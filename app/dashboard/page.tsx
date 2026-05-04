@@ -106,20 +106,35 @@ export default function Dashboard() {
         <Card
           title="Verifica percorso agevolato"
           description="Hai già un titolo, esami universitari o esperienza lavorativa? Potresti accedere a una valutazione CFU e abbreviare il percorso."
-          onClick={() => router.push("/dashboard/percorso-agevolato")}
-        />
+        >
+          <Button
+            label="Verifica percorso"
+            onClick={() => router.push("/dashboard/percorso-agevolato")}
+            variant="primary"
+          />
+        </Card>
 
         <Card
           title="Studia mentre lavori"
           description="Scopri un piano realistico per studiare online senza stravolgere lavoro, turni e impegni personali."
-          onClick={() => router.push("/dashboard/studio-lavoro")}
-        />
+        >
+          <Button
+            label="Crea piano studio"
+            onClick={() => router.push("/dashboard/studio-lavoro")}
+            variant="primary"
+          />
+        </Card>
 
         <Card
           title="Il tuo percorso più veloce"
           description="Visualizza il modo più rapido e sostenibile per arrivare al tuo obiettivo."
-          onClick={() => router.push("/dashboard/percorso")}
-        />
+        >
+          <Button
+            label="Scopri percorso"
+            onClick={() => router.push("/dashboard/percorso")}
+            variant="primary"
+          />
+        </Card>
       </div>
 
       <h2>Consigli e aggiornamenti per te</h2>
