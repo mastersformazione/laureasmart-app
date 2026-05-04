@@ -68,40 +68,52 @@ export default function Dashboard() {
         margin: "0 auto",
       }}
     >
-      <h1>Dashboard Graduatorie GPS</h1>
+      <h1>Laurea Smart</h1>
 
-      <p>Benvenuto {user.nome} 👋</p>
+      <p style={{ lineHeight: 1.5 }}>
+        Ciao {user.nome} 👋
+        <br />
+        Scopri il percorso universitario online più adatto alla tua vita, al tuo
+        lavoro e al tuo obiettivo.
+      </p>
 
       <div
         style={{ marginTop: 24, marginBottom: 24, display: "grid", gap: 12 }}
       >
         <Card
-          title="Strumenti per te"
-          description="Scegli uno strumento utile per orientarti nel mondo della scuola, dei corsi universitari e della crescita professionale."
+          title="Trova la laurea giusta per te"
+          description="Rispondi a poche domande e scopri quale percorso universitario online può essere più utile per il tuo futuro."
         >
           <Button
-            label="Trova la tua strada"
+            label="Inizia il test"
             onClick={() => router.push("/dashboard/orientamento")}
-            variant="secondary"
+            variant="primary"
           />
-
-          <p style={{ margin: "10px 0 0", color: "#555", lineHeight: 1.5 }}>
-            Rispondi a poche domande e scopri quale percorso di studio o
-            formazione può essere più adatto al tuo obiettivo.
-          </p>
         </Card>
 
         <Card
+          title="Verifica percorso agevolato"
+          description="Hai già un titolo, esami universitari o esperienza lavorativa? Potresti accedere a una valutazione CFU e abbreviare il percorso."
+          onClick={() => router.push("/dashboard/percorso-agevolato")}
+        />
+
+        <Card
+          title="Studia mentre lavori"
+          description="Scopri un piano realistico per studiare online senza stravolgere lavoro, turni e impegni personali."
+          onClick={() => router.push("/dashboard/studio-lavoro")}
+        />
+
+        <Card
           title="Il tuo percorso più veloce"
-          description="Scopri il modo più rapido e realistico per raggiungere il tuo obiettivo."
+          description="Visualizza il modo più rapido e sostenibile per arrivare al tuo obiettivo."
           onClick={() => router.push("/dashboard/percorso")}
         />
       </div>
 
-      <h2>Ultimi aggiornamenti</h2>
+      <h2>Consigli e aggiornamenti per te</h2>
 
       {notifiche.length === 0 ? (
-        <p>Nessuna notifica disponibile al momento.</p>
+        <p>Nessun aggiornamento disponibile al momento.</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {notifiche.map((notifica) => (
