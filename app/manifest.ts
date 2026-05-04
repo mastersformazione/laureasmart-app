@@ -2,10 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Graduatorie GPS",
-    short_name: "GPS",
-    description:
-      "App per ricevere aggiornamenti su GPS, abilitazioni, TFA sostegno e percorsi scuola.",
+    name: "Laurea Smart",
+    short_name: "Laurea Smart",
+    description: "La app per orientarti nel futuro accademico.",
     start_url: "/",
     scope: "/",
     display: "standalone",
