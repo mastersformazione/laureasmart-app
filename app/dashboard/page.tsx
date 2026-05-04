@@ -74,88 +74,144 @@ export default function Dashboard() {
   return (
     <main
       style={{
-        padding: 20,
+        minHeight: "100vh",
+        padding: "24px 18px 40px",
         fontFamily: "Arial",
-        maxWidth: 500,
+        maxWidth: 560,
         margin: "0 auto",
+        background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 45%)",
       }}
     >
-      <h1>Laurea Smart</h1>
-
-      <p style={{ lineHeight: 1.5 }}>
-        Ciao {user.nome} 👋
-        <br />
-        Scopri il percorso universitario online più adatto alla tua vita, al tuo
-        lavoro e al tuo obiettivo.
-      </p>
-
-      <div
-        style={{ marginTop: 24, marginBottom: 24, display: "grid", gap: 12 }}
+      <section
+        style={{
+          padding: 22,
+          borderRadius: 22,
+          background: "linear-gradient(135deg, #111827 0%, #2563eb 100%)",
+          color: "white",
+          boxShadow: "0 14px 35px rgba(37, 99, 235, 0.22)",
+        }}
       >
-        <Card
-          title="Trova la laurea giusta per te"
-          description="Rispondi a poche domande e scopri quale percorso universitario online può essere più utile per il tuo futuro."
-        >
-          <Button
-            label="Inizia il test"
-            onClick={() => router.push("/dashboard/orientamento")}
-            variant="primary"
-          />
-        </Card>
+        <p style={{ margin: 0, fontSize: 14, opacity: 0.9 }}>
+          Benvenuto, {user.nome} 👋
+        </p>
 
-        <Card
-          title="Verifica percorso agevolato"
-          description="Hai già un titolo, esami universitari o esperienza lavorativa? Potresti accedere a una valutazione CFU e abbreviare il percorso."
-        >
-          <Button
-            label="Verifica percorso"
-            onClick={() => router.push("/dashboard/percorso-agevolato")}
-            variant="primary"
-          />
-        </Card>
+        <h1 style={{ margin: "10px 0 10px", fontSize: 30, lineHeight: 1.1 }}>
+          Laurea Smart
+        </h1>
 
-        <Card
-          title="Studia mentre lavori"
-          description="Scopri un piano realistico per studiare online senza stravolgere lavoro, turni e impegni personali."
-        >
-          <Button
-            label="Crea piano studio"
-            onClick={() => router.push("/dashboard/studio-lavoro")}
-            variant="primary"
-          />
-        </Card>
+        <p style={{ margin: 0, lineHeight: 1.55, fontSize: 15 }}>
+          Scopri il percorso universitario online più adatto alla tua vita, al
+          tuo lavoro e al tuo obiettivo.
+        </p>
+      </section>
 
-        <Card
-          title="Il tuo percorso più veloce"
-          description="Visualizza il modo più rapido e sostenibile per arrivare al tuo obiettivo."
-        >
-          <Button
-            label="Scopri percorso"
-            onClick={() => router.push("/dashboard/percorso")}
-            variant="primary"
-          />
-        </Card>
-      </div>
+      <section style={{ marginTop: 28 }}>
+        <h2 style={{ marginBottom: 12, fontSize: 22 }}>Strumenti per te</h2>
 
-      <h2>Consigli e aggiornamenti per te</h2>
+        <div style={{ display: "grid", gap: 14 }}>
+          <Card
+            title="Trova la laurea giusta per te"
+            description="Rispondi a poche domande e scopri quale percorso universitario online può essere più utile per il tuo futuro."
+          >
+            <Button
+              label="Inizia il test"
+              onClick={() => router.push("/dashboard/orientamento")}
+              variant="primary"
+            />
+          </Card>
 
-      {notifiche.length === 0 ? (
-        <p>Nessun aggiornamento disponibile al momento.</p>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {notifiche.map((notifica) => (
-            <Card
-              key={notifica.id}
-              title={notifica.titolo}
-              description={notifica.messaggio}
-            >
-              <small>
-                {notifica.categoria} · {notifica.created_at}
-              </small>
-            </Card>
-          ))}
+          <Card
+            title="Verifica percorso agevolato"
+            description="Hai già un titolo, esami universitari o esperienza lavorativa? Potresti accedere a una valutazione CFU e abbreviare il percorso."
+          >
+            <Button
+              label="Verifica percorso"
+              onClick={() => router.push("/dashboard/percorso-agevolato")}
+              variant="primary"
+            />
+          </Card>
+
+          <Card
+            title="Studia mentre lavori"
+            description="Scopri un piano realistico per studiare online senza stravolgere lavoro, turni e impegni personali."
+          >
+            <Button
+              label="Crea piano studio"
+              onClick={() => router.push("/dashboard/studio-lavoro")}
+              variant="primary"
+            />
+          </Card>
+
+          <Card
+            title="Il tuo percorso più veloce"
+            description="Visualizza il modo più rapido e sostenibile per arrivare al tuo obiettivo."
+          >
+            <Button
+              label="Scopri percorso"
+              onClick={() => router.push("/dashboard/percorso")}
+              variant="primary"
+            />
+          </Card>
         </div>
-      )}
+      </section>
+
+      <section style={{ marginTop: 32 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            marginBottom: 12,
+          }}
+        >
+          <h2 style={{ margin: 0, fontSize: 22 }}>
+            Consigli e aggiornamenti
+          </h2>
+
+          {notifiche.length > 0 && (
+            <span
+              style={{
+                fontSize: 13,
+                padding: "5px 10px",
+                borderRadius: 999,
+                background: "#eef2ff",
+                color: "#3730a3",
+                fontWeight: 700,
+              }}
+            >
+              {notifiche.length}
+            </span>
+          )}
+        </div>
+
+        {notifiche.length === 0 ? (
+          <div
+            style={{
+              padding: 18,
+              borderRadius: 16,
+              background: "#f9fafb",
+              border: "1px solid #e5e7eb",
+              color: "#555",
+            }}
+          >
+            Nessun aggiornamento disponibile al momento.
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {notifiche.map((notifica) => (
+              <Card
+                key={notifica.id}
+                title={notifica.titolo}
+                description={notifica.messaggio}
+              >
+                <small style={{ color: "#6b7280" }}>
+                  {notifica.categoria} · {notifica.created_at}
+                </small>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
-}
