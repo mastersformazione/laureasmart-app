@@ -165,9 +165,7 @@ export default function Dashboard() {
             marginBottom: 12,
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 22 }}>
-            Consigli e aggiornamenti
-          </h2>
+          <h2 style={{ margin: 0, fontSize: 22 }}>Consigli e aggiornamenti</h2>
 
           {notifiche.length > 0 && (
             <span
@@ -215,3 +213,4 @@ export default function Dashboard() {
       </section>
     </main>
   );
+}
