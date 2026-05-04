@@ -74,23 +74,55 @@ export default function Dashboard() {
   return (
     <main
       style={{
-        padding: 20,
+        minHeight: "100vh",
+        padding: "24px 20px 40px",
         fontFamily: "Arial",
         maxWidth: 500,
         margin: "0 auto",
+        background: "#fafafa",
       }}
     >
-      <h1>Laurea Smart</h1>
+      <section style={{ marginBottom: 28 }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 14,
+            color: "#666",
+          }}
+        >
+          Ciao {user.nome} 👋
+        </p>
 
-      <p style={{ lineHeight: 1.5 }}>
-        Ciao {user.nome} 👋
-        <br />
-        Scopri il percorso universitario online più adatto alla tua vita, al tuo
-        lavoro e al tuo obiettivo.
-      </p>
+        <h1
+          style={{
+            margin: "6px 0 10px",
+            fontSize: 30,
+            lineHeight: 1.1,
+            letterSpacing: "-0.04em",
+          }}
+        >
+          Laurea Smart
+        </h1>
 
-      <div
-        style={{ marginTop: 24, marginBottom: 24, display: "grid", gap: 12 }}
+        <p
+          style={{
+            margin: 0,
+            fontSize: 15,
+            lineHeight: 1.55,
+            color: "#555",
+          }}
+        >
+          Scopri il percorso universitario online più adatto alla tua vita, al
+          tuo lavoro e al tuo obiettivo.
+        </p>
+      </section>
+
+      <section
+        style={{
+          display: "grid",
+          gap: 14,
+          marginBottom: 32,
+        }}
       >
         <Card
           title="Trova la laurea giusta per te"
@@ -110,7 +142,7 @@ export default function Dashboard() {
           <Button
             label="Verifica ora"
             onClick={() => router.push("/dashboard/percorso-agevolato")}
-            variant="secondary"
+            variant="primary"
           />
         </Card>
 
@@ -121,7 +153,7 @@ export default function Dashboard() {
           <Button
             label="Crea il tuo piano"
             onClick={() => router.push("/dashboard/studio-lavoro")}
-            variant="secondary"
+            variant="primary"
           />
         </Card>
 
@@ -132,30 +164,43 @@ export default function Dashboard() {
           <Button
             label="Visualizza percorso"
             onClick={() => router.push("/dashboard/percorso")}
-            variant="secondary"
+            variant="primary"
           />
         </Card>
-      </div>
+      </section>
 
-      <h2>Consigli e aggiornamenti per te</h2>
+      <section>
+        <h2
+          style={{
+            margin: "0 0 14px",
+            fontSize: 22,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          Consigli e aggiornamenti per te
+        </h2>
 
-      {notifiche.length === 0 ? (
-        <p>Nessun aggiornamento disponibile al momento.</p>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {notifiche.map((notifica) => (
-            <Card
-              key={notifica.id}
-              title={notifica.titolo}
-              description={notifica.messaggio}
-            >
-              <small>
-                {notifica.categoria} · {notifica.created_at}
-              </small>
-            </Card>
-          ))}
-        </div>
-      )}
+        {notifiche.length === 0 ? (
+          <Card
+            title="Nessun aggiornamento disponibile"
+            description="Quando ci saranno nuovi consigli o comunicazioni utili, li troverai qui."
+          />
+        ) : (
+          <div style={{ display: "grid", gap: 12 }}>
+            {notifiche.map((notifica) => (
+              <Card
+                key={notifica.id}
+                title={notifica.titolo}
+                description={notifica.messaggio}
+              >
+                <small style={{ color: "#777" }}>
+                  {notifica.categoria} · {notifica.created_at}
+                </small>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }
