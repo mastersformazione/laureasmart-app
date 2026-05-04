@@ -35,6 +35,16 @@ export default function Dashboard() {
 
     setUser(JSON.parse(storedUser) as GpsUser);
 
+    const aggiornaBadge = (count: number) => {
+      if ("setAppBadge" in navigator && count > 0) {
+        navigator.setAppBadge(count).catch(console.error);
+      }
+
+      if ("clearAppBadge" in navigator && count === 0) {
+        navigator.clearAppBadge().catch(console.error);
+      }
+    };
+
     const loadNotifiche = () => {
       fetch("https://graduatoriegps.it/api/notifiche.php?t=" + Date.now(), {
         cache: "no-store",
@@ -42,7 +52,9 @@ export default function Dashboard() {
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
-            setNotifiche(data.data);
+            const lista = data.data || [];
+            setNotifiche(lista);
+            aggiornaBadge(lista.length);
           }
         })
         .catch((error) => {
