@@ -21,7 +21,7 @@ export default function AdminPage() {
 
     try {
       const res = await fetch(
-        "https://graduatoriegps.it/api/admin-crea-notifica.php",
+        "https://laureasmart.it/api/admin-crea-notifica.php",
         {
           method: "POST",
           headers: {

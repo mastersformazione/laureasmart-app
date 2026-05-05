@@ -19,7 +19,7 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      const res = await fetch("https://graduatoriegps.it/api/leads.php", {
+      const res = await fetch("https://laureasmart.it/api/leads.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

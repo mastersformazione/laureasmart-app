@@ -1,10 +1,10 @@
 import mysql from "mysql2/promise";
 
 export const db = mysql.createPool({
-  host: "graduatoriegps.it",
-  user: "rggradua",
+  host: "laureasmart.it",
+  user: "plaureaa_u01",
   password: "Fra29Sus03",
-  database: "rggradua_db01",
+  database: "plaureaa_db01",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

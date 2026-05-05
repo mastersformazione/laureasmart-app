@@ -5,10 +5,10 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const connection = await mysql.createConnection({
-      host: "graduatoriegps.it",
-      user: "rggradua",
+      host: "laureasmart.it",
+      user: "plaureaa_u01",
       password: "Fra29Sus03",
-      database: "rggradua_db01",
+      database: "plaureaa_db01",
     });
 
     await connection.execute(

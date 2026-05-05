@@ -46,7 +46,7 @@ export default function Dashboard() {
     };
 
     const loadNotifiche = () => {
-      fetch("https://graduatoriegps.it/api/notifiche.php?t=" + Date.now(), {
+      fetch("https://laureasmart.it/api/notifiche.php?t=" + Date.now(), {
         cache: "no-store",
       })
         .then((res) => res.json())

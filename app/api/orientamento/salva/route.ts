@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const response = await fetch(
-      "https://graduatoriegps.it/api/orientamento-salva.php",
+      "https://laureasmart.it/api/orientamento-salva.php",
       {
         method: "POST",
         headers: {
