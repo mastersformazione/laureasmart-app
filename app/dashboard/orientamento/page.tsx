@@ -309,9 +309,17 @@ export default function OrientamentoPage() {
   const salvaDati = async (data: OrientamentoData) => {
     const risultato = getRisultato(data);
 
+    const storedUser = localStorage.getItem("gps_user");
+    const user = storedUser
+      ? (JSON.parse(storedUser) as {
+          nome?: string;
+          email?: string;
+          telefono?: string;
+        })
+      : null;
+
     localStorage.setItem("profilo_utente", risultato.tipo);
     localStorage.setItem("ha_fatto_test", "si");
-    localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("obiettivo", data.obiettivo || "");
     localStorage.setItem("tempo_disponibile", data.tempo || "");
@@ -347,8 +355,8 @@ export default function OrientamentoPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_email: "test@app.com",
-          user_nome: "Utente",
+          user_email: user?.email || "",
+          user_nome: user?.nome || "",
           situazione: data.situazione,
           titolo_studio: data.titolo_studio,
           obiettivo: data.obiettivo,
