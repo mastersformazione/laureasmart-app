@@ -8,7 +8,6 @@ export default function AdminPage() {
   const [form, setForm] = useState({
     titolo: "",
     messaggio: "",
-    categoria: "Generale",
     target: "ALL",
     adminKey: "",
   });
@@ -31,7 +30,7 @@ export default function AdminPage() {
           body: JSON.stringify({
             titolo: form.titolo,
             messaggio: form.messaggio,
-            categoria: form.categoria,
+            categoria: "Generale",
             target: form.target,
           }),
         }
@@ -52,7 +51,6 @@ export default function AdminPage() {
         setForm({
           titolo: "",
           messaggio: "",
-          categoria: "Generale",
           target: "ALL",
           adminKey: form.adminKey,
         });
@@ -77,8 +75,8 @@ export default function AdminPage() {
       <h1>Pannello Admin</h1>
 
       <p>
-        Da qui puoi pubblicare una notifica nella dashboard e inviare una push
-        anche a utenti segmentati.
+        Da qui puoi pubblicare una notifica e inviare una push agli utenti in
+        base al segmento scelto.
       </p>
 
       <form
@@ -109,34 +107,24 @@ export default function AdminPage() {
           rows={5}
         />
 
-        <label>Categoria notifica</label>
-        <select
-          value={form.categoria}
-          onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-        >
-          <option value="Generale">Generale</option>
-          <option value="GPS">GPS</option>
-          <option value="Percorsi abilitanti">Percorsi abilitanti</option>
-          <option value="TFA sostegno">TFA sostegno</option>
-          <option value="Master scuola">Master scuola</option>
-          <option value="Lauree">Lauree</option>
-          <option value="Orientamento">Orientamento</option>
-        </select>
-
         <label>Target push OneSignal</label>
         <select
           value={form.target}
           onChange={(e) => setForm({ ...form, target: e.target.value })}
         >
           <option value="ALL">Tutti gli utenti</option>
-          <option value="SCUOLA_GPS">Scuola / GPS</option>
-          <option value="PROFESSIONE">Professioni</option>
-          <option value="CRESCITA_LAVORO">Crescita lavoro</option>
-          <option value="LAUREA">Laurea</option>
-          <option value="INDECISO">Indecisi</option>
+          <option value="ECONOMIA">Economia e management</option>
+          <option value="PSICOLOGIA">Psicologia</option>
+          <option value="EDUCAZIONE">Scienze dell’educazione</option>
+          <option value="GIURIDICA">Area giuridica</option>
+          <option value="SPORT">Scienze motorie</option>
+          <option value="COMUNICAZIONE">Comunicazione</option>
+          <option value="TECNOLOGIA">Informatica / tecnologia</option>
+          <option value="SCUOLA">Scuola e insegnamento</option>
+          <option value="ORIENTAMENTO">Indecisi / orientamento</option>
+          <option value="GENERALE">Generale</option>
         </select>
 
-        {/* BOTTONE UI RIUTILIZZABILE */}
         <Button label="Pubblica notifica" variant="primary" type="submit" />
       </form>
 
