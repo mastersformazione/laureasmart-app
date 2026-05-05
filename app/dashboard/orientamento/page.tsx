@@ -402,32 +402,32 @@ export default function OrientamentoPage() {
     localStorage.setItem("orientamento_risultato", JSON.stringify(risultato));
 
     try {
-      await OneSignal.User.addTag("profilo", risultato.tipo);
-      await OneSignal.User.addTag("titolo_studio", data.titolo_studio || "");
-      await OneSignal.User.addTag("obiettivo", data.obiettivo || "");
-      await OneSignal.User.addTag("area_interesse", data.area || "");
-      await OneSignal.User.addTag(
-        "segmento_intento",
-        segmenti.segmento_intento
-      );
-      await OneSignal.User.addTag(
-        "segmento_ingresso",
-        segmenti.segmento_ingresso
-      );
-      await OneSignal.User.addTag(
-        "segmento_urgenza",
-        segmenti.segmento_urgenza
-      );
+      if (user?.email) {
+        await OneSignal.login(user.email);
 
-      console.log("Tag OneSignal aggiornati:", {
-        profilo: risultato.tipo,
-        titolo_studio: data.titolo_studio,
-        obiettivo: data.obiettivo,
-        area_interesse: data.area,
-        segmento_intento: segmenti.segmento_intento,
-        segmento_ingresso: segmenti.segmento_ingresso,
-        segmento_urgenza: segmenti.segmento_urgenza,
-      });
+        await OneSignal.User.addTags({
+          email: user.email,
+          nome: user.nome || "",
+          cognome: user.cognome || "",
+          profilo: risultato.tipo,
+          titolo_studio: data.titolo_studio || "",
+          obiettivo: data.obiettivo || "",
+          area_interesse: data.area || "",
+          segmento_intento: segmenti.segmento_intento,
+          segmento_ingresso: segmenti.segmento_ingresso,
+          segmento_urgenza: segmenti.segmento_urgenza,
+        });
+
+        console.log("Tag OneSignal aggiornati:", {
+          email: user.email,
+          profilo: risultato.tipo,
+          segmento_intento: segmenti.segmento_intento,
+          segmento_ingresso: segmenti.segmento_ingresso,
+          segmento_urgenza: segmenti.segmento_urgenza,
+        });
+      } else {
+        console.log("Email utente mancante: tag OneSignal non inviati");
+      }
     } catch (tagError) {
       console.error("Errore aggiornamento tag OneSignal:", tagError);
     }
