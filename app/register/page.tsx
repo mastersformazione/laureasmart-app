@@ -10,6 +10,7 @@ export default function Register() {
 
   const [form, setForm] = useState({
     nome: "",
+    cognome: "",
     email: "",
     telefono: "",
   });
@@ -32,19 +33,18 @@ export default function Register() {
       const data = await res.json();
 
       if (data.success) {
-        // 👉 salva utente
+        // 👉 salva utente (ORA CON COGNOME)
         localStorage.setItem("gps_user", JSON.stringify(form));
 
-        // 👉 indica che NON ha ancora fatto il test
         localStorage.setItem("ha_fatto_test", "no");
 
         setForm({
           nome: "",
+          cognome: "",
           email: "",
           telefono: "",
         });
 
-        // 👉 redirect diretto al test (conversione)
         router.push("/dashboard/orientamento");
       } else {
         alert("Errore: " + data.error);
@@ -86,6 +86,15 @@ export default function Register() {
           placeholder="Nome"
           value={form.nome}
           onChange={(e) => setForm({ ...form, nome: e.target.value })}
+          required
+          style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
+        />
+
+        <input
+          type="text"
+          placeholder="Cognome"
+          value={form.cognome}
+          onChange={(e) => setForm({ ...form, cognome: e.target.value })}
           required
           style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
         />
