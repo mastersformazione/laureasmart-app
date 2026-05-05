@@ -30,6 +30,12 @@ type Risultato = {
   ctaSecondaria: string;
 };
 
+type Segmenti = {
+  segmento_intento: string;
+  segmento_ingresso: string;
+  segmento_urgenza: string;
+};
+
 export default function OrientamentoPage() {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<OrientamentoData>({});
@@ -306,13 +312,77 @@ export default function OrientamentoPage() {
     };
   };
 
+  const getSegmenti = (data: OrientamentoData): Segmenti => {
+    let segmento_intento = "INDECISO";
+    let segmento_ingresso = "ALTRO";
+    let segmento_urgenza = "BASSA";
+
+    if (data.obiettivo === "Cambiare lavoro") {
+      segmento_intento = "CAMBIO_LAVORO";
+    } else if (data.obiettivo === "Aumentare lo stipendio") {
+      segmento_intento = "AUMENTO_STIPENDIO";
+    } else if (data.obiettivo === "Partecipare a concorsi") {
+      segmento_intento = "CONCORSI";
+    } else if (data.obiettivo === "Insegnare") {
+      segmento_intento = "SCUOLA";
+    } else if (data.obiettivo === "Crescita personale") {
+      segmento_intento = "CRESCITA_PERSONALE";
+    } else if (data.obiettivo === "Completare il mio profilo professionale") {
+      segmento_intento = "COMPLETAMENTO_PROFILO";
+    } else if (data.obiettivo === "Non sono sicuro") {
+      segmento_intento = "INDECISO";
+    }
+
+    if (data.titolo_studio === "Diploma") {
+      segmento_ingresso = "DIPLOMA";
+    } else if (data.titolo_studio === "Laurea triennale") {
+      segmento_ingresso = "LAUREA_TRIENNALE";
+    } else if (data.titolo_studio === "Laurea magistrale") {
+      segmento_ingresso = "LAUREA_MAGISTRALE";
+    } else if (data.titolo_studio === "Laurea vecchio ordinamento") {
+      segmento_ingresso = "LAUREA_VECCHIO_ORDINAMENTO";
+    } else if (data.titolo_studio === "Master universitario") {
+      segmento_ingresso = "MASTER";
+    } else if (
+      data.titolo_studio?.includes("AFAM") ||
+      data.titolo_studio?.includes("conservatorio") ||
+      data.titolo_studio?.includes("accademia")
+    ) {
+      segmento_ingresso = "AFAM";
+    } else if (data.titolo_studio?.includes("università")) {
+      segmento_ingresso = "UNIVERSITA_INCOMPLETA";
+    }
+
+    if (
+      data.tempo === "8-10 ore a settimana" ||
+      data.tempo === "Più di 10 ore a settimana"
+    ) {
+      segmento_urgenza = "ALTA";
+    } else if (data.tempo === "5-7 ore a settimana") {
+      segmento_urgenza = "MEDIA";
+    } else if (
+      data.tempo === "2-4 ore a settimana" ||
+      data.tempo === "Non lo so ancora"
+    ) {
+      segmento_urgenza = "BASSA";
+    }
+
+    return {
+      segmento_intento,
+      segmento_ingresso,
+      segmento_urgenza,
+    };
+  };
+
   const salvaDati = async (data: OrientamentoData) => {
     const risultato = getRisultato(data);
+    const segmenti = getSegmenti(data);
 
     const storedUser = localStorage.getItem("gps_user");
     const user = storedUser
       ? (JSON.parse(storedUser) as {
           nome?: string;
+          cognome?: string;
           email?: string;
           telefono?: string;
         })
@@ -324,6 +394,9 @@ export default function OrientamentoPage() {
     localStorage.setItem("obiettivo", data.obiettivo || "");
     localStorage.setItem("tempo_disponibile", data.tempo || "");
     localStorage.setItem("area_interesse", data.area || "");
+    localStorage.setItem("segmento_intento", segmenti.segmento_intento);
+    localStorage.setItem("segmento_ingresso", segmenti.segmento_ingresso);
+    localStorage.setItem("segmento_urgenza", segmenti.segmento_urgenza);
     localStorage.setItem("orientamento_data", JSON.stringify(data));
     localStorage.setItem("orientamento_risultato", JSON.stringify(risultato));
 
@@ -343,6 +416,9 @@ export default function OrientamentoPage() {
         OneSignal.User.addTag("titolo_studio", data.titolo_studio || "");
         OneSignal.User.addTag("obiettivo", data.obiettivo || "");
         OneSignal.User.addTag("area_interesse", data.area || "");
+        OneSignal.User.addTag("segmento_intento", segmenti.segmento_intento);
+        OneSignal.User.addTag("segmento_ingresso", segmenti.segmento_ingresso);
+        OneSignal.User.addTag("segmento_urgenza", segmenti.segmento_urgenza);
       }
     } catch (tagError) {
       console.error("Errore aggiornamento tag OneSignal:", tagError);
@@ -364,6 +440,9 @@ export default function OrientamentoPage() {
           area: data.area,
           risultato_tipo: risultato.tipo,
           corso_suggerito: risultato.corsoSuggerito,
+          segmento_intento: segmenti.segmento_intento,
+          segmento_ingresso: segmenti.segmento_ingresso,
+          segmento_urgenza: segmenti.segmento_urgenza,
         }),
       });
     } catch (error) {
