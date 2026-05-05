@@ -402,7 +402,9 @@ export default function OrientamentoPage() {
     localStorage.setItem("orientamento_risultato", JSON.stringify(risultato));
 
     try {
-      if (user?.email) {
+      if (!user?.email) {
+        console.log("Email utente mancante: tag OneSignal non inviati");
+      } else {
         await OneSignal.login(user.email);
 
         await OneSignal.User.addTags({
@@ -418,15 +420,15 @@ export default function OrientamentoPage() {
           segmento_urgenza: segmenti.segmento_urgenza,
         });
 
-        console.log("Tag OneSignal aggiornati:", {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        console.log("Tag OneSignal inviati:", {
           email: user.email,
           profilo: risultato.tipo,
           segmento_intento: segmenti.segmento_intento,
           segmento_ingresso: segmenti.segmento_ingresso,
           segmento_urgenza: segmenti.segmento_urgenza,
         });
-      } else {
-        console.log("Email utente mancante: tag OneSignal non inviati");
       }
     } catch (tagError) {
       console.error("Errore aggiornamento tag OneSignal:", tagError);
