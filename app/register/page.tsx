@@ -12,7 +12,6 @@ export default function Register() {
     nome: "",
     email: "",
     telefono: "",
-    interesse: "",
   });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -24,22 +23,29 @@ export default function Register() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          interesse: "N/A",
+        }),
       });
 
       const data = await res.json();
 
       if (data.success) {
+        // 👉 salva utente
         localStorage.setItem("gps_user", JSON.stringify(form));
+
+        // 👉 indica che NON ha ancora fatto il test
+        localStorage.setItem("ha_fatto_test", "no");
 
         setForm({
           nome: "",
           email: "",
           telefono: "",
-          interesse: "",
         });
 
-        router.push("/dashboard");
+        // 👉 redirect diretto al test (conversione)
+        router.push("/dashboard/orientamento");
       } else {
         alert("Errore: " + data.error);
       }
@@ -52,22 +58,28 @@ export default function Register() {
   return (
     <main
       style={{
-        padding: 20,
+        minHeight: "100vh",
+        padding: "28px 20px 40px",
         fontFamily: "Arial",
-        maxWidth: 400,
+        maxWidth: 420,
         margin: "0 auto",
       }}
     >
-      <h1>Registrati</h1>
+      <h1 style={{ marginBottom: 8 }}>Inizia il tuo percorso</h1>
 
-      <p>
-        Inserisci i tuoi dati per ricevere aggiornamenti su GPS, abilitazioni e
-        percorsi universitari.
+      <p style={{ color: "#555", lineHeight: 1.5 }}>
+        Inserisci i tuoi dati e scopri subito il percorso universitario più
+        adatto ai tuoi obiettivi.
       </p>
 
       <form
         onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+          marginTop: 20,
+        }}
       >
         <input
           type="text"
@@ -75,6 +87,7 @@ export default function Register() {
           value={form.nome}
           onChange={(e) => setForm({ ...form, nome: e.target.value })}
           required
+          style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
         />
 
         <input
@@ -83,6 +96,7 @@ export default function Register() {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
+          style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
         />
 
         <input
@@ -91,22 +105,14 @@ export default function Register() {
           value={form.telefono}
           onChange={(e) => setForm({ ...form, telefono: e.target.value })}
           required
+          style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
         />
 
-        <select
-          value={form.interesse}
-          onChange={(e) => setForm({ ...form, interesse: e.target.value })}
-          required
-        >
-          <option value="">Seleziona interesse</option>
-          <option value="Percorsi abilitanti">Percorsi abilitanti</option>
-          <option value="GPS">GPS</option>
-          <option value="TFA sostegno">TFA sostegno</option>
-          <option value="Master scuola">Master scuola</option>
-        </select>
-
-        {/* BOTTONE UNIFICATO */}
-        <Button label="Registrati" variant="primary" type="submit" />
+        <Button
+          label="Scopri il tuo percorso"
+          variant="primary"
+          type="submit"
+        />
       </form>
     </main>
   );

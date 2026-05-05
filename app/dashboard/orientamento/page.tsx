@@ -310,6 +310,8 @@ export default function OrientamentoPage() {
     const risultato = getRisultato(data);
 
     localStorage.setItem("profilo_utente", risultato.tipo);
+    localStorage.setItem("ha_fatto_test", "si");
+    localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("obiettivo", data.obiettivo || "");
     localStorage.setItem("tempo_disponibile", data.tempo || "");

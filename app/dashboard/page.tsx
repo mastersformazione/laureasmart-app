@@ -33,6 +33,13 @@ export default function Dashboard() {
       return;
     }
 
+    const haFattoTest = localStorage.getItem("ha_fatto_test");
+
+    if (haFattoTest !== "si") {
+      router.push("/dashboard/orientamento");
+      return;
+    }
+
     setUser(JSON.parse(storedUser) as GpsUser);
 
     const aggiornaBadge = (count: number) => {
