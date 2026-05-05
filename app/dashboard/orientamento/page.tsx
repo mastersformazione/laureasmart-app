@@ -403,32 +403,34 @@ export default function OrientamentoPage() {
 
     try {
       if (!user?.email) {
-        console.log("Email utente mancante: tag OneSignal non inviati");
+        console.log("OneSignal: email utente mancante");
       } else {
         await OneSignal.login(user.email);
 
-        await OneSignal.User.addTags({
-          email: user.email,
-          nome: user.nome || "",
-          cognome: user.cognome || "",
-          profilo: risultato.tipo,
-          titolo_studio: data.titolo_studio || "",
-          obiettivo: data.obiettivo || "",
-          area_interesse: data.area || "",
-          segmento_intento: segmenti.segmento_intento,
-          segmento_ingresso: segmenti.segmento_ingresso,
-          segmento_urgenza: segmenti.segmento_urgenza,
-        });
+        await OneSignal.User.addTag("email", user.email);
+        await OneSignal.User.addTag("nome", user.nome || "");
+        await OneSignal.User.addTag("cognome", user.cognome || "");
+        await OneSignal.User.addTag("telefono", user.telefono || "");
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await OneSignal.User.addTag("profilo", risultato.tipo);
+        await OneSignal.User.addTag("titolo_studio", data.titolo_studio || "");
+        await OneSignal.User.addTag("obiettivo", data.obiettivo || "");
+        await OneSignal.User.addTag("area_interesse", data.area || "");
 
-        console.log("Tag OneSignal inviati:", {
-          email: user.email,
-          profilo: risultato.tipo,
-          segmento_intento: segmenti.segmento_intento,
-          segmento_ingresso: segmenti.segmento_ingresso,
-          segmento_urgenza: segmenti.segmento_urgenza,
-        });
+        await OneSignal.User.addTag(
+          "segmento_intento",
+          segmenti.segmento_intento
+        );
+        await OneSignal.User.addTag(
+          "segmento_ingresso",
+          segmenti.segmento_ingresso
+        );
+        await OneSignal.User.addTag(
+          "segmento_urgenza",
+          segmenti.segmento_urgenza
+        );
+
+        console.log("OneSignal tag inviati correttamente");
       }
     } catch (tagError) {
       console.error("Errore aggiornamento tag OneSignal:", tagError);
