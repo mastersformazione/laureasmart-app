@@ -305,10 +305,10 @@ export default function PercorsiPage() {
             <button
               key={settore}
               onClick={() => setSettoreAttivo(settore)}
-              className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm ${
+              className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold transition ${
                 settoreAttivo === settore
-                  ? "bg-black text-white border-black"
-                  : "bg-white text-gray-700 border-gray-200"
+                  ? "bg-[#EAF4FC] text-[#1F6FB2]"
+                  : "bg-transparent text-gray-500"
               }`}
             >
               {nomiSettori[settore] || settore}
