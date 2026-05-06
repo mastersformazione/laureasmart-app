@@ -421,43 +421,36 @@ export default function OrientamentoPage() {
 
     try {
       if (!user?.email) {
-        console.log("OneSignal: email utente mancante");
+        console.log("Email utente mancante");
       } else {
-        const externalId = `ls_${user.email.toLowerCase().trim()}`;
-        await OneSignal.login(externalId);
+        const response = await fetch(
+          "https://laureasmart.it/api/sync-onesignal-tags.php",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: user.email,
+              profilo: risultato.tipo,
+              titolo_studio: data.titolo_studio || "",
+              obiettivo: data.obiettivo || "",
+              urgenza_obiettivo: data.urgenza || "",
+              tempo_disponibile: data.tempo || "",
+              area_interesse: data.area || "",
+              segmento_intento: segmenti.segmento_intento,
+              segmento_ingresso: segmenti.segmento_ingresso,
+              segmento_urgenza: segmenti.segmento_urgenza,
+            }),
+          }
+        );
 
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const result = await response.json();
 
-        await OneSignal.User.addTags({
-          email: user.email,
-          nome: user.nome || "",
-          cognome: user.cognome || "",
-          telefono: user.telefono || "",
-          profilo: risultato.tipo,
-          titolo_studio: data.titolo_studio || "",
-          obiettivo: data.obiettivo || "",
-          urgenza_obiettivo: data.urgenza || "",
-          tempo_disponibile: data.tempo || "",
-          area_interesse: data.area || "",
-          segmento_intento: segmenti.segmento_intento,
-          segmento_ingresso: segmenti.segmento_ingresso,
-          segmento_urgenza: segmenti.segmento_urgenza,
-        });
-
-        console.log("OneSignal tag inviati correttamente", {
-          profilo: risultato.tipo,
-          titolo_studio: data.titolo_studio,
-          obiettivo: data.obiettivo,
-          urgenza_obiettivo: data.urgenza,
-          tempo_disponibile: data.tempo,
-          area_interesse: data.area,
-          segmento_intento: segmenti.segmento_intento,
-          segmento_ingresso: segmenti.segmento_ingresso,
-          segmento_urgenza: segmenti.segmento_urgenza,
-        });
+        console.log("SYNC ONESIGNAL OK:", result);
       }
     } catch (tagError) {
-      console.error("Errore aggiornamento tag OneSignal:", tagError);
+      console.error("Errore sync OneSignal:", tagError);
     }
 
     try {
