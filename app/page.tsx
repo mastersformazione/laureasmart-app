@@ -5,7 +5,7 @@ import InstallButton from "./install-button";
 import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
 import Button from "@/components/ui/Button";
-import { Share } from "lucide-react";
+import { Share, CheckCircle, Bell, MessageCircle } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -35,33 +35,24 @@ export default function Home() {
     <main
       style={{
         minHeight: "100vh",
-        padding: "34px 22px 34px",
-        fontFamily: "Arial, sans-serif",
+        padding: "24px 20px 34px",
         maxWidth: 430,
         margin: "0 auto",
+        fontFamily: "var(--font-geist-sans)",
         background:
-          "linear-gradient(180deg, #EAF4FC 0%, #FFFFFF 42%, #FFFFFF 100%)",
+          "radial-gradient(circle at top, #D9EDFF 0%, #F8FBFF 42%, #FFFFFF 100%)",
         color: "#102033",
       }}
     >
-      <section
-        style={{
-          minHeight: "calc(100vh - 68px)",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          textAlign: "center",
-        }}
-      >
+      <section style={{ textAlign: "center" }}>
         <div
           style={{
-            width: 104,
-            height: 104,
-            margin: "0 auto 22px",
-            borderRadius: 28,
+            width: 118,
+            height: 118,
+            margin: "16px auto 18px",
+            borderRadius: 32,
             overflow: "hidden",
-            boxShadow: "0 18px 40px rgba(31, 111, 178, 0.20)",
-            background: "#1F6FB2",
+            boxShadow: "0 22px 50px rgba(31,111,178,0.28)",
           }}
         >
           <img
@@ -76,135 +67,165 @@ export default function Home() {
           />
         </div>
 
-        <p
+        <div
           style={{
-            margin: "0 0 10px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "7px 12px",
+            borderRadius: 999,
+            background: "#EAF4FC",
             color: "#1F6FB2",
-            fontWeight: 700,
-            fontSize: 15,
+            fontSize: 13,
+            fontWeight: 800,
+            marginBottom: 14,
           }}
         >
-          Laurea Smart
-        </p>
+          Gratis · Orientamento universitario
+        </div>
 
         <h1
           style={{
-            margin: "0 auto 14px",
-            fontSize: 31,
-            lineHeight: 1.12,
-            letterSpacing: "-0.5px",
-            maxWidth: 360,
+            margin: "0 auto",
+            fontSize: 37,
+            lineHeight: 1.03,
+            letterSpacing: "-1.2px",
+            fontWeight: 850,
+            maxWidth: 370,
+            color: "#0B1B2E",
           }}
         >
-          Trova il Percorso Universitario più adatto a te
+          Trova la laurea giusta senza perdere tempo
         </h1>
 
         <p
           style={{
-            margin: "0 auto 26px",
+            margin: "16px auto 24px",
             color: "#5F6B7A",
-            fontSize: 16,
+            fontSize: 17,
             lineHeight: 1.55,
-            maxWidth: 350,
+            maxWidth: 355,
           }}
         >
-          Scarica la app e ricevi consigli personalizzati su Lauree, Master e
-          percorsi agevolati e individualizzati.
+          Installa la app, ricevi notifiche utili e scopri percorsi universitari
+          online, master e agevolazioni adatti al tuo profilo.
         </p>
 
         <div
           style={{
             display: "grid",
             gap: 10,
-            marginBottom: 24,
+            marginBottom: 22,
           }}
         >
-          <div style={cardStyle}>🎯 Orientamento Gratuito e Personalizzato</div>
-          <div style={cardStyle}>
-            🔔 Notifiche su Scadenze, Promozioni e Opportunità
-          </div>
-          <div style={cardStyle}>💬 Supporto Diretto e Individualizzato</div>
+          <Benefit
+            icon={<CheckCircle size={20} />}
+            text="Test gratuito e consigli personalizzati"
+          />
+          <Benefit
+            icon={<Bell size={20} />}
+            text="Notifiche su scadenze, promozioni e opportunità"
+          />
+          <Benefit
+            icon={<MessageCircle size={20} />}
+            text="Supporto diretto su WhatsApp"
+          />
         </div>
-
-        <InstallButton />
 
         <div
           style={{
-            marginTop: 18,
-            padding: "14px 16px",
-            borderRadius: 18,
-            background: "#F4F9FD",
+            padding: 16,
+            borderRadius: 24,
+            background: "#FFFFFF",
             border: "1px solid #D7E7F5",
-            textAlign: "left",
-            boxShadow: "0 6px 18px rgba(31, 111, 178, 0.06)",
+            boxShadow: "0 16px 40px rgba(31,111,178,0.12)",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              marginBottom: 8,
-            }}
-          >
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 10,
-                background: "#1F6FB2",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                fontSize: 16,
-              }}
-            >
-              📱
-            </div>
-
-            <strong style={{ fontSize: 14, color: "#102033" }}>
-              Scarica su iPhone
-            </strong>
-          </div>
-
           <p
             style={{
-              margin: 0,
-              fontSize: 13,
-              color: "#5F6B7A",
-              lineHeight: 1.6,
+              margin: "0 0 12px",
+              fontSize: 14,
+              color: "#1F6FB2",
+              fontWeight: 800,
             }}
           >
-            Premi il pulsante{" "}
-            <span
+            Scarica subito la app
+          </p>
+
+          <InstallButton />
+
+          <div
+            style={{
+              marginTop: 14,
+              padding: "14px 15px",
+              borderRadius: 18,
+              background: "#F4F9FD",
+              border: "1px solid #D7E7F5",
+              textAlign: "left",
+            }}
+          >
+            <strong
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 24,
-                height: 24,
-                borderRadius: 8,
-                background: "#FFFFFF",
-                border: "1px solid #D8E5F0",
-                verticalAlign: "middle",
-                margin: "0 4px",
+                display: "block",
+                fontSize: 15,
+                color: "#102033",
+                marginBottom: 8,
               }}
             >
-              <Share size={14} color="#1F6FB2" />
-            </span>
-            di Safari e seleziona{" "}
-            <strong>“Aggiungi alla schermata Home”</strong>.
-          </p>
+              📱 Su iPhone
+            </strong>
+
+            <p
+              style={{
+                margin: 0,
+                fontSize: 14,
+                color: "#5F6B7A",
+                lineHeight: 1.6,
+              }}
+            >
+              Premi{" "}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 26,
+                  height: 26,
+                  borderRadius: 8,
+                  background: "#FFFFFF",
+                  border: "1px solid #D8E5F0",
+                  verticalAlign: "middle",
+                  margin: "0 4px",
+                }}
+              >
+                <Share size={15} color="#1F6FB2" />
+              </span>
+              in Safari e seleziona{" "}
+              <strong>“Aggiungi alla schermata Home”</strong>.
+            </p>
+          </div>
         </div>
 
-        <div style={{ marginTop: 18, opacity: 0.72 }}>
+        <div style={{ marginTop: 18 }}>
           <Button
             label="Accedi o Registrati"
             variant="secondary"
             onClick={() => setMenuOpen(true)}
           />
         </div>
+
+        <p
+          style={{
+            margin: "14px auto 0",
+            fontSize: 12,
+            color: "#7A8594",
+            lineHeight: 1.45,
+            maxWidth: 320,
+          }}
+        >
+          Anche senza installare la app puoi registrarti e ricevere supporto
+          personalizzato.
+        </p>
       </section>
 
       {menuOpen && (
@@ -219,12 +240,47 @@ export default function Home() {
   );
 }
 
-const cardStyle = {
-  padding: "14px 16px",
-  borderRadius: 16,
-  background: "#FFFFFF",
-  border: "1px solid #DDEAF5",
-  textAlign: "left" as const,
-  fontSize: 15,
-  boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
-};
+function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div
+      style={{
+        padding: "14px 15px",
+        borderRadius: 18,
+        background: "rgba(255,255,255,0.9)",
+        border: "1px solid #DDEAF5",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        textAlign: "left",
+        boxShadow: "0 10px 28px rgba(16,32,51,0.05)",
+      }}
+    >
+      <span
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 12,
+          background: "#EAF4FC",
+          color: "#1F6FB2",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </span>
+
+      <span
+        style={{
+          fontSize: 15,
+          lineHeight: 1.35,
+          fontWeight: 700,
+          color: "#102033",
+        }}
+      >
+        {text}
+      </span>
+    </div>
+  );
+}
