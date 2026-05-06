@@ -104,7 +104,7 @@ export default function Home() {
               fontWeight: 850,
             }}
           >
-            La laurea giusta, senza perdere tempo
+            La Laurea Giusta, Senza Perdere Tempo
           </h1>
 
           <p
@@ -116,7 +116,7 @@ export default function Home() {
               maxWidth: 350,
             }}
           >
-            Ricevi notifiche, consigli personalizzati e percorsi online adatti
+            Ricevi Notifiche, Consigli Personalizzati e Percorsi online adatti
             al tuo profilo.
           </p>
         </div>
@@ -128,13 +128,13 @@ export default function Home() {
             marginBottom: 20,
           }}
         >
-          <Benefit icon={<CheckCircle size={19} />} text="Test gratuito" />
+          <Benefit icon={<CheckCircle size={19} />} text="Test Gratuiti" />
 
-          <Benefit icon={<Bell size={19} />} text="Scadenze e promozioni" />
+          <Benefit icon={<Bell size={19} />} text="Scadenze e Promozioni" />
 
           <Benefit
             icon={<MessageCircle size={19} />}
-            text="Supporto WhatsApp"
+            text="Supporto di un Orientatore Dedicato"
           />
         </div>
 
@@ -194,8 +194,7 @@ export default function Home() {
               >
                 <Share size={15} color="#1F6FB2" />
               </span>
-              in Safari e seleziona{" "}
-              <strong>“Aggiungi alla schermata Home”</strong>.
+              e seleziona <strong>“Aggiungi alla schermata Home”</strong>.
             </p>
           </div>
 
