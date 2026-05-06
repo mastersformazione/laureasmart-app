@@ -4,6 +4,8 @@ import { Home, ClipboardList, MessageCircle } from "lucide-react";
 
 import { usePathname, useRouter } from "next/navigation";
 
+import NavIcon from "@/components/ui/NavIcon";
+
 const items = [
   {
     label: "Home",
@@ -66,21 +68,9 @@ export default function BottomNav() {
               minWidth: 78,
             }}
           >
-            <div
-              style={{
-                width: 52,
-                height: 42,
-                borderRadius: 14,
-                background: active ? "#09090B" : "transparent",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "0.2s",
-                color: active ? "#FFFFFF" : "#09090B",
-              }}
-            >
+            <NavIcon active={active}>
               <Icon size={22} strokeWidth={2.4} />
-            </div>
+            </NavIcon>
 
             <span
               style={{
