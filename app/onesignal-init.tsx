@@ -10,8 +10,6 @@ type StoredUser = {
   telefono?: string;
 };
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export default function OneSignalInit() {
   useEffect(() => {
     const initOneSignal = async () => {
@@ -39,40 +37,11 @@ export default function OneSignalInit() {
           return;
         }
 
-        const externalId = `ls_${user.email.toLowerCase().trim()}`;
         await OneSignal.login(user.email);
 
         console.log("OneSignal login OK:", user.email);
-
-        await wait(1500);
-
-        const tags: Record<string, string> = {
-          email: user.email,
-          nome: user.nome || "",
-          cognome: user.cognome || "",
-          telefono: user.telefono || "",
-
-          profilo: localStorage.getItem("profilo_utente") || "",
-          titolo_studio: localStorage.getItem("titolo_studio") || "",
-          obiettivo: localStorage.getItem("obiettivo") || "",
-          urgenza_obiettivo: localStorage.getItem("urgenza_obiettivo") || "",
-          tempo_disponibile: localStorage.getItem("tempo_disponibile") || "",
-          area_interesse: localStorage.getItem("area_interesse") || "",
-
-          segmento_intento: localStorage.getItem("segmento_intento") || "",
-          segmento_ingresso: localStorage.getItem("segmento_ingresso") || "",
-          segmento_urgenza: localStorage.getItem("segmento_urgenza") || "",
-        };
-
-        Object.entries(tags).forEach(([key, value]) => {
-          console.log("TAG DA INVIARE:", key, value);
-        });
-
-        await OneSignal.User.addTags(tags);
-
-        console.log("OneSignal tag sincronizzati:", tags);
       } catch (error) {
-        console.error("Errore OneSignal init/tag:", error);
+        console.error("Errore OneSignal init/login:", error);
       }
     };
 
