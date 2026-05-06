@@ -20,12 +20,12 @@ export default function Card({
       onClick={onClick}
       className="
         w-full
-        rounded-[22px]
+        rounded-[24px]
         border
         border-[#E4EAF1]
         bg-white
         p-5
-        shadow-[0_6px_24px_rgba(15,23,42,0.05)]
+        shadow-[0_8px_28px_rgba(15,23,42,0.05)]
         transition-all
         duration-200
         active:scale-[0.99]
@@ -35,14 +35,7 @@ export default function Card({
       {(title || badge) && (
         <div className="flex items-start justify-between gap-3">
           {title && (
-            <h3
-              className="
-                text-[16px]
-                font-semibold
-                leading-[1.3]
-                text-[#111827]
-              "
-            >
+            <h3 className="text-[20px] leading-[22px] font-bold tracking-[-0.03em] text-[#09090B]">
               {title}
             </h3>
           )}
@@ -67,19 +60,12 @@ export default function Card({
       )}
 
       {description && (
-        <p
-          className="
-            mt-2
-            text-[14px]
-            leading-6
-            text-[#6B7280]
-          "
-        >
+        <p className="mt-3 text-[15px] leading-[22px] font-normal tracking-[-0.01em] text-[#71717A]">
           {description}
         </p>
       )}
 
-      {children && <div className="mt-4">{children}</div>}
+      {children && <div className="mt-5">{children}</div>}
     </div>
   );
 }
