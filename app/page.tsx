@@ -5,6 +5,7 @@ import InstallButton from "./install-button";
 import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
 import Button from "@/components/ui/Button";
+import { Share } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -88,8 +89,8 @@ export default function Home() {
             maxWidth: 350,
           }}
         >
-          Installa la app, rispondi a poche domande e ricevi consigli
-          personalizzati su lauree, master e percorsi agevolati.
+          Scarica la app e ricevi consigli personalizzati su lauree, master e
+          percorsi agevolati e individualizzati.
         </p>
 
         <div
@@ -110,7 +111,7 @@ export default function Home() {
               boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
             }}
           >
-            🎯 Orientamento gratuito e personalizzato
+            🎯 Orientamento Gratuito e Personalizzato
           </div>
 
           <div
@@ -124,7 +125,7 @@ export default function Home() {
               boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
             }}
           >
-            🔔 Notifiche su scadenze e opportunità
+            🔔 Notifiche su Scadenze e Promozioni e Opportunità
           </div>
 
           <div
@@ -138,7 +139,7 @@ export default function Home() {
               boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
             }}
           >
-            💬 Supporto diretto dopo il test
+            💬 Supporto diretto e personalizzato
           </div>
         </div>
 
@@ -147,7 +148,7 @@ export default function Home() {
         <div style={{ marginTop: 12 }}>
           <Button
             label="Accedi o registrati"
-            variant="secondary"
+            variant="primary"
             onClick={() => setMenuOpen(true)}
           />
         </div>
@@ -157,12 +158,28 @@ export default function Home() {
             margin: "18px auto 0",
             fontSize: 13,
             color: "#6B7280",
-            lineHeight: 1.45,
+            lineHeight: 1.5,
             maxWidth: 330,
           }}
         >
-          Su iPhone puoi installarla dal pulsante di condivisione di Safari e
-          poi “Aggiungi alla schermata Home”.
+          Su iPhone premi{" "}
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 22,
+              height: 22,
+              borderRadius: 6,
+              background: "#EEF4FA",
+              border: "1px solid #D8E5F0",
+              verticalAlign: "middle",
+              margin: "0 4px",
+            }}
+          >
+            <Share size={13} color="#1F6FB2" />
+          </span>
+          e poi “Aggiungi alla schermata Home”.
         </p>
       </section>
 
