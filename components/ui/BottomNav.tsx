@@ -1,6 +1,7 @@
 "use client";
 
-import { Home, Bell, User } from "lucide-react";
+import { Home, ClipboardList, MessageCircle } from "lucide-react";
+
 import { usePathname, useRouter } from "next/navigation";
 
 const items = [
@@ -10,14 +11,14 @@ const items = [
     path: "/dashboard",
   },
   {
-    label: "Notifiche",
-    icon: Bell,
-    path: "/dashboard/notifiche",
+    label: "Orientamento",
+    icon: ClipboardList,
+    path: "/dashboard/orientamento",
   },
   {
-    label: "Profilo",
-    icon: User,
-    path: "/dashboard/profilo",
+    label: "Contatti",
+    icon: MessageCircle,
+    path: "/dashboard/contatti",
   },
 ];
 
@@ -34,15 +35,15 @@ export default function BottomNav() {
         transform: "translateX(-50%)",
         width: "100%",
         maxWidth: 430,
-        height: 78,
+        height: 84,
         background: "#FFFFFF",
         borderTop: "1px solid #E4E4E7",
-        boxShadow: "0 -4px 12px rgba(0,0,0,0.08)",
+        boxShadow: "0 -4px 12px rgba(0,0,0,0.06)",
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
-        zIndex: 50,
-        paddingBottom: 8,
+        zIndex: 999,
+        paddingBottom: 10,
       }}
     >
       {items.map((item) => {
@@ -60,21 +61,22 @@ export default function BottomNav() {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: 5,
-              color: active ? "#FFFFFF" : "#09090B",
+              gap: 6,
               cursor: "pointer",
-              minWidth: 76,
+              minWidth: 78,
             }}
           >
             <div
               style={{
-                width: 48,
+                width: 52,
                 height: 42,
-                borderRadius: 12,
+                borderRadius: 14,
                 background: active ? "#09090B" : "transparent",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                transition: "0.2s",
+                color: active ? "#FFFFFF" : "#09090B",
               }}
             >
               <Icon size={22} strokeWidth={2.4} />
@@ -84,7 +86,7 @@ export default function BottomNav() {
               style={{
                 fontSize: 11,
                 fontWeight: active ? 700 : 500,
-                color: active ? "#09090B" : "#52525B",
+                color: active ? "#09090B" : "#71717A",
               }}
             >
               {item.label}
