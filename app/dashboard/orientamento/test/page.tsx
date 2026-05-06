@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import OneSignal from "react-onesignal";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BottomNav from "@/components/ui/BottomNav";
@@ -404,6 +403,7 @@ export default function OrientamentoPage() {
     const segmenti = getSegmenti(data);
 
     const storedUser = localStorage.getItem("gps_user");
+
     const user = storedUser
       ? (JSON.parse(storedUser) as {
           nome?: string;
@@ -414,10 +414,17 @@ export default function OrientamentoPage() {
       : null;
 
     localStorage.setItem("profilo_utente", risultato.tipo);
+    localStorage.setItem("ha_fatto_test", "si");
     localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("obiettivo", data.obiettivo || "");
     localStorage.setItem("urgenza_obiettivo", data.urgenza || "");
+    localStorage.setItem("tempo_disponibile", data.tempo || "");
     localStorage.setItem("area_interesse", data.area || "");
+    localStorage.setItem("segmento_intento", segmenti.segmento_intento);
+    localStorage.setItem("segmento_ingresso", segmenti.segmento_ingresso);
+    localStorage.setItem("segmento_urgenza", segmenti.segmento_urgenza);
+    localStorage.setItem("orientamento_data", JSON.stringify(data));
+    localStorage.setItem("orientamento_risultato", JSON.stringify(risultato));
 
     try {
       if (!user?.email) {
@@ -432,6 +439,9 @@ export default function OrientamentoPage() {
             },
             body: JSON.stringify({
               email: user.email,
+              nome: user.nome || "",
+              cognome: user.cognome || "",
+              telefono: user.telefono || "",
               profilo: risultato.tipo,
               titolo_studio: data.titolo_studio || "",
               obiettivo: data.obiettivo || "",
@@ -446,11 +456,10 @@ export default function OrientamentoPage() {
         );
 
         const result = await response.json();
-
-        console.log("SYNC ONESIGNAL OK:", result);
+        console.log("SYNC ONESIGNAL SERVER:", result);
       }
     } catch (tagError) {
-      console.error("Errore sync OneSignal:", tagError);
+      console.error("Errore sync OneSignal server:", tagError);
     }
 
     try {
