@@ -30,10 +30,18 @@ const nomiSettori: Record<string, string> = {
   design_moda: "Design e moda",
 };
 
+const nomiTipi: Record<string, string> = {
+  tutti: "Tutti",
+  laurea_triennale: "Triennali",
+  laurea_magistrale: "Magistrali",
+  master: "Master",
+};
+
 export default function PercorsiPage() {
   const [titoloStudio, setTitoloStudio] = useState("diploma");
   const [messaggio, setMessaggio] = useState("");
   const [settoreAttivo, setSettoreAttivo] = useState("tutti");
+  const [tipoAttivo, setTipoAttivo] = useState("tutti");
 
   const [interessi, setInteressi] = useState<InteresseStorage>({
     settori: {},
@@ -72,10 +80,19 @@ export default function PercorsiPage() {
     ...Array.from(new Set(percorsi.map((percorso) => percorso.settore))),
   ];
 
-  const percorsiFiltrati =
-    settoreAttivo === "tutti"
-      ? percorsi
-      : percorsi.filter((percorso) => percorso.settore === settoreAttivo);
+  const percorsiFiltrati = percorsi.filter((percorso) => {
+    const filtroSettore =
+      settoreAttivo === "tutti" || percorso.settore === settoreAttivo;
+
+    const filtroTipo =
+      tipoAttivo === "tutti" ||
+      percorso.tipo === tipoAttivo ||
+      (tipoAttivo === "master" &&
+        (percorso.tipo === "master_primo_livello" ||
+          percorso.tipo === "master_secondo_livello"));
+
+    return filtroSettore && filtroTipo;
+  });
 
   const percorsiOrdinati = [...percorsiFiltrati].sort((a, b) => {
     const scoreSettoreA = interessi.settori[a.settore] || 0;
@@ -261,6 +278,26 @@ export default function PercorsiPage() {
       <p className="text-sm text-gray-500 mb-4">
         Titolo rilevato: <strong>{titoloStudio}</strong>
       </p>
+
+      <div className="mb-4 overflow-x-auto">
+        <div className="flex gap-2 pb-1">
+          {["tutti", "laurea_triennale", "laurea_magistrale", "master"].map(
+            (tipo) => (
+              <button
+                key={tipo}
+                onClick={() => setTipoAttivo(tipo)}
+                className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm ${
+                  tipoAttivo === tipo
+                    ? "bg-[#1F6FB2] text-white border-[#1F6FB2]"
+                    : "bg-white text-gray-700 border-gray-200"
+                }`}
+              >
+                {nomiTipi[tipo]}
+              </button>
+            )
+          )}
+        </div>
+      </div>
 
       <div className="mb-5 overflow-x-auto">
         <div className="flex gap-2 pb-1">
