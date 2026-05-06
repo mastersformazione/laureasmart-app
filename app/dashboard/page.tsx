@@ -111,9 +111,18 @@ export default function Dashboard() {
             color: "#71717A",
           }}
         >
-          Qui trovi novità, scadenze, promozioni e opportunità utili per il tuo
-          percorso universitario.
+          Qui trovi i percorsi che hai salvato, novità, scadenze, promozioni e
+          opportunità utili per il tuo percorso universitario.
         </p>
+      </section>
+
+      <section style={{ marginBottom: 22 }}>
+        <Card
+          title="📌 I miei percorsi"
+          description="Rivedi i corsi che hai salvato cliccando su “Mi interessa”. Puoi confrontarli e riprenderli quando vuoi."
+          badge="Preferiti"
+          onClick={() => router.push("/dashboard/preferiti")}
+        />
       </section>
 
       <section>
@@ -211,15 +220,6 @@ export default function Dashboard() {
             ))}
           </div>
         )}
-      </section>
-
-      <section style={{ marginTop: 22 }}>
-        <Card
-          title="📌 I miei percorsi"
-          description="Rivedi i corsi che hai salvato cliccando su “Mi interessa”. Puoi confrontarli e riprenderli quando vuoi."
-          badge="Preferiti"
-          onClick={() => router.push("/dashboard/preferiti")}
-        />
       </section>
 
       <section style={{ marginTop: 22 }}>
