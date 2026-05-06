@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import OneSignal from "react-onesignal";
+import { Bell } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BottomNav from "@/components/ui/BottomNav";
@@ -43,50 +44,54 @@ export default function OrientamentoPage() {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<OrientamentoData>({});
 
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [notificationPromptShown, setNotificationPromptShown] = useState(false);
 
   useEffect(() => {
-    const showNotificationPrompt = async () => {
-      if (step !== 1 || notificationPromptShown) return;
-
-      const storedUser = localStorage.getItem("gps_user");
-
-      if (!storedUser) return;
-
-      const user = JSON.parse(storedUser) as {
-        email?: string;
-      };
-
-      if (!user?.email) return;
-
+    if (step === 1 && !notificationPromptShown) {
+      setShowNotificationModal(true);
       setNotificationPromptShown(true);
+    }
+  }, [step, notificationPromptShown]);
 
-      try {
-        const hasPermission = OneSignal.Notifications.permission === true;
+  const handleActivateNotifications = async () => {
+    const storedUser = localStorage.getItem("gps_user");
 
-        if (!hasPermission) {
-          const oneSignalWithSlidedown = OneSignal as typeof OneSignal & {
-            Slidedown?: {
-              promptPush?: () => Promise<void>;
-            };
-          };
+    if (!storedUser) {
+      setShowNotificationModal(false);
+      return;
+    }
 
-          await oneSignalWithSlidedown.Slidedown?.promptPush?.();
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        if (OneSignal.Notifications.permission === true) {
-          await OneSignal.login(user.email.toLowerCase().trim());
-          console.log("OneSignal login dopo consenso OK:", user.email);
-        }
-      } catch (error) {
-        console.error("Errore prompt/login OneSignal:", error);
-      }
+    const user = JSON.parse(storedUser) as {
+      email?: string;
     };
 
-    showNotificationPrompt();
-  }, [step, notificationPromptShown]);
+    if (!user?.email) {
+      setShowNotificationModal(false);
+      return;
+    }
+
+    try {
+      await OneSignal.Notifications.requestPermission();
+
+      await new Promise((resolve) => setTimeout(resolve, 1800));
+
+      if (OneSignal.Notifications.permission === true) {
+        await OneSignal.login(user.email.toLowerCase().trim());
+        console.log("OneSignal login dopo consenso OK:", user.email);
+      } else {
+        console.log("OneSignal: notifiche non concesse");
+      }
+    } catch (error) {
+      console.error("Errore attivazione notifiche:", error);
+    }
+
+    setShowNotificationModal(false);
+  };
+
+  const handleSkipNotifications = () => {
+    setShowNotificationModal(false);
+  };
 
   const steps: StepItem[] = [
     {
@@ -701,6 +706,98 @@ Corso suggerito: ${risultato.corsoSuggerito}`
           ))}
         </div>
       </Card>
+
+      {showNotificationModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(6, 17, 31, 0.88)",
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 22,
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 390,
+              borderRadius: 30,
+              background: "#FFFFFF",
+              padding: 26,
+              textAlign: "center",
+              boxShadow: "0 30px 90px rgba(0,0,0,0.35)",
+            }}
+          >
+            <div
+              style={{
+                width: 74,
+                height: 74,
+                borderRadius: 24,
+                background: "#EAF4FC",
+                color: "#1F6FB2",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 18px",
+              }}
+            >
+              <Bell size={34} />
+            </div>
+
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 27,
+                lineHeight: 1.1,
+                fontWeight: 850,
+                color: "#09090B",
+                letterSpacing: "-0.7px",
+              }}
+            >
+              Ricevi consigli personalizzati
+            </h2>
+
+            <p
+              style={{
+                margin: "14px 0 22px",
+                fontSize: 15,
+                lineHeight: 1.6,
+                color: "#5F6B7A",
+              }}
+            >
+              Attiva le notifiche per ricevere aggiornamenti su lauree,
+              agevolazioni, scadenze e opportunità coerenti con il tuo profilo.
+            </p>
+
+            <div style={{ display: "grid", gap: 10 }}>
+              <Button
+                label="Attiva notifiche"
+                variant="primary"
+                onClick={handleActivateNotifications}
+              />
+
+              <button
+                type="button"
+                onClick={handleSkipNotifications}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  color: "#71717A",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  padding: 10,
+                  cursor: "pointer",
+                }}
+              >
+                Continua senza notifiche
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav />
     </main>
