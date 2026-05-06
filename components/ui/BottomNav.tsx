@@ -1,7 +1,6 @@
 "use client";
 
 import { Home, ClipboardList, MessageCircle } from "lucide-react";
-
 import { usePathname, useRouter } from "next/navigation";
 
 import NavIcon from "@/components/ui/NavIcon";
@@ -49,7 +48,10 @@ export default function BottomNav() {
       }}
     >
       {items.map((item) => {
-        const active = pathname === item.path;
+        const active =
+          pathname === item.path ||
+          (item.path !== "/dashboard" && pathname.startsWith(item.path));
+
         const Icon = item.icon;
 
         return (
