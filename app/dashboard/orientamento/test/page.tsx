@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import OneSignal from "react-onesignal";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BottomNav from "@/components/ui/BottomNav";
@@ -41,6 +42,51 @@ type Segmenti = {
 export default function OrientamentoPage() {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<OrientamentoData>({});
+
+  const [notificationPromptShown, setNotificationPromptShown] = useState(false);
+
+  useEffect(() => {
+    const showNotificationPrompt = async () => {
+      if (step !== 1 || notificationPromptShown) return;
+
+      const storedUser = localStorage.getItem("gps_user");
+
+      if (!storedUser) return;
+
+      const user = JSON.parse(storedUser) as {
+        email?: string;
+      };
+
+      if (!user?.email) return;
+
+      setNotificationPromptShown(true);
+
+      try {
+        const hasPermission = OneSignal.Notifications.permission === true;
+
+        if (!hasPermission) {
+          const oneSignalWithSlidedown = OneSignal as typeof OneSignal & {
+            Slidedown?: {
+              promptPush?: () => Promise<void>;
+            };
+          };
+
+          await oneSignalWithSlidedown.Slidedown?.promptPush?.();
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        if (OneSignal.Notifications.permission === true) {
+          await OneSignal.login(user.email.toLowerCase().trim());
+          console.log("OneSignal login dopo consenso OK:", user.email);
+        }
+      } catch (error) {
+        console.error("Errore prompt/login OneSignal:", error);
+      }
+    };
+
+    showNotificationPrompt();
+  }, [step, notificationPromptShown]);
 
   const steps: StepItem[] = [
     {

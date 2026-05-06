@@ -23,6 +23,8 @@ export default function OneSignalInit() {
           allowLocalhostAsSecureOrigin: true,
         });
 
+        console.log("OneSignal inizializzato");
+
         const storedUser = localStorage.getItem("gps_user");
 
         if (!storedUser) {
@@ -37,7 +39,16 @@ export default function OneSignalInit() {
           return;
         }
 
-        await OneSignal.login(user.email);
+        const hasPermission = OneSignal.Notifications.permission === true;
+
+        if (!hasPermission) {
+          console.log(
+            "OneSignal: permesso notifiche non ancora concesso. Login rimandato."
+          );
+          return;
+        }
+
+        await OneSignal.login(user.email.toLowerCase().trim());
 
         console.log("OneSignal login OK:", user.email);
       } catch (error) {

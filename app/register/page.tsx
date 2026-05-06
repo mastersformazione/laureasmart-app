@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
-import OneSignal from "react-onesignal";
 import Button from "@/components/ui/Button";
 
 export default function Register() {
@@ -36,13 +35,6 @@ export default function Register() {
       if (data.success) {
         localStorage.setItem("gps_user", JSON.stringify(form));
         localStorage.setItem("ha_fatto_test", "no");
-
-        try {
-          await OneSignal.login(form.email.toLowerCase().trim());
-          console.log("OneSignal login register OK:", form.email);
-        } catch (onesignalError) {
-          console.error("Errore login OneSignal register:", onesignalError);
-        }
 
         setForm({
           nome: "",
