@@ -77,7 +77,7 @@ export default function Home() {
             maxWidth: 360,
           }}
         >
-          Trova il percorso universitario più adatto a te
+          Trova il Percorso Universitario più adatto a te
         </h1>
 
         <p
@@ -89,7 +89,7 @@ export default function Home() {
             maxWidth: 350,
           }}
         >
-          Scarica la app e ricevi consigli personalizzati su lauree, master e
+          Scarica la app e ricevi consigli personalizzati su Lauree, Master e
           percorsi agevolati e individualizzati.
         </p>
 
@@ -100,87 +100,92 @@ export default function Home() {
             marginBottom: 24,
           }}
         >
-          <div
-            style={{
-              padding: "14px 16px",
-              borderRadius: 16,
-              background: "#FFFFFF",
-              border: "1px solid #DDEAF5",
-              textAlign: "left",
-              fontSize: 15,
-              boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
-            }}
-          >
-            🎯 Orientamento Gratuito e Personalizzato
+          <div style={cardStyle}>🎯 Orientamento Gratuito e Personalizzato</div>
+          <div style={cardStyle}>
+            🔔 Notifiche su Scadenze, Promozioni e Opportunità
           </div>
-
-          <div
-            style={{
-              padding: "14px 16px",
-              borderRadius: 16,
-              background: "#FFFFFF",
-              border: "1px solid #DDEAF5",
-              textAlign: "left",
-              fontSize: 15,
-              boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
-            }}
-          >
-            🔔 Notifiche su Scadenze e Promozioni e Opportunità
-          </div>
-
-          <div
-            style={{
-              padding: "14px 16px",
-              borderRadius: 16,
-              background: "#FFFFFF",
-              border: "1px solid #DDEAF5",
-              textAlign: "left",
-              fontSize: 15,
-              boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
-            }}
-          >
-            💬 Supporto diretto e personalizzato
-          </div>
+          <div style={cardStyle}>💬 Supporto Diretto e Individualizzato</div>
         </div>
 
         <InstallButton />
 
-        <div style={{ marginTop: 12 }}>
+        <div
+          style={{
+            marginTop: 18,
+            padding: "14px 16px",
+            borderRadius: 18,
+            background: "#F4F9FD",
+            border: "1px solid #D7E7F5",
+            textAlign: "left",
+            boxShadow: "0 6px 18px rgba(31, 111, 178, 0.06)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 8,
+            }}
+          >
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 10,
+                background: "#1F6FB2",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontSize: 16,
+              }}
+            >
+              📱
+            </div>
+
+            <strong style={{ fontSize: 14, color: "#102033" }}>
+              Scarica su iPhone
+            </strong>
+          </div>
+
+          <p
+            style={{
+              margin: 0,
+              fontSize: 13,
+              color: "#5F6B7A",
+              lineHeight: 1.6,
+            }}
+          >
+            Premi il pulsante{" "}
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 24,
+                height: 24,
+                borderRadius: 8,
+                background: "#FFFFFF",
+                border: "1px solid #D8E5F0",
+                verticalAlign: "middle",
+                margin: "0 4px",
+              }}
+            >
+              <Share size={14} color="#1F6FB2" />
+            </span>
+            di Safari e seleziona{" "}
+            <strong>“Aggiungi alla schermata Home”</strong>.
+          </p>
+        </div>
+
+        <div style={{ marginTop: 18, opacity: 0.72 }}>
           <Button
-            label="Accedi o registrati"
-            variant="primary"
+            label="Accedi o Registrati"
+            variant="secondary"
             onClick={() => setMenuOpen(true)}
           />
         </div>
-
-        <p
-          style={{
-            margin: "18px auto 0",
-            fontSize: 13,
-            color: "#6B7280",
-            lineHeight: 1.5,
-            maxWidth: 330,
-          }}
-        >
-          Su iPhone premi{" "}
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 22,
-              height: 22,
-              borderRadius: 6,
-              background: "#EEF4FA",
-              border: "1px solid #D8E5F0",
-              verticalAlign: "middle",
-              margin: "0 4px",
-            }}
-          >
-            <Share size={13} color="#1F6FB2" />
-          </span>
-          e poi “Aggiungi alla schermata Home”.
-        </p>
       </section>
 
       {menuOpen && (
@@ -194,3 +199,13 @@ export default function Home() {
     </main>
   );
 }
+
+const cardStyle = {
+  padding: "14px 16px",
+  borderRadius: 16,
+  background: "#FFFFFF",
+  border: "1px solid #DDEAF5",
+  textAlign: "left" as const,
+  fontSize: 15,
+  boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
+};
