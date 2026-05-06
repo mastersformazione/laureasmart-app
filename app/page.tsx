@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InstallButton from "./install-button";
 import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
@@ -10,6 +10,19 @@ import { Share } from "lucide-react";
 export default function Home() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("gps_user");
+
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone ===
+        true;
+
+    if (storedUser && isStandalone) {
+      router.replace("/dashboard");
+    }
+  }, [router]);
 
   const handleAction = (action: string) => {
     setMenuOpen(false);
