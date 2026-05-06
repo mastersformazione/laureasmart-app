@@ -476,6 +476,18 @@ export default function OrientamentoPage() {
       if (!user?.email) {
         console.log("Email utente mancante");
       } else {
+        try {
+          if (OneSignal.Notifications.permission === true) {
+            await OneSignal.login(user.email.toLowerCase().trim());
+
+            console.log("OneSignal login prima sync tag OK:", user.email);
+
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          }
+        } catch (loginError) {
+          console.error("Errore login OneSignal prima sync:", loginError);
+        }
+
         const response = await fetch(
           "https://laureasmart.it/api/sync-onesignal-tags.php",
           {
