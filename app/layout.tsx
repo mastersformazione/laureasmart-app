@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   description: "Trova la laurea giusta senza perdere tempo.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon-512-v2.png",
-    apple: "/icon-512-v2.png",
+    icon: "/icon-512.png",
+    apple: "/icon-512.png",
   },
   other: {
     "theme-color": "#1F6FB2",
