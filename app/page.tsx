@@ -46,15 +46,21 @@ export default function Home() {
             height: 104,
             margin: "0 auto 22px",
             borderRadius: 28,
-            background: "linear-gradient(135deg, #1F6FB2 0%, #155487 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 18px 40px rgba(31, 111, 178, 0.25)",
-            fontSize: 46,
+            overflow: "hidden",
+            boxShadow: "0 18px 40px rgba(31, 111, 178, 0.20)",
+            background: "#1F6FB2",
           }}
         >
-          🎓
+          <img
+            src="/icon-512.png"
+            alt="Laurea Smart"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
         </div>
 
         <p
