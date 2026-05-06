@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getPercorsiVisibili, Percorso } from "@/lib/data/percorsi";
+import Card from "@/components/ui/Card";
 
 type InteresseStorage = {
   settori: Record<string, number>;
@@ -32,6 +33,7 @@ export default function PercorsiPage() {
   const [titoloStudio, setTitoloStudio] = useState("diploma");
   const [messaggio, setMessaggio] = useState("");
   const [settoreAttivo, setSettoreAttivo] = useState("tutti");
+
   const [interessi, setInteressi] = useState<InteresseStorage>({
     settori: {},
     tags: {},
@@ -117,6 +119,71 @@ export default function PercorsiPage() {
       .map((item) => item.percorso);
   }
 
+  function mappaSettoreInProfilo(settore: string) {
+    const mappa: Record<string, string> = {
+      giuridico: "GIURIDICA",
+      politico_sociale: "SCUOLA",
+      psicologia: "PSICOLOGIA",
+      scienze_motorie: "SPORT",
+      comunicazione: "COMUNICAZIONE",
+      educazione: "EDUCAZIONE",
+      turismo: "ECONOMIA",
+      biologia: "TECNOLOGIA",
+      lingue: "COMUNICAZIONE",
+      lettere_arte_spettacolo: "COMUNICAZIONE",
+      informatica_ingegneria: "TECNOLOGIA",
+      ingegneria_industriale: "TECNOLOGIA",
+      ingegneria_civile: "TECNOLOGIA",
+      economia: "ECONOMIA",
+      design_moda: "COMUNICAZIONE",
+    };
+
+    return mappa[settore] || "GENERALE";
+  }
+
+  async function aggiornaTagOneSignal(percorso: Percorso) {
+    try {
+      const storedUser = localStorage.getItem("gps_user");
+
+      if (!storedUser) return;
+
+      const user = JSON.parse(storedUser);
+
+      if (!user?.email) return;
+
+      const profilo = mappaSettoreInProfilo(percorso.settore);
+
+      const titolo = localStorage.getItem("titolo_studio") || "Non indicato";
+
+      const obiettivo = localStorage.getItem("obiettivo") || "Non indicato";
+
+      await fetch("https://laureasmart.it/api/sync-onesignal-tags.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user.email,
+          nome: user.nome || "",
+          cognome: user.cognome || "",
+          telefono: user.telefono || "",
+
+          profilo,
+          titolo_studio: titolo,
+          obiettivo,
+        }),
+      });
+
+      console.log("OneSignal aggiornato:", {
+        profilo,
+        titolo,
+        obiettivo,
+      });
+    } catch (error) {
+      console.error("Errore sync OneSignal:", error);
+    }
+  }
+
   function inviaInteresseAlBackend(percorso: Percorso) {
     try {
       const profiloSalvato = localStorage.getItem("gps_user");
@@ -163,9 +230,12 @@ export default function PercorsiPage() {
     localStorage.setItem("interessi_percorsi", JSON.stringify(nuoviInteressi));
 
     setInteressi(nuoviInteressi);
+
     setMessaggio(`Interesse registrato per ${percorso.titolo}`);
 
     inviaInteresseAlBackend(percorso);
+
+    aggiornaTagOneSignal(percorso);
   }
 
   return (
@@ -214,20 +284,16 @@ export default function PercorsiPage() {
           const percorsiSimili = getPercorsiSimili(percorso);
 
           return (
-            <div
+            <Card
               key={percorso.id}
-              className="rounded-2xl bg-white p-4 shadow-sm border"
+              title={percorso.titolo}
+              description={`Durata: ${percorso.durata}`}
+              badge={nomiSettori[percorso.settore] || percorso.settore}
+              icon={percorso.classe.replace("L-", "L")}
             >
-              <p className="text-sm text-gray-500">{percorso.classe}</p>
-
-              <h2 className="text-lg font-semibold">{percorso.titolo}</h2>
-
-              <p className="text-sm text-gray-600 mt-1">
-                Durata: {percorso.durata}
-              </p>
-
               <div className="mt-3">
                 <h3 className="font-medium">Sbocchi principali</h3>
+
                 <ul className="list-disc pl-5 text-sm text-gray-700">
                   {percorso.sbocchi.map((item) => (
                     <li key={item}>{item}</li>
@@ -237,6 +303,7 @@ export default function PercorsiPage() {
 
               <div className="mt-3">
                 <h3 className="font-medium">Se vuoi proseguire</h3>
+
                 <ul className="list-disc pl-5 text-sm text-gray-700">
                   {percorso.prosecuzione.map((item) => (
                     <li key={item}>{item}</li>
@@ -266,11 +333,11 @@ export default function PercorsiPage() {
 
               <button
                 onClick={() => registraInteresse(percorso)}
-                className="mt-4 w-full rounded-xl bg-black text-white py-3"
+                className="mt-5 w-full rounded-2xl bg-[#1F6FB2] text-white py-3.5 font-semibold shadow-[0_8px_20px_rgba(31,111,178,0.25)] hover:opacity-90 transition"
               >
                 Mi interessa
               </button>
-            </div>
+            </Card>
           );
         })}
       </div>
