@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/ui/Header";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import BottomNav from "@/components/ui/BottomNav";
 
 export default function PercorsoPage() {
   const [profilo, setProfilo] = useState<string | null>(null);

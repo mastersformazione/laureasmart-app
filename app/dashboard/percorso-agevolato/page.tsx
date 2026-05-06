@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import BottomNav from "@/components/ui/BottomNav";
 
 type FormData = {
   titolo: string;

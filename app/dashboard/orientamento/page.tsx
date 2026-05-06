@@ -4,6 +4,7 @@ import { useState } from "react";
 import OneSignal from "react-onesignal";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import BottomNav from "@/components/ui/BottomNav";
 
 type OrientamentoData = {
   situazione?: string;

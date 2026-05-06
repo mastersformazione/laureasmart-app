@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import Button from "@/components/ui/Button";
+import BottomNav from "@/components/ui/BottomNav";
 
 export default function AdminPage() {
   const [form, setForm] = useState({
