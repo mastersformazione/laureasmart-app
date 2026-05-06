@@ -1,0 +1,48 @@
+import type { Percorso } from "../percorsi";
+
+export const masterIngegneria: Percorso[] = [
+  {
+    id: "protezione-radiazioni-ionizzanti",
+    titolo: "Protezione dalle Radiazioni Ionizzanti",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "ingegneria_industriale",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: ["radiazioni", "sicurezza", "industria", "sanita", "tecnico"],
+    prioritaCommerciale: 2,
+  },
+  {
+    id: "data-protection-officer-cyber-risk-manager",
+    titolo: "Data Protection Officer Cyber & Risk Manager",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "informatica_ingegneria",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: ["privacy", "gdpr", "cybersecurity", "risk_management", "dpo"],
+    prioritaCommerciale: 3,
+  },
+  {
+    id: "logistica-economia-marittima-security-mare",
+    titolo: "Logistica, Economia Marittima e Security del Mare",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "ingegneria_industriale",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: ["logistica", "mare", "trasporti", "security", "economia"],
+    prioritaCommerciale: 2,
+  },
+  {
+    id: "management-cybersecurity",
+    titolo: "Management & Cybersecurity",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "informatica_ingegneria",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: ["cybersecurity", "management", "informatica", "sicurezza", "it"],
+    prioritaCommerciale: 3,
+  },
+];

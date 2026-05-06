@@ -1,3 +1,12 @@
+import { masterEconomia } from "./master/master-economia";
+import { masterGiuridici } from "./master/master-giuridici";
+import { masterIngegneria } from "./master/master-ingegneria";
+import { masterLettere } from "./master/master-lettere";
+import { masterPA } from "./master/master-pa";
+import { masterPsicologia } from "./master/master-psicologia";
+import { masterSanitari } from "./master/master-sanitari";
+import { masterScuola } from "./master/master-scuola";
+
 export type Percorso = {
   id: string;
   titolo: string;
@@ -12,8 +21,8 @@ export type Percorso = {
   settore: string;
   durata: string;
   accesso: string[];
-  sbocchi: string[];
-  prosecuzione: string[];
+  sbocchi?: string[];
+  prosecuzione?: string[];
   tags: string[];
   prioritaCommerciale: number;
 };
@@ -1885,6 +1894,17 @@ export const percorsiMagistrali: Percorso[] = [
 
 percorsi.push(...percorsiMagistrali);
 
+percorsi.push(
+  ...masterEconomia,
+  ...masterGiuridici,
+  ...masterIngegneria,
+  ...masterLettere,
+  ...masterPA,
+  ...masterPsicologia,
+  ...masterSanitari,
+  ...masterScuola
+);
+
 export function normalizzaTitoloStudio(titoloStudio: string) {
   const titolo = titoloStudio.toLowerCase().trim();
 
@@ -1925,7 +1945,12 @@ export function getTipiPercorsoPerTitolo(titoloStudio: string) {
   }
 
   if (titoloNormalizzato === "laurea_magistrale") {
-    return ["master_primo_livello", "master_secondo_livello"];
+    return [
+      "master_primo_livello",
+      "master_secondo_livello",
+      "laurea_magistrale",
+      "laurea_triennale",
+    ];
   }
 
   return [];

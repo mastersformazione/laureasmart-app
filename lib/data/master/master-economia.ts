@@ -1,0 +1,48 @@
+import type { Percorso } from "../percorsi";
+
+export const masterEconomia: Percorso[] = [
+  {
+    id: "mba-business-administration",
+    titolo: "Business Administration MBA",
+    classe: "Master I e II livello",
+    tipo: "master_primo_livello",
+    settore: "economia",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: ["economia", "management", "business", "mba", "azienda"],
+    prioritaCommerciale: 3,
+  },
+  {
+    id: "rul1-risorse-umane-lavoro-organizzazione",
+    titolo: "Risorse Umane, Lavoro e Organizzazione",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "economia",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: ["economia", "hr", "risorse_umane", "lavoro", "organizzazione"],
+    prioritaCommerciale: 3,
+  },
+  {
+    id: "smart-business-management",
+    titolo: "Smart Business Management",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "economia",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: ["economia", "management", "business", "impresa", "innovazione"],
+    prioritaCommerciale: 2,
+  },
+  {
+    id: "diritto-tributario-impresa",
+    titolo: "Diritto Tributario dell’Impresa",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "economia",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: ["economia", "tributario", "impresa", "fisco", "diritto"],
+    prioritaCommerciale: 2,
+  },
+];

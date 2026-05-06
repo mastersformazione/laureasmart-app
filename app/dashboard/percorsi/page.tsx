@@ -83,9 +83,25 @@ export default function PercorsiPage() {
     const scorePercorsoA = interessi.percorsi[a.id] || 0;
     const scorePercorsoB = interessi.percorsi[b.id] || 0;
 
-    const scoreA = scoreSettoreA + scorePercorsoA + a.prioritaCommerciale;
-    const scoreB = scoreSettoreB + scorePercorsoB + b.prioritaCommerciale;
+    const prioritaTipo = (tipo: string) => {
+      if (tipo === "master_secondo_livello") return 40;
+      if (tipo === "master_primo_livello") return 35;
+      if (tipo === "laurea_magistrale") return 20;
+      if (tipo === "laurea_triennale") return 5;
+      return 0;
+    };
 
+    const scoreA =
+      scoreSettoreA +
+      scorePercorsoA +
+      a.prioritaCommerciale +
+      prioritaTipo(a.tipo);
+
+    const scoreB =
+      scoreSettoreB +
+      scorePercorsoB +
+      b.prioritaCommerciale +
+      prioritaTipo(b.tipo);
     return scoreB - scoreA;
   });
 
@@ -285,25 +301,29 @@ export default function PercorsiPage() {
               badge={nomiSettori[percorso.settore] || percorso.settore}
               icon={percorso.classe.replace("L-", "L")}
             >
-              <div className="mt-3">
-                <h3 className="font-medium">Sbocchi principali</h3>
+              {percorso.sbocchi && percorso.sbocchi.length > 0 && (
+                <div className="mt-3">
+                  <h3 className="font-medium">Sbocchi principali</h3>
 
-                <ul className="list-disc pl-5 text-sm text-gray-700">
-                  {percorso.sbocchi.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
+                  <ul className="list-disc pl-5 text-sm text-gray-700">
+                    {percorso.sbocchi.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-              <div className="mt-3">
-                <h3 className="font-medium">Se vuoi proseguire</h3>
+              {percorso.prosecuzione && percorso.prosecuzione.length > 0 && (
+                <div className="mt-3">
+                  <h3 className="font-medium">Se vuoi proseguire</h3>
 
-                <ul className="list-disc pl-5 text-sm text-gray-700">
-                  {percorso.prosecuzione.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
+                  <ul className="list-disc pl-5 text-sm text-gray-700">
+                    {percorso.prosecuzione.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {percorsiSimili.length > 0 && (
                 <div className="mt-4 rounded-xl bg-gray-50 p-3">
