@@ -419,49 +419,41 @@ export default function OrientamentoPage() {
     localStorage.setItem("urgenza_obiettivo", data.urgenza || "");
     localStorage.setItem("area_interesse", data.area || "");
 
-    await OneSignal.User.addTags({
-      profilo: risultato.tipo,
-      titolo_studio: data.titolo_studio || "",
-      obiettivo: data.obiettivo || "",
-      urgenza_obiettivo: data.urgenza || "",
-      tempo_disponibile: data.tempo || "",
-      area_interesse: data.area || "",
-      segmento_intento: segmenti.segmento_intento,
-      segmento_ingresso: segmenti.segmento_ingresso,
-      segmento_urgenza: segmenti.segmento_urgenza,
-    });
-
     try {
       if (!user?.email) {
         console.log("OneSignal: email utente mancante");
       } else {
         await OneSignal.login(user.email);
 
-        await OneSignal.User.addTag("email", user.email);
-        await OneSignal.User.addTag("nome", user.nome || "");
-        await OneSignal.User.addTag("cognome", user.cognome || "");
-        await OneSignal.User.addTag("telefono", user.telefono || "");
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        await OneSignal.User.addTag("profilo", risultato.tipo);
-        await OneSignal.User.addTag("titolo_studio", data.titolo_studio || "");
-        await OneSignal.User.addTag("obiettivo", data.obiettivo || "");
-        await OneSignal.User.addTag("urgenza_obiettivo", data.urgenza || "");
-        await OneSignal.User.addTag("area_interesse", data.area || "");
+        await OneSignal.User.addTags({
+          email: user.email,
+          nome: user.nome || "",
+          cognome: user.cognome || "",
+          telefono: user.telefono || "",
+          profilo: risultato.tipo,
+          titolo_studio: data.titolo_studio || "",
+          obiettivo: data.obiettivo || "",
+          urgenza_obiettivo: data.urgenza || "",
+          tempo_disponibile: data.tempo || "",
+          area_interesse: data.area || "",
+          segmento_intento: segmenti.segmento_intento,
+          segmento_ingresso: segmenti.segmento_ingresso,
+          segmento_urgenza: segmenti.segmento_urgenza,
+        });
 
-        await OneSignal.User.addTag(
-          "segmento_intento",
-          segmenti.segmento_intento
-        );
-        await OneSignal.User.addTag(
-          "segmento_ingresso",
-          segmenti.segmento_ingresso
-        );
-        await OneSignal.User.addTag(
-          "segmento_urgenza",
-          segmenti.segmento_urgenza
-        );
-
-        console.log("OneSignal tag inviati correttamente");
+        console.log("OneSignal tag inviati correttamente", {
+          profilo: risultato.tipo,
+          titolo_studio: data.titolo_studio,
+          obiettivo: data.obiettivo,
+          urgenza_obiettivo: data.urgenza,
+          tempo_disponibile: data.tempo,
+          area_interesse: data.area,
+          segmento_intento: segmenti.segmento_intento,
+          segmento_ingresso: segmenti.segmento_ingresso,
+          segmento_urgenza: segmenti.segmento_urgenza,
+        });
       }
     } catch (tagError) {
       console.error("Errore aggiornamento tag OneSignal:", tagError);
