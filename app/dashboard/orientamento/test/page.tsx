@@ -426,6 +426,18 @@ export default function OrientamentoPage() {
     localStorage.setItem("orientamento_data", JSON.stringify(data));
     localStorage.setItem("orientamento_risultato", JSON.stringify(risultato));
 
+    await OneSignal.User.addTags({
+      profilo: risultato.tipo,
+      titolo_studio: data.titolo_studio || "",
+      obiettivo: data.obiettivo || "",
+      urgenza_obiettivo: data.urgenza || "",
+      tempo_disponibile: data.tempo || "",
+      area_interesse: data.area || "",
+      segmento_intento: segmenti.segmento_intento,
+      segmento_ingresso: segmenti.segmento_ingresso,
+      segmento_urgenza: segmenti.segmento_urgenza,
+    });
+
     try {
       if (!user?.email) {
         console.log("OneSignal: email utente mancante");
