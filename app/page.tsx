@@ -81,7 +81,7 @@ export default function Home() {
             marginBottom: 14,
           }}
         >
-          Gratis · Orientamento universitario
+          Orientamento universitario Gratuito
         </div>
 
         <h1
@@ -95,7 +95,7 @@ export default function Home() {
             color: "#0B1B2E",
           }}
         >
-          Trova la laurea giusta senza perdere tempo
+          Trova la Laurea Giusta Senza Perdere Tempo
         </h1>
 
         <p
@@ -107,7 +107,7 @@ export default function Home() {
             maxWidth: 355,
           }}
         >
-          Installa la app, ricevi notifiche utili e scopri percorsi universitari
+          Scarica la app, ricevi notifiche utili e scopri percorsi universitari
           online, master e agevolazioni adatti al tuo profilo.
         </p>
 
@@ -120,15 +120,15 @@ export default function Home() {
         >
           <Benefit
             icon={<CheckCircle size={20} />}
-            text="Test gratuito e consigli personalizzati"
+            text="Test Gratuiti e Consigli Personalizzati"
           />
           <Benefit
             icon={<Bell size={20} />}
-            text="Notifiche su scadenze, promozioni e opportunità"
+            text="Notifiche su Scadenze, Promozioni e Opportunità"
           />
           <Benefit
             icon={<MessageCircle size={20} />}
-            text="Supporto diretto su WhatsApp"
+            text="Supporto Diretto e Gratuito con un Orientatore Dedicato"
           />
         </div>
 
