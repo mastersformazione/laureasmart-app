@@ -72,6 +72,18 @@ export default function OrientamentoHubPage() {
           />
         </Card>
 
+        <Card
+          title="📚 Percorsi consigliati"
+          description="Esplora lauree e percorsi coerenti con il tuo titolo di studio. Più interagisci, più i consigli diventano personalizzati in base ai tuoi interessi."
+          badge="Nuovo"
+        >
+          <Button
+            label="Vedi i percorsi consigliati"
+            variant="primary"
+            onClick={() => router.push("/dashboard/percorsi")}
+          />
+        </Card>
+
         <section
           style={{
             padding: 22,
