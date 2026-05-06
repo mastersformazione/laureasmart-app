@@ -215,6 +215,15 @@ export default function Dashboard() {
 
       <section style={{ marginTop: 22 }}>
         <Card
+          title="📌 I miei percorsi"
+          description="Rivedi i corsi che hai salvato cliccando su “Mi interessa”. Puoi confrontarli e riprenderli quando vuoi."
+          badge="Preferiti"
+          onClick={() => router.push("/dashboard/preferiti")}
+        />
+      </section>
+
+      <section style={{ marginTop: 22 }}>
+        <Card
           title="Hai bisogno di aiuto?"
           description="Vai su Orientamento per scegliere il percorso oppure contattaci direttamente su WhatsApp."
           onClick={() => router.push("/dashboard/orientamento")}

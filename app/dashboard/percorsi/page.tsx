@@ -257,9 +257,22 @@ export default function PercorsiPage() {
 
     localStorage.setItem("interessi_percorsi", JSON.stringify(nuoviInteressi));
 
+    const preferitiSalvati = localStorage.getItem("percorsi_preferiti");
+
+    const preferiti: Percorso[] = preferitiSalvati
+      ? JSON.parse(preferitiSalvati)
+      : [];
+
+    const giaPresente = preferiti.some((item) => item.id === percorso.id);
+
+    if (!giaPresente) {
+      preferiti.push(percorso);
+      localStorage.setItem("percorsi_preferiti", JSON.stringify(preferiti));
+    }
+
     setInteressi(nuoviInteressi);
 
-    setMessaggio(`Interesse registrato per ${percorso.titolo}`);
+    setMessaggio(`${percorso.titolo} aggiunto ai tuoi percorsi preferiti`);
 
     inviaInteresseAlBackend(percorso);
 
