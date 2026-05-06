@@ -41,12 +41,10 @@ export default function AdminPage() {
 
       if (data.success) {
         setStatus(
-          "Notifica salvata. Target: " +
+          "Notifica inviata. Target: " +
             data.target +
             " - OneSignal code: " +
-            data.onesignal_http_code +
-            " - Response: " +
-            JSON.stringify(data.onesignal_response)
+            data.onesignal_http_code
         );
 
         setForm({
@@ -67,22 +65,30 @@ export default function AdminPage() {
   return (
     <main
       style={{
+        minHeight: "100vh",
         padding: 20,
-        fontFamily: "Arial",
+        paddingBottom: 120,
+        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
         maxWidth: 500,
         margin: "0 auto",
+        background: "#F8FBFF",
       }}
     >
-      <h1>Pannello Admin</h1>
+      <h1 style={{ marginBottom: 8 }}>Pannello Admin</h1>
 
-      <p>
-        Da qui puoi pubblicare una notifica e inviare una push agli utenti in
-        base al segmento scelto.
+      <p style={{ color: "#555", lineHeight: 1.5 }}>
+        Pubblica una notifica e inviala agli utenti in base alla segmentazione
+        OneSignal.
       </p>
 
       <form
         onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+          marginTop: 20,
+        }}
       >
         <input
           type="password"
@@ -90,6 +96,7 @@ export default function AdminPage() {
           value={form.adminKey}
           onChange={(e) => setForm({ ...form, adminKey: e.target.value })}
           required
+          style={inputStyle}
         />
 
         <input
@@ -98,6 +105,7 @@ export default function AdminPage() {
           value={form.titolo}
           onChange={(e) => setForm({ ...form, titolo: e.target.value })}
           required
+          style={inputStyle}
         />
 
         <textarea
@@ -106,31 +114,87 @@ export default function AdminPage() {
           onChange={(e) => setForm({ ...form, messaggio: e.target.value })}
           required
           rows={5}
+          style={inputStyle}
         />
 
-        <label>Target push OneSignal</label>
+        <label style={{ fontWeight: 700, marginTop: 4 }}>
+          Target push OneSignal
+        </label>
+
         <select
           value={form.target}
           onChange={(e) => setForm({ ...form, target: e.target.value })}
+          style={inputStyle}
         >
           <option value="ALL">Tutti gli utenti</option>
-          <option value="ECONOMIA">Economia e management</option>
-          <option value="PSICOLOGIA">Psicologia</option>
-          <option value="EDUCAZIONE">Scienze dell’educazione</option>
-          <option value="GIURIDICA">Area giuridica</option>
-          <option value="SPORT">Scienze motorie</option>
-          <option value="COMUNICAZIONE">Comunicazione</option>
-          <option value="TECNOLOGIA">Informatica / tecnologia</option>
-          <option value="SCUOLA">Scuola e insegnamento</option>
-          <option value="ORIENTAMENTO">Indecisi / orientamento</option>
-          <option value="GENERALE">Generale</option>
+
+          <optgroup label="Area / Profilo">
+            <option value="PROFILO:ECONOMIA">Economia e management</option>
+            <option value="PROFILO:PSICOLOGIA">Psicologia</option>
+            <option value="PROFILO:EDUCAZIONE">Scienze dell’educazione</option>
+            <option value="PROFILO:GIURIDICA">Area giuridica</option>
+            <option value="PROFILO:SPORT">Scienze motorie</option>
+            <option value="PROFILO:COMUNICAZIONE">Comunicazione</option>
+            <option value="PROFILO:TECNOLOGIA">Informatica / tecnologia</option>
+            <option value="PROFILO:SCUOLA">Scuola e insegnamento</option>
+            <option value="PROFILO:ORIENTAMENTO">
+              Indecisi / orientamento
+            </option>
+          </optgroup>
+
+          <optgroup label="Obiettivo">
+            <option value="OBIETTIVO:Aumentare lo stipendio">
+              Aumentare lo stipendio
+            </option>
+            <option value="OBIETTIVO:Cambiare lavoro">Cambiare lavoro</option>
+            <option value="OBIETTIVO:Partecipare a concorsi">
+              Partecipare a concorsi
+            </option>
+            <option value="OBIETTIVO:Insegnare">Insegnare</option>
+            <option value="OBIETTIVO:Crescita personale">
+              Crescita personale
+            </option>
+            <option value="OBIETTIVO:Completare il mio profilo professionale">
+              Completare il profilo professionale
+            </option>
+            <option value="OBIETTIVO:Non sono sicuro">Non sono sicuro</option>
+          </optgroup>
+
+          <optgroup label="Titolo di studio">
+            <option value="TITOLO:Diploma">Diploma</option>
+            <option value="TITOLO:Laurea triennale">Laurea triennale</option>
+            <option value="TITOLO:Laurea magistrale">Laurea magistrale</option>
+            <option value="TITOLO:Laurea vecchio ordinamento">
+              Laurea vecchio ordinamento
+            </option>
+            <option value="TITOLO:Master universitario">
+              Master universitario
+            </option>
+            <option value="TITOLO:AFAM">
+              AFAM / Conservatorio / Accademia
+            </option>
+            <option value="TITOLO:Università incompleta">
+              Università incompleta
+            </option>
+          </optgroup>
         </select>
 
         <Button label="Pubblica notifica" variant="primary" type="submit" />
       </form>
 
-      {status && <p style={{ marginTop: 20 }}>{status}</p>}
+      {status && (
+        <p style={{ marginTop: 20, fontSize: 14, color: "#333" }}>{status}</p>
+      )}
+
       <BottomNav />
     </main>
   );
 }
+
+const inputStyle: React.CSSProperties = {
+  padding: 12,
+  borderRadius: 12,
+  border: "1px solid #D7E7F5",
+  background: "#FFFFFF",
+  fontSize: 14,
+};
