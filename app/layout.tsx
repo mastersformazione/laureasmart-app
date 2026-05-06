@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Sora } from "next/font/google";
 import "./globals.css";
 import RegisterSW from "./register-sw";
 import OneSignalInit from "./onesignal-init";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sora",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,8 +16,8 @@ export const metadata: Metadata = {
   description: "Trova la laurea giusta senza perdere tempo.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon-512.png",
-    apple: "/icon-512.png",
+    icon: "/icon-512-v2.png",
+    apple: "/icon-512-v2.png",
   },
   other: {
     "theme-color": "#1F6FB2",
@@ -41,9 +36,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="it">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${sora.variable} antialiased`}>
         <RegisterSW />
         <OneSignalInit />
         {children}

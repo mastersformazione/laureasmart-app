@@ -35,152 +35,136 @@ export default function Home() {
     <main
       style={{
         minHeight: "100vh",
-        padding: "24px 20px 34px",
         maxWidth: 430,
         margin: "0 auto",
-        fontFamily: "var(--font-geist-sans)",
-        background:
-          "radial-gradient(circle at top, #D9EDFF 0%, #F8FBFF 42%, #FFFFFF 100%)",
-        color: "#102033",
+        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+        background: "#06111F",
+        color: "#FFFFFF",
+        overflow: "hidden",
       }}
     >
-      <section style={{ textAlign: "center" }}>
-        <div
-          style={{
-            width: 118,
-            height: 118,
-            margin: "16px auto 18px",
-            borderRadius: 32,
-            overflow: "hidden",
-            boxShadow: "0 22px 50px rgba(31,111,178,0.28)",
-          }}
-        >
-          <img
-            src="/icon-512.png"
-            alt="Laurea Smart"
+      <section
+        style={{
+          minHeight: "100vh",
+          padding: "30px 22px 28px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          background:
+            "radial-gradient(circle at 50% 10%, #3AA0FF 0%, #1F6FB2 26%, #06111F 62%, #020712 100%)",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 30 }}>
+          <div
             style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
+              width: 132,
+              height: 132,
+              margin: "0 auto 22px",
+              borderRadius: 34,
+              overflow: "hidden",
+              boxShadow: "0 28px 65px rgba(0,0,0,0.35)",
             }}
-          />
+          >
+            <img
+              src="/icon-512.png"
+              alt="Laurea Smart"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "inline-flex",
+              padding: "8px 13px",
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.14)",
+              border: "1px solid rgba(255,255,255,0.22)",
+              fontSize: 13,
+              fontWeight: 800,
+              marginBottom: 18,
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            Orientamento universitario gratuito
+          </div>
+
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 41,
+              lineHeight: 1.02,
+              letterSpacing: "-1.4px",
+              fontWeight: 850,
+            }}
+          >
+            La laurea giusta, senza perdere tempo
+          </h1>
+
+          <p
+            style={{
+              margin: "18px auto 0",
+              color: "rgba(255,255,255,0.78)",
+              fontSize: 16,
+              lineHeight: 1.6,
+              maxWidth: 350,
+            }}
+          >
+            Ricevi notifiche, consigli personalizzati e percorsi online adatti
+            al tuo profilo.
+          </p>
         </div>
-
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "7px 12px",
-            borderRadius: 999,
-            background: "#EAF4FC",
-            color: "#1F6FB2",
-            fontSize: 13,
-            fontWeight: 800,
-            marginBottom: 14,
-          }}
-        >
-          Orientamento universitario Gratuito
-        </div>
-
-        <h1
-          style={{
-            margin: "0 auto",
-            fontSize: 37,
-            lineHeight: 1.03,
-            letterSpacing: "-1.2px",
-            fontWeight: 850,
-            maxWidth: 370,
-            color: "#0B1B2E",
-          }}
-        >
-          Trova la Laurea Giusta Senza Perdere Tempo
-        </h1>
-
-        <p
-          style={{
-            margin: "16px auto 24px",
-            color: "#5F6B7A",
-            fontSize: 17,
-            lineHeight: 1.55,
-            maxWidth: 355,
-          }}
-        >
-          Scarica la app, ricevi notifiche utili e scopri percorsi universitari
-          online, master e agevolazioni adatti al tuo profilo.
-        </p>
 
         <div
           style={{
             display: "grid",
             gap: 10,
-            marginBottom: 22,
+            marginBottom: 20,
           }}
         >
+          <Benefit icon={<CheckCircle size={19} />} text="Test gratuito" />
+          <Benefit icon={<Bell size={19} />} text="Scadenze e promozioni" />
           <Benefit
-            icon={<CheckCircle size={20} />}
-            text="Test Gratuiti e Consigli Personalizzati"
-          />
-          <Benefit
-            icon={<Bell size={20} />}
-            text="Notifiche su Scadenze, Promozioni e Opportunità"
-          />
-          <Benefit
-            icon={<MessageCircle size={20} />}
-            text="Supporto Diretto e Gratuito con un Orientatore Dedicato"
+            icon={<MessageCircle size={19} />}
+            text="Supporto WhatsApp"
           />
         </div>
 
         <div
           style={{
             padding: 16,
-            borderRadius: 24,
-            background: "#FFFFFF",
-            border: "1px solid #D7E7F5",
-            boxShadow: "0 16px 40px rgba(31,111,178,0.12)",
+            borderRadius: 28,
+            background: "rgba(255,255,255,0.96)",
+            color: "#102033",
+            boxShadow: "0 24px 70px rgba(0,0,0,0.28)",
           }}
         >
-          <p
-            style={{
-              margin: "0 0 12px",
-              fontSize: 14,
-              color: "#1F6FB2",
-              fontWeight: 800,
-            }}
-          >
-            Scarica subito la app
-          </p>
-
           <InstallButton />
 
           <div
             style={{
-              marginTop: 14,
-              padding: "14px 15px",
+              marginTop: 12,
+              padding: "13px 14px",
               borderRadius: 18,
               background: "#F4F9FD",
               border: "1px solid #D7E7F5",
               textAlign: "left",
             }}
           >
-            <strong
-              style={{
-                display: "block",
-                fontSize: 15,
-                color: "#102033",
-                marginBottom: 8,
-              }}
-            >
+            <strong style={{ display: "block", fontSize: 14, marginBottom: 6 }}>
               📱 Su iPhone
             </strong>
 
             <p
               style={{
                 margin: 0,
-                fontSize: 14,
+                fontSize: 13,
                 color: "#5F6B7A",
-                lineHeight: 1.6,
+                lineHeight: 1.55,
               }}
             >
               Premi{" "}
@@ -189,8 +173,8 @@ export default function Home() {
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  width: 26,
-                  height: 26,
+                  width: 25,
+                  height: 25,
                   borderRadius: 8,
                   background: "#FFFFFF",
                   border: "1px solid #D8E5F0",
@@ -204,27 +188,27 @@ export default function Home() {
               <strong>“Aggiungi alla schermata Home”</strong>.
             </p>
           </div>
-        </div>
 
-        <div style={{ marginTop: 18 }}>
-          <Button
-            label="Accedi o Registrati"
-            variant="secondary"
-            onClick={() => setMenuOpen(true)}
-          />
+          <div style={{ marginTop: 12 }}>
+            <Button
+              label="Accedi o Registrati"
+              variant="secondary"
+              onClick={() => setMenuOpen(true)}
+            />
+          </div>
         </div>
 
         <p
           style={{
             margin: "14px auto 0",
             fontSize: 12,
-            color: "#7A8594",
+            color: "rgba(255,255,255,0.65)",
             lineHeight: 1.45,
             maxWidth: 320,
+            textAlign: "center",
           }}
         >
-          Anche senza installare la app puoi registrarti e ricevere supporto
-          personalizzato.
+          Puoi registrarti anche senza installare la app.
         </p>
       </section>
 
@@ -244,24 +228,23 @@ function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <div
       style={{
-        padding: "14px 15px",
+        padding: "13px 15px",
         borderRadius: 18,
-        background: "rgba(255,255,255,0.9)",
-        border: "1px solid #DDEAF5",
+        background: "rgba(255,255,255,0.13)",
+        border: "1px solid rgba(255,255,255,0.18)",
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        textAlign: "left",
-        boxShadow: "0 10px 28px rgba(16,32,51,0.05)",
+        gap: 11,
+        color: "#FFFFFF",
+        backdropFilter: "blur(10px)",
       }}
     >
       <span
         style={{
-          width: 36,
-          height: 36,
+          width: 34,
+          height: 34,
           borderRadius: 12,
-          background: "#EAF4FC",
-          color: "#1F6FB2",
+          background: "rgba(255,255,255,0.18)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -271,16 +254,7 @@ function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
         {icon}
       </span>
 
-      <span
-        style={{
-          fontSize: 15,
-          lineHeight: 1.35,
-          fontWeight: 700,
-          color: "#102033",
-        }}
-      >
-        {text}
-      </span>
+      <span style={{ fontSize: 14, fontWeight: 800 }}>{text}</span>
     </div>
   );
 }
