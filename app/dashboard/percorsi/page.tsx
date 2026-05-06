@@ -41,18 +41,12 @@ export default function PercorsiPage() {
   });
 
   useEffect(() => {
-    const profiloSalvato = localStorage.getItem("profilo_utente");
+    const titoloSalvato = localStorage.getItem("titolo_studio");
 
-    if (profiloSalvato) {
-      try {
-        const profilo = JSON.parse(profiloSalvato);
-
-        if (profilo.titoloStudio) {
-          setTitoloStudio(profilo.titoloStudio);
-        }
-      } catch {
-        setTitoloStudio("diploma");
-      }
+    if (titoloSalvato) {
+      setTitoloStudio(titoloSalvato);
+    } else {
+      setTitoloStudio("diploma");
     }
 
     const datiSalvati = localStorage.getItem("interessi_percorsi");
