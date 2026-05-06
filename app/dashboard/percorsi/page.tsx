@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getPercorsiVisibili, Percorso } from "@/lib/data/percorsi";
 import Card from "@/components/ui/Card";
+import BottomNav from "@/components/ui/BottomNav";
 
 type InteresseStorage = {
   settori: Record<string, number>;
@@ -355,6 +356,7 @@ export default function PercorsiPage() {
           );
         })}
       </div>
+      <BottomNav />
     </main>
   );
 }
