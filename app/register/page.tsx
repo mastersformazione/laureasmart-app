@@ -117,11 +117,7 @@ export default function Register() {
           style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
         />
 
-        <Button
-          label="Scopri il tuo percorso"
-          variant="primary"
-          type="submit"
-        />
+        <Button label="Scopri di più" variant="primary" type="submit" />
       </form>
     </main>
   );
