@@ -414,17 +414,10 @@ export default function OrientamentoPage() {
       : null;
 
     localStorage.setItem("profilo_utente", risultato.tipo);
-    localStorage.setItem("ha_fatto_test", "si");
     localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("obiettivo", data.obiettivo || "");
     localStorage.setItem("urgenza_obiettivo", data.urgenza || "");
-    localStorage.setItem("tempo_disponibile", data.tempo || "");
     localStorage.setItem("area_interesse", data.area || "");
-    localStorage.setItem("segmento_intento", segmenti.segmento_intento);
-    localStorage.setItem("segmento_ingresso", segmenti.segmento_ingresso);
-    localStorage.setItem("segmento_urgenza", segmenti.segmento_urgenza);
-    localStorage.setItem("orientamento_data", JSON.stringify(data));
-    localStorage.setItem("orientamento_risultato", JSON.stringify(risultato));
 
     await OneSignal.User.addTags({
       profilo: risultato.tipo,
