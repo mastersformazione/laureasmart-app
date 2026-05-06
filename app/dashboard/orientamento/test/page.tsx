@@ -605,12 +605,33 @@ Corso suggerito: ${risultato.corsoSuggerito}`
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
       }}
     >
-      <Card
-        title="Trova la laurea giusta per te"
-        description={`Domanda ${step + 1} di ${steps.length}: ${
-          current.domanda
-        }`}
-      >
+      <Card title="Trova la laurea giusta per te">
+        <div style={{ marginBottom: 18 }}>
+          <p
+            style={{
+              margin: "0 0 8px",
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#1F6FB2",
+            }}
+          >
+            Domanda {step + 1} di {steps.length}
+          </p>
+
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 24,
+              lineHeight: 1.18,
+              fontWeight: 800,
+              color: "#09090B",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            {current.domanda}
+          </h2>
+        </div>
+
         <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
           {current.opzioni.map((opzione) => (
             <Button
