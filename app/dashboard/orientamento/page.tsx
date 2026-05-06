@@ -17,13 +17,13 @@ export default function OrientamentoHubPage() {
         maxWidth: 430,
         margin: "0 auto",
         background: "#F8FBFF",
-        fontFamily: "var(--font-geist-sans)",
+        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
       }}
     >
       <section
         style={{
-          padding: 24,
-          borderRadius: 28,
+          padding: 26,
+          borderRadius: 30,
           background: "linear-gradient(135deg, #1F6FB2 0%, #155487 100%)",
           color: "#FFFFFF",
           boxShadow: "0 18px 40px rgba(31,111,178,0.18)",
@@ -31,19 +31,19 @@ export default function OrientamentoHubPage() {
         }}
       >
         <p style={{ margin: "0 0 8px", fontSize: 14, opacity: 0.9 }}>
-          Laurea Smart
+          Orientamento Laurea Smart
         </p>
 
         <h1
           style={{
             margin: 0,
-            fontSize: 34,
+            fontSize: 35,
             lineHeight: 1.05,
-            fontWeight: 800,
-            letterSpacing: "-0.6px",
+            fontWeight: 850,
+            letterSpacing: "-0.8px",
           }}
         >
-          Da dove vuoi partire?
+          Capisci da dove partire
         </h1>
 
         <p
@@ -54,58 +54,100 @@ export default function OrientamentoHubPage() {
             opacity: 0.95,
           }}
         >
-          Scegli il servizio più utile per capire quale percorso universitario
-          può essere più adatto ai tuoi obiettivi.
+          Fai il test gratuito e scopri quale percorso universitario può essere
+          più adatto al tuo profilo, al tuo lavoro e ai tuoi obiettivi.
         </p>
       </section>
 
-      <div style={{ display: "grid", gap: 14 }}>
+      <div style={{ display: "grid", gap: 16 }}>
         <Card
           title="🎯 Test di orientamento"
-          description="Rispondi a poche domande e ricevi un primo consiglio personalizzato."
+          description="Rispondi a poche domande e ricevi un primo consiglio personalizzato su area, percorso e priorità."
           badge="Consigliato"
         >
           <Button
-            label="Inizia il test"
+            label="Inizia il test gratuito"
             variant="primary"
             onClick={() => router.push("/dashboard/orientamento/test")}
           />
         </Card>
 
-        <Card
-          title="📚 Trova il percorso giusto"
-          description="Scopri quale laurea o master può essere più coerente con i tuoi obiettivi."
+        <section
+          style={{
+            padding: 22,
+            borderRadius: 26,
+            background: "#FFFFFF",
+            border: "1px solid #D7E7F5",
+            boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
+          }}
         >
-          <Button
-            label="Scopri il percorso"
-            variant="primary"
-            onClick={() => router.push("/dashboard/orientamento/percorso")}
-          />
-        </Card>
+          <div
+            style={{
+              display: "inline-flex",
+              padding: "7px 11px",
+              borderRadius: 999,
+              background: "#EAF4FC",
+              color: "#1F6FB2",
+              fontSize: 12,
+              fontWeight: 800,
+              marginBottom: 12,
+            }}
+          >
+            Possibile abbreviazione percorso
+          </div>
 
-        <Card
-          title="💶 Percorsi agevolati"
-          description="Verifica se puoi accedere a valutazioni CFU, abbreviazioni o agevolazioni."
-        >
-          <Button
-            label="Verifica agevolazioni"
-            variant="primary"
-            onClick={() =>
-              router.push("/dashboard/orientamento/percorso-agevolato")
-            }
-          />
-        </Card>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 24,
+              lineHeight: 1.15,
+              fontWeight: 850,
+              color: "#09090B",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            Hai già esami, titoli o esperienza lavorativa?
+          </h2>
 
-        <Card
-          title="💼 Studio e lavoro"
-          description="Organizza un percorso universitario compatibile con lavoro e impegni personali."
-        >
-          <Button
-            label="Crea il tuo piano"
-            variant="primary"
-            onClick={() => router.push("/dashboard/orientamento/studio-lavoro")}
-          />
-        </Card>
+          <p
+            style={{
+              margin: "12px 0 0",
+              fontSize: 15,
+              lineHeight: 1.6,
+              color: "#5F6B7A",
+            }}
+          >
+            In alcuni casi è possibile richiedere una valutazione del pregresso:
+            esami universitari già sostenuti, titoli precedenti, certificazioni
+            o competenze documentabili da CV possono aiutarti a costruire un
+            percorso più rapido.
+          </p>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 9,
+              marginTop: 16,
+              color: "#102033",
+              fontSize: 14,
+              fontWeight: 700,
+            }}
+          >
+            <div>✅ Esami universitari già sostenuti</div>
+            <div>✅ Titoli, master o percorsi precedenti</div>
+            <div>✅ Esperienze e competenze documentabili</div>
+          </div>
+
+          <div style={{ marginTop: 18 }}>
+            <Button
+              label="Verifica il percorso agevolato"
+              variant="primary"
+              onClick={() =>
+                router.push("/dashboard/orientamento/percorso-agevolato")
+              }
+            />
+          </div>
+        </section>
       </div>
 
       <BottomNav />
