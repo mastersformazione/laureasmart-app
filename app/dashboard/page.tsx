@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BottomNav from "@/components/ui/BottomNav";
 
@@ -31,13 +30,6 @@ export default function Dashboard() {
 
     if (!storedUser) {
       router.push("/register");
-      return;
-    }
-
-    const haFattoTest = localStorage.getItem("ha_fatto_test");
-
-    if (haFattoTest !== "si") {
-      router.push("/dashboard/orientamento");
       return;
     }
 
@@ -71,7 +63,6 @@ export default function Dashboard() {
     };
 
     loadNotifiche();
-
     const interval = setInterval(loadNotifiche, 10000);
 
     return () => clearInterval(interval);
@@ -83,107 +74,82 @@ export default function Dashboard() {
     <main
       style={{
         minHeight: "100vh",
-        padding: "24px 18px 40px",
-        fontFamily: "Arial",
-        maxWidth: 560,
+        padding: "24px 18px 120px",
+        fontFamily: "var(--font-geist-sans)",
+        maxWidth: 430,
         margin: "0 auto",
-        background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 45%)",
+        background: "#F8FBFF",
       }}
     >
-      <section
-        style={{
-          padding: 22,
-          borderRadius: 22,
-          background: "linear-gradient(135deg, #111827 0%, #2563eb 100%)",
-          color: "white",
-          boxShadow: "0 14px 35px rgba(37, 99, 235, 0.22)",
-        }}
-      >
-        <p style={{ margin: 0, fontSize: 14, opacity: 0.9 }}>
-          Benvenuto, {user.nome} 👋
+      <section style={{ marginBottom: 22 }}>
+        <p
+          style={{
+            margin: "0 0 6px",
+            fontSize: 14,
+            color: "#71717A",
+          }}
+        >
+          Ciao, {user.nome} 👋
         </p>
 
-        <h1 style={{ margin: "10px 0 10px", fontSize: 30, lineHeight: 1.1 }}>
-          Laurea Smart
+        <h1
+          style={{
+            margin: 0,
+            fontSize: 30,
+            lineHeight: 1.1,
+            color: "#09090B",
+          }}
+        >
+          Aggiornamenti
         </h1>
 
-        <p style={{ margin: 0, lineHeight: 1.55, fontSize: 15 }}>
-          Scopri il percorso universitario online più adatto alla tua vita, al
-          tuo lavoro e al tuo obiettivo.
+        <p
+          style={{
+            margin: "10px 0 0",
+            fontSize: 15,
+            lineHeight: 1.6,
+            color: "#71717A",
+          }}
+        >
+          Qui trovi novità, scadenze, promozioni e opportunità utili per il tuo
+          percorso universitario.
         </p>
       </section>
 
-      <section style={{ marginTop: 28 }}>
-        <h2 style={{ marginBottom: 12, fontSize: 22 }}>Strumenti per te</h2>
-
-        <div style={{ display: "grid", gap: 14 }}>
-          <Card
-            title="Trova la laurea giusta per te"
-            description="Rispondi a poche domande e scopri quale percorso universitario online può essere più utile per il tuo futuro."
-          >
-            <Button
-              label="Inizia il test"
-              onClick={() => router.push("/dashboard/orientamento")}
-              variant="primary"
-            />
-          </Card>
-
-          <Card
-            title="Verifica percorso agevolato"
-            description="Hai già un titolo, esami universitari o esperienza lavorativa? Potresti accedere a una valutazione CFU e abbreviare il percorso."
-          >
-            <Button
-              label="Verifica percorso"
-              onClick={() => router.push("/dashboard/percorso-agevolato")}
-              variant="primary"
-            />
-          </Card>
-
-          <Card
-            title="Studia mentre lavori"
-            description="Scopri un piano realistico per studiare online senza stravolgere lavoro, turni e impegni personali."
-          >
-            <Button
-              label="Crea piano studio"
-              onClick={() => router.push("/dashboard/studio-lavoro")}
-              variant="primary"
-            />
-          </Card>
-
-          <Card
-            title="Il tuo percorso più veloce"
-            description="Visualizza il modo più rapido e sostenibile per arrivare al tuo obiettivo."
-          >
-            <Button
-              label="Scopri percorso"
-              onClick={() => router.push("/dashboard/percorso")}
-              variant="primary"
-            />
-          </Card>
-        </div>
-      </section>
-
-      <section style={{ marginTop: 32 }}>
+      <section>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 12,
-            marginBottom: 12,
+            marginBottom: 14,
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 22 }}>Consigli e aggiornamenti</h2>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 20,
+              color: "#09090B",
+            }}
+          >
+            Notifiche recenti
+          </h2>
 
           {notifiche.length > 0 && (
             <span
               style={{
-                fontSize: 13,
-                padding: "5px 10px",
+                minWidth: 28,
+                height: 28,
+                padding: "0 10px",
                 borderRadius: 999,
-                background: "#eef2ff",
-                color: "#3730a3",
+                background: "#1F6FB2",
+                color: "#FFFFFF",
+                fontSize: 13,
                 fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               {notifiche.length}
@@ -194,31 +160,67 @@ export default function Dashboard() {
         {notifiche.length === 0 ? (
           <div
             style={{
-              padding: 18,
-              borderRadius: 16,
-              background: "#f9fafb",
-              border: "1px solid #e5e7eb",
-              color: "#555",
+              padding: 20,
+              borderRadius: 22,
+              background: "#FFFFFF",
+              border: "1px solid #E4EAF1",
+              boxShadow: "0 8px 28px rgba(15,23,42,0.05)",
             }}
           >
-            Nessun aggiornamento disponibile al momento.
+            <p
+              style={{
+                margin: 0,
+                fontSize: 15,
+                color: "#09090B",
+                fontWeight: 600,
+              }}
+            >
+              Nessun aggiornamento disponibile
+            </p>
+
+            <p
+              style={{
+                margin: "8px 0 0",
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: "#71717A",
+              }}
+            >
+              Quando saranno pubblicate nuove opportunità, le troverai qui.
+            </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "grid", gap: 12 }}>
             {notifiche.map((notifica) => (
               <Card
                 key={notifica.id}
                 title={notifica.titolo}
                 description={notifica.messaggio}
+                badge={notifica.categoria}
               >
-                <small style={{ color: "#6b7280" }}>
-                  {notifica.categoria} · {notifica.created_at}
-                </small>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 12,
+                    color: "#71717A",
+                  }}
+                >
+                  {notifica.created_at}
+                </p>
               </Card>
             ))}
           </div>
         )}
       </section>
+
+      <section style={{ marginTop: 22 }}>
+        <Card
+          title="Hai bisogno di aiuto?"
+          description="Vai su Orientamento per scegliere il percorso oppure contattaci direttamente su WhatsApp."
+          onClick={() => router.push("/dashboard/orientamento")}
+        />
+      </section>
+
       <BottomNav />
     </main>
   );
