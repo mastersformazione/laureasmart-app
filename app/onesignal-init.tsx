@@ -39,7 +39,8 @@ export default function OneSignalInit() {
           return;
         }
 
-        await OneSignal.login(user.email);
+        const externalId = `ls_${user.email.toLowerCase().trim()}`;
+        await OneSignal.login(externalId);
 
         console.log("OneSignal login OK:", user.email);
 

@@ -423,7 +423,8 @@ export default function OrientamentoPage() {
       if (!user?.email) {
         console.log("OneSignal: email utente mancante");
       } else {
-        await OneSignal.login(user.email);
+        const externalId = `ls_${user.email.toLowerCase().trim()}`;
+        await OneSignal.login(externalId);
 
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
