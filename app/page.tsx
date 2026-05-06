@@ -4,7 +4,6 @@ import { useState } from "react";
 import InstallButton from "./install-button";
 import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
-import Header from "@/components/ui/Header";
 import Button from "@/components/ui/Button";
 
 export default function Home() {
@@ -14,106 +13,138 @@ export default function Home() {
   const handleAction = (action: string) => {
     setMenuOpen(false);
 
-    if (action === "Accedi") {
-      router.push("/dashboard");
-    }
-
-    if (action === "Registrati") {
-      router.push("/register");
-    }
+    if (action === "Accedi") router.push("/dashboard");
+    if (action === "Registrati") router.push("/register");
   };
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        padding: "28px 20px 40px",
-        fontFamily: "Arial",
-        maxWidth: 440,
+        padding: "34px 22px 34px",
+        fontFamily: "Arial, sans-serif",
+        maxWidth: 430,
         margin: "0 auto",
-        background: "linear-gradient(180deg, #1F6FB2 0%, #ffffff 48%)",
+        background:
+          "linear-gradient(180deg, #EAF4FC 0%, #FFFFFF 42%, #FFFFFF 100%)",
+        color: "#102033",
       }}
     >
-      <Header
-        title="Laurea Smart"
-        subtitle="Scarica la app e scopri il percorso universitario online più adatto ai tuoi obiettivi, al tuo lavoro e al tuo futuro."
-      />
-
       <section
         style={{
-          marginTop: 24,
-          padding: 22,
-          borderRadius: 22,
-          background: "linear-gradient(135deg, #111827 0%, #1F6FB2 100%)",
-          color: "#fff",
-          boxShadow: "0 14px 35px rgba(37, 99, 235, 0.22)",
+          minHeight: "calc(100vh - 68px)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          textAlign: "center",
         }}
       >
-        <h1 style={{ margin: "0 0 12px", fontSize: 28, lineHeight: 1.12 }}>
-          Trova la laurea giusta senza perdere tempo
+        <div
+          style={{
+            width: 104,
+            height: 104,
+            margin: "0 auto 22px",
+            borderRadius: 28,
+            background: "linear-gradient(135deg, #1F6FB2 0%, #155487 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 18px 40px rgba(31, 111, 178, 0.25)",
+            fontSize: 46,
+          }}
+        >
+          🎓
+        </div>
+
+        <p
+          style={{
+            margin: "0 0 10px",
+            color: "#1F6FB2",
+            fontWeight: 700,
+            fontSize: 15,
+          }}
+        >
+          Laurea Smart
+        </p>
+
+        <h1
+          style={{
+            margin: "0 auto 14px",
+            fontSize: 31,
+            lineHeight: 1.12,
+            letterSpacing: "-0.5px",
+            maxWidth: 360,
+          }}
+        >
+          Trova il percorso universitario più adatto a te
         </h1>
 
-        <p style={{ margin: 0, lineHeight: 1.6, fontSize: 15 }}>
-          Ricevi consigli personalizzati GRATUITAMENTE e resta aggiornato su
-          lauree, master, percorsi agevolati e opportunità di crescita.
+        <p
+          style={{
+            margin: "0 auto 26px",
+            color: "#5F6B7A",
+            fontSize: 16,
+            lineHeight: 1.55,
+            maxWidth: 350,
+          }}
+        >
+          Installa la app, rispondi a poche domande e ricevi consigli
+          personalizzati su lauree, master e percorsi agevolati.
         </p>
-      </section>
-
-      <section
-        style={{
-          marginTop: 22,
-          display: "grid",
-          gap: 12,
-        }}
-      >
-        <div
-          style={{
-            padding: 16,
-            borderRadius: 16,
-            border: "1px solid #e5e7eb",
-            background: "#fff",
-          }}
-        >
-          <strong>🎯 Orientamento personalizzato</strong>
-          <p style={{ margin: "6px 0 0", color: "#555", lineHeight: 1.5 }}>
-            Scopri qual è il percorso più adattto alle tue esigenze.
-          </p>
-        </div>
 
         <div
           style={{
-            padding: 16,
-            borderRadius: 16,
-            border: "1px solid #e5e7eb",
-            background: "#fff",
+            display: "grid",
+            gap: 10,
+            marginBottom: 24,
           }}
         >
-          <strong>🔔 Aggiornamenti utili</strong>
-          <p style={{ margin: "6px 0 0", color: "#555", lineHeight: 1.5 }}>
-            Ricevi notifiche su novità, scadenze e opportunità formative e
-            lavorative.
-          </p>
+          <div
+            style={{
+              padding: "14px 16px",
+              borderRadius: 16,
+              background: "#FFFFFF",
+              border: "1px solid #DDEAF5",
+              textAlign: "left",
+              fontSize: 15,
+              boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
+            }}
+          >
+            🎯 Orientamento gratuito e personalizzato
+          </div>
+
+          <div
+            style={{
+              padding: "14px 16px",
+              borderRadius: 16,
+              background: "#FFFFFF",
+              border: "1px solid #DDEAF5",
+              textAlign: "left",
+              fontSize: 15,
+              boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
+            }}
+          >
+            🔔 Notifiche su scadenze e opportunità
+          </div>
+
+          <div
+            style={{
+              padding: "14px 16px",
+              borderRadius: 16,
+              background: "#FFFFFF",
+              border: "1px solid #DDEAF5",
+              textAlign: "left",
+              fontSize: 15,
+              boxShadow: "0 8px 24px rgba(16, 32, 51, 0.04)",
+            }}
+          >
+            💬 Supporto diretto dopo il test
+          </div>
         </div>
 
-        <div
-          style={{
-            padding: 16,
-            borderRadius: 16,
-            border: "1px solid #e5e7eb",
-            background: "#fff",
-          }}
-        >
-          <strong>💬 Supporto diretto</strong>
-          <p style={{ margin: "6px 0 0", color: "#555", lineHeight: 1.5 }}>
-            Richiedi GRATIS un piano personalizzato direttamente su WhatsApp.
-          </p>
-        </div>
-      </section>
-
-      <div style={{ marginTop: 26, textAlign: "center" }}>
         <InstallButton />
 
-        <div style={{ marginTop: 14 }}>
+        <div style={{ marginTop: 12 }}>
           <Button
             label="Accedi o registrati"
             variant="secondary"
@@ -123,16 +154,17 @@ export default function Home() {
 
         <p
           style={{
-            marginTop: 18,
-            fontSize: 14,
-            color: "#555",
-            lineHeight: 1.5,
+            margin: "18px auto 0",
+            fontSize: 13,
+            color: "#6B7280",
+            lineHeight: 1.45,
+            maxWidth: 330,
           }}
         >
-          Scarica la app per avere sempre a portata di mano il tuo percorso, gli
-          aggiornamenti e gli strumenti di orientamento.
+          Su iPhone puoi installarla dal pulsante di condivisione di Safari e
+          poi “Aggiungi alla schermata Home”.
         </p>
-      </div>
+      </section>
 
       {menuOpen && (
         <ActionSheet

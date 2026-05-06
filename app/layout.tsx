@@ -17,9 +17,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Graduatorie GPS",
-  description:
-    "Ricevi aggiornamenti su GPS, abilitazioni, TFA sostegno e percorsi scuola.",
+  title: "Laurea Smart",
+  description: "Trova la laurea giusta senza perdere tempo.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/icon.svg",
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "Graduatorie GPS",
+    title: "Laurea Smart",
     statusBarStyle: "black-translucent",
   },
 };
