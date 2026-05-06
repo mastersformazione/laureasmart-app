@@ -10,6 +10,7 @@ type OrientamentoData = {
   situazione?: string;
   titolo_studio?: string;
   obiettivo?: string;
+  urgenza?: string;
   tempo?: string;
   area?: string;
 };
@@ -86,6 +87,17 @@ export default function OrientamentoPage() {
       ],
     },
     {
+      id: "urgenza",
+      domanda: "Entro quanto tempo vuoi realizzare questo obiettivo?",
+      opzioni: [
+        "Subito / entro 1 mese",
+        "Entro 3 mesi",
+        "Entro 6 mesi",
+        "Entro 12 mesi",
+        "Non ho una scadenza precisa",
+      ],
+    },
+    {
       id: "tempo",
       domanda: "Quanto tempo puoi dedicare allo studio?",
       opzioni: [
@@ -117,6 +129,7 @@ export default function OrientamentoPage() {
     const situazione = data.situazione || "";
     const titolo = data.titolo_studio || "";
     const obiettivo = data.obiettivo || "";
+    const urgenza = data.urgenza || "";
     const tempo = data.tempo || "";
     const area = data.area || "";
 
@@ -167,6 +180,18 @@ export default function OrientamentoPage() {
       );
       prossimoPasso = "Richiedere una valutazione gratuita dei CFU";
       ctaSecondaria = "Verifica subito il percorso agevolato";
+    }
+
+    if (urgenza === "Subito / entro 1 mese") {
+      motivazioni.push(
+        "Hai indicato un obiettivo molto ravvicinato: conviene valutare subito il percorso più rapido e sostenibile."
+      );
+    }
+
+    if (urgenza === "Entro 3 mesi") {
+      motivazioni.push(
+        "Hai una finestra temporale breve: è utile chiarire presto titolo di ingresso, area e possibilità di agevolazione."
+      );
     }
 
     if (tempo === "2-4 ore a settimana") {
@@ -355,18 +380,16 @@ export default function OrientamentoPage() {
       segmento_ingresso = "UNIVERSITA_INCOMPLETA";
     }
 
-    if (
-      data.tempo === "8-10 ore a settimana" ||
-      data.tempo === "Più di 10 ore a settimana"
-    ) {
+    if (data.urgenza === "Subito / entro 1 mese") {
       segmento_urgenza = "ALTA";
-    } else if (data.tempo === "5-7 ore a settimana") {
+    } else if (data.urgenza === "Entro 3 mesi") {
+      segmento_urgenza = "MEDIO_ALTA";
+    } else if (data.urgenza === "Entro 6 mesi") {
       segmento_urgenza = "MEDIA";
-    } else if (
-      data.tempo === "2-4 ore a settimana" ||
-      data.tempo === "Non lo so ancora"
-    ) {
+    } else if (data.urgenza === "Entro 12 mesi") {
       segmento_urgenza = "BASSA";
+    } else if (data.urgenza === "Non ho una scadenza precisa") {
+      segmento_urgenza = "FREDDA";
     }
 
     return {
@@ -394,6 +417,7 @@ export default function OrientamentoPage() {
     localStorage.setItem("ha_fatto_test", "si");
     localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("obiettivo", data.obiettivo || "");
+    localStorage.setItem("urgenza_obiettivo", data.urgenza || "");
     localStorage.setItem("tempo_disponibile", data.tempo || "");
     localStorage.setItem("area_interesse", data.area || "");
     localStorage.setItem("segmento_intento", segmenti.segmento_intento);
@@ -416,6 +440,7 @@ export default function OrientamentoPage() {
         await OneSignal.User.addTag("profilo", risultato.tipo);
         await OneSignal.User.addTag("titolo_studio", data.titolo_studio || "");
         await OneSignal.User.addTag("obiettivo", data.obiettivo || "");
+        await OneSignal.User.addTag("urgenza_obiettivo", data.urgenza || "");
         await OneSignal.User.addTag("area_interesse", data.area || "");
 
         await OneSignal.User.addTag(
@@ -449,6 +474,7 @@ export default function OrientamentoPage() {
           situazione: data.situazione,
           titolo_studio: data.titolo_studio,
           obiettivo: data.obiettivo,
+          urgenza_obiettivo: data.urgenza,
           tempo: data.tempo,
           area: data.area,
           risultato_tipo: risultato.tipo,
@@ -490,6 +516,7 @@ export default function OrientamentoPage() {
 Situazione attuale: ${formData.situazione || ""}
 Titolo di studio: ${formData.titolo_studio || ""}
 Obiettivo: ${formData.obiettivo || ""}
+Urgenza obiettivo: ${formData.urgenza || ""}
 Tempo disponibile: ${formData.tempo || ""}
 Area di interesse: ${formData.area || ""}
 
@@ -498,7 +525,17 @@ Corso suggerito: ${risultato.corsoSuggerito}`
     )}`;
 
     return (
-      <main style={{ padding: 20, maxWidth: 500, margin: "0 auto" }}>
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: 20,
+          paddingBottom: 120,
+          maxWidth: 500,
+          margin: "0 auto",
+          background: "#F8FBFF",
+          fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+        }}
+      >
         <Card title={risultato.percorso} description={risultato.descrizione}>
           <div style={{ display: "grid", gap: 12 }}>
             <Card
@@ -548,6 +585,8 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             </p>
           </div>
         </Card>
+
+        <BottomNav />
       </main>
     );
   }
@@ -555,7 +594,17 @@ Corso suggerito: ${risultato.corsoSuggerito}`
   const current = steps[step];
 
   return (
-    <main style={{ padding: 20, maxWidth: 500, margin: "0 auto" }}>
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: 20,
+        paddingBottom: 120,
+        maxWidth: 500,
+        margin: "0 auto",
+        background: "#F8FBFF",
+        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+      }}
+    >
       <Card
         title="Trova la laurea giusta per te"
         description={`Domanda ${step + 1} di ${steps.length}: ${
@@ -573,6 +622,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
           ))}
         </div>
       </Card>
+
       <BottomNav />
     </main>
   );
