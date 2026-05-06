@@ -21,15 +21,16 @@ export const metadata: Metadata = {
   description: "Trova la laurea giusta senza perdere tempo.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon.svg",
+    icon: "/icon-512.png",
+    apple: "/icon-512.png",
   },
   other: {
-    "theme-color": "#000000",
+    "theme-color": "#1F6FB2",
   },
   appleWebApp: {
     capable: true,
     title: "Laurea Smart",
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
   },
 };
 
