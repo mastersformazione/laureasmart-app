@@ -62,7 +62,8 @@ export default function Home() {
               margin: "0 auto 22px",
               borderRadius: 34,
               overflow: "hidden",
-              boxShadow: "0 28px 65px rgba(0,0,0,0.35)",
+              background: "transparent",
+              boxShadow: "0 18px 45px rgba(0,0,0,0.28)",
             }}
           >
             <img
@@ -73,6 +74,7 @@ export default function Home() {
                 height: "100%",
                 objectFit: "cover",
                 display: "block",
+                borderRadius: 34,
               }}
             />
           </div>
@@ -127,7 +129,9 @@ export default function Home() {
           }}
         >
           <Benefit icon={<CheckCircle size={19} />} text="Test gratuito" />
+
           <Benefit icon={<Bell size={19} />} text="Scadenze e promozioni" />
+
           <Benefit
             icon={<MessageCircle size={19} />}
             text="Supporto WhatsApp"
@@ -155,7 +159,13 @@ export default function Home() {
               textAlign: "left",
             }}
           >
-            <strong style={{ display: "block", fontSize: 14, marginBottom: 6 }}>
+            <strong
+              style={{
+                display: "block",
+                fontSize: 14,
+                marginBottom: 6,
+              }}
+            >
               📱 Su iPhone
             </strong>
 
@@ -254,7 +264,14 @@ function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
         {icon}
       </span>
 
-      <span style={{ fontSize: 14, fontWeight: 800 }}>{text}</span>
+      <span
+        style={{
+          fontSize: 14,
+          fontWeight: 800,
+        }}
+      >
+        {text}
+      </span>
     </div>
   );
 }
