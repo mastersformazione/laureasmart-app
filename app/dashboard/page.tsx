@@ -219,6 +219,7 @@ export default function Dashboard() {
           </div>
         )}
       </section>
+      <BottomNav />
     </main>
   );
 }

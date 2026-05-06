@@ -130,6 +130,7 @@ export default function AdminPage() {
       </form>
 
       {status && <p style={{ marginTop: 20 }}>{status}</p>}
+      <BottomNav />
     </main>
   );
 }

@@ -573,6 +573,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
           ))}
         </div>
       </Card>
+      <BottomNav />
     </main>
   );
 }

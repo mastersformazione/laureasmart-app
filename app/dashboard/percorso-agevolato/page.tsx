@@ -235,6 +235,7 @@ Note: ${form.note}`
           </p>
         </div>
       </Card>
+      <BottomNav />
     </main>
   );
 }

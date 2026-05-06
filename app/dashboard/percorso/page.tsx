@@ -101,6 +101,7 @@ export default function PercorsoPage() {
           }
         />
       </div>
+      <BottomNav />
     </main>
   );
 }

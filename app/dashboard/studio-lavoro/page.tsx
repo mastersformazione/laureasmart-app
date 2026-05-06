@@ -138,6 +138,7 @@ Momento preferito per studiare: ${form.momento}`
           </p>
         </div>
       </Card>
+      <BottomNav />
     </main>
   );
 }
