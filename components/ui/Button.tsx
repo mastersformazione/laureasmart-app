@@ -20,7 +20,7 @@ export default function Button({
 
   const styles =
     variant === "primary"
-      ? "bg-[#2563eb] text-white"
+      ? "bg-[#1F6FB2] text-white"
       : variant === "danger"
       ? "bg-gray-100 text-red-500"
       : "bg-gray-100 text-black";

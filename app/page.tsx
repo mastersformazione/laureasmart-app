@@ -31,12 +31,12 @@ export default function Home() {
         fontFamily: "Arial",
         maxWidth: 440,
         margin: "0 auto",
-        background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 48%)",
+        background: "linear-gradient(180deg, #1F6FB2 0%, #ffffff 48%)",
       }}
     >
       <Header
         title="Laurea Smart"
-        subtitle="Installa la app e scopri il percorso universitario online più adatto ai tuoi obiettivi, al tuo lavoro e al tuo futuro."
+        subtitle="Scarica la app e scopri il percorso universitario online più adatto ai tuoi obiettivi, al tuo lavoro e al tuo futuro."
       />
 
       <section
@@ -44,7 +44,7 @@ export default function Home() {
           marginTop: 24,
           padding: 22,
           borderRadius: 22,
-          background: "linear-gradient(135deg, #111827 0%, #2563eb 100%)",
+          background: "linear-gradient(135deg, #111827 0%, #1F6FB2 100%)",
           color: "#fff",
           boxShadow: "0 14px 35px rgba(37, 99, 235, 0.22)",
         }}
@@ -54,9 +54,8 @@ export default function Home() {
         </h1>
 
         <p style={{ margin: 0, lineHeight: 1.6, fontSize: 15 }}>
-          Rispondi a poche domande, ricevi consigli personalizzati e resta
-          aggiornato su lauree, master, percorsi agevolati e opportunità per
-          crescere professionalmente.
+          Ricevi consigli personalizzati GRATUITAMENTE e resta aggiornato su
+          lauree, master, percorsi agevolati e opportunità di crescita.
         </p>
       </section>
 
@@ -77,8 +76,7 @@ export default function Home() {
         >
           <strong>🎯 Orientamento personalizzato</strong>
           <p style={{ margin: "6px 0 0", color: "#555", lineHeight: 1.5 }}>
-            Scopri se ti conviene una laurea, un master o un percorso
-            universitario agevolato.
+            Scopri qual è il percorso più adattto alle tue esigenze.
           </p>
         </div>
 
@@ -92,7 +90,8 @@ export default function Home() {
         >
           <strong>🔔 Aggiornamenti utili</strong>
           <p style={{ margin: "6px 0 0", color: "#555", lineHeight: 1.5 }}>
-            Ricevi notifiche su novità, scadenze e opportunità formative.
+            Ricevi notifiche su novità, scadenze e opportunità formative e
+            lavorative.
           </p>
         </div>
 
@@ -106,7 +105,7 @@ export default function Home() {
         >
           <strong>💬 Supporto diretto</strong>
           <p style={{ margin: "6px 0 0", color: "#555", lineHeight: 1.5 }}>
-            Dopo il test puoi richiedere un piano personalizzato su WhatsApp.
+            Richiedi GRATIS un piano personalizzato direttamente su WhatsApp.
           </p>
         </div>
       </section>
@@ -130,8 +129,8 @@ export default function Home() {
             lineHeight: 1.5,
           }}
         >
-          Installa la app per avere sempre a portata di mano il tuo percorso,
-          gli aggiornamenti e gli strumenti di orientamento.
+          Scarica la app per avere sempre a portata di mano il tuo percorso, gli
+          aggiornamenti e gli strumenti di orientamento.
         </p>
       </div>
 

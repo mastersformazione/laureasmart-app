@@ -41,11 +41,11 @@ export default function InstallButton() {
       style={{
         marginTop: 20,
         padding: 10,
-        background: "green",
+        background: "#1F6FB2",
         color: "white",
       }}
     >
-      Installa App
+      Scarica App su Android
     </button>
   );
 }
