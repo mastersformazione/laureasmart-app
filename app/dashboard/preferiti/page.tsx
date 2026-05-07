@@ -7,7 +7,7 @@ import type { Percorso } from "@/lib/data/percorsi";
 
 export default function PreferitiPage() {
   const [preferiti, setPreferiti] = useState<Percorso[]>([]);
-
+  const [queryRicerca, setQueryRicerca] = useState("");
   useEffect(() => {
     const datiSalvati = localStorage.getItem("percorsi_preferiti");
 
@@ -27,6 +27,18 @@ export default function PreferitiPage() {
     localStorage.setItem("percorsi_preferiti", JSON.stringify(nuoviPreferiti));
   }
 
+  const preferitiFiltrati = preferiti.filter((percorso) => {
+    const testoRicerca = queryRicerca.toLowerCase().trim();
+
+    return (
+      testoRicerca === "" ||
+      percorso.titolo.toLowerCase().includes(testoRicerca) ||
+      percorso.classe.toLowerCase().includes(testoRicerca) ||
+      percorso.settore.toLowerCase().includes(testoRicerca) ||
+      percorso.tags.some((tag) => tag.toLowerCase().includes(testoRicerca))
+    );
+  });
+
   return (
     <main className="min-h-screen bg-gray-50 p-4 pb-[120px]">
       <h1 className="text-2xl font-bold mb-2">I miei percorsi</h1>
@@ -34,7 +46,29 @@ export default function PreferitiPage() {
       <p className="text-gray-600 mb-6">
         Qui trovi i percorsi che hai salvato cliccando su “Mi interessa”.
       </p>
+      <div className="mb-5">
+        <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+          <span className="text-gray-400">🔍</span>
 
+          <input
+            type="text"
+            value={queryRicerca}
+            onChange={(e) => setQueryRicerca(e.target.value)}
+            placeholder="Cerca tra i tuoi percorsi..."
+            className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+          />
+
+          {queryRicerca && (
+            <button
+              type="button"
+              onClick={() => setQueryRicerca("")}
+              className="text-sm font-semibold text-gray-400"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
       {preferiti.length === 0 ? (
         <Card
           title="Nessun percorso salvato"
@@ -43,7 +77,7 @@ export default function PreferitiPage() {
         />
       ) : (
         <div className="space-y-4">
-          {preferiti.map((percorso) => (
+          {preferitiFiltrati.map((percorso) => (
             <Card
               key={percorso.id}
               title={percorso.titolo}

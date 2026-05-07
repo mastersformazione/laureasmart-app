@@ -44,6 +44,7 @@ export default function PercorsiPage() {
   const [messaggio, setMessaggio] = useState("");
   const [settoreAttivo, setSettoreAttivo] = useState("tutti");
   const [tipoAttivo, setTipoAttivo] = useState("tutti");
+  const [queryRicerca, setQueryRicerca] = useState("");
   const [percorsoAttivo, setPercorsoAttivo] = useState<Percorso | null>(null);
 
   const [interessi, setInteressi] = useState<InteresseStorage>({
@@ -94,7 +95,16 @@ export default function PercorsiPage() {
         (percorso.tipo === "master_primo_livello" ||
           percorso.tipo === "master_secondo_livello"));
 
-    return filtroSettore && filtroTipo;
+    const testoRicerca = queryRicerca.toLowerCase().trim();
+
+    const filtroRicerca =
+      testoRicerca === "" ||
+      percorso.titolo.toLowerCase().includes(testoRicerca) ||
+      percorso.classe.toLowerCase().includes(testoRicerca) ||
+      percorso.settore.toLowerCase().includes(testoRicerca) ||
+      percorso.tags.some((tag) => tag.toLowerCase().includes(testoRicerca));
+
+    return filtroSettore && filtroTipo && filtroRicerca;
   });
 
   const percorsiOrdinati = [...percorsiFiltrati].sort((a, b) => {
@@ -325,6 +335,30 @@ export default function PercorsiPage() {
       <p className="text-sm text-gray-500 mb-4">
         Titolo rilevato: <strong>{titoloStudio}</strong>
       </p>
+
+      <div className="mb-4">
+        <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+          <span className="text-gray-400">🔍</span>
+
+          <input
+            type="text"
+            value={queryRicerca}
+            onChange={(e) => setQueryRicerca(e.target.value)}
+            placeholder="Cerca corso, area o parola chiave..."
+            className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+          />
+
+          {queryRicerca && (
+            <button
+              type="button"
+              onClick={() => setQueryRicerca("")}
+              className="text-sm font-semibold text-gray-400"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="mb-4 overflow-x-auto">
         <div className="flex gap-2 pb-1">
