@@ -28,6 +28,8 @@ const nomiSettori: Record<string, string> = {
   ingegneria_civile: "Ingegneria civile",
   economia: "Economia",
   design_moda: "Design e moda",
+  scuola: "Scuola",
+  sanitario: "Sanitario",
 };
 
 const nomiTipi: Record<string, string> = {
@@ -42,6 +44,7 @@ export default function PercorsiPage() {
   const [messaggio, setMessaggio] = useState("");
   const [settoreAttivo, setSettoreAttivo] = useState("tutti");
   const [tipoAttivo, setTipoAttivo] = useState("tutti");
+  const [percorsoAttivo, setPercorsoAttivo] = useState<Percorso | null>(null);
 
   const [interessi, setInteressi] = useState<InteresseStorage>({
     settori: {},
@@ -120,6 +123,7 @@ export default function PercorsiPage() {
       scorePercorsoB +
       b.prioritaCommerciale +
       prioritaTipo(b.tipo);
+
     return scoreB - scoreA;
   });
 
@@ -164,6 +168,8 @@ export default function PercorsiPage() {
       ingegneria_civile: "TECNOLOGIA",
       economia: "ECONOMIA",
       design_moda: "COMUNICAZIONE",
+      scuola: "SCUOLA",
+      sanitario: "PSICOLOGIA",
     };
 
     return mappa[settore] || "GENERALE";
@@ -180,9 +186,7 @@ export default function PercorsiPage() {
       if (!user?.email) return;
 
       const profilo = mappaSettoreInProfilo(percorso.settore);
-
       const titolo = localStorage.getItem("titolo_studio") || "Non indicato";
-
       const obiettivo = localStorage.getItem("obiettivo") || "Non indicato";
 
       await fetch("https://laureasmart.it/api/sync-onesignal-tags.php", {
@@ -195,7 +199,6 @@ export default function PercorsiPage() {
           nome: user.nome || "",
           cognome: user.cognome || "",
           telefono: user.telefono || "",
-
           profilo,
           titolo_studio: titolo,
           obiettivo,
@@ -212,7 +215,10 @@ export default function PercorsiPage() {
     }
   }
 
-  function inviaInteresseAlBackend(percorso: Percorso) {
+  function inviaInteresseAlBackend(
+    percorso: Percorso,
+    actionType: string = "click"
+  ) {
     try {
       const profiloSalvato = localStorage.getItem("gps_user");
       const profilo = profiloSalvato ? JSON.parse(profiloSalvato) : null;
@@ -228,7 +234,7 @@ export default function PercorsiPage() {
           percorso_titolo: percorso.titolo,
           settore: percorso.settore,
           tags: percorso.tags,
-          action_type: "click",
+          action_type: actionType,
         }),
       }).catch((error) => {
         console.error("Errore salvataggio interesse percorso:", error);
@@ -271,16 +277,44 @@ export default function PercorsiPage() {
     }
 
     setInteressi(nuoviInteressi);
-
     setMessaggio(`${percorso.titolo} aggiunto ai tuoi percorsi preferiti`);
 
-    inviaInteresseAlBackend(percorso);
-
+    inviaInteresseAlBackend(percorso, "click_mi_interessa");
     aggiornaTagOneSignal(percorso);
+    setPercorsoAttivo(percorso);
+  }
+
+  function vaiAPercorsoAgevolato(percorso: Percorso) {
+    localStorage.setItem("corso_interesse_attivo", JSON.stringify(percorso));
+    inviaInteresseAlBackend(percorso, "click_cfu");
+    setPercorsoAttivo(null);
+    window.location.href = "/dashboard/orientamento/percorso-agevolato";
+  }
+
+  function apriWhatsAppCosto(percorso: Percorso) {
+    inviaInteresseAlBackend(percorso, "click_costo_whatsapp");
+
+    const testo = encodeURIComponent(
+      `Ciao, ho salvato questo percorso su Laurea Smart: ${percorso.titolo}. Vorrei ricevere informazioni su costi, agevolazioni e modalità di iscrizione.`
+    );
+
+    setPercorsoAttivo(null);
+    window.open(`https://wa.me/393298170817?text=${testo}`, "_blank");
+  }
+
+  function parlaConOrientatore(percorso: Percorso) {
+    inviaInteresseAlBackend(percorso, "click_orientatore_whatsapp");
+
+    const testo = encodeURIComponent(
+      `Ciao, vorrei parlare con un orientatore Laurea Smart. Il percorso che mi interessa è: ${percorso.titolo}.`
+    );
+
+    setPercorsoAttivo(null);
+    window.open(`https://wa.me/393298170817?text=${testo}`, "_blank");
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4">
+    <main className="min-h-screen bg-gray-50 p-4 pb-[120px]">
       <h1 className="text-2xl font-bold mb-2">Percorsi consigliati</h1>
 
       <p className="text-gray-600 mb-2">
@@ -406,6 +440,57 @@ export default function PercorsiPage() {
           );
         })}
       </div>
+
+      {percorsoAttivo && (
+        <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/60 px-5">
+          <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+            <div className="mb-4 rounded-2xl bg-[#EAF4FC] px-4 py-3 text-sm font-semibold text-[#1F6FB2]">
+              Percorso salvato nei preferiti
+            </div>
+
+            <h2 className="text-2xl font-bold leading-tight text-gray-950">
+              {percorsoAttivo.titolo}
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-gray-600">
+              Vuoi fare un passo in più? Puoi scoprire costi, agevolazioni,
+              possibilità di riconoscimento CFU o parlare subito con un
+              orientatore.
+            </p>
+
+            <div className="mt-5 grid gap-3">
+              <button
+                onClick={() => apriWhatsAppCosto(percorsoAttivo)}
+                className="rounded-2xl bg-[#1F6FB2] px-4 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(31,111,178,0.25)]"
+              >
+                Scopri quanto costa
+              </button>
+
+              <button
+                onClick={() => vaiAPercorsoAgevolato(percorsoAttivo)}
+                className="rounded-2xl border border-[#D7E7F5] bg-white px-4 py-3.5 text-sm font-bold text-[#1F6FB2]"
+              >
+                Verifica CFU e percorso agevolato
+              </button>
+
+              <button
+                onClick={() => parlaConOrientatore(percorsoAttivo)}
+                className="rounded-2xl border border-[#D7E7F5] bg-white px-4 py-3.5 text-sm font-bold text-[#1F6FB2]"
+              >
+                Parla con un orientatore
+              </button>
+
+              <button
+                onClick={() => setPercorsoAttivo(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-400"
+              >
+                Continua a esplorare
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </main>
   );
