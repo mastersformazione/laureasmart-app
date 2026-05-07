@@ -43,16 +43,13 @@ type Segmenti = {
 export default function OrientamentoPage() {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<OrientamentoData>({});
-
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [notificationPromptShown, setNotificationPromptShown] = useState(false);
 
   useEffect(() => {
     const giaMostrato = localStorage.getItem("notifica_banner_mostrato");
 
     if (!giaMostrato) {
       setShowNotificationModal(true);
-      setNotificationPromptShown(true);
       localStorage.setItem("notifica_banner_mostrato", "si");
     }
   }, []);
