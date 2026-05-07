@@ -48,17 +48,21 @@ export default function OrientamentoPage() {
   const [notificationPromptShown, setNotificationPromptShown] = useState(false);
 
   useEffect(() => {
-    if (step === 1 && !notificationPromptShown) {
+    const giaMostrato = localStorage.getItem("notifica_banner_mostrato");
+
+    if (!giaMostrato) {
       setShowNotificationModal(true);
       setNotificationPromptShown(true);
+      localStorage.setItem("notifica_banner_mostrato", "si");
     }
-  }, [step, notificationPromptShown]);
+  }, []);
 
   const handleActivateNotifications = async () => {
+    setShowNotificationModal(false);
+
     const storedUser = localStorage.getItem("gps_user");
 
     if (!storedUser) {
-      setShowNotificationModal(false);
       return;
     }
 
@@ -67,7 +71,6 @@ export default function OrientamentoPage() {
     };
 
     if (!user?.email) {
-      setShowNotificationModal(false);
       return;
     }
 
@@ -85,8 +88,6 @@ export default function OrientamentoPage() {
     } catch (error) {
       console.error("Errore attivazione notifiche:", error);
     }
-
-    setShowNotificationModal(false);
   };
 
   const handleSkipNotifications = () => {
@@ -785,14 +786,15 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 style={{
                   border: "none",
                   background: "transparent",
-                  color: "#71717A",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  padding: 10,
+                  color: "rgba(113, 113, 122, 0.45)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  padding: 6,
                   cursor: "pointer",
+                  transition: "opacity 0.2s ease",
                 }}
               >
-                Continua senza notifiche
+                Non ora
               </button>
             </div>
           </div>
