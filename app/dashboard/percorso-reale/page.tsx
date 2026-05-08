@@ -8,7 +8,17 @@ import SimulationResult from "@/components/ui/SimulationResult";
 
 type Answers = Record<string, string>;
 
-const domande = [
+type Domanda = {
+  id: string;
+  domanda: string;
+  descrizione?: string;
+  options: {
+    value: string;
+    label: string;
+  }[];
+};
+
+const domande: Domanda[] = [
   {
     id: "lavoro",
     domanda: "Oggi lavori?",
@@ -20,6 +30,7 @@ const domande = [
       { value: "no", label: "No, al momento non lavoro" },
     ],
   },
+
   {
     id: "tempo",
     domanda: "Quante ore realistiche potresti dedicare allo studio?",
@@ -29,6 +40,7 @@ const domande = [
       { value: "alto", label: "8-10 ore o più" },
     ],
   },
+
   {
     id: "momento",
     domanda: "Quando riusciresti a studiare più facilmente?",
@@ -39,6 +51,7 @@ const domande = [
       { value: "variabile", label: "Dipende dai giorni" },
     ],
   },
+
   {
     id: "regolarita",
     domanda: "Il tuo tempo libero è abbastanza regolare?",
@@ -48,6 +61,7 @@ const domande = [
       { value: "no", label: "No, cambia spesso" },
     ],
   },
+
   {
     id: "stanchezza",
     domanda: "A fine giornata ti senti spesso molto stanco?",
@@ -57,6 +71,7 @@ const domande = [
       { value: "bassa", label: "Raramente" },
     ],
   },
+
   {
     id: "preoccupazione",
     domanda: "Cosa ti preoccupa di più dell’università?",
@@ -67,6 +82,7 @@ const domande = [
       { value: "mollare", label: "Mollare a metà" },
     ],
   },
+
   {
     id: "ritmo",
     domanda: "Come vorresti vivere questo percorso?",
@@ -76,6 +92,7 @@ const domande = [
       { value: "rapido", label: "Cercando di accelerare" },
     ],
   },
+
   {
     id: "esperienza",
     domanda: "Hai già studiato mentre lavoravi?",
@@ -85,6 +102,7 @@ const domande = [
       { value: "mai", label: "No, mai" },
     ],
   },
+
   {
     id: "organizzazione",
     domanda: "Come ti organizzi di solito?",
@@ -94,6 +112,7 @@ const domande = [
       { value: "bassa", label: "Faccio fatica a mantenere costanza" },
     ],
   },
+
   {
     id: "priorita",
     domanda: "Cosa cerchi soprattutto?",
@@ -146,53 +165,39 @@ function calcolaRisultato(answers: Answers) {
     stress === "Basso"
       ? "Il percorso sembra gestibile, soprattutto se mantieni una routine semplice e costante."
       : stress === "Moderato"
-      ? "Il percorso è sostenibile, ma conviene partire con un ritmo graduale e senza sovraccaricarti."
+      ? "Il percorso è sostenibile, ma conviene partire con un ritmo graduale."
       : "Il percorso può essere affrontato, ma è importante evitare una partenza troppo intensa.";
 
-  const settimana =
-    answers.momento === "weekend"
-      ? ["Sabato → 2 ore", "Domenica → 2 ore", "1 sera libera → 45 minuti"]
-      : answers.momento === "sera"
-      ? ["Lunedì sera → 45 minuti", "Mercoledì sera → 1 ora", "Sabato → 2 ore"]
-      : answers.momento === "mattina"
-      ? [
-          "Martedì mattina → 45 minuti",
-          "Giovedì mattina → 1 ora",
-          "Weekend → 2 ore",
-        ]
-      : [
-          "2 micro-sessioni da 30 minuti",
-          "1 sessione da 1 ora",
-          "Weekend → 2 ore",
-        ];
+  const settimana = [
+    "2 sessioni brevi durante la settimana",
+    "1 sessione più lunga nel weekend",
+    "1 giorno libero senza studio",
+  ];
 
   const strategia = [
-    answers.tempo === "basso"
-      ? "micro-sessioni brevi e realistiche"
-      : "sessioni distribuite durante la settimana",
-    answers.ritmo === "rapido"
-      ? "accelerare solo dopo il primo periodo di ambientamento"
-      : "partire con un ritmo graduale",
-    "preparare un esame alla volta",
-    "usare la flessibilità online senza perdere continuità",
+    "Preparare un esame alla volta",
+    "Studiare con continuità",
+    "Usare sessioni brevi ma frequenti",
+    "Organizzare il tempo in modo realistico",
   ];
 
   const rassicurazione =
-    "Non serve stravolgere la tua vita. La cosa più importante è costruire una routine sostenibile: pochi momenti ben organizzati possono fare più differenza di grandi sforzi discontinui.";
+    "Non serve stravolgere la tua vita. La costanza vale più dell’intensità.";
 
   const timeline = [
     {
       periodo: "Primi 30 giorni",
-      testo:
-        "Ambientamento, accesso alla piattaforma e organizzazione del metodo di studio.",
+      testo: "Ambientamento e organizzazione del metodo di studio.",
     },
+
     {
       periodo: "2-3 mesi",
-      testo: "Possibile preparazione del primo esame con un ritmo graduale.",
+      testo: "Possibile preparazione del primo esame.",
     },
+
     {
       periodo: "6 mesi",
-      testo: "Routine più stabile e maggiore consapevolezza del percorso.",
+      testo: "Routine più stabile e maggiore sicurezza.",
     },
   ];
 
@@ -212,7 +217,8 @@ export default function PercorsoRealePage() {
   const [answers, setAnswers] = useState<Answers>({});
   const [completed, setCompleted] = useState(false);
 
-  const current = domande[step];
+  const current = domande[step] || domande[0];
+
   const result = calcolaRisultato(answers);
 
   async function handleSelect(value: string) {
@@ -224,60 +230,51 @@ export default function PercorsoRealePage() {
     setAnswers(updated);
 
     if (step < domande.length - 1) {
-        setStep(step + 1);
-      } else {
-        const risultato = calcolaRisultato(updated);
-      
-        localStorage.setItem(
-          "percorso_reale_data",
-          JSON.stringify(updated)
-        );
-      
-        localStorage.setItem(
-          "percorso_reale_result",
-          JSON.stringify(risultato)
-        );
-      
-        try {
-          const storedUser = localStorage.getItem("gps_user");
-      
-          const user = storedUser
-            ? JSON.parse(storedUser)
-            : null;
-      
-          await fetch(
-            "https://laureasmart.it/api/salva-percorso-reale.php",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                user_email: user?.email || "",
-                user_nome: user?.nome || "",
-      
-                lavoro: updated.lavoro,
-                tempo: updated.tempo,
-                momento: updated.momento,
-                regolarita: updated.regolarita,
-                stanchezza: updated.stanchezza,
-                preoccupazione: updated.preoccupazione,
-                ritmo: updated.ritmo,
-                esperienza: updated.esperienza,
-                organizzazione: updated.organizzazione,
-                priorita: updated.priorita,
-      
-                compatibilita: risultato.compatibilita,
-                stress: risultato.stress,
-              }),
-            }
-          );
-        } catch (error) {
-          console.error("Errore salvataggio:", error);
-        }
-      
-        setCompleted(true);
+      setStep(step + 1);
+    } else {
+      const risultato = calcolaRisultato(updated);
+
+      localStorage.setItem("percorso_reale_data", JSON.stringify(updated));
+
+      localStorage.setItem("percorso_reale_result", JSON.stringify(risultato));
+
+      try {
+        const storedUser = localStorage.getItem("gps_user");
+
+        const user = storedUser ? JSON.parse(storedUser) : null;
+
+        await fetch("https://laureasmart.it/api/salva-percorso-reale.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            user_email: user?.email || "",
+            user_nome: user?.nome || "",
+
+            lavoro: updated.lavoro,
+            tempo: updated.tempo,
+            momento: updated.momento,
+            regolarita: updated.regolarita,
+            stanchezza: updated.stanchezza,
+            preoccupazione: updated.preoccupazione,
+            ritmo: updated.ritmo,
+            esperienza: updated.esperienza,
+            organizzazione: updated.organizzazione,
+            priorita: updated.priorita,
+
+            compatibilita: risultato.compatibilita,
+            stress: risultato.stress,
+          }),
+        });
+      } catch (error) {
+        console.error("Errore salvataggio:", error);
       }
+
+      setCompleted(true);
+    }
+  }
 
   function handleRestart() {
     setStep(0);
@@ -287,7 +284,7 @@ export default function PercorsoRealePage() {
 
   function handleContact() {
     const testo = encodeURIComponent(
-      "Ciao, ho fatto la simulazione del mio percorso reale su Laurea Smart e vorrei capire come applicare questo piano alla mia situazione."
+      "Ciao, ho fatto la simulazione del mio percorso reale su Laurea Smart e vorrei capire meglio il percorso più adatto a me."
     );
 
     window.open(`https://wa.me/393298170817?text=${testo}`, "_blank");
@@ -304,8 +301,7 @@ export default function PercorsoRealePage() {
           </h1>
 
           <p className="mt-3 text-[15px] leading-6 opacity-95">
-            Scopri se l’università online può entrare davvero nella tua vita,
-            senza stravolgere lavoro, famiglia e impegni quotidiani.
+            Scopri se l’università online può entrare davvero nella tua vita.
           </p>
         </section>
 
