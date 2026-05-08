@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Card from "@/components/ui/Card";
 import BottomNav from "@/components/ui/BottomNav";
 import {
   BookOpen,
@@ -50,18 +49,19 @@ function FeatureCard({
     <section
       onClick={onClick}
       style={{
-        background: "#FFFFFF",
+        background: "rgba(17,32,51,0.82)",
         borderRadius: 30,
         border: highlight
-          ? "2px solid rgba(255,196,64,0.30)"
-          : "1px solid #E4EAF1",
+          ? "1px solid rgba(255,201,64,0.35)"
+          : "1px solid rgba(255,255,255,0.08)",
         padding: 16,
         boxShadow: highlight
-          ? "0 18px 44px rgba(255,196,64,0.18)"
-          : "0 14px 36px rgba(15,23,42,0.10)",
+          ? "0 18px 44px rgba(255,196,64,0.16)"
+          : "0 18px 46px rgba(0,0,0,0.26)",
         marginBottom: 20,
         cursor: "pointer",
         transition: "all .2s ease",
+        backdropFilter: "blur(16px)",
       }}
     >
       <div
@@ -73,7 +73,7 @@ function FeatureCard({
           color: "#FFFFFF",
           position: "relative",
           overflow: "hidden",
-          boxShadow: "0 10px 24px rgba(31,111,178,0.16)",
+          boxShadow: "0 16px 34px rgba(31,111,178,0.24)",
         }}
       >
         <div
@@ -97,14 +97,14 @@ function FeatureCard({
             width: 56,
             height: 56,
             borderRadius: 999,
-            background: "#FFFFFF",
+            background: "rgba(255,255,255,0.94)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: "#1F6FB2",
             fontSize: 36,
             fontWeight: 900,
-            boxShadow: "0 10px 24px rgba(0,0,0,0.16)",
+            boxShadow: "0 10px 24px rgba(0,0,0,0.20)",
           }}
         >
           ›
@@ -244,17 +244,21 @@ export default function Dashboard() {
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
         maxWidth: 430,
         margin: "0 auto",
-        background: "#F8FBFF",
+        color: "#FFFFFF",
+        background:
+          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
       }}
     >
       <section
         style={{
-          background: "linear-gradient(135deg, #1F6FB2 0%, #155487 100%)",
+          background:
+            "linear-gradient(135deg, rgba(31,111,178,0.98) 0%, rgba(21,84,135,0.96) 100%)",
           borderRadius: 30,
           padding: 24,
           color: "#FFFFFF",
-          boxShadow: "0 18px 42px rgba(31,111,178,0.20)",
+          boxShadow: "0 22px 54px rgba(0,0,0,0.34)",
           marginBottom: 20,
+          border: "1px solid rgba(255,255,255,0.10)",
         }}
       >
         <p
@@ -299,14 +303,15 @@ export default function Dashboard() {
             display: "flex",
             alignItems: "center",
             gap: 12,
-            border: "1px solid #D7E7F5",
-            background: "#FFFFFF",
+            border: "1px solid rgba(255,255,255,0.09)",
+            background: "rgba(17,32,51,0.82)",
             borderRadius: 22,
             padding: "14px 16px",
-            boxShadow: "0 8px 24px rgba(15,23,42,0.04)",
+            boxShadow: "0 12px 30px rgba(0,0,0,0.20)",
+            backdropFilter: "blur(16px)",
           }}
         >
-          <Search size={22} color="#1F6FB2" />
+          <Search size={22} color="#3AA0FF" />
 
           <input
             value={query}
@@ -317,7 +322,7 @@ export default function Dashboard() {
               border: "none",
               outline: "none",
               background: "transparent",
-              color: "#102033",
+              color: "#FFFFFF",
               fontSize: 14,
               fontFamily: "inherit",
             }}
@@ -330,7 +335,7 @@ export default function Dashboard() {
               style={{
                 border: "none",
                 background: "transparent",
-                color: "#9CA3AF",
+                color: "rgba(255,255,255,0.65)",
                 fontSize: 18,
                 cursor: "pointer",
               }}
@@ -411,7 +416,7 @@ export default function Dashboard() {
             style={{
               margin: 0,
               fontSize: 22,
-              color: "#09090B",
+              color: "#FFFFFF",
               fontWeight: 850,
               letterSpacing: "-0.4px",
             }}
@@ -426,13 +431,14 @@ export default function Dashboard() {
                 height: 30,
                 padding: "0 10px",
                 borderRadius: 999,
-                background: "#1F6FB2",
+                background: "#3AA0FF",
                 color: "#FFFFFF",
                 fontSize: 13,
                 fontWeight: 800,
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
+                boxShadow: "0 8px 22px rgba(58,160,255,0.32)",
               }}
             >
               {notifiche.length}
@@ -441,41 +447,14 @@ export default function Dashboard() {
         </div>
 
         {notificheFiltrate.length === 0 ? (
-          <div
-            style={{
-              padding: 22,
-              borderRadius: 24,
-              background: "#FFFFFF",
-              border: "1px solid #E4EAF1",
-              boxShadow: "0 8px 28px rgba(15,23,42,0.05)",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                fontSize: 15,
-                color: "#09090B",
-                fontWeight: 750,
-              }}
-            >
-              Nessun aggiornamento trovato
-            </p>
-
-            <p
-              style={{
-                margin: "8px 0 0",
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: "#71717A",
-              }}
-            >
-              Quando saranno pubblicate nuove opportunità, le troverai qui.
-            </p>
-          </div>
+          <DarkCard
+            title="Nessun aggiornamento trovato"
+            description="Quando saranno pubblicate nuove opportunità, le troverai qui."
+          />
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
             {notificheFiltrate.map((notifica) => (
-              <Card
+              <DarkCard
                 key={notifica.id}
                 title={notifica.titolo}
                 description={notifica.messaggio}
@@ -486,22 +465,22 @@ export default function Dashboard() {
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
-                    marginTop: 4,
-                    color: "#71717A",
+                    marginTop: 12,
+                    color: "rgba(255,255,255,0.54)",
                     fontSize: 12,
                   }}
                 >
                   <Bell size={14} />
                   <span>{notifica.created_at}</span>
                 </div>
-              </Card>
+              </DarkCard>
             ))}
           </div>
         )}
       </section>
 
       <section style={{ marginTop: 22 }}>
-        <Card
+        <DarkCard
           title="Hai bisogno di aiuto?"
           description="Un orientatore reale può aiutarti gratuitamente a capire quale percorso scegliere."
           badge="Gratis"
@@ -509,11 +488,11 @@ export default function Dashboard() {
         >
           <div
             style={{
-              marginTop: 4,
+              marginTop: 12,
               display: "flex",
               alignItems: "center",
               gap: 8,
-              color: "#1F6FB2",
+              color: "#3AA0FF",
               fontSize: 14,
               fontWeight: 800,
             }}
@@ -521,7 +500,7 @@ export default function Dashboard() {
             <MessageCircle size={18} />
             Parla con un orientatore
           </div>
-        </Card>
+        </DarkCard>
       </section>
 
       <BottomNav />
@@ -544,13 +523,14 @@ function QuickCard({
     <button
       onClick={onClick}
       style={{
-        border: "1px solid #E4EAF1",
-        background: "#FFFFFF",
+        border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(17,32,51,0.82)",
         borderRadius: 24,
         padding: 16,
         textAlign: "left",
-        boxShadow: "0 8px 24px rgba(15,23,42,0.04)",
+        boxShadow: "0 14px 34px rgba(0,0,0,0.22)",
         cursor: "pointer",
+        backdropFilter: "blur(16px)",
       }}
     >
       <div
@@ -558,8 +538,8 @@ function QuickCard({
           width: 46,
           height: 46,
           borderRadius: 16,
-          background: "#EAF4FC",
-          color: "#1F6FB2",
+          background: "rgba(58,160,255,0.16)",
+          color: "#3AA0FF",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -574,7 +554,7 @@ function QuickCard({
           margin: 0,
           fontSize: 16,
           fontWeight: 850,
-          color: "#102033",
+          color: "#FFFFFF",
           lineHeight: 1.15,
         }}
       >
@@ -585,11 +565,90 @@ function QuickCard({
         style={{
           margin: "6px 0 0",
           fontSize: 13,
-          color: "#71717A",
+          color: "rgba(255,255,255,0.62)",
         }}
       >
         {text}
       </p>
     </button>
+  );
+}
+
+function DarkCard({
+  title,
+  description,
+  badge,
+  children,
+  onClick,
+}: {
+  title: string;
+  description: string;
+  badge?: string;
+  children?: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <section
+      onClick={onClick}
+      style={{
+        padding: 18,
+        borderRadius: 24,
+        background: "rgba(17,32,51,0.86)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 14px 34px rgba(0,0,0,0.24)",
+        cursor: onClick ? "pointer" : "default",
+        backdropFilter: "blur(16px)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 17,
+            lineHeight: 1.25,
+            color: "#FFFFFF",
+            fontWeight: 850,
+          }}
+        >
+          {title}
+        </h3>
+
+        {badge && (
+          <span
+            style={{
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: "rgba(58,160,255,0.16)",
+              color: "#78C2FF",
+              fontSize: 11,
+              fontWeight: 850,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {badge}
+          </span>
+        )}
+      </div>
+
+      <p
+        style={{
+          margin: "10px 0 0",
+          fontSize: 14,
+          lineHeight: 1.5,
+          color: "rgba(255,255,255,0.68)",
+        }}
+      >
+        {description}
+      </p>
+
+      {children}
+    </section>
   );
 }
