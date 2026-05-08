@@ -11,6 +11,7 @@ import {
   Heart,
   MessageCircle,
   GraduationCap,
+  TrendingUp,
 } from "lucide-react";
 
 type GpsUser = {
@@ -225,7 +226,8 @@ export default function Dashboard() {
           border: "1px solid #E4EAF1",
           padding: 20,
           boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
-          marginBottom: 22,
+          marginBottom: 20,
+          cursor: "pointer",
         }}
         onClick={() => router.push("/dashboard/percorsi")}
       >
@@ -277,6 +279,83 @@ export default function Dashboard() {
             }}
           >
             Lauree, magistrali e master ordinati in base al tuo profilo.
+          </p>
+        </div>
+      </section>
+
+      <section
+        style={{
+          background: "#FFFFFF",
+          borderRadius: 28,
+          border: "1px solid #E4EAF1",
+          padding: 20,
+          boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
+          marginBottom: 22,
+          cursor: "pointer",
+        }}
+        onClick={() => router.push("/dashboard/simula-futuro")}
+      >
+        <div
+          style={{
+            minHeight: 120,
+            borderRadius: 24,
+            background:
+              "linear-gradient(135deg, #102033 0%, #1F6FB2 58%, #3AA0FF 100%)",
+            padding: 20,
+            color: "#FFFFFF",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              right: -32,
+              bottom: -34,
+              width: 130,
+              height: 130,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.13)",
+            }}
+          />
+
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 18,
+              background: "rgba(255,255,255,0.18)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <TrendingUp size={27} />
+          </div>
+
+          <h2
+            style={{
+              margin: "16px 0 6px",
+              fontSize: 24,
+              lineHeight: 1.1,
+              fontWeight: 850,
+              letterSpacing: "-0.5px",
+            }}
+          >
+            Simula il tuo futuro
+          </h2>
+
+          <p
+            style={{
+              margin: 0,
+              fontSize: 14,
+              lineHeight: 1.45,
+              opacity: 0.92,
+              maxWidth: 300,
+            }}
+          >
+            Visualizza come potrebbe crescere il tuo profilo nei prossimi 36
+            mesi.
           </p>
         </div>
       </section>
