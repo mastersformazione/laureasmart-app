@@ -31,6 +31,149 @@ type Notifica = {
   created_at: string;
 };
 
+function FeatureCard({
+  icon,
+  title,
+  description,
+  gradient,
+  onClick,
+  highlight = false,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  gradient: string;
+  onClick: () => void;
+  highlight?: boolean;
+}) {
+  return (
+    <section
+      onClick={onClick}
+      style={{
+        background: "#FFFFFF",
+        borderRadius: 30,
+        border: highlight
+          ? "2px solid rgba(255,196,64,0.30)"
+          : "1px solid #E4EAF1",
+        padding: 16,
+        boxShadow: highlight
+          ? "0 18px 44px rgba(255,196,64,0.18)"
+          : "0 14px 36px rgba(15,23,42,0.10)",
+        marginBottom: 20,
+        cursor: "pointer",
+        transition: "all .2s ease",
+      }}
+    >
+      <div
+        style={{
+          minHeight: 145,
+          borderRadius: 28,
+          background: gradient,
+          padding: 20,
+          color: "#FFFFFF",
+          position: "relative",
+          overflow: "hidden",
+          boxShadow: "0 10px 24px rgba(31,111,178,0.16)",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            right: -34,
+            top: -24,
+            width: 140,
+            height: 140,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.13)",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            right: 18,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 56,
+            height: 56,
+            borderRadius: 999,
+            background: "#FFFFFF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#1F6FB2",
+            fontSize: 36,
+            fontWeight: 900,
+            boxShadow: "0 10px 24px rgba(0,0,0,0.16)",
+          }}
+        >
+          ›
+        </div>
+
+        {highlight && (
+          <div
+            style={{
+              display: "inline-flex",
+              marginBottom: 14,
+              padding: "6px 12px",
+              borderRadius: 999,
+              background: "#FFC940",
+              color: "#FFFFFF",
+              fontSize: 12,
+              fontWeight: 850,
+              letterSpacing: "0.3px",
+              boxShadow: "0 6px 16px rgba(255,201,64,0.30)",
+            }}
+          >
+            NOVITÀ
+          </div>
+        )}
+
+        <div
+          style={{
+            width: 58,
+            height: 58,
+            borderRadius: 20,
+            background: "rgba(0,0,0,0.16)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 18,
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 10px 24px rgba(0,0,0,0.16)",
+          }}
+        >
+          {icon}
+        </div>
+
+        <h2
+          style={{
+            margin: "0 80px 8px 0",
+            fontSize: 24,
+            lineHeight: 1.04,
+            fontWeight: 850,
+            letterSpacing: "-0.8px",
+          }}
+        >
+          {title}
+        </h2>
+
+        <p
+          style={{
+            margin: 0,
+            fontSize: 15,
+            lineHeight: 1.55,
+            opacity: 0.96,
+            maxWidth: 290,
+          }}
+        >
+          {description}
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState<GpsUser | null>(null);
@@ -221,300 +364,38 @@ export default function Dashboard() {
         />
       </section>
 
-      <section
-        style={{
-          background: "#FFFFFF",
-          borderRadius: 28,
-          border: "1px solid #E4EAF1",
-          padding: 20,
-          boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
-          marginBottom: 20,
-          cursor: "pointer",
-        }}
+      <FeatureCard
+        icon={<BookOpen size={30} />}
+        title="Esplora i percorsi consigliati"
+        description="Lauree, magistrali e master ordinati in base al tuo profilo."
+        gradient="linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)"
         onClick={() => router.push("/dashboard/percorsi")}
-      >
-        <div
-          style={{
-            minHeight: 120,
-            borderRadius: 24,
-            background:
-              "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
-            padding: 20,
-            color: "#FFFFFF",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: -28,
-              top: -24,
-              width: 118,
-              height: 118,
-              borderRadius: 999,
-              background: "rgba(255,255,255,0.14)",
-            }}
-          />
+      />
 
-          <BookOpen size={30} />
-
-          <h2
-            style={{
-              margin: "16px 0 6px",
-              fontSize: 24,
-              lineHeight: 1.1,
-              fontWeight: 850,
-              letterSpacing: "-0.5px",
-            }}
-          >
-            Esplora i percorsi consigliati
-          </h2>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: 14,
-              lineHeight: 1.45,
-              opacity: 0.92,
-              maxWidth: 280,
-            }}
-          >
-            Lauree, magistrali e master ordinati in base al tuo profilo.
-          </p>
-        </div>
-      </section>
-
-      <section
-        style={{
-          background: "#FFFFFF",
-          borderRadius: 28,
-          border: "1px solid #E4EAF1",
-          padding: 20,
-          boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
-          marginBottom: 20,
-          cursor: "pointer",
-        }}
+      <FeatureCard
+        icon={<TrendingUp size={30} />}
+        title="Simula il tuo futuro"
+        description="Visualizza come potrebbe crescere il tuo profilo nei prossimi 36 mesi."
+        gradient="linear-gradient(135deg, #102033 0%, #1F6FB2 58%, #3AA0FF 100%)"
         onClick={() => router.push("/dashboard/simula-futuro")}
-      >
-        <div
-          style={{
-            minHeight: 120,
-            borderRadius: 24,
-            background:
-              "linear-gradient(135deg, #102033 0%, #1F6FB2 58%, #3AA0FF 100%)",
-            padding: 20,
-            color: "#FFFFFF",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: -32,
-              bottom: -34,
-              width: 130,
-              height: 130,
-              borderRadius: 999,
-              background: "rgba(255,255,255,0.13)",
-            }}
-          />
+      />
 
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 18,
-              background: "rgba(255,255,255,0.18)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TrendingUp size={27} />
-          </div>
-
-          <h2
-            style={{
-              margin: "16px 0 6px",
-              fontSize: 24,
-              lineHeight: 1.1,
-              fontWeight: 850,
-              letterSpacing: "-0.5px",
-            }}
-          >
-            Simula il tuo futuro
-          </h2>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: 14,
-              lineHeight: 1.45,
-              opacity: 0.92,
-              maxWidth: 300,
-            }}
-          >
-            Visualizza come potrebbe crescere il tuo profilo nei prossimi 36
-            mesi.
-          </p>
-        </div>
-      </section>
-
-      <section
-        style={{
-          background: "#FFFFFF",
-          borderRadius: 28,
-          border: "1px solid #E4EAF1",
-          padding: 20,
-          boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
-          marginBottom: 22,
-          cursor: "pointer",
-        }}
+      <FeatureCard
+        icon={<CalendarCheck size={30} />}
+        title="Il tuo percorso reale"
+        description="Scopri se università, lavoro e impegni quotidiani possono stare insieme in modo sostenibile."
+        gradient="linear-gradient(135deg, #0B2440 0%, #155487 52%, #1F6FB2 100%)"
         onClick={() => router.push("/dashboard/percorso-reale")}
-      >
-        <div
-          style={{
-            minHeight: 120,
-            borderRadius: 24,
-            background:
-              "linear-gradient(135deg, #1F6FB2 0%, #155487 58%, #102033 100%)",
-            padding: 20,
-            color: "#FFFFFF",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: -34,
-              top: -34,
-              width: 132,
-              height: 132,
-              borderRadius: 999,
-              background: "rgba(255,255,255,0.13)",
-            }}
-          />
+      />
 
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 18,
-              background: "rgba(255,255,255,0.18)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CalendarCheck size={27} />
-          </div>
-
-          <h2
-            style={{
-              margin: "16px 0 6px",
-              fontSize: 24,
-              lineHeight: 1.1,
-              fontWeight: 850,
-              letterSpacing: "-0.5px",
-            }}
-          >
-            Il tuo percorso reale
-          </h2>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: 14,
-              lineHeight: 1.45,
-              opacity: 0.92,
-              maxWidth: 300,
-            }}
-          >
-            Scopri se università, lavoro e impegni quotidiani possono stare
-            insieme in modo sostenibile.
-          </p>
-        </div>
-      </section>
-
-      <section
-        style={{
-          background: "#FFFFFF",
-          borderRadius: 28,
-          border: "1px solid #E4EAF1",
-          padding: 20,
-          boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
-          marginBottom: 22,
-          cursor: "pointer",
-        }}
+      <FeatureCard
+        icon={<CalendarDays size={30} />}
+        title="Prepara il tuo anno accademico"
+        description="Simula esami, CFU, sessioni e tempo di studio per capire come organizzare il tuo primo anno."
+        gradient="linear-gradient(135deg, #2563EB 0%, #3B82F6 55%, #60A5FA 100%)"
+        highlight
         onClick={() => router.push("/dashboard/anno-accademico")}
-      >
-        <div
-          style={{
-            minHeight: 120,
-            borderRadius: 24,
-            background:
-              "linear-gradient(135deg, #155487 0%, #1F6FB2 55%, #3AA0FF 100%)",
-            padding: 20,
-            color: "#FFFFFF",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: -34,
-              bottom: -34,
-              width: 132,
-              height: 132,
-              borderRadius: 999,
-              background: "rgba(255,255,255,0.13)",
-            }}
-          />
-
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 18,
-              background: "rgba(255,255,255,0.18)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CalendarDays size={27} />
-          </div>
-
-          <h2
-            style={{
-              margin: "16px 0 6px",
-              fontSize: 24,
-              lineHeight: 1.1,
-              fontWeight: 850,
-              letterSpacing: "-0.5px",
-            }}
-          >
-            Prepara il tuo anno accademico
-          </h2>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: 14,
-              lineHeight: 1.45,
-              opacity: 0.92,
-              maxWidth: 300,
-            }}
-          >
-            Simula esami, CFU, sessioni e tempo di studio per capire come
-            organizzare il tuo primo anno.
-          </p>
-        </div>
-      </section>
+      />
 
       <section>
         <div
