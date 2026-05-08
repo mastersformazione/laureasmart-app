@@ -35,7 +35,9 @@ async function trackInstallEvent(eventType: string, platform: string) {
 
 export default function Home() {
   const router = useRouter();
+
   const [menuOpen, setMenuOpen] = useState(false);
+  const [iphoneHelpOpen, setIphoneHelpOpen] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("gps_user");
@@ -164,7 +166,9 @@ export default function Home() {
           }}
         >
           <Benefit icon={<CheckCircle size={19} />} text="Test gratuiti" />
+
           <Benefit icon={<Bell size={19} />} text="Scadenze e promozioni" />
+
           <Benefit
             icon={<MessageCircle size={19} />}
             text="Supporto Gratuito di un Orientatore Dedicato"
@@ -190,7 +194,10 @@ export default function Home() {
 
             <button
               type="button"
-              onClick={() => trackInstallEvent("click_scarica_iphone", "ios")}
+              onClick={() => {
+                trackInstallEvent("click_scarica_iphone", "ios");
+                setIphoneHelpOpen(true);
+              }}
               style={{
                 width: "100%",
                 border: "1px solid rgba(58,160,255,0.22)",
@@ -203,7 +210,7 @@ export default function Home() {
                 gap: 14,
                 textAlign: "left",
                 boxShadow: "0 14px 34px rgba(31,111,178,0.22)",
-                cursor: "default",
+                cursor: "pointer",
               }}
             >
               <div
@@ -289,6 +296,127 @@ export default function Home() {
         </p>
       </section>
 
+      {iphoneHelpOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(2,7,18,0.72)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            padding: 14,
+          }}
+          onClick={() => setIphoneHelpOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 430,
+              background: "#FFFFFF",
+              color: "#102033",
+              borderRadius: "28px 28px 24px 24px",
+              padding: "22px 18px 18px",
+              boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+          >
+            <h2
+              style={{
+                margin: "0 0 8px",
+                fontSize: 22,
+                lineHeight: 1.2,
+                fontWeight: 900,
+                letterSpacing: "-0.5px",
+              }}
+            >
+              Come Scaricare Laurea Smart su iPhone
+            </h2>
+
+            <p
+              style={{
+                margin: "0 0 18px",
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: "#5F6B7A",
+              }}
+            >
+              Su iPhone la app si Scarica direttamente da Safari e compare tra
+              le app del telefono.
+            </p>
+
+            <div style={{ display: "grid", gap: 12 }}>
+              <InstallStep
+                number="1"
+                emoji="🧭"
+                title="Apri il sito con Safari"
+                text="Se stai usando Chrome o un altro browser, apri app.laureasmart.it con Safari."
+              />
+
+              <InstallStep
+                number="2"
+                emoji="⬆️"
+                title="Premi Condividi"
+                text="Tocca l’icona con il quadrato e la freccia verso l’alto."
+              />
+
+              <InstallStep
+                number="3"
+                emoji="➕"
+                title="Premi Aggiungi alla schermata Home"
+                text="Scorri il menu e seleziona questa voce."
+              />
+
+              <InstallStep
+                number="4"
+                emoji="✅"
+                title="Premi Aggiungi"
+                text="Laurea Smart comparirà tra le app del tuo iPhone."
+              />
+            </div>
+
+            <div
+              style={{
+                marginTop: 16,
+                padding: 13,
+                borderRadius: 18,
+                background: "#F1F7FF",
+                border: "1px solid #D8EAFF",
+                fontSize: 13,
+                lineHeight: 1.45,
+                color: "#24547D",
+                fontWeight: 700,
+              }}
+            >
+              Se non vedi “Aggiungi alla schermata Home”, scorri verso il basso
+              e premi “Modifica azioni”.
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIphoneHelpOpen(false)}
+              style={{
+                width: "100%",
+                marginTop: 16,
+                minHeight: 56,
+                border: "none",
+                borderRadius: 18,
+                background: "#1F6FB2",
+                color: "#FFFFFF",
+                fontSize: 16,
+                fontWeight: 900,
+                cursor: "pointer",
+              }}
+            >
+              Ho Capito
+            </button>
+          </div>
+        </div>
+      )}
+
       {menuOpen && (
         <ActionSheet
           title="Cosa vuoi fare?"
@@ -339,6 +467,82 @@ function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
       >
         {text}
       </span>
+    </div>
+  );
+}
+
+function InstallStep({
+  number,
+  emoji,
+  title,
+  text,
+}: {
+  number: string;
+  emoji: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        padding: 13,
+        borderRadius: 20,
+        background: "#F7FAFD",
+        border: "1px solid #E5EDF5",
+      }}
+    >
+      <div
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 15,
+          background: "#EAF4FF",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 22,
+          flexShrink: 0,
+        }}
+      >
+        {emoji}
+      </div>
+
+      <div>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 900,
+            color: "#1F6FB2",
+            marginBottom: 3,
+          }}
+        >
+          STEP {number}
+        </div>
+
+        <strong
+          style={{
+            display: "block",
+            fontSize: 15,
+            fontWeight: 900,
+            marginBottom: 3,
+          }}
+        >
+          {title}
+        </strong>
+
+        <span
+          style={{
+            display: "block",
+            fontSize: 13,
+            lineHeight: 1.45,
+            color: "#5F6B7A",
+          }}
+        >
+          {text}
+        </span>
+      </div>
     </div>
   );
 }
