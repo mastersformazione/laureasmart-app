@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 import InstallButton from "./install-button";
 import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
-import Button from "@/components/ui/Button";
-import { Share, CheckCircle, Bell, MessageCircle } from "lucide-react";
+import {
+  Share,
+  CheckCircle,
+  Bell,
+  MessageCircle,
+  Smartphone,
+  UserCircle2,
+} from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -153,7 +159,55 @@ export default function Home() {
               gap: 10,
             }}
           >
-            <InstallButton />
+            <div
+              style={{
+                borderRadius: 22,
+                overflow: "hidden",
+                boxShadow: "0 10px 30px rgba(31,111,178,0.18)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: "0 18px",
+                  height: 68,
+                  background:
+                    "linear-gradient(135deg, #2D7CC0 0%, #1F6FB2 100%)",
+                }}
+              >
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 16,
+                    background: "rgba(255,255,255,0.14)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Smartphone size={24} color="#FFFFFF" />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 18,
+                      fontWeight: 800,
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    Scarica App su Android
+                  </div>
+                </div>
+              </div>
+
+              <InstallButton />
+            </div>
 
             <button
               type="button"
@@ -215,13 +269,29 @@ export default function Home() {
               </div>
             </button>
 
-            <div style={{ marginTop: 4 }}>
-              <Button
-                label="Accedi o Registrati"
-                variant="primary"
-                onClick={() => setMenuOpen(true)}
-              />
-            </div>
+            <button
+              onClick={() => setMenuOpen(true)}
+              style={{
+                width: "100%",
+                height: 68,
+                border: "none",
+                borderRadius: 22,
+                background: "linear-gradient(135deg, #123C68 0%, #0B2D50 100%)",
+                color: "#FFFFFF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+                fontSize: 20,
+                fontWeight: 800,
+                cursor: "pointer",
+                boxShadow: "0 12px 30px rgba(11,45,80,0.28)",
+              }}
+            >
+              <UserCircle2 size={28} />
+
+              <span>Accedi o Registrati</span>
+            </button>
           </div>
         </div>
 
@@ -235,7 +305,7 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          Puoi registrarti anche senza Scaricare la app.
+          Puoi registrarti anche senza installare la app.
         </p>
       </section>
 
