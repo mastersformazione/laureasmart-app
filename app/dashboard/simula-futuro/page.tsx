@@ -12,6 +12,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
 import BottomNav from "@/components/ui/BottomNav";
 
 type TitoloStudio = "diploma" | "triennale" | "magistrale" | "altro";
@@ -113,11 +114,7 @@ function calculateScores(form: FormData) {
 
 function createChartData(scores: ReturnType<typeof calculateScores>) {
   return [
-    {
-      mese: "Oggi",
-      senzaPercorso: 35,
-      conPercorso: 35,
-    },
+    { mese: "Oggi", senzaPercorso: 35, conPercorso: 35 },
     {
       mese: "12 mesi",
       senzaPercorso: 40,
@@ -128,11 +125,7 @@ function createChartData(scores: ReturnType<typeof calculateScores>) {
       senzaPercorso: 44,
       conPercorso: Math.round(scores.crescita * 0.78),
     },
-    {
-      mese: "36 mesi",
-      senzaPercorso: 48,
-      conPercorso: scores.crescita,
-    },
+    { mese: "36 mesi", senzaPercorso: 48, conPercorso: scores.crescita },
   ];
 }
 
@@ -140,12 +133,13 @@ function BarScore({ label, value }: { label: string; value: number }) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-sm">
-        <span className="font-medium text-slate-700">{label}</span>
-        <span className="font-semibold text-slate-900">{value}%</span>
+        <span className="font-semibold text-[#102033]">{label}</span>
+        <span className="font-bold text-[#1F6FB2]">{value}%</span>
       </div>
-      <div className="h-3 rounded-full bg-slate-200">
+
+      <div className="h-3 rounded-full bg-[rgba(31,111,178,0.10)]">
         <div
-          className="h-3 rounded-full bg-slate-900"
+          className="h-3 rounded-full bg-[#1F6FB2] shadow-[0_6px_14px_rgba(31,111,178,0.22)]"
           style={{ width: `${value}%` }}
         />
       </div>
@@ -174,21 +168,23 @@ export default function SimulaFuturoPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 pb-28 pt-5">
+    <main className="min-h-screen bg-[#F8FBFF] px-4 pb-[120px] pt-5">
       <div className="mx-auto max-w-md space-y-5">
         <button
           onClick={() => router.push("/dashboard")}
-          className="text-sm font-medium text-slate-600"
+          className="text-sm font-semibold text-[#1F6FB2]"
         >
           ← Torna alla dashboard
         </button>
 
-        <section className="rounded-3xl bg-slate-900 p-5 text-white shadow-lg">
-          <p className="text-sm text-slate-300">LaureaSmart</p>
-          <h1 className="mt-2 text-2xl font-bold leading-tight">
+        <section className="rounded-[30px] bg-gradient-to-br from-[#1F6FB2] to-[#155487] p-6 text-white shadow-[0_18px_42px_rgba(31,111,178,0.20)]">
+          <p className="text-sm font-bold opacity-90">Laurea Smart</p>
+
+          <h1 className="mt-2 text-[32px] font-extrabold leading-[35px] tracking-[-0.7px]">
             Simula il tuo futuro
           </h1>
-          <p className="mt-3 text-sm leading-6 text-slate-200">
+
+          <p className="mt-3 text-[15px] leading-6 opacity-95">
             Scopri come potrebbe evolvere il tuo profilo nei prossimi 36 mesi in
             base al tuo titolo di studio, ai tuoi obiettivi e al percorso più
             adatto.
@@ -196,162 +192,117 @@ export default function SimulaFuturoPage() {
         </section>
 
         {!showResult && (
-          <Card>
+          <Card
+            title="Costruiamo la tua simulazione"
+            description="Rispondi a poche domande per generare una proiezione personalizzata."
+            badge="Gratis"
+          >
             <div className="space-y-5">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  Costruiamo la tua simulazione
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Rispondi a poche domande per generare una proiezione
-                  personalizzata.
-                </p>
-              </div>
+              <SelectField
+                label="Titolo di studio attuale"
+                value={form.titolo}
+                onChange={(value) =>
+                  updateField("titolo", value as TitoloStudio)
+                }
+                options={[
+                  ["diploma", "Diploma"],
+                  ["triennale", "Laurea triennale"],
+                  ["magistrale", "Laurea magistrale"],
+                  ["altro", "Altro percorso"],
+                ]}
+              />
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  Titolo di studio attuale
-                </label>
-                <select
-                  value={form.titolo}
-                  onChange={(e) =>
-                    updateField("titolo", e.target.value as TitoloStudio)
-                  }
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm outline-none"
-                >
-                  <option value="diploma">Diploma</option>
-                  <option value="triennale">Laurea triennale</option>
-                  <option value="magistrale">Laurea magistrale</option>
-                  <option value="altro">Altro percorso</option>
-                </select>
-              </div>
+              <SelectField
+                label="Obiettivo principale"
+                value={form.obiettivo}
+                onChange={(value) =>
+                  updateField("obiettivo", value as Obiettivo)
+                }
+                options={[
+                  ["stabilita", "Più stabilità lavorativa"],
+                  ["carriera", "Crescita di carriera"],
+                  ["cambio_settore", "Cambiare settore"],
+                  ["concorsi", "Accedere a concorsi"],
+                ]}
+              />
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  Obiettivo principale
-                </label>
-                <select
-                  value={form.obiettivo}
-                  onChange={(e) =>
-                    updateField("obiettivo", e.target.value as Obiettivo)
-                  }
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm outline-none"
-                >
-                  <option value="stabilita">Più stabilità lavorativa</option>
-                  <option value="carriera">Crescita di carriera</option>
-                  <option value="cambio_settore">Cambiare settore</option>
-                  <option value="concorsi">Accedere a concorsi</option>
-                </select>
-              </div>
+              <SelectField
+                label="Settore di interesse"
+                value={form.settore}
+                onChange={(value) => updateField("settore", value as Settore)}
+                options={[
+                  ["scuola", "Scuola / educazione"],
+                  ["psicologia", "Psicologia / sociale"],
+                  ["economia", "Economia / management"],
+                  ["giuridico", "Giuridico / concorsi"],
+                  ["digitale", "Digitale / AI / marketing"],
+                ]}
+              />
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  Settore di interesse
-                </label>
-                <select
-                  value={form.settore}
-                  onChange={(e) =>
-                    updateField("settore", e.target.value as Settore)
-                  }
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm outline-none"
-                >
-                  <option value="scuola">Scuola / educazione</option>
-                  <option value="psicologia">Psicologia / sociale</option>
-                  <option value="economia">Economia / management</option>
-                  <option value="giuridico">Giuridico / concorsi</option>
-                  <option value="digitale">Digitale / AI / marketing</option>
-                </select>
-              </div>
+              <SelectField
+                label="Tempo disponibile per studiare"
+                value={form.tempo}
+                onChange={(value) => updateField("tempo", value as Tempo)}
+                options={[
+                  ["poco", "Poco tempo"],
+                  ["medio", "Tempo medio"],
+                  ["alto", "Buona disponibilità"],
+                ]}
+              />
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  Tempo disponibile per studiare
-                </label>
-                <select
-                  value={form.tempo}
-                  onChange={(e) =>
-                    updateField("tempo", e.target.value as Tempo)
-                  }
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm outline-none"
-                >
-                  <option value="poco">Poco tempo</option>
-                  <option value="medio">Tempo medio</option>
-                  <option value="alto">Buona disponibilità</option>
-                </select>
-              </div>
-
-              <button
+              <Button
+                label="Genera simulazione"
+                variant="primary"
                 onClick={handleSubmit}
-                className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white shadow-md"
-              >
-                Genera simulazione
-              </button>
+              />
             </div>
           </Card>
         )}
 
         {showResult && (
           <div className="space-y-5">
-            <Card>
-              <div className="space-y-3">
-                <p className="text-sm font-semibold text-slate-500">
-                  Percorso consigliato
-                </p>
-                <h2 className="text-xl font-bold text-slate-900">{percorso}</h2>
-                <p className="text-sm leading-6 text-slate-600">
-                  Nei prossimi 36 mesi questo percorso potrebbe aumentare la
-                  spendibilità del tuo profilo, aprendo nuove opportunità
-                  coerenti con il tuo obiettivo. La simulazione non promette un
-                  risultato economico certo, ma mostra una possibile evoluzione
-                  professionale.
-                </p>
+            <Card
+              title={percorso}
+              description="Nei prossimi 36 mesi questo percorso potrebbe aumentare la spendibilità del tuo profilo, aprendo nuove opportunità coerenti con il tuo obiettivo."
+              badge="Percorso"
+            />
+
+            <Card title="Curva di crescita del profilo" badge="36 mesi">
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E4EAF1" />
+                    <XAxis dataKey="mese" fontSize={12} />
+                    <YAxis domain={[0, 100]} fontSize={12} />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="senzaPercorso"
+                      name="Scenario attuale"
+                      stroke="#9CA3AF"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="conPercorso"
+                      name="Con percorso"
+                      stroke="#1F6FB2"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
+
+              <p className="mt-4 text-xs leading-5 text-[#71717A]">
+                Il grafico rappresenta un indice orientativo di crescita
+                professionale, non una previsione di stipendio.
+              </p>
             </Card>
 
-            <Card>
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-slate-900">
-                  Curva di crescita del profilo
-                </h3>
-
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="mese" fontSize={12} />
-                      <YAxis domain={[0, 100]} fontSize={12} />
-                      <Tooltip />
-                      <Line
-                        type="monotone"
-                        dataKey="senzaPercorso"
-                        name="Scenario attuale"
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="conPercorso"
-                        name="Con percorso"
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <p className="text-xs leading-5 text-slate-500">
-                  Il grafico rappresenta un indice orientativo di crescita
-                  professionale, non una previsione di stipendio.
-                </p>
-              </div>
-            </Card>
-
-            <Card>
+            <Card title="Indicatori principali" badge="Profilo">
               <div className="space-y-5">
-                <h3 className="text-lg font-bold text-slate-900">
-                  Indicatori principali
-                </h3>
-
                 <BarScore
                   label="Compatibilità con il tuo obiettivo"
                   value={scores.compatibilita}
@@ -371,81 +322,55 @@ export default function SimulaFuturoPage() {
               </div>
             </Card>
 
-            <Card>
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-slate-900">
-                  Tabella riassuntiva
-                </h3>
-
-                <div className="overflow-hidden rounded-2xl border border-slate-200">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      <tr className="border-b border-slate-200">
-                        <td className="bg-slate-100 p-3 font-semibold">
-                          Percorso
-                        </td>
-                        <td className="p-3">{percorso}</td>
-                      </tr>
-                      <tr className="border-b border-slate-200">
-                        <td className="bg-slate-100 p-3 font-semibold">
-                          Orizzonte
-                        </td>
-                        <td className="p-3">36 mesi</td>
-                      </tr>
-                      <tr className="border-b border-slate-200">
-                        <td className="bg-slate-100 p-3 font-semibold">
-                          Spendibilità
-                        </td>
-                        <td className="p-3">{scores.spendibilita}%</td>
-                      </tr>
-                      <tr>
-                        <td className="bg-slate-100 p-3 font-semibold">
-                          Rischio percorso
-                        </td>
-                        <td className="p-3">{scores.rischio}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+            <Card title="Tabella riassuntiva" badge="Sintesi">
+              <div className="overflow-hidden rounded-2xl border border-[rgba(31,111,178,0.10)]">
+                <table className="w-full text-sm">
+                  <tbody>
+                    <SummaryRow label="Percorso" value={percorso} />
+                    <SummaryRow label="Orizzonte" value="36 mesi" />
+                    <SummaryRow
+                      label="Spendibilità"
+                      value={`${scores.spendibilita}%`}
+                    />
+                    <SummaryRow
+                      label="Rischio percorso"
+                      value={scores.rischio}
+                      last
+                    />
+                  </tbody>
+                </table>
               </div>
             </Card>
 
-            <Card>
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-slate-900">
-                  Opportunità collegate
-                </h3>
-
-                <div className="flex flex-wrap gap-2">
-                  {opportunita.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-
-                <p className="text-sm leading-6 text-slate-600">
-                  Il valore principale del percorso è l’apertura di nuove
-                  possibilità: più canali lavorativi, maggiore coerenza del
-                  profilo e una strategia più chiara per il futuro.
-                </p>
+            <Card title="Opportunità collegate" badge="Possibilità">
+              <div className="flex flex-wrap gap-2">
+                {opportunita.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full bg-[rgba(31,111,178,0.10)] px-3 py-2 text-xs font-bold text-[#1F6FB2]"
+                  >
+                    {item}
+                  </span>
+                ))}
               </div>
+
+              <p className="mt-4 text-sm leading-6 text-[#71717A]">
+                Il valore principale del percorso è l’apertura di nuove
+                possibilità: più canali lavorativi, maggiore coerenza del
+                profilo e una strategia più chiara per il futuro.
+              </p>
             </Card>
 
             <div className="space-y-3">
-              <button
-                onClick={() => router.push("/dashboard/corsi")}
-                className="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white shadow-md"
-              >
-                Vedi i corsi consigliati
-              </button>
+              <Button
+                label="Vedi i corsi consigliati"
+                variant="primary"
+                onClick={() => router.push("/dashboard/percorsi")}
+              />
 
               <button
                 onClick={() => setShowResult(false)}
-                className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-800 shadow-sm"
+                className="w-full rounded-2xl bg-white px-4 py-4 text-base font-semibold text-[#102033] shadow-[0_8px_22px_rgba(31,111,178,0.08)] active:scale-[0.98]"
               >
                 Modifica simulazione
               </button>
@@ -456,5 +381,54 @@ export default function SimulaFuturoPage() {
 
       <BottomNav />
     </main>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: [string, string][];
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-bold text-[#102033]">{label}</label>
+
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-2xl border border-[rgba(31,111,178,0.10)] bg-white p-4 text-sm font-semibold text-[#102033] outline-none shadow-[0_8px_22px_rgba(31,111,178,0.06)]"
+      >
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>
+            {optionLabel}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  last,
+}: {
+  label: string;
+  value: string;
+  last?: boolean;
+}) {
+  return (
+    <tr className={last ? "" : "border-b border-[rgba(31,111,178,0.10)]"}>
+      <td className="bg-[rgba(31,111,178,0.06)] p-3 font-bold text-[#102033]">
+        {label}
+      </td>
+      <td className="p-3 text-[#5F6B7A]">{value}</td>
+    </tr>
   );
 }
