@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Smartphone } from "lucide-react";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -39,13 +40,44 @@ export default function InstallButton() {
     <button
       onClick={handleInstall}
       style={{
-        marginTop: 20,
-        padding: 10,
-        background: "#1F6FB2",
-        color: "white",
+        width: "100%",
+        height: 68,
+        border: "none",
+        borderRadius: 22,
+        background: "linear-gradient(135deg, #2D7CC0 0%, #1F6FB2 100%)",
+        color: "#FFFFFF",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        padding: "0 18px",
+        cursor: "pointer",
+        boxShadow: "0 10px 30px rgba(31,111,178,0.18)",
       }}
     >
-      Scarica App su Android
+      <span
+        style={{
+          width: 46,
+          height: 46,
+          borderRadius: 16,
+          background: "rgba(255,255,255,0.16)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <Smartphone size={24} color="#FFFFFF" />
+      </span>
+
+      <span
+        style={{
+          fontSize: 18,
+          fontWeight: 800,
+          lineHeight: 1.1,
+        }}
+      >
+        Scarica App su Android
+      </span>
     </button>
   );
 }

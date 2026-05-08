@@ -9,7 +9,6 @@ import {
   CheckCircle,
   Bell,
   MessageCircle,
-  Smartphone,
   UserCircle2,
 } from "lucide-react";
 
@@ -159,55 +158,7 @@ export default function Home() {
               gap: 10,
             }}
           >
-            <div
-              style={{
-                borderRadius: 22,
-                overflow: "hidden",
-                boxShadow: "0 10px 30px rgba(31,111,178,0.18)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: "0 18px",
-                  height: 68,
-                  background:
-                    "linear-gradient(135deg, #2D7CC0 0%, #1F6FB2 100%)",
-                }}
-              >
-                <div
-                  style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: 16,
-                    background: "rgba(255,255,255,0.14)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Smartphone size={24} color="#FFFFFF" />
-                </div>
-
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      color: "#FFFFFF",
-                      fontSize: 18,
-                      fontWeight: 800,
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    Scarica App su Android
-                  </div>
-                </div>
-              </div>
-
-              <InstallButton />
-            </div>
+            <InstallButton />
 
             <button
               type="button"
