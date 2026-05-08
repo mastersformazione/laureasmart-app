@@ -1,12 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Smartphone } from "lucide-react";
+import { Download } from "lucide-react";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
+
+async function trackInstallEvent(eventType: string, platform: string) {
+  try {
+    const storedUser = localStorage.getItem("gps_user");
+    const user = storedUser ? JSON.parse(storedUser) : null;
+
+    await fetch("https://laureasmart.it/api/salva-install-event.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_email: user?.email || "",
+        event_type: eventType,
+        platform,
+      }),
+    });
+  } catch (error) {
+    console.error("Errore tracking install:", error);
+  }
+}
 
 export default function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] =
@@ -28,8 +49,17 @@ export default function InstallButton() {
   const handleInstall = async () => {
     if (!deferredPrompt) return;
 
+    await trackInstallEvent("click_scarica_android", "android");
+
     await deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      await trackInstallEvent("install_android_accettata", "android");
+    } else {
+      await trackInstallEvent("install_android_rifiutata", "android");
+    }
 
     setDeferredPrompt(null);
   };
@@ -39,26 +69,27 @@ export default function InstallButton() {
   return (
     <button
       onClick={handleInstall}
+      type="button"
       style={{
         width: "100%",
-        height: 68,
         border: "none",
+        background: "linear-gradient(135deg, #1F6FB2 0%, #155487 100%)",
         borderRadius: 22,
-        background: "linear-gradient(135deg, #2D7CC0 0%, #1F6FB2 100%)",
-        color: "#FFFFFF",
+        padding: "18px 18px",
         display: "flex",
         alignItems: "center",
         gap: 14,
-        padding: "0 18px",
+        textAlign: "left",
+        boxShadow: "0 14px 34px rgba(31,111,178,0.22)",
         cursor: "pointer",
-        boxShadow: "0 10px 30px rgba(31,111,178,0.18)",
+        color: "#FFFFFF",
       }}
     >
-      <span
+      <div
         style={{
-          width: 46,
-          height: 46,
-          borderRadius: 16,
+          width: 56,
+          height: 56,
+          borderRadius: 18,
           background: "rgba(255,255,255,0.16)",
           display: "flex",
           alignItems: "center",
@@ -66,18 +97,33 @@ export default function InstallButton() {
           flexShrink: 0,
         }}
       >
-        <Smartphone size={24} color="#FFFFFF" />
-      </span>
+        <Download size={25} color="#FFFFFF" />
+      </div>
 
-      <span
-        style={{
-          fontSize: 18,
-          fontWeight: 800,
-          lineHeight: 1.1,
-        }}
-      >
-        Scarica App su Android
-      </span>
+      <div>
+        <strong
+          style={{
+            display: "block",
+            fontSize: 19,
+            fontWeight: 850,
+            color: "#FFFFFF",
+            marginBottom: 5,
+          }}
+        >
+          Scarica su Android
+        </strong>
+
+        <span
+          style={{
+            display: "block",
+            fontSize: 14,
+            lineHeight: 1.45,
+            color: "rgba(255,255,255,0.82)",
+          }}
+        >
+          Installa la app sul tuo telefono.
+        </span>
+      </div>
     </button>
   );
 }

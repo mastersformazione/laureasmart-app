@@ -12,6 +12,27 @@ import {
   UserCircle2,
 } from "lucide-react";
 
+async function trackInstallEvent(eventType: string, platform: string) {
+  try {
+    const storedUser = localStorage.getItem("gps_user");
+    const user = storedUser ? JSON.parse(storedUser) : null;
+
+    await fetch("https://laureasmart.it/api/salva-install-event.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_email: user?.email || "",
+        event_type: eventType,
+        platform,
+      }),
+    });
+  } catch (error) {
+    console.error("Errore tracking install:", error);
+  }
+}
+
 export default function Home() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -23,6 +44,15 @@ export default function Home() {
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone ===
         true;
+
+    if (isStandalone) {
+      const giaTracciato = localStorage.getItem("standalone_open_tracked");
+
+      if (!giaTracciato) {
+        trackInstallEvent("open_standalone", "pwa");
+        localStorage.setItem("standalone_open_tracked", "si");
+      }
+    }
 
     if (storedUser && isStandalone) {
       router.replace("/dashboard");
@@ -160,6 +190,7 @@ export default function Home() {
 
             <button
               type="button"
+              onClick={() => trackInstallEvent("click_scarica_iphone", "ios")}
               style={{
                 width: "100%",
                 border: "1px solid rgba(58,160,255,0.22)",
