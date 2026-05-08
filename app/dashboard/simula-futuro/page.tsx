@@ -12,9 +12,16 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import BottomNav from "@/components/ui/BottomNav";
+import {
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  RefreshCcw,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 
 type TitoloStudio = "diploma" | "triennale" | "magistrale" | "altro";
 type Obiettivo = "stabilita" | "carriera" | "cambio_settore" | "concorsi";
@@ -136,16 +143,38 @@ function createChartData(scores: ReturnType<typeof calculateScores>) {
 
 function BarScore({ label, value }: { label: string; value: number }) {
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-sm">
-        <span className="font-semibold text-[#102033]">{label}</span>
-        <span className="font-bold text-[#1F6FB2]">{value}%</span>
+    <div style={{ display: "grid", gap: 9 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 12,
+          fontSize: 14,
+        }}
+      >
+        <span style={{ fontWeight: 850, color: "rgba(255,255,255,0.78)" }}>
+          {label}
+        </span>
+
+        <span style={{ fontWeight: 900, color: "#78C2FF" }}>{value}%</span>
       </div>
 
-      <div className="h-3 rounded-full bg-[rgba(31,111,178,0.10)]">
+      <div
+        style={{
+          height: 12,
+          borderRadius: 999,
+          background: "rgba(255,255,255,0.08)",
+          overflow: "hidden",
+        }}
+      >
         <div
-          className="h-3 rounded-full bg-[#1F6FB2] shadow-[0_6px_14px_rgba(31,111,178,0.22)]"
-          style={{ width: `${value}%` }}
+          style={{
+            width: `${value}%`,
+            height: "100%",
+            borderRadius: 999,
+            background: "linear-gradient(90deg, #1F6FB2, #3AA0FF, #78C2FF)",
+            boxShadow: "0 8px 18px rgba(58,160,255,0.26)",
+          }}
         />
       </div>
     </div>
@@ -173,23 +202,114 @@ export default function SimulaFuturoPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F8FBFF] px-4 pb-[120px] pt-5">
-      <div className="mx-auto max-w-md space-y-5">
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: "20px 16px 120px",
+        color: "#FFFFFF",
+        background:
+          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+      }}
+    >
+      <div
+        style={{ maxWidth: 430, margin: "0 auto", display: "grid", gap: 20 }}
+      >
         <button
           onClick={() => router.push("/dashboard")}
-          className="text-sm font-semibold text-[#1F6FB2]"
+          style={{
+            border: "none",
+            background: "transparent",
+            color: "#78C2FF",
+            fontSize: 14,
+            fontWeight: 850,
+            textAlign: "left",
+            padding: 0,
+            cursor: "pointer",
+          }}
         >
           ← Torna alla dashboard
         </button>
 
-        <section className="rounded-[30px] bg-gradient-to-br from-[#1F6FB2] to-[#155487] p-6 text-white shadow-[0_18px_42px_rgba(31,111,178,0.20)]">
-          <p className="text-sm font-bold opacity-90">Laurea Smart</p>
+        <section
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 32,
+            padding: 28,
+            background:
+              "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
+            border: "1px solid rgba(255,255,255,0.14)",
+            boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              right: -44,
+              top: -44,
+              width: 155,
+              height: 155,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.14)",
+            }}
+          />
 
-          <h1 className="mt-2 text-[32px] font-extrabold leading-[35px] tracking-[-0.7px]">
+          <div
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 22,
+              background: "rgba(255,255,255,0.16)",
+              border: "1px solid rgba(255,255,255,0.16)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 18,
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            <TrendingUp size={31} />
+          </div>
+
+          <p
+            style={{
+              margin: "0 0 8px",
+              fontSize: 14,
+              fontWeight: 850,
+              opacity: 0.92,
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            Laurea Smart
+          </p>
+
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 34,
+              lineHeight: 1.05,
+              fontWeight: 900,
+              letterSpacing: "-1px",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
             Simula il tuo futuro
           </h1>
 
-          <p className="mt-3 text-[15px] leading-6 opacity-95">
+          <p
+            style={{
+              margin: "14px 0 0",
+              fontSize: 15,
+              lineHeight: 1.6,
+              opacity: 0.95,
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
             Scopri come potrebbe evolvere il tuo profilo nei prossimi 36 mesi in
             base al tuo titolo di studio, ai tuoi obiettivi e al percorso più
             adatto.
@@ -197,12 +317,12 @@ export default function SimulaFuturoPage() {
         </section>
 
         {!showResult && (
-          <Card
+          <DarkCard
             title="Costruiamo la tua simulazione"
             description="Rispondi a poche domande per generare una proiezione personalizzata."
             badge="Gratis"
           >
-            <div className="space-y-5">
+            <div style={{ display: "grid", gap: 20, marginTop: 18 }}>
               <SelectField
                 label="Titolo di studio attuale"
                 value={form.titolo}
@@ -261,25 +381,59 @@ export default function SimulaFuturoPage() {
                 onClick={handleSubmit}
               />
             </div>
-          </Card>
+          </DarkCard>
         )}
 
         {showResult && (
-          <div className="space-y-5">
-            <Card
+          <div style={{ display: "grid", gap: 20 }}>
+            <DarkCard
               title={percorso}
               description="Nei prossimi 36 mesi questo percorso potrebbe aumentare la spendibilità del tuo profilo, aprendo nuove opportunità coerenti con il tuo obiettivo."
               badge="Percorso"
+              icon={<Sparkles size={24} />}
             />
 
-            <Card title="Curva di crescita del profilo" badge="36 mesi">
-              <div className="h-64 w-full">
+            <DarkCard
+              title="Curva di crescita del profilo"
+              badge="36 mesi"
+              icon={<BarChart3 size={24} />}
+            >
+              <div
+                style={{
+                  height: 260,
+                  width: "100%",
+                  marginTop: 18,
+                  borderRadius: 22,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  padding: 8,
+                }}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E4EAF1" />
-                    <XAxis dataKey="mese" fontSize={12} />
-                    <YAxis domain={[0, 100]} fontSize={12} />
-                    <Tooltip />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(255,255,255,0.10)"
+                    />
+                    <XAxis
+                      dataKey="mese"
+                      fontSize={12}
+                      stroke="rgba(255,255,255,0.55)"
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      fontSize={12}
+                      stroke="rgba(255,255,255,0.55)"
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: "#102033",
+                        border: "1px solid rgba(255,255,255,0.10)",
+                        borderRadius: 14,
+                        color: "#FFFFFF",
+                      }}
+                      labelStyle={{ color: "#FFFFFF" }}
+                    />
                     <Line
                       type="monotone"
                       dataKey="senzaPercorso"
@@ -292,7 +446,7 @@ export default function SimulaFuturoPage() {
                       type="monotone"
                       dataKey="conPercorso"
                       name="Con percorso"
-                      stroke="#1F6FB2"
+                      stroke="#3AA0FF"
                       strokeWidth={3}
                       dot={{ r: 4 }}
                     />
@@ -300,14 +454,21 @@ export default function SimulaFuturoPage() {
                 </ResponsiveContainer>
               </div>
 
-              <p className="mt-4 text-xs leading-5 text-[#71717A]">
+              <p
+                style={{
+                  margin: "14px 0 0",
+                  fontSize: 12,
+                  lineHeight: 1.55,
+                  color: "rgba(255,255,255,0.55)",
+                }}
+              >
                 Il grafico rappresenta un indice orientativo di crescita
                 professionale, non una previsione di stipendio.
               </p>
-            </Card>
+            </DarkCard>
 
-            <Card title="Indicatori principali" badge="Profilo">
-              <div className="space-y-5">
+            <DarkCard title="Indicatori principali" badge="Profilo">
+              <div style={{ display: "grid", gap: 20, marginTop: 18 }}>
                 <BarScore
                   label="Compatibilità con il tuo obiettivo"
                   value={scores.compatibilita}
@@ -325,11 +486,24 @@ export default function SimulaFuturoPage() {
                   value={scores.stabilita}
                 />
               </div>
-            </Card>
+            </DarkCard>
 
-            <Card title="Tabella riassuntiva" badge="Sintesi">
-              <div className="overflow-hidden rounded-2xl border border-[rgba(31,111,178,0.10)]">
-                <table className="w-full text-sm">
+            <DarkCard title="Tabella riassuntiva" badge="Sintesi">
+              <div
+                style={{
+                  marginTop: 18,
+                  overflow: "hidden",
+                  borderRadius: 20,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: 14,
+                  }}
+                >
                   <tbody>
                     <SummaryRow label="Percorso" value={percorso} />
                     <SummaryRow label="Orizzonte" value="36 mesi" />
@@ -345,28 +519,49 @@ export default function SimulaFuturoPage() {
                   </tbody>
                 </table>
               </div>
-            </Card>
+            </DarkCard>
 
-            <Card title="Opportunità collegate" badge="Possibilità">
-              <div className="flex flex-wrap gap-2">
+            <DarkCard title="Opportunità collegate" badge="Possibilità">
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 9,
+                  marginTop: 18,
+                }}
+              >
                 {opportunita.map((item) => (
                   <span
                     key={item}
-                    className="rounded-full bg-[rgba(31,111,178,0.10)] px-3 py-2 text-xs font-bold text-[#1F6FB2]"
+                    style={{
+                      borderRadius: 999,
+                      background: "rgba(58,160,255,0.16)",
+                      color: "#78C2FF",
+                      padding: "9px 12px",
+                      fontSize: 12,
+                      fontWeight: 900,
+                    }}
                   >
                     {item}
                   </span>
                 ))}
               </div>
 
-              <p className="mt-4 text-sm leading-6 text-[#71717A]">
+              <p
+                style={{
+                  margin: "16px 0 0",
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.64)",
+                }}
+              >
                 Il valore principale del percorso è l’apertura di nuove
                 possibilità: più canali lavorativi, maggiore coerenza del
                 profilo e una strategia più chiara per il futuro.
               </p>
-            </Card>
+            </DarkCard>
 
-            <div className="space-y-3">
+            <div style={{ display: "grid", gap: 12 }}>
               <Button
                 label="Vedi i corsi consigliati"
                 variant="primary"
@@ -375,8 +570,23 @@ export default function SimulaFuturoPage() {
 
               <button
                 onClick={() => setShowResult(false)}
-                className="w-full rounded-2xl bg-white px-4 py-4 text-base font-semibold text-[#102033] shadow-[0_8px_22px_rgba(31,111,178,0.08)] active:scale-[0.98]"
+                style={{
+                  width: "100%",
+                  minHeight: 56,
+                  borderRadius: 20,
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  background: "rgba(255,255,255,0.08)",
+                  color: "#FFFFFF",
+                  fontSize: 15,
+                  fontWeight: 850,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 9,
+                  cursor: "pointer",
+                }}
               >
+                <RefreshCcw size={18} />
                 Modifica simulazione
               </button>
             </div>
@@ -386,6 +596,108 @@ export default function SimulaFuturoPage() {
 
       <BottomNav />
     </main>
+  );
+}
+
+function DarkCard({
+  title,
+  description,
+  badge,
+  icon,
+  children,
+}: {
+  title: string;
+  description?: string;
+  badge?: string;
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <section
+      style={{
+        padding: 20,
+        borderRadius: 28,
+        background: "rgba(17,32,51,0.86)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        backdropFilter: "blur(16px)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 13 }}>
+        {icon && (
+          <div
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 18,
+              background: "rgba(58,160,255,0.16)",
+              color: "#78C2FF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            {icon}
+          </div>
+        )}
+
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: 12,
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 21,
+                lineHeight: 1.16,
+                fontWeight: 900,
+                color: "#FFFFFF",
+                letterSpacing: "-0.45px",
+              }}
+            >
+              {title}
+            </h2>
+
+            {badge && (
+              <span
+                style={{
+                  borderRadius: 999,
+                  background: "rgba(58,160,255,0.16)",
+                  color: "#78C2FF",
+                  padding: "6px 10px",
+                  fontSize: 11,
+                  fontWeight: 900,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {badge}
+              </span>
+            )}
+          </div>
+
+          {description && (
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.66)",
+              }}
+            >
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {children}
+    </section>
   );
 }
 
@@ -399,11 +711,31 @@ function SummaryRow({
   last?: boolean;
 }) {
   return (
-    <tr className={last ? "" : "border-b border-[rgba(31,111,178,0.10)]"}>
-      <td className="bg-[rgba(31,111,178,0.06)] p-3 font-bold text-[#102033]">
+    <tr>
+      <td
+        style={{
+          padding: 13,
+          width: "38%",
+          background: "rgba(58,160,255,0.10)",
+          borderBottom: last ? "none" : "1px solid rgba(255,255,255,0.08)",
+          fontWeight: 900,
+          color: "#FFFFFF",
+          verticalAlign: "top",
+        }}
+      >
         {label}
       </td>
-      <td className="p-3 text-[#5F6B7A]">{value}</td>
+
+      <td
+        style={{
+          padding: 13,
+          borderBottom: last ? "none" : "1px solid rgba(255,255,255,0.08)",
+          color: "rgba(255,255,255,0.68)",
+          lineHeight: 1.45,
+        }}
+      >
+        {value}
+      </td>
     </tr>
   );
 }

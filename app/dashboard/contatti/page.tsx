@@ -7,6 +7,8 @@ import {
   ShieldCheck,
   UserRound,
   HeartHandshake,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 
 export default function ContattiPage() {
@@ -22,25 +24,77 @@ export default function ContattiPage() {
         paddingBottom: 120,
         maxWidth: 430,
         margin: "0 auto",
-        background: "#F8FBFF",
+        color: "#FFFFFF",
+        background:
+          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
       }}
     >
       <section
         style={{
-          background: "linear-gradient(135deg, #1F6FB2 0%, #155487 100%)",
-          borderRadius: 30,
+          position: "relative",
+          overflow: "hidden",
+          background:
+            "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
+          borderRadius: 32,
           padding: 28,
           color: "#FFFFFF",
-          boxShadow: "0 18px 40px rgba(31,111,178,0.18)",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+          border: "1px solid rgba(255,255,255,0.14)",
         }}
       >
+        <div
+          style={{
+            position: "absolute",
+            right: -42,
+            top: -42,
+            width: 150,
+            height: 150,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.14)",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            left: -54,
+            bottom: -64,
+            width: 180,
+            height: 180,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.08)",
+          }}
+        />
+
+        <div
+          style={{
+            width: 58,
+            height: 58,
+            borderRadius: 22,
+            background: "rgba(255,255,255,0.16)",
+            border: "1px solid rgba(255,255,255,0.16)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 18,
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 12px 28px rgba(0,0,0,0.18)",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <HeartHandshake size={30} />
+        </div>
+
         <p
           style={{
             margin: "0 0 10px",
             fontSize: 14,
-            opacity: 0.9,
-            fontWeight: 700,
+            opacity: 0.92,
+            fontWeight: 800,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           Supporto Laurea Smart
@@ -49,10 +103,12 @@ export default function ContattiPage() {
         <h1
           style={{
             margin: 0,
-            fontSize: 32,
-            lineHeight: 1.08,
-            fontWeight: 850,
-            letterSpacing: "-0.7px",
+            fontSize: 34,
+            lineHeight: 1.04,
+            fontWeight: 900,
+            letterSpacing: "-1px",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           Parla gratis con un orientatore
@@ -63,7 +119,9 @@ export default function ContattiPage() {
             marginTop: 16,
             lineHeight: 1.6,
             fontSize: 15,
-            opacity: 0.95,
+            opacity: 0.96,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           Una persona reale ti aiuta a capire da dove partire, quale percorso
@@ -73,12 +131,13 @@ export default function ContattiPage() {
 
       <section
         style={{
-          marginTop: 22,
-          background: "#FFFFFF",
-          border: "1px solid #E4EAF1",
-          borderRadius: 26,
-          padding: 22,
-          boxShadow: "0 8px 28px rgba(15,23,42,0.05)",
+          marginTop: 20,
+          padding: 18,
+          borderRadius: 28,
+          background: "rgba(17,32,51,0.86)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+          backdropFilter: "blur(16px)",
         }}
       >
         <InfoRow
@@ -110,49 +169,90 @@ export default function ContattiPage() {
       <section
         style={{
           marginTop: 22,
-          background: "#FFFFFF",
-          border: "1px solid #D7E7F5",
-          borderRadius: 28,
-          padding: 22,
-          boxShadow: "0 12px 34px rgba(15,23,42,0.06)",
+          position: "relative",
+          overflow: "hidden",
+          background:
+            "linear-gradient(135deg, rgba(37,211,102,0.18) 0%, rgba(17,32,51,0.92) 48%, rgba(17,32,51,0.96) 100%)",
+          border: "1px solid rgba(37,211,102,0.28)",
+          borderRadius: 32,
+          padding: 24,
+          boxShadow: "0 22px 54px rgba(0,0,0,0.34)",
         }}
       >
         <div
           style={{
-            width: 58,
-            height: 58,
-            borderRadius: 20,
+            position: "absolute",
+            right: -46,
+            top: -46,
+            width: 150,
+            height: 150,
+            borderRadius: 999,
+            background: "rgba(37,211,102,0.16)",
+          }}
+        />
+
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 24,
             background: "#25D366",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: "#FFFFFF",
-            marginBottom: 16,
-            boxShadow: "0 12px 24px rgba(37,211,102,0.22)",
+            marginBottom: 18,
+            boxShadow: "0 16px 34px rgba(37,211,102,0.28)",
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          <MessageCircle size={29} />
+          <MessageCircle size={32} />
+        </div>
+
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "7px 12px",
+            borderRadius: 999,
+            background: "rgba(37,211,102,0.13)",
+            color: "#7CFFB1",
+            fontSize: 12,
+            fontWeight: 900,
+            marginBottom: 14,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <Sparkles size={14} />
+          Risposta da un consulente reale
         </div>
 
         <h2
           style={{
             margin: 0,
-            fontSize: 23,
-            lineHeight: 1.15,
-            fontWeight: 850,
-            color: "#09090B",
-            letterSpacing: "-0.4px",
+            fontSize: 26,
+            lineHeight: 1.12,
+            fontWeight: 900,
+            color: "#FFFFFF",
+            letterSpacing: "-0.6px",
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          Scrivici su WhatsApp
+          Scrivici ora su WhatsApp
         </h2>
 
         <p
           style={{
-            margin: "10px 0 18px",
-            color: "#5F6B7A",
+            margin: "12px 0 20px",
+            color: "rgba(255,255,255,0.72)",
             fontSize: 15,
-            lineHeight: 1.55,
+            lineHeight: 1.6,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           Ti risponderemo appena possibile negli orari di disponibilità. Puoi
@@ -165,8 +265,8 @@ export default function ContattiPage() {
           rel="noopener noreferrer"
           style={{
             width: "100%",
-            height: 58,
-            borderRadius: 20,
+            height: 62,
+            borderRadius: 22,
             background: "#25D366",
             color: "#FFFFFF",
             display: "flex",
@@ -174,13 +274,16 @@ export default function ContattiPage() {
             justifyContent: "center",
             gap: 10,
             textDecoration: "none",
-            fontWeight: 850,
-            fontSize: 16,
-            boxShadow: "0 12px 24px rgba(37,211,102,0.22)",
+            fontWeight: 900,
+            fontSize: 17,
+            boxShadow: "0 16px 34px rgba(37,211,102,0.30)",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <MessageCircle size={22} />
           Apri WhatsApp
+          <ArrowRight size={20} />
         </a>
       </section>
 
@@ -188,7 +291,7 @@ export default function ContattiPage() {
         style={{
           margin: "18px auto 0",
           textAlign: "center",
-          color: "#71717A",
+          color: "rgba(255,255,255,0.58)",
           fontSize: 13,
           lineHeight: 1.5,
           maxWidth: 330,
@@ -221,20 +324,21 @@ function InfoRow({
         gap: 13,
         paddingBottom: last ? 0 : 16,
         marginBottom: last ? 0 : 16,
-        borderBottom: last ? "none" : "1px solid #EEF2F6",
+        borderBottom: last ? "none" : "1px solid rgba(255,255,255,0.08)",
       }}
     >
       <div
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: 16,
-          background: "#EAF4FC",
-          color: "#1F6FB2",
+          width: 46,
+          height: 46,
+          borderRadius: 17,
+          background: "rgba(58,160,255,0.16)",
+          color: "#78C2FF",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
+          boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
         }}
       >
         {icon}
@@ -245,8 +349,8 @@ function InfoRow({
           style={{
             margin: 0,
             fontSize: 16,
-            fontWeight: 850,
-            color: "#102033",
+            fontWeight: 900,
+            color: "#FFFFFF",
           }}
         >
           {title}
@@ -254,10 +358,10 @@ function InfoRow({
 
         <p
           style={{
-            margin: "5px 0 0",
+            margin: "6px 0 0",
             fontSize: 14,
-            lineHeight: 1.5,
-            color: "#5F6B7A",
+            lineHeight: 1.55,
+            color: "rgba(255,255,255,0.66)",
           }}
         >
           {text}

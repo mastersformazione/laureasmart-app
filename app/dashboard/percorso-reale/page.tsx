@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import BottomNav from "@/components/ui/BottomNav";
-import ProgressBar from "@/components/ui/ProgressBar";
-import QuizCard from "@/components/ui/QuizCard";
-import SimulationResult from "@/components/ui/SimulationResult";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  MessageCircle,
+  RefreshCcw,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 
 type Answers = Record<string, string>;
 
@@ -218,8 +225,8 @@ export default function PercorsoRealePage() {
   const [completed, setCompleted] = useState(false);
 
   const current = domande[step] || domande[0];
-
   const result = calcolaRisultato(answers);
+  const progress = Math.round(((step + 1) / domande.length) * 100);
 
   async function handleSelect(value: string) {
     const updated = {
@@ -231,16 +238,15 @@ export default function PercorsoRealePage() {
 
     if (step < domande.length - 1) {
       setStep(step + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       const risultato = calcolaRisultato(updated);
 
       localStorage.setItem("percorso_reale_data", JSON.stringify(updated));
-
       localStorage.setItem("percorso_reale_result", JSON.stringify(risultato));
 
       try {
         const storedUser = localStorage.getItem("gps_user");
-
         const user = storedUser ? JSON.parse(storedUser) : null;
 
         await fetch("https://laureasmart.it/api/salva-percorso-reale.php", {
@@ -273,6 +279,7 @@ export default function PercorsoRealePage() {
       }
 
       setCompleted(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
 
@@ -280,6 +287,7 @@ export default function PercorsoRealePage() {
     setStep(0);
     setAnswers({});
     setCompleted(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleContact() {
@@ -291,35 +299,109 @@ export default function PercorsoRealePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F8FBFF] px-4 pb-[120px] pt-5">
-      <div className="mx-auto max-w-md space-y-5">
-        <section className="rounded-[30px] bg-gradient-to-br from-[#1F6FB2] to-[#155487] p-6 text-white shadow-[0_18px_42px_rgba(31,111,178,0.20)]">
-          <p className="text-sm font-bold opacity-90">Laurea Smart</p>
-
-          <h1 className="mt-2 text-[31px] font-extrabold leading-[34px] tracking-[-0.7px]">
-            Il tuo percorso reale
-          </h1>
-
-          <p className="mt-3 text-[15px] leading-6 opacity-95">
-            Scopri se l’università online può entrare davvero nella tua vita.
-          </p>
-        </section>
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: "20px 16px 120px",
+        color: "#FFFFFF",
+        background:
+          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+      }}
+    >
+      <div
+        style={{ maxWidth: 430, margin: "0 auto", display: "grid", gap: 20 }}
+      >
+        <Hero />
 
         {!completed && (
           <>
-            <ProgressBar current={step + 1} total={domande.length} />
+            <Progress current={step + 1} total={domande.length} />
 
-            <QuizCard
-              domanda={current.domanda}
-              descrizione={current.descrizione}
-              options={current.options}
-              onSelect={handleSelect}
-            />
+            <section
+              style={{
+                padding: 20,
+                borderRadius: 28,
+                background: "rgba(17,32,51,0.86)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+                backdropFilter: "blur(16px)",
+              }}
+            >
+              <div style={{ marginBottom: 18 }}>
+                <p
+                  style={{
+                    margin: "0 0 8px",
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: "#78C2FF",
+                  }}
+                >
+                  Domanda {step + 1} di {domande.length}
+                </p>
+
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: 25,
+                    lineHeight: 1.16,
+                    fontWeight: 900,
+                    color: "#FFFFFF",
+                    letterSpacing: "-0.6px",
+                  }}
+                >
+                  {current.domanda}
+                </h2>
+
+                {current.descrizione && (
+                  <p
+                    style={{
+                      margin: "10px 0 0",
+                      fontSize: 14,
+                      lineHeight: 1.55,
+                      color: "rgba(255,255,255,0.64)",
+                    }}
+                  >
+                    {current.descrizione}
+                  </p>
+                )}
+              </div>
+
+              <div style={{ display: "grid", gap: 10 }}>
+                {current.options.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleSelect(option.value)}
+                    style={{
+                      width: "100%",
+                      minHeight: 58,
+                      borderRadius: 20,
+                      border: "1px solid rgba(255,255,255,0.10)",
+                      background: "rgba(255,255,255,0.07)",
+                      color: "#FFFFFF",
+                      padding: "14px 15px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      textAlign: "left",
+                      fontSize: 15,
+                      fontWeight: 850,
+                      cursor: "pointer",
+                      boxShadow: "0 10px 24px rgba(0,0,0,0.14)",
+                    }}
+                  >
+                    <span>{option.label}</span>
+                    <ArrowRight size={18} color="#78C2FF" />
+                  </button>
+                ))}
+              </div>
+            </section>
           </>
         )}
 
         {completed && (
-          <SimulationResult
+          <ResultCard
             compatibilita={result.compatibilita}
             stress={result.stress}
             stressText={result.stressText}
@@ -335,5 +417,514 @@ export default function PercorsoRealePage() {
 
       <BottomNav />
     </main>
+  );
+}
+
+function Hero() {
+  return (
+    <section
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: 32,
+        padding: 28,
+        background:
+          "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
+        border: "1px solid rgba(255,255,255,0.14)",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          right: -44,
+          top: -44,
+          width: 155,
+          height: 155,
+          borderRadius: 999,
+          background: "rgba(255,255,255,0.14)",
+        }}
+      />
+
+      <div
+        style={{
+          width: 60,
+          height: 60,
+          borderRadius: 22,
+          background: "rgba(255,255,255,0.16)",
+          border: "1px solid rgba(255,255,255,0.16)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 18,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <Sparkles size={31} />
+      </div>
+
+      <p
+        style={{
+          margin: "0 0 8px",
+          fontSize: 14,
+          fontWeight: 850,
+          opacity: 0.92,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        Laurea Smart
+      </p>
+
+      <h1
+        style={{
+          margin: 0,
+          fontSize: 34,
+          lineHeight: 1.05,
+          fontWeight: 900,
+          letterSpacing: "-1px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        Il tuo percorso reale
+      </h1>
+
+      <p
+        style={{
+          margin: "14px 0 0",
+          fontSize: 15,
+          lineHeight: 1.6,
+          opacity: 0.95,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        Scopri se l’università online può entrare davvero nella tua vita.
+      </p>
+    </section>
+  );
+}
+
+function Progress({ current, total }: { current: number; total: number }) {
+  const progress = Math.round((current / total) * 100);
+
+  return (
+    <section
+      style={{
+        padding: 16,
+        borderRadius: 22,
+        background: "rgba(17,32,51,0.72)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.20)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 10,
+          color: "#78C2FF",
+          fontSize: 13,
+          fontWeight: 900,
+        }}
+      >
+        <span>
+          Step {current} di {total}
+        </span>
+        <span>{progress}%</span>
+      </div>
+
+      <div
+        style={{
+          height: 8,
+          width: "100%",
+          borderRadius: 999,
+          overflow: "hidden",
+          background: "rgba(255,255,255,0.08)",
+        }}
+      >
+        <div
+          style={{
+            width: `${progress}%`,
+            height: "100%",
+            borderRadius: 999,
+            background: "linear-gradient(90deg, #3AA0FF, #78C2FF)",
+          }}
+        />
+      </div>
+    </section>
+  );
+}
+
+function ResultCard({
+  compatibilita,
+  stress,
+  stressText,
+  settimana,
+  strategia,
+  rassicurazione,
+  timeline,
+  onRestart,
+  onContact,
+}: {
+  compatibilita: number;
+  stress: "Basso" | "Moderato" | "Alto";
+  stressText: string;
+  settimana: string[];
+  strategia: string[];
+  rassicurazione: string;
+  timeline: {
+    periodo: string;
+    testo: string;
+  }[];
+  onRestart: () => void;
+  onContact: () => void;
+}) {
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <section
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          padding: 24,
+          borderRadius: 30,
+          background:
+            "linear-gradient(135deg, rgba(31,111,178,0.98) 0%, rgba(58,160,255,0.88) 100%)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+        }}
+      >
+        <p
+          style={{
+            margin: "0 0 8px",
+            fontSize: 13,
+            fontWeight: 900,
+            opacity: 0.92,
+          }}
+        >
+          Risultato simulazione
+        </p>
+
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 31,
+            lineHeight: 1.06,
+            fontWeight: 900,
+            letterSpacing: "-0.9px",
+          }}
+        >
+          Compatibilità {compatibilita}%
+        </h2>
+
+        <p
+          style={{
+            margin: "12px 0 0",
+            fontSize: 15,
+            lineHeight: 1.55,
+            opacity: 0.95,
+          }}
+        >
+          {stressText}
+        </p>
+      </section>
+
+      <DarkCard
+        icon={<ShieldCheck size={23} />}
+        title="Livello di stress stimato"
+        description={stress}
+        badge="Analisi"
+      />
+
+      <DarkList
+        icon={<Clock size={23} />}
+        title="Settimana consigliata"
+        items={settimana}
+      />
+
+      <DarkList
+        icon={<TrendingUp size={23} />}
+        title="Strategia consigliata"
+        items={strategia}
+      />
+
+      <DarkCard
+        icon={<CheckCircle2 size={23} />}
+        title="Da ricordare"
+        description={rassicurazione}
+        badge="Metodo"
+      />
+
+      <section
+        style={{
+          padding: 20,
+          borderRadius: 28,
+          background: "rgba(17,32,51,0.86)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+          backdropFilter: "blur(16px)",
+        }}
+      >
+        <h3
+          style={{
+            margin: "0 0 14px",
+            fontSize: 20,
+            fontWeight: 900,
+            color: "#FFFFFF",
+            letterSpacing: "-0.4px",
+          }}
+        >
+          Timeline realistica
+        </h3>
+
+        <div style={{ display: "grid", gap: 12 }}>
+          {timeline.map((item) => (
+            <div
+              key={item.periodo}
+              style={{
+                padding: 14,
+                borderRadius: 20,
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  fontWeight: 900,
+                  color: "#78C2FF",
+                }}
+              >
+                {item.periodo}
+              </p>
+
+              <p
+                style={{
+                  margin: "5px 0 0",
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  color: "rgba(255,255,255,0.66)",
+                }}
+              >
+                {item.testo}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <button
+        onClick={onContact}
+        style={{
+          width: "100%",
+          minHeight: 60,
+          borderRadius: 22,
+          border: "none",
+          background: "#25D366",
+          color: "#FFFFFF",
+          fontSize: 16,
+          fontWeight: 900,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+          cursor: "pointer",
+          boxShadow: "0 16px 34px rgba(37,211,102,0.30)",
+        }}
+      >
+        <MessageCircle size={22} />
+        Parla con un orientatore
+      </button>
+
+      <button
+        onClick={onRestart}
+        style={{
+          width: "100%",
+          minHeight: 56,
+          borderRadius: 20,
+          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(255,255,255,0.08)",
+          color: "#FFFFFF",
+          fontSize: 15,
+          fontWeight: 850,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 9,
+          cursor: "pointer",
+        }}
+      >
+        <RefreshCcw size={18} />
+        Rifai la simulazione
+      </button>
+    </div>
+  );
+}
+
+function DarkCard({
+  icon,
+  title,
+  description,
+  badge,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  badge?: string;
+}) {
+  return (
+    <section
+      style={{
+        display: "flex",
+        gap: 13,
+        padding: 18,
+        borderRadius: 26,
+        background: "rgba(17,32,51,0.86)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        backdropFilter: "blur(16px)",
+      }}
+    >
+      <div
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 18,
+          background: "rgba(58,160,255,0.16)",
+          color: "#78C2FF",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+
+      <div style={{ flex: 1 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 10,
+          }}
+        >
+          <h3
+            style={{
+              margin: 0,
+              fontSize: 16,
+              fontWeight: 900,
+              color: "#FFFFFF",
+            }}
+          >
+            {title}
+          </h3>
+
+          {badge && (
+            <span
+              style={{
+                padding: "5px 9px",
+                borderRadius: 999,
+                background: "rgba(58,160,255,0.16)",
+                color: "#78C2FF",
+                fontSize: 11,
+                fontWeight: 900,
+              }}
+            >
+              {badge}
+            </span>
+          )}
+        </div>
+
+        <p
+          style={{
+            margin: "7px 0 0",
+            fontSize: 14,
+            lineHeight: 1.5,
+            color: "rgba(255,255,255,0.66)",
+          }}
+        >
+          {description}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function DarkList({
+  icon,
+  title,
+  items,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  items: string[];
+}) {
+  return (
+    <section
+      style={{
+        padding: 18,
+        borderRadius: 26,
+        background: "rgba(17,32,51,0.86)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        backdropFilter: "blur(16px)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 18,
+            background: "rgba(58,160,255,0.16)",
+            color: "#78C2FF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </div>
+
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 18,
+            fontWeight: 900,
+            color: "#FFFFFF",
+          }}
+        >
+          {title}
+        </h3>
+      </div>
+
+      <div style={{ display: "grid", gap: 9, marginTop: 14 }}>
+        {items.map((item) => (
+          <div
+            key={item}
+            style={{
+              display: "flex",
+              gap: 9,
+              color: "rgba(255,255,255,0.68)",
+              fontSize: 14,
+              lineHeight: 1.5,
+            }}
+          >
+            <CheckCircle2
+              size={17}
+              color="#78C2FF"
+              style={{ flexShrink: 0, marginTop: 1 }}
+            />
+            <span>{item}</span>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

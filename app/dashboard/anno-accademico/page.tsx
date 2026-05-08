@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import SelectField from "@/components/ui/SelectField";
 import BottomNav from "@/components/ui/BottomNav";
@@ -149,16 +148,16 @@ Carico: ${result.carico}`
   }
 
   return (
-    <main className="min-h-screen bg-[#F8FBFF] px-4 pb-[120px] pt-5">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#173E68_0%,#0B1728_34%,#07111F_100%)] px-4 pb-[120px] pt-5 text-white">
       <div className="mx-auto max-w-md space-y-5">
         <button
           onClick={() => router.push("/dashboard")}
-          className="text-sm font-semibold text-[#1F6FB2]"
+          className="text-sm font-semibold text-[#78C2FF]"
         >
           ← Torna alla dashboard
         </button>
 
-        <section className="rounded-[30px] bg-gradient-to-br from-[#1F6FB2] to-[#155487] p-6 text-white shadow-[0_18px_42px_rgba(31,111,178,0.20)]">
+        <section className="rounded-[30px] border border-white/10 bg-gradient-to-br from-[#1F6FB2] to-[#155487] p-6 text-white shadow-[0_22px_54px_rgba(0,0,0,0.34)]">
           <p className="text-sm font-bold opacity-90">Laurea Smart</p>
 
           <h1 className="mt-2 text-[31px] font-extrabold leading-[34px] tracking-[-0.7px]">
@@ -172,7 +171,7 @@ Carico: ${result.carico}`
         </section>
 
         {!showResult && (
-          <Card
+          <DarkCard
             title="Costruiamo il tuo piano annuale"
             description="Inserisci dati indicativi: se non conosci piano di studi o sessioni, puoi verificarli con un orientatore."
             badge="Simulazione"
@@ -259,18 +258,18 @@ Carico: ${result.carico}`
                 onClick={generaPiano}
               />
             </div>
-          </Card>
+          </DarkCard>
         )}
 
         {showResult && (
           <div className="space-y-5">
-            <Card
+            <DarkCard
               title={`${result.esamiRealistici} esami realistici`}
               description={`Su ${result.esamiAnno} esami previsti, il sistema stima che tu possa puntare realisticamente a ${result.esamiRealistici} esami nell’anno, pari a circa ${result.cfuRealistici} CFU.`}
               badge={result.carico}
             />
 
-            <Card title="Ore di studio stimate" badge="Tempo">
+            <DarkCard title="Ore di studio stimate" badge="Tempo">
               <div className="grid gap-3">
                 <ResultRow
                   label="Ore settimanali disponibili"
@@ -285,33 +284,33 @@ Carico: ${result.carico}`
                   value={`${result.cfuMedioEsame} CFU`}
                 />
               </div>
-            </Card>
+            </DarkCard>
 
-            <Card title="Distribuzione per sessioni" badge="Piano">
+            <DarkCard title="Distribuzione per sessioni" badge="Piano">
               <div className="grid gap-3">
                 {result.pianoSessioni.map((item) => (
                   <div
                     key={item.sessione}
-                    className="rounded-2xl bg-[rgba(31,111,178,0.08)] px-4 py-3"
+                    className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3"
                   >
-                    <p className="text-sm font-extrabold text-[#1F6FB2]">
+                    <p className="text-sm font-extrabold text-[#78C2FF]">
                       {item.sessione}
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-[#102033]">
+                    <p className="mt-1 text-sm font-semibold text-white/75">
                       {item.testo}
                     </p>
                   </div>
                 ))}
               </div>
-            </Card>
+            </DarkCard>
 
-            <Card
+            <DarkCard
               title="Lettura del piano"
               description={result.messaggio}
               badge="Consiglio"
             />
 
-            <Card
+            <DarkCard
               title="Non conosci piano di studi o sessioni?"
               description="È normale. Prima dell’iscrizione puoi chiedere a un orientatore di verificare numero esami, CFU, modalità d’esame e calendario indicativo."
               badge="Gratis"
@@ -325,7 +324,7 @@ Carico: ${result.carico}`
 
             <button
               onClick={() => setShowResult(false)}
-              className="w-full rounded-2xl bg-white px-4 py-4 text-base font-semibold text-[#102033] shadow-[0_8px_22px_rgba(31,111,178,0.08)] active:scale-[0.98]"
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.08] px-4 py-4 text-base font-semibold text-white shadow-[0_14px_34px_rgba(0,0,0,0.22)] active:scale-[0.98]"
             >
               Modifica simulazione
             </button>
@@ -340,9 +339,45 @@ Carico: ${result.carico}`
 
 function ResultRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl bg-[rgba(31,111,178,0.08)] px-4 py-3">
-      <span className="text-sm font-bold text-[#102033]">{label}</span>
-      <span className="text-sm font-extrabold text-[#1F6FB2]">{value}</span>
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3">
+      <span className="text-sm font-bold text-white/75">{label}</span>
+      <span className="text-sm font-extrabold text-[#78C2FF]">{value}</span>
     </div>
+  );
+}
+
+function DarkCard({
+  title,
+  description,
+  badge,
+  children,
+}: {
+  title: string;
+  description?: string;
+  badge?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-[26px] border border-white/10 bg-[rgba(17,32,51,0.86)] p-[18px] shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-[16px]">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="m-0 text-[18px] font-extrabold leading-snug text-white">
+          {title}
+        </h2>
+
+        {badge && (
+          <span className="shrink-0 rounded-full bg-[#3AA0FF]/15 px-3 py-1.5 text-[11px] font-extrabold text-[#78C2FF]">
+            {badge}
+          </span>
+        )}
+      </div>
+
+      {description && (
+        <p className="mt-3 text-[14px] leading-6 text-white/65">
+          {description}
+        </p>
+      )}
+
+      {children && <div className="mt-5">{children}</div>}
+    </section>
   );
 }

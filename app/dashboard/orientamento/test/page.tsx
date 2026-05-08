@@ -2,9 +2,17 @@
 
 import { useEffect, useState } from "react";
 import OneSignal from "react-onesignal";
-import { Bell } from "lucide-react";
+import {
+  Bell,
+  Sparkles,
+  GraduationCap,
+  Clock,
+  Target,
+  MessageCircle,
+  CheckCircle2,
+  ArrowRight,
+} from "lucide-react";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import BottomNav from "@/components/ui/BottomNav";
 
 type OrientamentoData = {
@@ -59,21 +67,14 @@ export default function OrientamentoPage() {
 
     const storedUser = localStorage.getItem("gps_user");
 
-    if (!storedUser) {
-      return;
-    }
+    if (!storedUser) return;
 
-    const user = JSON.parse(storedUser) as {
-      email?: string;
-    };
+    const user = JSON.parse(storedUser) as { email?: string };
 
-    if (!user?.email) {
-      return;
-    }
+    if (!user?.email) return;
 
     try {
       await OneSignal.Notifications.requestPermission();
-
       await new Promise((resolve) => setTimeout(resolve, 1800));
 
       if (OneSignal.Notifications.permission === true) {
@@ -392,53 +393,44 @@ export default function OrientamentoPage() {
     let segmento_ingresso = "ALTRO";
     let segmento_urgenza = "BASSA";
 
-    if (data.obiettivo === "Cambiare lavoro") {
+    if (data.obiettivo === "Cambiare lavoro")
       segmento_intento = "CAMBIO_LAVORO";
-    } else if (data.obiettivo === "Aumentare lo stipendio") {
+    else if (data.obiettivo === "Aumentare lo stipendio")
       segmento_intento = "AUMENTO_STIPENDIO";
-    } else if (data.obiettivo === "Partecipare a concorsi") {
+    else if (data.obiettivo === "Partecipare a concorsi")
       segmento_intento = "CONCORSI";
-    } else if (data.obiettivo === "Insegnare") {
-      segmento_intento = "SCUOLA";
-    } else if (data.obiettivo === "Crescita personale") {
+    else if (data.obiettivo === "Insegnare") segmento_intento = "SCUOLA";
+    else if (data.obiettivo === "Crescita personale")
       segmento_intento = "CRESCITA_PERSONALE";
-    } else if (data.obiettivo === "Completare il mio profilo professionale") {
+    else if (data.obiettivo === "Completare il mio profilo professionale")
       segmento_intento = "COMPLETAMENTO_PROFILO";
-    } else if (data.obiettivo === "Non sono sicuro") {
+    else if (data.obiettivo === "Non sono sicuro")
       segmento_intento = "INDECISO";
-    }
 
-    if (data.titolo_studio === "Diploma") {
-      segmento_ingresso = "DIPLOMA";
-    } else if (data.titolo_studio === "Laurea triennale") {
+    if (data.titolo_studio === "Diploma") segmento_ingresso = "DIPLOMA";
+    else if (data.titolo_studio === "Laurea triennale")
       segmento_ingresso = "LAUREA_TRIENNALE";
-    } else if (data.titolo_studio === "Laurea magistrale") {
+    else if (data.titolo_studio === "Laurea magistrale")
       segmento_ingresso = "LAUREA_MAGISTRALE";
-    } else if (data.titolo_studio === "Laurea vecchio ordinamento") {
+    else if (data.titolo_studio === "Laurea vecchio ordinamento")
       segmento_ingresso = "LAUREA_VECCHIO_ORDINAMENTO";
-    } else if (data.titolo_studio === "Master universitario") {
+    else if (data.titolo_studio === "Master universitario")
       segmento_ingresso = "MASTER";
-    } else if (
+    else if (
       data.titolo_studio?.includes("AFAM") ||
       data.titolo_studio?.includes("conservatorio") ||
       data.titolo_studio?.includes("accademia")
-    ) {
+    )
       segmento_ingresso = "AFAM";
-    } else if (data.titolo_studio?.includes("università")) {
+    else if (data.titolo_studio?.includes("università"))
       segmento_ingresso = "UNIVERSITA_INCOMPLETA";
-    }
 
-    if (data.urgenza === "Subito / entro 1 mese") {
-      segmento_urgenza = "ALTA";
-    } else if (data.urgenza === "Entro 3 mesi") {
-      segmento_urgenza = "MEDIO_ALTA";
-    } else if (data.urgenza === "Entro 6 mesi") {
-      segmento_urgenza = "MEDIA";
-    } else if (data.urgenza === "Entro 12 mesi") {
-      segmento_urgenza = "BASSA";
-    } else if (data.urgenza === "Non ho una scadenza precisa") {
+    if (data.urgenza === "Subito / entro 1 mese") segmento_urgenza = "ALTA";
+    else if (data.urgenza === "Entro 3 mesi") segmento_urgenza = "MEDIO_ALTA";
+    else if (data.urgenza === "Entro 6 mesi") segmento_urgenza = "MEDIA";
+    else if (data.urgenza === "Entro 12 mesi") segmento_urgenza = "BASSA";
+    else if (data.urgenza === "Non ho una scadenza precisa")
       segmento_urgenza = "FREDDA";
-    }
 
     return {
       segmento_intento,
@@ -482,9 +474,7 @@ export default function OrientamentoPage() {
         try {
           if (OneSignal.Notifications.permission === true) {
             await OneSignal.login(user.email.toLowerCase().trim());
-
             console.log("OneSignal login prima sync tag OK:", user.email);
-
             await new Promise((resolve) => setTimeout(resolve, 2000));
           }
         } catch (loginError) {
@@ -562,9 +552,11 @@ export default function OrientamentoPage() {
 
     if (step < steps.length - 1) {
       setStep(step + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       await salvaDati(updatedData);
       setStep(step + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -593,59 +585,107 @@ Corso suggerito: ${risultato.corsoSuggerito}`
           paddingBottom: 120,
           maxWidth: 500,
           margin: "0 auto",
-          background: "#F8FBFF",
+          color: "#FFFFFF",
+          background:
+            "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
           fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
         }}
       >
-        <Card title={risultato.percorso} description={risultato.descrizione}>
-          <div style={{ display: "grid", gap: 12 }}>
-            <Card
-              title="Corso suggerito"
-              description={risultato.corsoSuggerito}
-            />
+        <ResultHero risultato={risultato} />
 
-            <Card title="Tempo stimato" description={risultato.tempoStimato} />
+        <div style={{ display: "grid", gap: 14, marginTop: 20 }}>
+          <ResultMetric
+            icon={<GraduationCap size={22} />}
+            title="Corso suggerito"
+            description={risultato.corsoSuggerito}
+          />
 
-            <Card
-              title="Difficoltà percepita"
-              description={risultato.difficolta}
-            />
+          <ResultMetric
+            icon={<Clock size={22} />}
+            title="Tempo stimato"
+            description={risultato.tempoStimato}
+          />
 
-            <Card title="Perché è adatto al tuo profilo">
-              <ul style={{ marginTop: 0, paddingLeft: 18 }}>
-                {risultato.motivazioni.map((item, index) => (
-                  <li key={index} style={{ marginBottom: 6 }}>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
+          <ResultMetric
+            icon={<Target size={22} />}
+            title="Difficoltà percepita"
+            description={risultato.difficolta}
+          />
 
-            <Card
-              title="Prossimo passo"
-              description={risultato.prossimoPasso}
-            />
+          <DarkCard title="Perché è adatto al tuo profilo" badge="Motivi">
+            <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+              {risultato.motivazioni.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    padding: 12,
+                    borderRadius: 18,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.72)",
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <CheckCircle2
+                    size={18}
+                    color="#78C2FF"
+                    style={{ flexShrink: 0, marginTop: 1 }}
+                  />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </DarkCard>
 
-            <Button
-              label="Ricevi il tuo piano personalizzato (gratis)"
-              variant="primary"
-              onClick={() => window.open(whatsappUrl, "_blank")}
-            />
+          <DarkCard
+            title="Prossimo passo"
+            description={risultato.prossimoPasso}
+            badge="Gratis"
+          />
 
-            <p
-              style={{
-                marginTop: 0,
-                fontSize: 13,
-                color: "#666",
-                lineHeight: 1.5,
-              }}
-            >
-              {risultato.ctaSecondaria}. Un orientatore può aiutarti a capire
-              quale percorso online è più adatto al tuo lavoro, al tuo tempo e
-              al tuo obiettivo.
-            </p>
-          </div>
-        </Card>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              width: "100%",
+              minHeight: 62,
+              borderRadius: 22,
+              background: "#25D366",
+              color: "#FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              textDecoration: "none",
+              fontWeight: 900,
+              fontSize: 16,
+              boxShadow: "0 16px 34px rgba(37,211,102,0.30)",
+            }}
+          >
+            <MessageCircle size={22} />
+            Ricevi il tuo piano personalizzato
+            <ArrowRight size={20} />
+          </a>
+
+          <p
+            style={{
+              margin: "0 auto",
+              fontSize: 13,
+              color: "rgba(255,255,255,0.58)",
+              lineHeight: 1.5,
+              textAlign: "center",
+              maxWidth: 360,
+            }}
+          >
+            {risultato.ctaSecondaria}. Un orientatore può aiutarti a capire
+            quale percorso online è più adatto al tuo lavoro, al tuo tempo e al
+            tuo obiettivo.
+          </p>
+        </div>
 
         <BottomNav />
       </main>
@@ -653,6 +693,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
   }
 
   const current = steps[step];
+  const progress = Math.round(((step + 1) / steps.length) * 100);
 
   return (
     <main
@@ -662,31 +703,159 @@ Corso suggerito: ${risultato.corsoSuggerito}`
         paddingBottom: 120,
         maxWidth: 500,
         margin: "0 auto",
-        background: "#F8FBFF",
+        color: "#FFFFFF",
+        background:
+          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
       }}
     >
-      <Card title="Trova la laurea giusta per te">
-        <div style={{ marginBottom: 18 }}>
+      <section
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: 32,
+          padding: 26,
+          background:
+            "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+          marginBottom: 20,
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            right: -42,
+            top: -42,
+            width: 150,
+            height: 150,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.14)",
+          }}
+        />
+
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div
+            style={{
+              width: 58,
+              height: 58,
+              borderRadius: 22,
+              background: "rgba(255,255,255,0.16)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 16,
+            }}
+          >
+            <Sparkles size={30} />
+          </div>
+
           <p
             style={{
               margin: "0 0 8px",
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#1F6FB2",
+              fontSize: 14,
+              fontWeight: 850,
+              opacity: 0.92,
             }}
           >
-            Domanda {step + 1} di {steps.length}
+            Test di orientamento
           </p>
+
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 33,
+              lineHeight: 1.04,
+              fontWeight: 900,
+              letterSpacing: "-1px",
+            }}
+          >
+            Trova la laurea giusta per te
+          </h1>
+
+          <p
+            style={{
+              margin: "14px 0 0",
+              fontSize: 15,
+              lineHeight: 1.6,
+              opacity: 0.94,
+            }}
+          >
+            Rispondi a poche domande: ti mostreremo un percorso più coerente con
+            titolo, obiettivo e tempo disponibile.
+          </p>
+        </div>
+      </section>
+
+      <DarkCard>
+        <div style={{ marginBottom: 18 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              marginBottom: 12,
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: 13,
+                fontWeight: 900,
+                color: "#78C2FF",
+              }}
+            >
+              Domanda {step + 1} di {steps.length}
+            </p>
+
+            <span
+              style={{
+                padding: "6px 10px",
+                borderRadius: 999,
+                background: "rgba(58,160,255,0.16)",
+                color: "#78C2FF",
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {progress}%
+            </span>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              height: 8,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.08)",
+              overflow: "hidden",
+              marginBottom: 20,
+            }}
+          >
+            <div
+              style={{
+                width: `${progress}%`,
+                height: "100%",
+                borderRadius: 999,
+                background: "linear-gradient(90deg, #3AA0FF, #78C2FF)",
+              }}
+            />
+          </div>
 
           <h2
             style={{
               margin: 0,
-              fontSize: 24,
-              lineHeight: 1.18,
-              fontWeight: 800,
-              color: "#09090B",
-              letterSpacing: "-0.5px",
+              fontSize: 25,
+              lineHeight: 1.16,
+              fontWeight: 900,
+              color: "#FFFFFF",
+              letterSpacing: "-0.6px",
             }}
           >
             {current.domanda}
@@ -695,51 +864,75 @@ Corso suggerito: ${risultato.corsoSuggerito}`
 
         <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
           {current.opzioni.map((opzione) => (
-            <Button
+            <button
               key={opzione}
-              label={opzione}
               onClick={() => handleSelect(opzione)}
-              variant="secondary"
-            />
+              style={{
+                width: "100%",
+                minHeight: 58,
+                borderRadius: 20,
+                border: "1px solid rgba(255,255,255,0.10)",
+                background: "rgba(255,255,255,0.07)",
+                color: "#FFFFFF",
+                padding: "14px 15px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+                textAlign: "left",
+                fontSize: 15,
+                fontWeight: 850,
+                cursor: "pointer",
+                boxShadow: "0 10px 24px rgba(0,0,0,0.14)",
+              }}
+            >
+              <span>{opzione}</span>
+              <ArrowRight size={18} color="#78C2FF" />
+            </button>
           ))}
         </div>
-      </Card>
+      </DarkCard>
 
       {showNotificationModal && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(6, 17, 31, 0.88)",
+            background: "rgba(2,7,18,0.82)",
             zIndex: 2000,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             padding: 22,
+            backdropFilter: "blur(10px)",
           }}
         >
           <div
             style={{
               width: "100%",
               maxWidth: 390,
-              borderRadius: 30,
-              background: "#FFFFFF",
+              borderRadius: 32,
+              background:
+                "linear-gradient(135deg, rgba(17,32,51,0.98) 0%, rgba(11,23,40,0.98) 100%)",
               padding: 26,
               textAlign: "center",
-              boxShadow: "0 30px 90px rgba(0,0,0,0.35)",
+              boxShadow: "0 30px 90px rgba(0,0,0,0.45)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              color: "#FFFFFF",
             }}
           >
             <div
               style={{
-                width: 74,
-                height: 74,
-                borderRadius: 24,
-                background: "#EAF4FC",
-                color: "#1F6FB2",
+                width: 76,
+                height: 76,
+                borderRadius: 26,
+                background: "rgba(58,160,255,0.16)",
+                color: "#78C2FF",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 margin: "0 auto 18px",
+                boxShadow: "0 12px 28px rgba(0,0,0,0.22)",
               }}
             >
               <Bell size={34} />
@@ -748,11 +941,11 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             <h2
               style={{
                 margin: 0,
-                fontSize: 27,
-                lineHeight: 1.1,
-                fontWeight: 850,
-                color: "#09090B",
-                letterSpacing: "-0.7px",
+                fontSize: 28,
+                lineHeight: 1.08,
+                fontWeight: 900,
+                color: "#FFFFFF",
+                letterSpacing: "-0.8px",
               }}
             >
               Ricevi consigli personalizzati
@@ -763,7 +956,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 margin: "14px 0 22px",
                 fontSize: 15,
                 lineHeight: 1.6,
-                color: "#5F6B7A",
+                color: "rgba(255,255,255,0.68)",
               }}
             >
               Attiva le notifiche per ricevere aggiornamenti su lauree,
@@ -783,12 +976,11 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 style={{
                   border: "none",
                   background: "transparent",
-                  color: "rgba(113, 113, 122, 0.45)",
+                  color: "rgba(255,255,255,0.42)",
                   fontSize: 13,
-                  fontWeight: 500,
+                  fontWeight: 600,
                   padding: 6,
                   cursor: "pointer",
-                  transition: "opacity 0.2s ease",
                 }}
               >
                 Non ora
@@ -800,5 +992,238 @@ Corso suggerito: ${risultato.corsoSuggerito}`
 
       <BottomNav />
     </main>
+  );
+}
+
+function DarkCard({
+  title,
+  description,
+  badge,
+  children,
+}: {
+  title?: string;
+  description?: string;
+  badge?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <section
+      style={{
+        padding: 20,
+        borderRadius: 28,
+        background: "rgba(17,32,51,0.86)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        backdropFilter: "blur(16px)",
+      }}
+    >
+      {(title || badge) && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          {title && (
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 21,
+                lineHeight: 1.16,
+                fontWeight: 900,
+                color: "#FFFFFF",
+                letterSpacing: "-0.4px",
+              }}
+            >
+              {title}
+            </h2>
+          )}
+
+          {badge && (
+            <span
+              style={{
+                borderRadius: 999,
+                background: "rgba(58,160,255,0.16)",
+                color: "#78C2FF",
+                padding: "6px 10px",
+                fontSize: 11,
+                fontWeight: 900,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {badge}
+            </span>
+          )}
+        </div>
+      )}
+
+      {description && (
+        <p
+          style={{
+            margin: "10px 0 0",
+            fontSize: 14,
+            lineHeight: 1.55,
+            color: "rgba(255,255,255,0.68)",
+          }}
+        >
+          {description}
+        </p>
+      )}
+
+      {children}
+    </section>
+  );
+}
+
+function ResultHero({ risultato }: { risultato: Risultato }) {
+  return (
+    <section
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: 32,
+        padding: 28,
+        background:
+          "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
+        border: "1px solid rgba(255,255,255,0.14)",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          right: -46,
+          top: -46,
+          width: 160,
+          height: 160,
+          borderRadius: 999,
+          background: "rgba(255,255,255,0.14)",
+        }}
+      />
+
+      <div
+        style={{
+          width: 62,
+          height: 62,
+          borderRadius: 24,
+          background: "rgba(255,255,255,0.16)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 18,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <Sparkles size={31} />
+      </div>
+
+      <p
+        style={{
+          margin: "0 0 10px",
+          fontSize: 14,
+          fontWeight: 900,
+          opacity: 0.92,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        Risultato del test
+      </p>
+
+      <h1
+        style={{
+          margin: 0,
+          fontSize: 31,
+          lineHeight: 1.08,
+          fontWeight: 900,
+          letterSpacing: "-0.9px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {risultato.percorso}
+      </h1>
+
+      <p
+        style={{
+          margin: "14px 0 0",
+          fontSize: 15,
+          lineHeight: 1.6,
+          opacity: 0.95,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {risultato.descrizione}
+      </p>
+    </section>
+  );
+}
+
+function ResultMetric({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <section
+      style={{
+        display: "flex",
+        gap: 13,
+        padding: 16,
+        borderRadius: 24,
+        background: "rgba(17,32,51,0.86)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 14px 34px rgba(0,0,0,0.24)",
+        backdropFilter: "blur(16px)",
+      }}
+    >
+      <div
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 18,
+          background: "rgba(58,160,255,0.16)",
+          color: "#78C2FF",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+
+      <div>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 15,
+            fontWeight: 900,
+            color: "#FFFFFF",
+          }}
+        >
+          {title}
+        </h3>
+
+        <p
+          style={{
+            margin: "6px 0 0",
+            fontSize: 14,
+            lineHeight: 1.5,
+            color: "rgba(255,255,255,0.66)",
+          }}
+        >
+          {description}
+        </p>
+      </div>
+    </section>
   );
 }

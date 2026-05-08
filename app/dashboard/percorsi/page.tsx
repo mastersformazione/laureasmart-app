@@ -2,8 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { getPercorsiVisibili, Percorso } from "@/lib/data/percorsi";
-import Card from "@/components/ui/Card";
 import BottomNav from "@/components/ui/BottomNav";
+import {
+  Search,
+  GraduationCap,
+  Sparkles,
+  Heart,
+  ArrowRight,
+  CheckCircle2,
+  MessageCircle,
+  FileCheck2,
+  Wallet,
+  X,
+} from "lucide-react";
 
 type InteresseStorage = {
   settori: Record<string, number>;
@@ -324,199 +335,427 @@ export default function PercorsiPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 pb-[120px]">
-      <h1 className="text-2xl font-bold mb-2">Percorsi consigliati</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: 20,
+        paddingBottom: 120,
+        maxWidth: 500,
+        margin: "0 auto",
+        color: "#FFFFFF",
+        background:
+          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+      }}
+    >
+      <section
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: 32,
+          padding: 28,
+          background:
+            "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+          marginBottom: 20,
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            right: -44,
+            top: -44,
+            width: 155,
+            height: 155,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.14)",
+          }}
+        />
 
-      <p className="text-gray-600 mb-2">
-        In base al tuo titolo di studio, questi sono i percorsi più adatti da
-        valutare.
-      </p>
+        <div
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: 22,
+            background: "rgba(255,255,255,0.16)",
+            border: "1px solid rgba(255,255,255,0.16)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 18,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <GraduationCap size={31} />
+        </div>
 
-      <p className="text-sm text-gray-500 mb-4">
-        Titolo rilevato: <strong>{titoloStudio}</strong>
-      </p>
+        <p
+          style={{
+            margin: "0 0 8px",
+            fontSize: 14,
+            fontWeight: 850,
+            opacity: 0.92,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          Laurea Smart
+        </p>
 
-      <div className="mb-4">
-        <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
-          <span className="text-gray-400">🔍</span>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: 34,
+            lineHeight: 1.05,
+            fontWeight: 900,
+            letterSpacing: "-1px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          Percorsi consigliati
+        </h1>
 
-          <input
-            type="text"
-            value={queryRicerca}
-            onChange={(e) => setQueryRicerca(e.target.value)}
-            placeholder="Cerca corso, area o parola chiave..."
-            className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+        <p
+          style={{
+            margin: "14px 0 0",
+            fontSize: 15,
+            lineHeight: 1.6,
+            opacity: 0.95,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          In base al tuo titolo di studio, questi sono i percorsi più adatti da
+          valutare.
+        </p>
+
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 16,
+            padding: "8px 12px",
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.16)",
+            color: "#FFFFFF",
+            fontSize: 12,
+            fontWeight: 900,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <Sparkles size={14} />
+          Titolo rilevato: {titoloStudio}
+        </div>
+      </section>
+
+      <section
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "14px 16px",
+          borderRadius: 22,
+          background: "rgba(17,32,51,0.86)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 14px 34px rgba(0,0,0,0.24)",
+          backdropFilter: "blur(16px)",
+        }}
+      >
+        <Search size={22} color="#78C2FF" />
+
+        <input
+          type="text"
+          value={queryRicerca}
+          onChange={(e) => setQueryRicerca(e.target.value)}
+          placeholder="Cerca corso, area o parola chiave..."
+          style={{
+            width: "100%",
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            color: "#FFFFFF",
+            fontSize: 14,
+            fontFamily: "inherit",
+          }}
+        />
+
+        {queryRicerca && (
+          <button
+            type="button"
+            onClick={() => setQueryRicerca("")}
+            style={{
+              border: "none",
+              background: "transparent",
+              color: "rgba(255,255,255,0.55)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <X size={18} />
+          </button>
+        )}
+      </section>
+
+      <FilterScroller>
+        {["tutti", "laurea_triennale", "laurea_magistrale", "master"].map(
+          (tipo) => (
+            <FilterButton
+              key={tipo}
+              active={tipoAttivo === tipo}
+              onClick={() => setTipoAttivo(tipo)}
+              label={nomiTipi[tipo]}
+              variant="pill"
+            />
+          )
+        )}
+      </FilterScroller>
+
+      <FilterScroller>
+        {settoriDisponibili.map((settore) => (
+          <FilterButton
+            key={settore}
+            active={settoreAttivo === settore}
+            onClick={() => setSettoreAttivo(settore)}
+            label={nomiSettori[settore] || settore}
+            variant="soft"
           />
-
-          {queryRicerca && (
-            <button
-              type="button"
-              onClick={() => setQueryRicerca("")}
-              className="text-sm font-semibold text-gray-400"
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="mb-4 overflow-x-auto">
-        <div className="flex gap-2 pb-1">
-          {["tutti", "laurea_triennale", "laurea_magistrale", "master"].map(
-            (tipo) => (
-              <button
-                key={tipo}
-                onClick={() => setTipoAttivo(tipo)}
-                className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm ${
-                  tipoAttivo === tipo
-                    ? "bg-[#1F6FB2] text-white border-[#1F6FB2]"
-                    : "bg-white text-gray-700 border-gray-200"
-                }`}
-              >
-                {nomiTipi[tipo]}
-              </button>
-            )
-          )}
-        </div>
-      </div>
-
-      <div className="mb-5 overflow-x-auto">
-        <div className="flex gap-2 pb-1">
-          {settoriDisponibili.map((settore) => (
-            <button
-              key={settore}
-              onClick={() => setSettoreAttivo(settore)}
-              className={`whitespace-nowrap rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                settoreAttivo === settore
-                  ? "bg-[#EAF4FC] text-[#1F6FB2]"
-                  : "bg-transparent text-gray-500"
-              }`}
-            >
-              {nomiSettori[settore] || settore}
-            </button>
-          ))}
-        </div>
-      </div>
+        ))}
+      </FilterScroller>
 
       {messaggio && (
-        <div className="mb-4 rounded-xl bg-green-50 border border-green-200 p-3 text-sm text-green-700">
+        <div
+          style={{
+            marginBottom: 16,
+            padding: 14,
+            borderRadius: 18,
+            background: "rgba(37,211,102,0.13)",
+            border: "1px solid rgba(37,211,102,0.25)",
+            color: "#7CFFB1",
+            fontSize: 13,
+            lineHeight: 1.45,
+            fontWeight: 800,
+          }}
+        >
           {messaggio}
         </div>
       )}
 
-      <div className="mb-4 text-sm text-gray-500">
-        Percorsi mostrati: <strong>{percorsiOrdinati.length}</strong>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 14,
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 20,
+            fontWeight: 900,
+            letterSpacing: "-0.4px",
+            color: "#FFFFFF",
+          }}
+        >
+          Risultati
+        </h2>
+
+        <span
+          style={{
+            minWidth: 34,
+            height: 32,
+            padding: "0 11px",
+            borderRadius: 999,
+            background: "rgba(58,160,255,0.16)",
+            color: "#78C2FF",
+            fontSize: 13,
+            fontWeight: 900,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {percorsiOrdinati.length}
+        </span>
       </div>
 
-      <div className="space-y-4">
+      <div style={{ display: "grid", gap: 16 }}>
         {percorsiOrdinati.map((percorso) => {
           const percorsiSimili = getPercorsiSimili(percorso);
 
           return (
-            <Card
+            <PercorsoCard
               key={percorso.id}
-              title={percorso.titolo}
-              description={`Durata: ${percorso.durata}`}
-              badge={nomiSettori[percorso.settore] || percorso.settore}
-              icon={percorso.classe.replace("L-", "L")}
-            >
-              {percorso.sbocchi && percorso.sbocchi.length > 0 && (
-                <div className="mt-3">
-                  <h3 className="font-medium">Sbocchi principali</h3>
-
-                  <ul className="list-disc pl-5 text-sm text-gray-700">
-                    {percorso.sbocchi.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {percorso.prosecuzione && percorso.prosecuzione.length > 0 && (
-                <div className="mt-3">
-                  <h3 className="font-medium">Se vuoi proseguire</h3>
-
-                  <ul className="list-disc pl-5 text-sm text-gray-700">
-                    {percorso.prosecuzione.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {percorsiSimili.length > 0 && (
-                <div className="mt-4 rounded-xl bg-gray-50 p-3">
-                  <h3 className="text-sm font-semibold mb-2">
-                    Percorsi simili
-                  </h3>
-
-                  <div className="flex flex-wrap gap-2">
-                    {percorsiSimili.map((simile) => (
-                      <button
-                        key={simile.id}
-                        onClick={() => registraInteresse(simile)}
-                        className="rounded-full bg-white border px-3 py-2 text-xs text-gray-700"
-                      >
-                        {simile.titolo}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={() => registraInteresse(percorso)}
-                className="mt-5 w-full rounded-2xl bg-[#1F6FB2] text-white py-3.5 font-semibold shadow-[0_8px_20px_rgba(31,111,178,0.25)] hover:opacity-90 transition"
-              >
-                Mi interessa
-              </button>
-            </Card>
+              percorso={percorso}
+              percorsiSimili={percorsiSimili}
+              onInteresse={registraInteresse}
+            />
           );
         })}
       </div>
 
       {percorsoAttivo && (
-        <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/60 px-5">
-          <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
-            <div className="mb-4 rounded-2xl bg-[#EAF4FC] px-4 py-3 text-sm font-semibold text-[#1F6FB2]">
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 3000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(2,7,18,0.82)",
+            padding: 20,
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 390,
+              borderRadius: 32,
+              background:
+                "linear-gradient(135deg, rgba(17,32,51,0.98) 0%, rgba(11,23,40,0.98) 100%)",
+              padding: 24,
+              boxShadow: "0 30px 90px rgba(0,0,0,0.45)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              color: "#FFFFFF",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 16,
+                borderRadius: 999,
+                background: "rgba(37,211,102,0.13)",
+                color: "#7CFFB1",
+                padding: "8px 12px",
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              <Heart size={15} />
               Percorso salvato nei preferiti
             </div>
 
-            <h2 className="text-2xl font-bold leading-tight text-gray-950">
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 27,
+                lineHeight: 1.08,
+                fontWeight: 900,
+                letterSpacing: "-0.8px",
+                color: "#FFFFFF",
+              }}
+            >
               {percorsoAttivo.titolo}
             </h2>
 
-            <p className="mt-3 text-sm leading-6 text-gray-600">
+            <p
+              style={{
+                margin: "14px 0 0",
+                fontSize: 14,
+                lineHeight: 1.65,
+                color: "rgba(255,255,255,0.68)",
+              }}
+            >
               Vuoi fare un passo in più? Puoi scoprire costi, agevolazioni,
               possibilità di riconoscimento CFU o parlare subito con un
               orientatore.
             </p>
 
-            <div className="mt-5 grid gap-3">
+            <div
+              style={{
+                display: "grid",
+                gap: 11,
+                marginTop: 22,
+              }}
+            >
               <button
                 onClick={() => apriWhatsAppCosto(percorsoAttivo)}
-                className="rounded-2xl bg-[#1F6FB2] px-4 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(31,111,178,0.25)]"
+                style={{
+                  minHeight: 56,
+                  borderRadius: 20,
+                  border: "none",
+                  background: "#25D366",
+                  color: "#FFFFFF",
+                  fontSize: 15,
+                  fontWeight: 900,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 9,
+                  cursor: "pointer",
+                  boxShadow: "0 16px 34px rgba(37,211,102,0.28)",
+                }}
               >
+                <Wallet size={19} />
                 Scopri quanto costa
               </button>
 
               <button
                 onClick={() => vaiAPercorsoAgevolato(percorsoAttivo)}
-                className="rounded-2xl border border-[#D7E7F5] bg-white px-4 py-3.5 text-sm font-bold text-[#1F6FB2]"
+                style={{
+                  minHeight: 54,
+                  borderRadius: 20,
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  background: "rgba(255,255,255,0.08)",
+                  color: "#78C2FF",
+                  fontSize: 14,
+                  fontWeight: 900,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 9,
+                  cursor: "pointer",
+                }}
               >
+                <FileCheck2 size={18} />
                 Verifica CFU e percorso agevolato
               </button>
 
               <button
                 onClick={() => parlaConOrientatore(percorsoAttivo)}
-                className="rounded-2xl border border-[#D7E7F5] bg-white px-4 py-3.5 text-sm font-bold text-[#1F6FB2]"
+                style={{
+                  minHeight: 54,
+                  borderRadius: 20,
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  background: "rgba(255,255,255,0.08)",
+                  color: "#78C2FF",
+                  fontSize: 14,
+                  fontWeight: 900,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 9,
+                  cursor: "pointer",
+                }}
               >
+                <MessageCircle size={18} />
                 Parla con un orientatore
               </button>
 
               <button
                 onClick={() => setPercorsoAttivo(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-400"
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  color: "rgba(255,255,255,0.45)",
+                  padding: "8px 4px",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
               >
                 Continua a esplorare
               </button>
@@ -527,5 +766,284 @@ export default function PercorsiPage() {
 
       <BottomNav />
     </main>
+  );
+}
+
+function FilterScroller({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        marginBottom: 14,
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          paddingBottom: 3,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function FilterButton({
+  active,
+  onClick,
+  label,
+  variant,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  variant: "pill" | "soft";
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        whiteSpace: "nowrap",
+        borderRadius: variant === "pill" ? 999 : 15,
+        border: active
+          ? "1px solid rgba(58,160,255,0.55)"
+          : "1px solid rgba(255,255,255,0.08)",
+        padding: variant === "pill" ? "10px 15px" : "9px 12px",
+        background: active ? "rgba(58,160,255,0.20)" : "rgba(17,32,51,0.72)",
+        color: active ? "#78C2FF" : "rgba(255,255,255,0.62)",
+        fontSize: variant === "pill" ? 13 : 12,
+        fontWeight: 900,
+        cursor: "pointer",
+        boxShadow: active ? "0 10px 24px rgba(58,160,255,0.12)" : "none",
+        backdropFilter: "blur(12px)",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function PercorsoCard({
+  percorso,
+  percorsiSimili,
+  onInteresse,
+}: {
+  percorso: Percorso;
+  percorsiSimili: Percorso[];
+  onInteresse: (percorso: Percorso) => void;
+}) {
+  return (
+    <section
+      style={{
+        padding: 18,
+        borderRadius: 28,
+        background: "rgba(17,32,51,0.86)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        backdropFilter: "blur(16px)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 13,
+        }}
+      >
+        <div
+          style={{
+            width: 54,
+            height: 54,
+            borderRadius: 20,
+            background: "rgba(58,160,255,0.16)",
+            color: "#78C2FF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            fontSize: 16,
+            fontWeight: 900,
+            boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+          }}
+        >
+          {percorso.classe.replace("L-", "L")}
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              display: "inline-flex",
+              marginBottom: 9,
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: "rgba(58,160,255,0.16)",
+              color: "#78C2FF",
+              fontSize: 11,
+              fontWeight: 900,
+            }}
+          >
+            {nomiSettori[percorso.settore] || percorso.settore}
+          </div>
+
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 21,
+              lineHeight: 1.14,
+              fontWeight: 900,
+              color: "#FFFFFF",
+              letterSpacing: "-0.45px",
+            }}
+          >
+            {percorso.titolo}
+          </h2>
+
+          <p
+            style={{
+              margin: "9px 0 0",
+              color: "rgba(255,255,255,0.64)",
+              fontSize: 14,
+              lineHeight: 1.5,
+            }}
+          >
+            Durata: {percorso.durata}
+          </p>
+        </div>
+      </div>
+
+      {percorso.sbocchi && percorso.sbocchi.length > 0 && (
+        <InfoList title="Sbocchi principali" items={percorso.sbocchi} />
+      )}
+
+      {percorso.prosecuzione && percorso.prosecuzione.length > 0 && (
+        <InfoList title="Se vuoi proseguire" items={percorso.prosecuzione} />
+      )}
+
+      {percorsiSimili.length > 0 && (
+        <div
+          style={{
+            marginTop: 16,
+            padding: 14,
+            borderRadius: 22,
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <h3
+            style={{
+              margin: "0 0 10px",
+              fontSize: 14,
+              fontWeight: 900,
+              color: "#FFFFFF",
+            }}
+          >
+            Percorsi simili
+          </h3>
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+            }}
+          >
+            {percorsiSimili.map((simile) => (
+              <button
+                key={simile.id}
+                onClick={() => onInteresse(simile)}
+                style={{
+                  borderRadius: 999,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.72)",
+                  padding: "8px 11px",
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                {simile.titolo}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <button
+        onClick={() => onInteresse(percorso)}
+        style={{
+          marginTop: 18,
+          width: "100%",
+          minHeight: 56,
+          borderRadius: 20,
+          border: "none",
+          background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
+          color: "#FFFFFF",
+          fontSize: 16,
+          fontWeight: 900,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+          cursor: "pointer",
+          boxShadow: "0 16px 34px rgba(31,111,178,0.28)",
+        }}
+      >
+        <Heart size={19} />
+        Mi interessa
+        <ArrowRight size={19} />
+      </button>
+    </section>
+  );
+}
+
+function InfoList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div
+      style={{
+        marginTop: 15,
+      }}
+    >
+      <h3
+        style={{
+          margin: "0 0 9px",
+          fontSize: 14,
+          fontWeight: 900,
+          color: "#FFFFFF",
+        }}
+      >
+        {title}
+      </h3>
+
+      <div
+        style={{
+          display: "grid",
+          gap: 8,
+        }}
+      >
+        {items.map((item) => (
+          <div
+            key={item}
+            style={{
+              display: "flex",
+              gap: 9,
+              fontSize: 13,
+              lineHeight: 1.45,
+              color: "rgba(255,255,255,0.66)",
+            }}
+          >
+            <CheckCircle2
+              size={16}
+              color="#78C2FF"
+              style={{ flexShrink: 0, marginTop: 1 }}
+            />
+            <span>{item}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
