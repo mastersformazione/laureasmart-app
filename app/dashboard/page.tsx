@@ -119,7 +119,7 @@ export default function Dashboard() {
             fontWeight: 700,
           }}
         >
-          Ciao, {user.nome} 👋
+          Benvenuto, {user.nome} 👋
         </p>
 
         <h1
