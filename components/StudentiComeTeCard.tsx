@@ -33,7 +33,8 @@ export default function StudentiComeTeCard() {
         const user = JSON.parse(storedUser);
 
         const response = await fetch(
-          "https://laureasmart.it/api/genera-storia-studente.php",
+          "https://laureasmart.it/api/genera-storia-studente.php?t=" +
+            Date.now(),
           {
             method: "POST",
             headers: {
