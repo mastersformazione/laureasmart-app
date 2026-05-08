@@ -1,74 +1,83 @@
 "use client";
 
-type Option = {
+type SelectOption = {
   value: string;
   label: string;
-};
-
-type Props = {
-  label?: string;
-  value: string;
-  options: Option[];
-  onChange: (value: string) => void;
 };
 
 export default function SelectField({
   label,
   value,
-  options,
   onChange,
-}: Props) {
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+}) {
   return (
-    <div className="space-y-2">
-      {label && (
-        <label className="text-sm font-bold text-[#102033]">{label}</label>
-      )}
+    <div style={{ display: "grid", gap: 8 }}>
+      <label
+        style={{
+          fontSize: 14,
+          fontWeight: 850,
+          color: "#FFFFFF",
+          lineHeight: 1.35,
+        }}
+      >
+        {label}
+      </label>
 
-      <div className="relative">
+      <div style={{ position: "relative" }}>
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="
-            w-full
-            h-[52px]
-            rounded-[20px]
-            border
-            border-[rgba(31,111,178,0.12)]
-            bg-white
-            px-4
-            pr-11
-            text-[14px]
-            font-semibold
-            text-[#102033]
-            outline-none
-            appearance-none
-            shadow-[0_10px_28px_rgba(31,111,178,0.06)]
-            transition
-            focus:border-[#1F6FB2]
-            focus:shadow-[0_12px_30px_rgba(31,111,178,0.14)]
-          "
+          style={{
+            width: "100%",
+            minHeight: 58,
+            appearance: "none",
+            WebkitAppearance: "none",
+            borderRadius: 20,
+            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(255,255,255,0.07)",
+            color: "#FFFFFF",
+            padding: "0 48px 0 18px",
+            fontSize: 15,
+            fontWeight: 850,
+            fontFamily: "inherit",
+            outline: "none",
+            boxShadow: "0 10px 24px rgba(0,0,0,0.14)",
+          }}
         >
           {options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option
+              key={option.value}
+              value={option.value}
+              style={{
+                background: "#102033",
+                color: "#FFFFFF",
+              }}
+            >
               {option.label}
             </option>
           ))}
         </select>
 
-        <div
-          className="
-            pointer-events-none
-            absolute
-            right-4
-            top-1/2
-            -translate-y-1/2
-            text-[#1F6FB2]
-            text-sm
-            font-bold
-          "
+        <span
+          style={{
+            position: "absolute",
+            right: 18,
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "#78C2FF",
+            fontSize: 18,
+            fontWeight: 900,
+            pointerEvents: "none",
+          }}
         >
           ▼
-        </div>
+        </span>
       </div>
     </div>
   );
