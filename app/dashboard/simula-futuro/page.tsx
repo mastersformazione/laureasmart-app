@@ -14,14 +14,7 @@ import {
 } from "recharts";
 import Button from "@/components/ui/Button";
 import BottomNav from "@/components/ui/BottomNav";
-import {
-  ArrowRight,
-  BarChart3,
-  CheckCircle2,
-  RefreshCcw,
-  Sparkles,
-  TrendingUp,
-} from "lucide-react";
+import { BarChart3, RefreshCcw, Sparkles, TrendingUp } from "lucide-react";
 
 type TitoloStudio = "diploma" | "triennale" | "magistrale" | "altro";
 type Obiettivo = "stabilita" | "carriera" | "cambio_settore" | "concorsi";

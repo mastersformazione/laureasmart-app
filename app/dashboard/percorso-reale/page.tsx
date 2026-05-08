@@ -226,7 +226,6 @@ export default function PercorsoRealePage() {
 
   const current = domande[step] || domande[0];
   const result = calcolaRisultato(answers);
-  const progress = Math.round(((step + 1) / domande.length) * 100);
 
   async function handleSelect(value: string) {
     const updated = {

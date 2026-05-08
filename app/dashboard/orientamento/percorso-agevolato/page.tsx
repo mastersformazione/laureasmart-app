@@ -3,14 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
 import BottomNav from "@/components/ui/BottomNav";
-import {
-  GraduationCap,
-  FileCheck2,
-  BriefcaseBusiness,
-  Sparkles,
-  MessageCircle,
-  ShieldCheck,
-} from "lucide-react";
+import { GraduationCap, FileCheck2, Sparkles, ShieldCheck } from "lucide-react";
 
 type FormData = {
   titolo: string;
