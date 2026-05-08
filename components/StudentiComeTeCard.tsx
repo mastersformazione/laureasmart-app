@@ -128,7 +128,63 @@ export default function StudentiComeTeCard() {
     );
   }
 
-  if (!story) return null;
+  if (!story) {
+    return (
+      <section
+        style={{
+          padding: 20,
+          borderRadius: 30,
+          background: "rgba(17,32,51,0.86)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 18px 46px rgba(0,0,0,0.28)",
+          color: "#FFFFFF",
+          backdropFilter: "blur(16px)",
+          marginBottom: 20,
+        }}
+      >
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "7px 12px",
+            borderRadius: 999,
+            background: "rgba(58,160,255,0.16)",
+            color: "#78C2FF",
+            fontSize: 12,
+            fontWeight: 900,
+            marginBottom: 14,
+          }}
+        >
+          Studenti come te
+        </div>
+
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 23,
+            lineHeight: 1.12,
+            fontWeight: 900,
+            letterSpacing: "-0.5px",
+          }}
+        >
+          Storie in arrivo per il tuo profilo
+        </h2>
+
+        <p
+          style={{
+            margin: "12px 0 0",
+            fontSize: 15,
+            lineHeight: 1.65,
+            color: "rgba(255,255,255,0.72)",
+          }}
+        >
+          Presto troverai qui esperienze di studenti con obiettivi e ritmi
+          simili ai tuoi.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section
