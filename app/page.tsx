@@ -98,10 +98,10 @@ export default function Home() {
           <h1
             style={{
               margin: 0,
-              fontSize: 41,
-              lineHeight: 1.02,
-              letterSpacing: "-1.4px",
-              fontWeight: 850,
+              fontSize: 38,
+              lineHeight: 1.04,
+              letterSpacing: "-1.1px",
+              fontWeight: 800,
             }}
           >
             La Laurea Giusta, Senza Perdere Tempo
@@ -116,7 +116,7 @@ export default function Home() {
               maxWidth: 350,
             }}
           >
-            Ricevi Notifiche, Consigli Personalizzati e Percorsi online adatti
+            Ricevi notifiche, consigli personalizzati e percorsi online adatti
             al tuo profilo.
           </p>
         </div>
@@ -128,82 +128,96 @@ export default function Home() {
             marginBottom: 20,
           }}
         >
-          <Benefit icon={<CheckCircle size={19} />} text="Test Gratuiti" />
+          <Benefit icon={<CheckCircle size={19} />} text="Test gratuiti" />
 
-          <Benefit icon={<Bell size={19} />} text="Scadenze e Promozioni" />
+          <Benefit icon={<Bell size={19} />} text="Scadenze e promozioni" />
 
           <Benefit
             icon={<MessageCircle size={19} />}
-            text="Supporto di un Orientatore Dedicato"
+            text="Supporto di un orientatore dedicato"
           />
         </div>
 
         <div
           style={{
             padding: 16,
-            borderRadius: 28,
-            background: "rgba(255,255,255,0.96)",
+            borderRadius: 30,
+            background: "rgba(255,255,255,0.97)",
             color: "#102033",
             boxShadow: "0 24px 70px rgba(0,0,0,0.28)",
           }}
         >
-          <InstallButton />
-
           <div
             style={{
-              marginTop: 12,
-              padding: "13px 14px",
-              borderRadius: 18,
-              background: "#F4F9FD",
-              border: "1px solid #D7E7F5",
-              textAlign: "left",
+              display: "grid",
+              gap: 10,
             }}
           >
-            <strong
-              style={{
-                display: "block",
-                fontSize: 14,
-                marginBottom: 6,
-              }}
-            >
-              📱 Su iPhone
-            </strong>
+            <InstallButton />
 
-            <p
+            <button
+              type="button"
               style={{
-                margin: 0,
-                fontSize: 13,
-                color: "#5F6B7A",
-                lineHeight: 1.55,
+                width: "100%",
+                border: "1px solid #D7E7F5",
+                background: "#F4F9FD",
+                borderRadius: 20,
+                padding: "15px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                textAlign: "left",
+                cursor: "default",
               }}
             >
-              Premi{" "}
               <span
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 25,
-                  height: 25,
-                  borderRadius: 8,
+                  width: 42,
+                  height: 42,
+                  borderRadius: 15,
                   background: "#FFFFFF",
                   border: "1px solid #D8E5F0",
-                  verticalAlign: "middle",
-                  margin: "0 4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
                 }}
               >
-                <Share size={15} color="#1F6FB2" />
+                <Share size={20} color="#1F6FB2" />
               </span>
-              e seleziona <strong>“Aggiungi alla schermata Home”</strong>.
-            </p>
-          </div>
 
-          <div style={{ marginTop: 12 }}>
-            <Button
-              label="Accedi o Registrati"
-              variant="secondary"
-              onClick={() => setMenuOpen(true)}
-            />
+              <span>
+                <strong
+                  style={{
+                    display: "block",
+                    fontSize: 15,
+                    color: "#102033",
+                    marginBottom: 3,
+                  }}
+                >
+                  Installa su iPhone
+                </strong>
+
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 13,
+                    lineHeight: 1.4,
+                    color: "#5F6B7A",
+                  }}
+                >
+                  Premi Condividi e scegli “Aggiungi alla schermata Home”.
+                </span>
+              </span>
+            </button>
+
+            <div style={{ marginTop: 4 }}>
+              <Button
+                label="Accedi o Registrati"
+                variant="primary"
+                onClick={() => setMenuOpen(true)}
+              />
+            </div>
           </div>
         </div>
 
