@@ -134,9 +134,7 @@ export default function Home() {
           }}
         >
           <Benefit icon={<CheckCircle size={19} />} text="Test gratuiti" />
-
           <Benefit icon={<Bell size={19} />} text="Scadenze e promozioni" />
-
           <Benefit
             icon={<MessageCircle size={19} />}
             text="Supporto Gratuito di un Orientatore Dedicato"
@@ -164,23 +162,23 @@ export default function Home() {
               type="button"
               style={{
                 width: "100%",
-                border: "1px solid rgba(31,111,178,0.12)",
+                border: "1px solid rgba(31,111,178,0.16)",
                 background:
-                  "linear-gradient(135deg, #F4F9FF 0%, #EAF4FC 50%, #F8FBFF 100%)",
+                  "linear-gradient(135deg, #EAF4FC 0%, #DDF0FF 48%, #F4F9FF 100%)",
                 borderRadius: 22,
-                padding: "16px 18px",
+                padding: "18px 18px",
                 display: "flex",
                 alignItems: "center",
                 gap: 14,
                 textAlign: "left",
-                boxShadow: "0 8px 24px rgba(31,111,178,0.08)",
+                boxShadow: "0 10px 26px rgba(31,111,178,0.14)",
                 cursor: "default",
               }}
             >
               <div
                 style={{
-                  width: 54,
-                  height: 54,
+                  width: 56,
+                  height: 56,
                   borderRadius: 18,
                   background: "#FFFFFF",
                   border: "1px solid rgba(31,111,178,0.12)",
@@ -188,20 +186,21 @@ export default function Home() {
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
-                  boxShadow: "0 6px 16px rgba(31,111,178,0.08)",
+                  boxShadow: "0 8px 18px rgba(31,111,178,0.10)",
                 }}
               >
-                <Share size={24} color="#1F6FB2" />
+                <Share size={25} color="#1F6FB2" />
               </div>
 
               <div>
                 <strong
                   style={{
                     display: "block",
-                    fontSize: 17,
-                    fontWeight: 800,
+                    fontSize: 19,
+                    fontWeight: 850,
                     color: "#12304D",
-                    marginBottom: 4,
+                    marginBottom: 5,
+                    letterSpacing: "-0.3px",
                   }}
                 >
                   Scarica su iPhone
@@ -224,23 +223,22 @@ export default function Home() {
               onClick={() => setMenuOpen(true)}
               style={{
                 width: "100%",
-                height: 68,
-                border: "none",
+                minHeight: 64,
+                border: "1px solid #E4EAF1",
                 borderRadius: 22,
-                background: "linear-gradient(135deg, #123C68 0%, #0B2D50 100%)",
-                color: "#FFFFFF",
+                background: "rgba(255,255,255,0.72)",
+                color: "#102033",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 12,
-                fontSize: 20,
+                gap: 11,
+                fontSize: 18,
                 fontWeight: 800,
                 cursor: "pointer",
-                boxShadow: "0 12px 30px rgba(11,45,80,0.28)",
+                boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
               }}
             >
-              <UserCircle2 size={28} />
-
+              <UserCircle2 size={26} color="#5F6B7A" />
               <span>Accedi o Registrati</span>
             </button>
           </div>
