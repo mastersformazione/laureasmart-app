@@ -29,10 +29,10 @@ const initialForm: FormData = {
 };
 
 function orePerCfu(tipo: TipoEsame) {
-  if (tipo === "quiz") return 6;
-  if (tipo === "orale") return 8;
-  if (tipo === "scritto") return 9;
-  return 8;
+  if (tipo === "quiz") return 3.5;
+  if (tipo === "orale") return 5;
+  if (tipo === "scritto") return 5.5;
+  return 4.5;
 }
 
 function coefficienteRitmo(ritmo: Ritmo) {
@@ -49,7 +49,7 @@ function calcolaPiano(form: FormData) {
 
   const cfuMedioEsame = Math.round(cfuTotali / esamiAnno);
   const oreStimateTotali = cfuTotali * orePerCfu(form.tipoEsame);
-  const oreAnnueDisponibili = oreSettimana * 42 * coefficienteRitmo(form.ritmo);
+  const oreAnnueDisponibili = oreSettimana * 48 * coefficienteRitmo(form.ritmo);
 
   const percentualeCopertura = Math.min(
     1,
@@ -66,12 +66,12 @@ function calcolaPiano(form: FormData) {
 
   let carico = "Sostenibile";
   let messaggio =
-    "Il piano sembra realistico, soprattutto se mantieni una routine costante e non concentri tutto a ridosso degli esami.";
+    "Il piano sembra sostenibile e compatibile con una routine reale. Anche poche ore ben organizzate possono permetterti di avanzare in modo costante.";
 
   if (percentualeCopertura < 0.55) {
-    carico = "Intenso";
+    carico = "Da organizzare";
     messaggio =
-      "Il piano è possibile, ma richiede prudenza: meglio partire con meno esami e aumentare il ritmo dopo il primo periodo.";
+      "Anche con poche ore a settimana puoi costruire un percorso sostenibile. Il consiglio è partire da pochi esami ben distribuiti, senza concentrare tutto a ridosso delle sessioni.";
   }
 
   if (percentualeCopertura > 0.85 && form.ritmo !== "veloce") {
