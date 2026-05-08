@@ -8,7 +8,6 @@ import {
   GraduationCap,
   FileCheck2,
   Sparkles,
-  ArrowRight,
   CheckCircle2,
 } from "lucide-react";
 
