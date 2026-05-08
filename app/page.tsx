@@ -159,56 +159,60 @@ export default function Home() {
               type="button"
               style={{
                 width: "100%",
-                border: "1px solid #D7E7F5",
-                background: "#F4F9FD",
-                borderRadius: 20,
-                padding: "15px 16px",
+                border: "1px solid rgba(31,111,178,0.12)",
+                background:
+                  "linear-gradient(135deg, #F4F9FF 0%, #EAF4FC 50%, #F8FBFF 100%)",
+                borderRadius: 22,
+                padding: "16px 18px",
                 display: "flex",
                 alignItems: "center",
-                gap: 12,
+                gap: 14,
                 textAlign: "left",
+                boxShadow: "0 8px 24px rgba(31,111,178,0.08)",
                 cursor: "default",
               }}
             >
-              <span
+              <div
                 style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 15,
+                  width: 54,
+                  height: 54,
+                  borderRadius: 18,
                   background: "#FFFFFF",
-                  border: "1px solid #D8E5F0",
+                  border: "1px solid rgba(31,111,178,0.12)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
+                  boxShadow: "0 6px 16px rgba(31,111,178,0.08)",
                 }}
               >
-                <Share size={20} color="#1F6FB2" />
-              </span>
+                <Share size={24} color="#1F6FB2" />
+              </div>
 
-              <span>
+              <div>
                 <strong
                   style={{
                     display: "block",
-                    fontSize: 15,
-                    color: "#102033",
-                    marginBottom: 3,
+                    fontSize: 17,
+                    fontWeight: 800,
+                    color: "#12304D",
+                    marginBottom: 4,
                   }}
                 >
-                  Installa su iPhone
+                  Scarica su iPhone
                 </strong>
 
                 <span
                   style={{
                     display: "block",
-                    fontSize: 13,
-                    lineHeight: 1.4,
+                    fontSize: 14,
+                    lineHeight: 1.45,
                     color: "#5F6B7A",
                   }}
                 >
                   Premi Condividi e scegli “Aggiungi alla schermata Home”.
                 </span>
-              </span>
+              </div>
             </button>
 
             <div style={{ marginTop: 4 }}>
@@ -231,7 +235,7 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          Puoi registrarti anche senza installare la app.
+          Puoi registrarti anche senza Scaricare la app.
         </p>
       </section>
 
