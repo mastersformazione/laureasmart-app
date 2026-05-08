@@ -370,8 +370,6 @@ export default function Dashboard() {
         />
       </section>
 
-      <StudentiComeTeCard />
-
       <FeatureCard
         icon={<BookOpen size={30} />}
         title="Esplora i percorsi consigliati"
@@ -395,6 +393,8 @@ export default function Dashboard() {
         gradient="linear-gradient(135deg, #0B2440 0%, #155487 52%, #1F6FB2 100%)"
         onClick={() => router.push("/dashboard/percorso-reale")}
       />
+
+      <StudentiComeTeCard />
 
       <FeatureCard
         icon={<CalendarDays size={30} />}
