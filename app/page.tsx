@@ -97,7 +97,7 @@ export default function Home() {
               backdropFilter: "blur(10px)",
             }}
           >
-            Orientamento universitario gratuito
+            Orientamento Universitario Gratuito
           </div>
 
           <h1
@@ -139,7 +139,7 @@ export default function Home() {
 
           <Benefit
             icon={<MessageCircle size={19} />}
-            text="Supporto di un orientatore dedicato"
+            text="Supporto Gratuito di un Orientatore Dedicato"
           />
         </div>
 
@@ -256,7 +256,7 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          Puoi registrarti anche senza installare la app.
+          Puoi registrarti anche senza scaricare la app.
         </p>
       </section>
 
