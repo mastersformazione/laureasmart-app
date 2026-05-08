@@ -4,13 +4,7 @@ import { useEffect, useState } from "react";
 import InstallButton from "./install-button";
 import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
-import {
-  Share,
-  CheckCircle,
-  Bell,
-  MessageCircle,
-  UserCircle2,
-} from "lucide-react";
+import { CheckCircle, Bell, MessageCircle, UserCircle2 } from "lucide-react";
 
 async function trackInstallEvent(eventType: string, platform: string) {
   try {
@@ -227,7 +221,7 @@ export default function Home() {
                   backdropFilter: "blur(8px)",
                 }}
               >
-                <Share size={25} color="#FFFFFF" />
+                <AppleShareIcon size={29} color="#FFFFFF" />
               </div>
 
               <div>
@@ -350,21 +344,21 @@ export default function Home() {
 
             <div style={{ display: "grid", gap: 12 }}>
               <InstallStep
-                number="2"
-                emoji="⬆️"
+                number="1"
+                icon={<AppleShareIcon size={27} color="#1F6FB2" />}
                 title="Premi Condividi"
                 text="Tocca l’icona con il quadrato e la freccia verso l’alto."
               />
 
               <InstallStep
-                number="3"
+                number="2"
                 emoji="➕"
                 title="Premi Aggiungi alla schermata Home"
                 text="Scorri il menu e seleziona questa voce."
               />
 
               <InstallStep
-                number="4"
+                number="3"
                 emoji="✅"
                 title="Premi Aggiungi"
                 text="Laurea Smart comparirà tra le app del tuo iPhone."
@@ -467,11 +461,13 @@ function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
 function InstallStep({
   number,
   emoji,
+  icon,
   title,
   text,
 }: {
   number: string;
-  emoji: string;
+  emoji?: string;
+  icon?: React.ReactNode;
   title: string;
   text: string;
 }) {
@@ -499,7 +495,7 @@ function InstallStep({
           flexShrink: 0,
         }}
       >
-        {emoji}
+        {icon || emoji}
       </div>
 
       <div>
@@ -537,5 +533,44 @@ function InstallStep({
         </span>
       </div>
     </div>
+  );
+}
+
+function AppleShareIcon({
+  size = 28,
+  color = "#FFFFFF",
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 15V3"
+        stroke={color}
+        strokeWidth="2.1"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7.5 7.5L12 3L16.5 7.5"
+        stroke={color}
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6.5 10.5V18.5C6.5 19.6 7.4 20.5 8.5 20.5H15.5C16.6 20.5 17.5 19.6 17.5 18.5V10.5"
+        stroke={color}
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
