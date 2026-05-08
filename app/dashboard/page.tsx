@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import StudentiComeTeCard from "@/components/StudentiComeTeCard";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/ui/BottomNav";
 import {
@@ -368,6 +369,8 @@ export default function Dashboard() {
           onClick={() => router.push("/dashboard/orientamento")}
         />
       </section>
+
+      <StudentiComeTeCard />
 
       <FeatureCard
         icon={<BookOpen size={30} />}
