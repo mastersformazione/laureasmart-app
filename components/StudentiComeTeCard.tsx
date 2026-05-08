@@ -195,9 +195,9 @@ export default function StudentiComeTeCard() {
         padding: 20,
         borderRadius: 30,
         background:
-          "linear-gradient(135deg, rgba(17,32,51,0.94) 0%, rgba(17,32,51,0.84) 100%)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 18px 46px rgba(0,0,0,0.28)",
+          "linear-gradient(135deg, #1F6FB2 0%, #2F86D1 52%, #155487 100%)",
+        border: "1px solid rgba(255,255,255,0.16)",
+        boxShadow: "0 18px 46px rgba(31,111,178,0.34)",
         color: "#FFFFFF",
         backdropFilter: "blur(16px)",
         marginBottom: 20,
@@ -211,7 +211,8 @@ export default function StudentiComeTeCard() {
           width: 140,
           height: 140,
           borderRadius: 999,
-          background: "rgba(58,160,255,0.14)",
+          background: "rgba(255,255,255,0.16)",
+          color: "#78C2FF",
         }}
       />
 
