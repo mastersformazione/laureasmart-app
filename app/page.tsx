@@ -350,13 +350,6 @@ export default function Home() {
 
             <div style={{ display: "grid", gap: 12 }}>
               <InstallStep
-                number="1"
-                emoji="🧭"
-                title="Apri il sito con Safari"
-                text="Se stai usando Chrome o un altro browser, apri app.laureasmart.it con Safari."
-              />
-
-              <InstallStep
                 number="2"
                 emoji="⬆️"
                 title="Premi Condividi"
