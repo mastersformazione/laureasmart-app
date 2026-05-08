@@ -162,16 +162,16 @@ export default function Home() {
               type="button"
               style={{
                 width: "100%",
-                border: "1px solid rgba(31,111,178,0.16)",
+                border: "1px solid rgba(58,160,255,0.22)",
                 background:
-                  "linear-gradient(135deg, #EAF4FC 0%, #DDF0FF 48%, #F4F9FF 100%)",
+                  "linear-gradient(135deg, #2F86D1 0%, #1F6FB2 55%, #155487 100%)",
                 borderRadius: 22,
                 padding: "18px 18px",
                 display: "flex",
                 alignItems: "center",
                 gap: 14,
                 textAlign: "left",
-                boxShadow: "0 10px 26px rgba(31,111,178,0.14)",
+                boxShadow: "0 14px 34px rgba(31,111,178,0.22)",
                 cursor: "default",
               }}
             >
@@ -180,16 +180,16 @@ export default function Home() {
                   width: 56,
                   height: 56,
                   borderRadius: 18,
-                  background: "#FFFFFF",
-                  border: "1px solid rgba(31,111,178,0.12)",
+                  background: "rgba(255,255,255,0.12)",
+                  border: "1px solid rgba(255,255,255,0.10)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
-                  boxShadow: "0 8px 18px rgba(31,111,178,0.10)",
+                  backdropFilter: "blur(8px)",
                 }}
               >
-                <Share size={25} color="#1F6FB2" />
+                <Share size={25} color="#FFFFFF" />
               </div>
 
               <div>
@@ -198,7 +198,7 @@ export default function Home() {
                     display: "block",
                     fontSize: 19,
                     fontWeight: 850,
-                    color: "#12304D",
+                    color: "#FFFFFF",
                     marginBottom: 5,
                     letterSpacing: "-0.3px",
                   }}
@@ -211,7 +211,7 @@ export default function Home() {
                     display: "block",
                     fontSize: 14,
                     lineHeight: 1.45,
-                    color: "#5F6B7A",
+                    color: "rgba(255,255,255,0.82)",
                   }}
                 >
                   Premi Condividi e scegli “Aggiungi alla schermata Home”.
