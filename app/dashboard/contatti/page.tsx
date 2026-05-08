@@ -160,7 +160,7 @@ export default function ContattiPage() {
         </p>
 
         <a
-          href={`https://wa.me/393298170817?text=${whatsappText}`}
+          href={`https://wa.me/393793673257?text=${whatsappText}`}
           target="_blank"
           rel="noopener noreferrer"
           style={{

@@ -571,7 +571,7 @@ export default function OrientamentoPage() {
   if (step >= steps.length) {
     const risultato = getRisultato();
 
-    const whatsappUrl = `https://wa.me/393298170817?text=${encodeURIComponent(
+    const whatsappUrl = `https://wa.me/393793673257?text=${encodeURIComponent(
       `Ho fatto il test Laurea Smart e vorrei ricevere il mio piano personalizzato.
 
 Situazione attuale: ${formData.situazione || ""}

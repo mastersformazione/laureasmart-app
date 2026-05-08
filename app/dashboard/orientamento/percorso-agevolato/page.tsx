@@ -32,7 +32,7 @@ export default function PercorsoAgevolatoPage() {
     setSubmitted(true);
   };
 
-  const whatsappUrl = `https://wa.me/393298170817?text=${encodeURIComponent(
+  const whatsappUrl = `https://wa.me/393793673257?text=${encodeURIComponent(
     `Vorrei una valutazione gratuita CFU per Laurea Smart.
 
 Titolo di studio: ${form.titolo}

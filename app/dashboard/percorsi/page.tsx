@@ -309,7 +309,7 @@ export default function PercorsiPage() {
     );
 
     setPercorsoAttivo(null);
-    window.open(`https://wa.me/393298170817?text=${testo}`, "_blank");
+    window.open(`https://wa.me/393793673257?text=${testo}`, "_blank");
   }
 
   function parlaConOrientatore(percorso: Percorso) {
@@ -320,7 +320,7 @@ export default function PercorsiPage() {
     );
 
     setPercorsoAttivo(null);
-    window.open(`https://wa.me/393298170817?text=${testo}`, "_blank");
+    window.open(`https://wa.me/393793673257?text=${testo}`, "_blank");
   }
 
   return (

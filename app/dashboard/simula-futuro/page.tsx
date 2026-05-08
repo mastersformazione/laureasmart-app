@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import SelectField from "@/components/ui/SelectField";
 import { useRouter } from "next/navigation";
 import {
   LineChart,
@@ -125,7 +126,11 @@ function createChartData(scores: ReturnType<typeof calculateScores>) {
       senzaPercorso: 44,
       conPercorso: Math.round(scores.crescita * 0.78),
     },
-    { mese: "36 mesi", senzaPercorso: 48, conPercorso: scores.crescita },
+    {
+      mese: "36 mesi",
+      senzaPercorso: 48,
+      conPercorso: scores.crescita,
+    },
   ];
 }
 
@@ -205,10 +210,10 @@ export default function SimulaFuturoPage() {
                   updateField("titolo", value as TitoloStudio)
                 }
                 options={[
-                  ["diploma", "Diploma"],
-                  ["triennale", "Laurea triennale"],
-                  ["magistrale", "Laurea magistrale"],
-                  ["altro", "Altro percorso"],
+                  { value: "diploma", label: "Diploma" },
+                  { value: "triennale", label: "Laurea triennale" },
+                  { value: "magistrale", label: "Laurea magistrale" },
+                  { value: "altro", label: "Altro percorso" },
                 ]}
               />
 
@@ -219,10 +224,10 @@ export default function SimulaFuturoPage() {
                   updateField("obiettivo", value as Obiettivo)
                 }
                 options={[
-                  ["stabilita", "Più stabilità lavorativa"],
-                  ["carriera", "Crescita di carriera"],
-                  ["cambio_settore", "Cambiare settore"],
-                  ["concorsi", "Accedere a concorsi"],
+                  { value: "stabilita", label: "Più stabilità lavorativa" },
+                  { value: "carriera", label: "Crescita di carriera" },
+                  { value: "cambio_settore", label: "Cambiare settore" },
+                  { value: "concorsi", label: "Accedere a concorsi" },
                 ]}
               />
 
@@ -231,11 +236,11 @@ export default function SimulaFuturoPage() {
                 value={form.settore}
                 onChange={(value) => updateField("settore", value as Settore)}
                 options={[
-                  ["scuola", "Scuola / educazione"],
-                  ["psicologia", "Psicologia / sociale"],
-                  ["economia", "Economia / management"],
-                  ["giuridico", "Giuridico / concorsi"],
-                  ["digitale", "Digitale / AI / marketing"],
+                  { value: "scuola", label: "Scuola / educazione" },
+                  { value: "psicologia", label: "Psicologia / sociale" },
+                  { value: "economia", label: "Economia / management" },
+                  { value: "giuridico", label: "Giuridico / concorsi" },
+                  { value: "digitale", label: "Digitale / AI / marketing" },
                 ]}
               />
 
@@ -244,9 +249,9 @@ export default function SimulaFuturoPage() {
                 value={form.tempo}
                 onChange={(value) => updateField("tempo", value as Tempo)}
                 options={[
-                  ["poco", "Poco tempo"],
-                  ["medio", "Tempo medio"],
-                  ["alto", "Buona disponibilità"],
+                  { value: "poco", label: "Poco tempo" },
+                  { value: "medio", label: "Tempo medio" },
+                  { value: "alto", label: "Buona disponibilità" },
                 ]}
               />
 
@@ -381,36 +386,6 @@ export default function SimulaFuturoPage() {
 
       <BottomNav />
     </main>
-  );
-}
-
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: [string, string][];
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-bold text-[#102033]">{label}</label>
-
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-2xl border border-[rgba(31,111,178,0.10)] bg-white p-4 text-sm font-semibold text-[#102033] outline-none shadow-[0_8px_22px_rgba(31,111,178,0.06)]"
-      >
-        {options.map(([optionValue, optionLabel]) => (
-          <option key={optionValue} value={optionValue}>
-            {optionLabel}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 }
 
