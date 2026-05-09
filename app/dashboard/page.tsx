@@ -201,7 +201,15 @@ export default function Dashboard() {
     };
 
     const loadNotifiche = () => {
-      fetch("https://laureasmart.it/api/notifiche.php?t=" + Date.now(), {
+      const registeredAt = localStorage.getItem("registered_at") || "";
+
+      const url =
+        "https://laureasmart.it/api/notifiche.php?t=" +
+        Date.now() +
+        "&registered_at=" +
+        encodeURIComponent(registeredAt);
+
+      fetch(url, {
         cache: "no-store",
       })
         .then((res) => res.json())

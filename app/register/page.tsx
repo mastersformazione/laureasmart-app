@@ -36,6 +36,7 @@ export default function Register() {
       if (data.success) {
         localStorage.setItem("gps_user", JSON.stringify(form));
         localStorage.setItem("ha_fatto_test", "no");
+        localStorage.setItem("registered_at", new Date().toISOString());
 
         setForm({
           nome: "",
