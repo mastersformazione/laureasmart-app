@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import Button from "@/components/ui/Button";
-import { Sparkles, User, Mail, Phone, ArrowRight } from "lucide-react";
+import { Sparkles, User, Mail, Phone } from "lucide-react";
 
 export default function Register() {
   const router = useRouter();
