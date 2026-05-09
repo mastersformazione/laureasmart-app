@@ -133,6 +133,125 @@ export default function Home() {
 
         <div
           style={{
+            marginBottom: 20,
+            padding: 18,
+            borderRadius: 28,
+            background: "rgba(255,255,255,0.12)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            boxShadow: "0 18px 46px rgba(0,0,0,0.22)",
+            backdropFilter: "blur(14px)",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              padding: "6px 11px",
+              borderRadius: 999,
+              background: "rgba(37,211,102,0.16)",
+              border: "1px solid rgba(37,211,102,0.26)",
+              color: "#FFFFFF",
+              fontSize: 11,
+              fontWeight: 900,
+              marginBottom: 12,
+              letterSpacing: "0.3px",
+            }}
+          >
+            ORIENTAMENTO GRATUITO
+          </div>
+
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 22,
+              lineHeight: 1.12,
+              fontWeight: 900,
+              letterSpacing: "-0.6px",
+              color: "#FFFFFF",
+            }}
+          >
+            Non devi scegliere da solo
+          </h2>
+
+          <p
+            style={{
+              margin: "10px 0 0",
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: "rgba(255,255,255,0.78)",
+            }}
+          >
+            Laurea Smart ti aiuta a orientarti verso l’ateneo e il corso più
+            adatti alle tue esigenze, al tuo tempo e ai tuoi obiettivi.
+          </p>
+
+          <div
+            style={{
+              marginTop: 14,
+              display: "grid",
+              gap: 9,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                gap: 9,
+                fontSize: 13,
+                lineHeight: 1.45,
+                color: "rgba(255,255,255,0.78)",
+              }}
+            >
+              <CheckCircle
+                size={17}
+                color="#25D366"
+                style={{ flexShrink: 0, marginTop: 1 }}
+              />
+              <span>
+                Gli orientatori ti seguono gratuitamente nella scelta.
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 9,
+                fontSize: 13,
+                lineHeight: 1.45,
+                color: "rgba(255,255,255,0.78)",
+              }}
+            >
+              <CheckCircle
+                size={17}
+                color="#25D366"
+                style={{ flexShrink: 0, marginTop: 1 }}
+              />
+              <span>
+                Nessun costo nascosto, nessuna sorpresa e nessun obbligo.
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 9,
+                fontSize: 13,
+                lineHeight: 1.45,
+                color: "rgba(255,255,255,0.78)",
+              }}
+            >
+              <CheckCircle
+                size={17}
+                color="#25D366"
+                style={{ flexShrink: 0, marginTop: 1 }}
+              />
+              <span>
+                L’obiettivo è aiutarti a scegliere un percorso sostenibile.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
             padding: 16,
             borderRadius: 30,
             background: "rgba(255,255,255,0.97)",
