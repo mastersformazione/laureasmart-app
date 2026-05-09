@@ -3,14 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/ui/BottomNav";
-import {
-  BookOpen,
-  Sparkles,
-  GraduationCap,
-  Route,
-  ClipboardCheck,
-  MessageCircle,
-} from "lucide-react";
+import { BookOpen, Route, ClipboardCheck, MessageCircle } from "lucide-react";
 
 type GpsUser = {
   nome: string;
