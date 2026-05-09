@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import StudentiComeTeCard from "@/components/StudentiComeTeCard";
 import { useRouter } from "next/navigation";
+import CompatibilitaPercorsoCard from "@/components/CompatibilitaPercorsoCard";
 import BottomNav from "@/components/ui/BottomNav";
 import {
   BookOpen,
@@ -437,6 +438,8 @@ export default function Dashboard() {
           </div>
         </button>
       </section>
+
+      <CompatibilitaPercorsoCard />
 
       <FeatureCard
         icon={<BookOpen size={30} />}
