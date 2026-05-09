@@ -16,6 +16,8 @@ import {
   ShieldCheck,
   GitCompare,
   Trophy,
+  TrendingUp,
+  Target,
 } from "lucide-react";
 
 type ProfiloUtente = {
@@ -828,8 +830,12 @@ export default function PreferitiPage() {
                         gap: 9,
                         padding: 11,
                         borderRadius: 16,
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.07)",
+                        background:
+                          "linear-gradient(135deg, rgba(31,111,178,0.16) 0%, rgba(17,32,51,0.92) 100%)",
+
+                        border: "1px solid rgba(120,194,255,0.18)",
+
+                        boxShadow: "0 14px 34px rgba(0,0,0,0.22)",
                         color: "rgba(255,255,255,0.74)",
                         fontSize: 13,
                         lineHeight: 1.45,
@@ -848,24 +854,38 @@ export default function PreferitiPage() {
                 <div
                   style={{
                     marginTop: 14,
-                    padding: 14,
-                    borderRadius: 20,
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.07)",
+                    padding: 15,
+                    borderRadius: 22,
+                    background:
+                      "linear-gradient(135deg, rgba(31,111,178,0.20) 0%, rgba(17,32,51,0.96) 100%)",
+                    border: "1px solid rgba(120,194,255,0.20)",
+                    boxShadow: "0 14px 34px rgba(0,0,0,0.22)",
                   }}
                 >
-                  <h3
+                  <div
                     style={{
-                      margin: "0 0 10px",
-                      fontSize: 15,
-                      fontWeight: 900,
-                      color: "#FFFFFF",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 12,
                     }}
                   >
-                    Dove può portarti questo percorso
-                  </h3>
+                    <TrendingUp size={18} color="#78C2FF" />
 
-                  <div style={{ display: "grid", gap: 8 }}>
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: 16,
+                        fontWeight: 900,
+                        color: "#FFFFFF",
+                        letterSpacing: "-0.2px",
+                      }}
+                    >
+                      Dove può portarti questo percorso
+                    </h3>
+                  </div>
+
+                  <div style={{ display: "grid", gap: 9 }}>
                     {getSviluppiPercorso(percorso).map((sviluppo) => (
                       <div
                         key={sviluppo}
@@ -875,7 +895,7 @@ export default function PreferitiPage() {
                           gap: 8,
                           fontSize: 13,
                           lineHeight: 1.45,
-                          color: "rgba(255,255,255,0.72)",
+                          color: "rgba(255,255,255,0.74)",
                         }}
                       >
                         <CheckCircle2
@@ -892,34 +912,56 @@ export default function PreferitiPage() {
                 <div
                   style={{
                     marginTop: 14,
-                    padding: 14,
-                    borderRadius: 20,
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.07)",
+                    padding: 15,
+                    borderRadius: 22,
+                    background:
+                      "linear-gradient(135deg, rgba(31,111,178,0.16) 0%, rgba(17,32,51,0.96) 100%)",
+                    border: "1px solid rgba(120,194,255,0.18)",
+                    boxShadow: "0 14px 34px rgba(0,0,0,0.22)",
                   }}
                 >
-                  <h3
+                  <div
                     style={{
-                      margin: "0 0 10px",
-                      fontSize: 15,
-                      fontWeight: 900,
-                      color: "#FFFFFF",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 12,
                     }}
                   >
-                    Cosa conviene valutare prima di scegliere
-                  </h3>
+                    <Target size={18} color="#78C2FF" />
+
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: 16,
+                        fontWeight: 900,
+                        color: "#FFFFFF",
+                        letterSpacing: "-0.2px",
+                      }}
+                    >
+                      Cosa conviene valutare prima di scegliere
+                    </h3>
+                  </div>
 
                   <div style={{ display: "grid", gap: 8 }}>
                     {getDomandeUtili().map((domanda) => (
                       <div
                         key={domanda}
                         style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 8,
                           fontSize: 13,
                           lineHeight: 1.45,
-                          color: "rgba(255,255,255,0.68)",
+                          color: "rgba(255,255,255,0.72)",
                         }}
                       >
-                        • {domanda}
+                        <CheckCircle2
+                          size={16}
+                          color="#78C2FF"
+                          style={{ flexShrink: 0, marginTop: 1 }}
+                        />
+                        <span>{domanda}</span>
                       </div>
                     ))}
                   </div>
