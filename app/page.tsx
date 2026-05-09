@@ -6,27 +6,6 @@ import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
 import { CheckCircle, Bell, MessageCircle, UserCircle2 } from "lucide-react";
 
-async function trackInstallEvent(eventType: string, platform: string) {
-  try {
-    const storedUser = localStorage.getItem("gps_user");
-    const user = storedUser ? JSON.parse(storedUser) : null;
-
-    await fetch("https://laureasmart.it/api/salva-install-event.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_email: user?.email || "",
-        event_type: eventType,
-        platform,
-      }),
-    });
-  } catch (error) {
-    console.error("Errore tracking install:", error);
-  }
-}
-
 export default function Home() {
   const router = useRouter();
 
@@ -40,15 +19,6 @@ export default function Home() {
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone ===
         true;
-
-    if (isStandalone) {
-      const giaTracciato = localStorage.getItem("standalone_open_tracked");
-
-      if (!giaTracciato) {
-        trackInstallEvent("open_standalone", "pwa");
-        localStorage.setItem("standalone_open_tracked", "si");
-      }
-    }
 
     if (storedUser && isStandalone) {
       router.replace("/dashboard");
@@ -152,17 +122,9 @@ export default function Home() {
           </p>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gap: 10,
-            marginBottom: 20,
-          }}
-        >
+        <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
           <Benefit icon={<CheckCircle size={19} />} text="Test gratuiti" />
-
           <Benefit icon={<Bell size={19} />} text="Scadenze e promozioni" />
-
           <Benefit
             icon={<MessageCircle size={19} />}
             text="Supporto Gratuito di un Orientatore Dedicato"
@@ -178,20 +140,12 @@ export default function Home() {
             boxShadow: "0 24px 70px rgba(0,0,0,0.28)",
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gap: 10,
-            }}
-          >
+          <div style={{ display: "grid", gap: 10 }}>
             <InstallButton />
 
             <button
               type="button"
-              onClick={() => {
-                trackInstallEvent("click_scarica_iphone", "ios");
-                setIphoneHelpOpen(true);
-              }}
+              onClick={() => setIphoneHelpOpen(true)}
               style={{
                 width: "100%",
                 border: "1px solid rgba(58,160,255,0.22)",
@@ -338,7 +292,7 @@ export default function Home() {
                 color: "#5F6B7A",
               }}
             >
-              Su iPhone la app si Scarica direttamente da Safari e compare tra
+              Su iPhone la app si scarica direttamente da Safari e compare tra
               le app del telefono.
             </p>
 
@@ -446,14 +400,7 @@ function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
         {icon}
       </span>
 
-      <span
-        style={{
-          fontSize: 14,
-          fontWeight: 800,
-        }}
-      >
-        {text}
-      </span>
+      <span style={{ fontSize: 14, fontWeight: 800 }}>{text}</span>
     </div>
   );
 }

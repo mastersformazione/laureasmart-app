@@ -8,27 +8,6 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-async function trackInstallEvent(eventType: string, platform: string) {
-  try {
-    const storedUser = localStorage.getItem("gps_user");
-    const user = storedUser ? JSON.parse(storedUser) : null;
-
-    await fetch("https://laureasmart.it/api/salva-install-event.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_email: user?.email || "",
-        event_type: eventType,
-        platform,
-      }),
-    });
-  } catch (error) {
-    console.error("Errore tracking install:", error);
-  }
-}
-
 export default function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -49,7 +28,6 @@ export default function InstallButton() {
     };
 
     const installedHandler = () => {
-      trackInstallEvent("app_installata", "android");
       setDeferredPrompt(null);
     };
 
@@ -67,23 +45,14 @@ export default function InstallButton() {
 
     setIsInstalling(true);
 
-    const promptEvent = deferredPrompt;
-
     try {
-      await promptEvent.prompt();
+      await deferredPrompt.prompt();
 
-      const choice = await promptEvent.userChoice;
-
-      if (choice.outcome === "accepted") {
-        trackInstallEvent("install_android_accettata", "android");
-      } else {
-        trackInstallEvent("install_android_rifiutata", "android");
-      }
+      await deferredPrompt.userChoice;
 
       setDeferredPrompt(null);
     } catch (error) {
       console.error("Errore prompt installazione:", error);
-      trackInstallEvent("errore_prompt_android", "android");
     } finally {
       setIsInstalling(false);
     }
