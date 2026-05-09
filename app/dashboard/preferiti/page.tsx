@@ -893,7 +893,7 @@ export default function PreferitiPage() {
                           display: "flex",
                           alignItems: "flex-start",
                           gap: 8,
-                          fontSize: 13,
+                          fontSize: 16,
                           lineHeight: 1.45,
                           color: "rgba(255,255,255,0.74)",
                         }}
@@ -951,7 +951,7 @@ export default function PreferitiPage() {
                           display: "flex",
                           alignItems: "flex-start",
                           gap: 8,
-                          fontSize: 13,
+                          fontSize: 16,
                           lineHeight: 1.45,
                           color: "rgba(255,255,255,0.72)",
                         }}
