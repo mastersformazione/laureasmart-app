@@ -67,23 +67,23 @@ export default function InstallButton() {
 
     setIsInstalling(true);
 
-    await trackInstallEvent("click_scarica_android", "android");
+    const promptEvent = deferredPrompt;
 
     try {
-      await deferredPrompt.prompt();
+      await promptEvent.prompt();
 
-      const choice = await deferredPrompt.userChoice;
+      const choice = await promptEvent.userChoice;
 
       if (choice.outcome === "accepted") {
-        await trackInstallEvent("install_android_accettata", "android");
+        trackInstallEvent("install_android_accettata", "android");
       } else {
-        await trackInstallEvent("install_android_rifiutata", "android");
+        trackInstallEvent("install_android_rifiutata", "android");
       }
 
       setDeferredPrompt(null);
     } catch (error) {
       console.error("Errore prompt installazione:", error);
-      await trackInstallEvent("errore_prompt_android", "android");
+      trackInstallEvent("errore_prompt_android", "android");
     } finally {
       setIsInstalling(false);
     }
