@@ -935,7 +935,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 boxShadow: "0 12px 28px rgba(0,0,0,0.22)",
               }}
             >
-              <Bell size={34} />
+              <Sparkles size={34} />
             </div>
 
             <h2
@@ -948,7 +948,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 letterSpacing: "-0.8px",
               }}
             >
-              Ricevi consigli personalizzati
+              Capisci subito qual è il percorso migliore per te
             </h2>
 
             <p
@@ -959,13 +959,13 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 color: "rgba(255,255,255,0.68)",
               }}
             >
-              Attiva le notifiche per ricevere aggiornamenti su lauree,
-              agevolazioni, scadenze e opportunità coerenti con il tuo profilo.
+              Parti da qui: Laurea Smart può mostrarti contenuti, corsi e
+              opportunità più coerenti con il tuo profilo e i tuoi obiettivi.
             </p>
 
             <div style={{ display: "grid", gap: 10 }}>
               <Button
-                label="Attiva notifiche"
+                label="Inizia"
                 variant="primary"
                 onClick={handleActivateNotifications}
               />
