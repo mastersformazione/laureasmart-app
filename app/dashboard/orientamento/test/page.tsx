@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import OneSignal from "react-onesignal";
 import {
-  Bell,
   Sparkles,
   GraduationCap,
   Clock,
@@ -948,7 +947,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 letterSpacing: "-0.8px",
               }}
             >
-              Capisci subito qual è il percorso migliore per te
+              Capisci in pochi secondi qual è il percorso migliore per te
             </h2>
 
             <p
