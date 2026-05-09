@@ -958,8 +958,8 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 color: "rgba(255,255,255,0.68)",
               }}
             >
-              Parti da qui: Laurea Smart può mostrarti contenuti, corsi e
-              opportunità più coerenti con il tuo profilo e i tuoi obiettivi.
+              Parti da qui: in base alle tue risposte ti mostreremo subito un
+              possibile percorso universitario adatto ai tuoi obiettivi.
             </p>
 
             <div style={{ display: "grid", gap: 10 }}>
