@@ -3,12 +3,12 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Laurea Smart",
-    short_name: "Laurea Smart",
+    short_name: "LaureaSmart",
     description: "Trova la laurea giusta senza perdere tempo.",
-    start_url: "/dashboard",
+    start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: "#ffffff",
+    background_color: "#06111F",
     theme_color: "#1F6FB2",
     icons: [
       {
