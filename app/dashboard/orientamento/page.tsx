@@ -1,18 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import StudentiComeTeCard from "@/components/StudentiComeTeCard";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/ui/BottomNav";
 import {
   BookOpen,
-  Bell,
-  Search,
-  Heart,
+  Sparkles,
+  GraduationCap,
+  Route,
+  ClipboardCheck,
   MessageCircle,
-  TrendingUp,
-  CalendarCheck,
-  CalendarDays,
 } from "lucide-react";
 
 type GpsUser = {
@@ -22,28 +19,20 @@ type GpsUser = {
   interesse: string;
 };
 
-type Notifica = {
-  id: string;
-  titolo: string;
-  messaggio: string;
-  categoria: string;
-  created_at: string;
-};
-
 function FeatureCard({
   icon,
   title,
   description,
   gradient,
   onClick,
-  highlight = false,
+  badge,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
   gradient: string;
   onClick: () => void;
-  highlight?: boolean;
+  badge?: string;
 }) {
   return (
     <section
@@ -51,22 +40,17 @@ function FeatureCard({
       style={{
         background: "rgba(17,32,51,0.82)",
         borderRadius: 30,
-        border: highlight
-          ? "1px solid rgba(255,201,64,0.35)"
-          : "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid rgba(255,255,255,0.08)",
         padding: 16,
-        boxShadow: highlight
-          ? "0 18px 44px rgba(255,196,64,0.16)"
-          : "0 18px 46px rgba(0,0,0,0.26)",
+        boxShadow: "0 18px 46px rgba(0,0,0,0.26)",
         marginBottom: 20,
         cursor: "pointer",
-        transition: "all .2s ease",
         backdropFilter: "blur(16px)",
       }}
     >
       <div
         style={{
-          minHeight: 145,
+          minHeight: 155,
           borderRadius: 28,
           background: gradient,
           padding: 20,
@@ -110,22 +94,21 @@ function FeatureCard({
           ›
         </div>
 
-        {highlight && (
+        {badge && (
           <div
             style={{
               display: "inline-flex",
               marginBottom: 14,
               padding: "6px 12px",
               borderRadius: 999,
-              background: "#FFC940",
+              background: "rgba(255,255,255,0.18)",
               color: "#FFFFFF",
               fontSize: 12,
               fontWeight: 850,
               letterSpacing: "0.3px",
-              boxShadow: "0 6px 16px rgba(255,201,64,0.30)",
             }}
           >
-            NOVITÀ
+            {badge}
           </div>
         )}
 
@@ -174,11 +157,9 @@ function FeatureCard({
   );
 }
 
-export default function Dashboard() {
+export default function OrientamentoPage() {
   const router = useRouter();
   const [user, setUser] = useState<GpsUser | null>(null);
-  const [notifiche, setNotifiche] = useState<Notifica[]>([]);
-  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("gps_user");
@@ -189,52 +170,9 @@ export default function Dashboard() {
     }
 
     setUser(JSON.parse(storedUser) as GpsUser);
-
-    const aggiornaBadge = (count: number) => {
-      if ("setAppBadge" in navigator && count > 0) {
-        navigator.setAppBadge(count).catch(console.error);
-      }
-
-      if ("clearAppBadge" in navigator && count === 0) {
-        navigator.clearAppBadge().catch(console.error);
-      }
-    };
-
-    const loadNotifiche = () => {
-      fetch("https://laureasmart.it/api/notifiche.php?t=" + Date.now(), {
-        cache: "no-store",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            const lista = data.data || [];
-            setNotifiche(lista);
-            aggiornaBadge(lista.length);
-          }
-        })
-        .catch((error) => {
-          console.error("Errore caricamento notifiche:", error);
-        });
-    };
-
-    loadNotifiche();
-    const interval = setInterval(loadNotifiche, 10000);
-
-    return () => clearInterval(interval);
   }, [router]);
 
   if (!user) return null;
-
-  const notificheFiltrate = notifiche.filter((notifica) => {
-    const testo = query.toLowerCase().trim();
-
-    return (
-      testo === "" ||
-      notifica.titolo.toLowerCase().includes(testo) ||
-      notifica.messaggio.toLowerCase().includes(testo) ||
-      notifica.categoria.toLowerCase().includes(testo)
-    );
-  });
 
   return (
     <main
@@ -269,7 +207,7 @@ export default function Dashboard() {
             fontWeight: 700,
           }}
         >
-          Benvenuto, {user.nome} 👋
+          Orientamento Laurea Smart
         </p>
 
         <h1
@@ -281,7 +219,7 @@ export default function Dashboard() {
             letterSpacing: "-0.7px",
           }}
         >
-          Costruisci il tuo percorso universitario
+          Scegli il prossimo passo giusto
         </h1>
 
         <p
@@ -292,260 +230,42 @@ export default function Dashboard() {
             opacity: 0.95,
           }}
         >
-          Ritrova i corsi salvati, ricevi aggiornamenti e scopri opportunità
-          coerenti con il tuo profilo.
+          Da qui puoi valutare percorsi agevolati, esplorare i corsi consigliati
+          oppure rifare il test se vuoi aggiornare il tuo profilo.
         </p>
       </section>
 
-      <section style={{ marginBottom: 18 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            border: "1px solid rgba(255,255,255,0.09)",
-            background: "rgba(17,32,51,0.82)",
-            borderRadius: 22,
-            padding: "14px 16px",
-            boxShadow: "0 12px 30px rgba(0,0,0,0.20)",
-            backdropFilter: "blur(16px)",
-          }}
-        >
-          <Search size={22} color="#3AA0FF" />
-
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cerca notifiche, scadenze, opportunità..."
-            style={{
-              width: "100%",
-              border: "none",
-              outline: "none",
-              background: "transparent",
-              color: "#FFFFFF",
-              fontSize: 14,
-              fontFamily: "inherit",
-            }}
-          />
-
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              style={{
-                border: "none",
-                background: "transparent",
-                color: "rgba(255,255,255,0.65)",
-                fontSize: 18,
-                cursor: "pointer",
-              }}
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </section>
-
-      <section style={{ marginBottom: 20 }}>
-        <button
-          onClick={() => router.push("/dashboard/preferiti")}
-          style={{
-            width: "100%",
-            border: "1px solid rgba(58,160,255,0.28)",
-            background:
-              "linear-gradient(135deg, rgba(31,111,178,0.96) 0%, rgba(58,160,255,0.92) 55%, rgba(21,84,135,0.96) 100%)",
-            borderRadius: 28,
-            padding: 20,
-            textAlign: "left",
-            boxShadow: "0 20px 48px rgba(58,160,255,0.22)",
-            cursor: "pointer",
-            color: "#FFFFFF",
-            position: "relative",
-            overflow: "hidden",
-            fontFamily: "inherit",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: -34,
-              top: -34,
-              width: 130,
-              height: 130,
-              borderRadius: 999,
-              background: "rgba(255,255,255,0.14)",
-            }}
-          />
-
-          <div
-            style={{
-              position: "relative",
-              zIndex: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 14,
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 20,
-                background: "rgba(255,255,255,0.18)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Heart size={28} />
-            </div>
-
-            <div>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: 23,
-                  lineHeight: 1.1,
-                  fontWeight: 900,
-                  letterSpacing: "-0.5px",
-                }}
-              >
-                I miei percorsi
-              </h2>
-
-              <p
-                style={{
-                  margin: "7px 0 0",
-                  fontSize: 14,
-                  lineHeight: 1.45,
-                  color: "rgba(255,255,255,0.86)",
-                }}
-              >
-                Ritrova subito i corsi salvati e continua da quelli più adatti
-                al tuo profilo.
-              </p>
-            </div>
-          </div>
-        </button>
-      </section>
+      <FeatureCard
+        icon={<Route size={30} />}
+        title="Percorso agevolato"
+        description="Scopri se puoi accedere a un percorso più rapido, sostenibile o personalizzato in base al tuo profilo."
+        gradient="linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)"
+        badge="Consigliato"
+        onClick={() =>
+          router.push("/dashboard/orientamento/percorso-agevolato")
+        }
+      />
 
       <FeatureCard
         icon={<BookOpen size={30} />}
-        title="Esplora i percorsi consigliati"
-        description="Lauree, magistrali e master ordinati in base al tuo profilo."
-        gradient="linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)"
+        title="Esplora i percorsi"
+        description="Consulta lauree, magistrali e master disponibili e continua dai corsi più coerenti con i tuoi obiettivi."
+        gradient="linear-gradient(135deg, #102033 0%, #1F6FB2 58%, #3AA0FF 100%)"
         onClick={() => router.push("/dashboard/percorsi")}
       />
 
       <FeatureCard
-        icon={<TrendingUp size={30} />}
-        title="Simula il tuo futuro"
-        description="Visualizza come potrebbe crescere il tuo profilo nei prossimi 36 mesi."
-        gradient="linear-gradient(135deg, #102033 0%, #1F6FB2 58%, #3AA0FF 100%)"
-        onClick={() => router.push("/dashboard/simula-futuro")}
-      />
-
-      <FeatureCard
-        icon={<CalendarCheck size={30} />}
-        title="Il tuo percorso reale"
-        description="Scopri se università, lavoro e impegni quotidiani possono stare insieme in modo sostenibile."
+        icon={<ClipboardCheck size={30} />}
+        title="Aggiorna il tuo test"
+        description="Rifai il test di orientamento se sono cambiati obiettivi, tempo disponibile o area di interesse."
         gradient="linear-gradient(135deg, #0B2440 0%, #155487 52%, #1F6FB2 100%)"
-        onClick={() => router.push("/dashboard/percorso-reale")}
+        onClick={() => router.push("/dashboard/orientamento/test")}
       />
-
-      <StudentiComeTeCard />
-
-      <FeatureCard
-        icon={<CalendarDays size={30} />}
-        title="Prepara il tuo anno accademico"
-        description="Simula esami, CFU, sessioni e tempo di studio per capire come organizzare il tuo primo anno."
-        gradient="linear-gradient(135deg, #2563EB 0%, #3B82F6 55%, #60A5FA 100%)"
-        highlight
-        onClick={() => router.push("/dashboard/anno-accademico")}
-      />
-
-      <section>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            marginBottom: 14,
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: 22,
-              color: "#FFFFFF",
-              fontWeight: 850,
-              letterSpacing: "-0.4px",
-            }}
-          >
-            Notifiche recenti
-          </h2>
-
-          {notifiche.length > 0 && (
-            <span
-              style={{
-                minWidth: 30,
-                height: 30,
-                padding: "0 10px",
-                borderRadius: 999,
-                background: "#3AA0FF",
-                color: "#FFFFFF",
-                fontSize: 13,
-                fontWeight: 800,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 8px 22px rgba(58,160,255,0.32)",
-              }}
-            >
-              {notifiche.length}
-            </span>
-          )}
-        </div>
-
-        {notificheFiltrate.length === 0 ? (
-          <DarkCard
-            title="Nessun aggiornamento trovato"
-            description="Quando saranno pubblicate nuove opportunità, le troverai qui."
-          />
-        ) : (
-          <div style={{ display: "grid", gap: 12 }}>
-            {notificheFiltrate.map((notifica) => (
-              <DarkCard
-                key={notifica.id}
-                title={notifica.titolo}
-                description={notifica.messaggio}
-                badge={notifica.categoria}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    marginTop: 12,
-                    color: "rgba(255,255,255,0.54)",
-                    fontSize: 12,
-                  }}
-                >
-                  <Bell size={14} />
-                  <span>{notifica.created_at}</span>
-                </div>
-              </DarkCard>
-            ))}
-          </div>
-        )}
-      </section>
 
       <section style={{ marginTop: 22 }}>
         <DarkCard
-          title="Hai bisogno di aiuto?"
-          description="Un orientatore reale può aiutarti gratuitamente a capire quale percorso scegliere."
+          title="Hai ancora dubbi?"
+          description="Un orientatore può aiutarti gratuitamente a leggere il risultato del test e capire quale strada seguire."
           badge="Gratis"
           onClick={() => router.push("/dashboard/contatti")}
         >
