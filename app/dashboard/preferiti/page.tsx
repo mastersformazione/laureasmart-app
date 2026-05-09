@@ -10,11 +10,161 @@ import {
   Trash2,
   GraduationCap,
   Sparkles,
+  CheckCircle2,
+  ArrowRight,
+  MessageCircle,
+  ShieldCheck,
 } from "lucide-react";
+
+type ProfiloUtente = {
+  situazione: string;
+  titoloStudio: string;
+  obiettivo: string;
+  urgenza: string;
+  tempo: string;
+  area: string;
+};
+
+function getProfiloUtente(): ProfiloUtente {
+  return {
+    situazione: localStorage.getItem("situazione") || "",
+    titoloStudio: localStorage.getItem("titolo_studio") || "",
+    obiettivo: localStorage.getItem("obiettivo") || "",
+    urgenza: localStorage.getItem("urgenza_obiettivo") || "",
+    tempo: localStorage.getItem("tempo_disponibile") || "",
+    area: localStorage.getItem("area_interesse") || "",
+  };
+}
+
+function calcolaCompatibilita(percorso: Percorso, profilo: ProfiloUtente) {
+  let score = 74;
+
+  const settore = percorso.settore.toLowerCase();
+  const titolo = percorso.titolo.toLowerCase();
+  const tags = percorso.tags.map((tag) => tag.toLowerCase()).join(" ");
+  const area = profilo.area.toLowerCase();
+  const obiettivo = profilo.obiettivo.toLowerCase();
+
+  if (
+    area &&
+    area !== "non so ancora" &&
+    (settore.includes(area) || titolo.includes(area) || tags.includes(area))
+  ) {
+    score += 9;
+  }
+
+  if (profilo.tempo === "5-7 ore a settimana") score += 5;
+  if (
+    profilo.tempo === "8-10 ore a settimana" ||
+    profilo.tempo === "Più di 10 ore a settimana"
+  ) {
+    score += 8;
+  }
+  if (profilo.tempo === "2-4 ore a settimana") score += 2;
+
+  if (
+    profilo.situazione === "Lavoro full-time" ||
+    profilo.situazione === "Lavoro part-time" ||
+    profilo.situazione === "Studio e lavoro"
+  ) {
+    score += 4;
+  }
+
+  if (
+    obiettivo.includes("concorsi") &&
+    (settore.includes("giurisprudenza") ||
+      settore.includes("educazione") ||
+      settore.includes("scuola"))
+  ) {
+    score += 5;
+  }
+
+  if (
+    obiettivo.includes("insegnare") &&
+    (settore.includes("educazione") || settore.includes("scuola"))
+  ) {
+    score += 6;
+  }
+
+  if (
+    obiettivo.includes("cambiare lavoro") ||
+    obiettivo.includes("aumentare lo stipendio") ||
+    obiettivo.includes("completare")
+  ) {
+    score += 4;
+  }
+
+  if (profilo.urgenza === "Subito / entro 1 mese") score += 2;
+  if (profilo.urgenza === "Entro 3 mesi") score += 3;
+
+  return Math.min(score, 96);
+}
+
+function getMotiviPercorso(percorso: Percorso, profilo: ProfiloUtente) {
+  const motivi = [];
+
+  if (
+    profilo.situazione === "Lavoro full-time" ||
+    profilo.situazione === "Lavoro part-time" ||
+    profilo.situazione === "Studio e lavoro"
+  ) {
+    motivi.push(
+      "Può essere valutato anche da chi deve conciliare studio e impegni quotidiani."
+    );
+  } else {
+    motivi.push(
+      "Può aiutarti a costruire un percorso universitario più ordinato e progressivo."
+    );
+  }
+
+  if (profilo.tempo === "2-4 ore a settimana") {
+    motivi.push(
+      "Con poco tempo disponibile, conviene ragionare su un piano graduale e sostenibile."
+    );
+  } else if (profilo.tempo) {
+    motivi.push(
+      "Il tempo che hai indicato permette una valutazione più concreta del percorso."
+    );
+  }
+
+  if (profilo.obiettivo) {
+    motivi.push(
+      `È utile da confrontare con il tuo obiettivo: ${profilo.obiettivo.toLowerCase()}.`
+    );
+  } else {
+    motivi.push(
+      "È utile da confrontare con i tuoi obiettivi professionali e personali."
+    );
+  }
+
+  return motivi.slice(0, 3);
+}
+
+function getDomandeUtili() {
+  return [
+    "Quali materie troverei nel piano di studio?",
+    "Quanto è sostenibile con il mio tempo?",
+    "È coerente con il mio obiettivo professionale?",
+  ];
+}
+
+function creaWhatsAppUrl(percorso: Percorso, compatibilita: number) {
+  return `https://wa.me/393793673257?text=${encodeURIComponent(
+    `Ciao, vorrei ricevere il piano di studio spiegato in modo semplice per questo percorso:
+
+${percorso.titolo}
+Classe: ${percorso.classe}
+Area: ${percorso.settore}
+Compatibilità indicata in app: ${compatibilita}%
+
+Vorrei capire se è davvero adatto al mio profilo.`
+  )}`;
+}
 
 export default function PreferitiPage() {
   const [preferiti, setPreferiti] = useState<Percorso[]>([]);
   const [queryRicerca, setQueryRicerca] = useState("");
+  const [profilo, setProfilo] = useState<ProfiloUtente | null>(null);
 
   useEffect(() => {
     const datiSalvati = localStorage.getItem("percorsi_preferiti");
@@ -26,6 +176,8 @@ export default function PreferitiPage() {
         setPreferiti([]);
       }
     }
+
+    setProfilo(getProfiloUtente());
   }, []);
 
   function rimuoviPreferito(id: string) {
@@ -141,7 +293,8 @@ export default function PreferitiPage() {
             zIndex: 1,
           }}
         >
-          Qui trovi i percorsi che hai salvato cliccando su “Mi interessa”.
+          Confronta i corsi che hai salvato e capisci quali sono più coerenti
+          con il tuo profilo, il tuo tempo e i tuoi obiettivi.
         </p>
 
         <div
@@ -227,54 +380,217 @@ export default function PreferitiPage() {
         />
       ) : (
         <div style={{ display: "grid", gap: 16 }}>
-          {preferitiFiltrati.map((percorso) => (
-            <DarkCard
-              key={percorso.id}
-              title={percorso.titolo}
-              description={`Durata: ${percorso.durata}`}
-              badge={percorso.classe}
-              icon={<span>{percorso.classe.replace("L-", "L")}</span>}
-            >
-              <div
-                style={{
-                  marginTop: 14,
-                  padding: 13,
-                  borderRadius: 18,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.68)",
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                }}
-              >
-                Area:{" "}
-                <strong style={{ color: "#FFFFFF" }}>{percorso.settore}</strong>
-              </div>
+          {preferitiFiltrati.map((percorso) => {
+            const compatibilita = profilo
+              ? calcolaCompatibilita(percorso, profilo)
+              : 78;
 
-              <button
-                onClick={() => rimuoviPreferito(percorso.id)}
-                style={{
-                  marginTop: 14,
-                  width: "100%",
-                  minHeight: 54,
-                  borderRadius: 20,
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#FFFFFF",
-                  fontSize: 14,
-                  fontWeight: 850,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 9,
-                  cursor: "pointer",
-                }}
+            const motivi = profilo ? getMotiviPercorso(percorso, profilo) : [];
+            const whatsappUrl = creaWhatsAppUrl(percorso, compatibilita);
+
+            return (
+              <DarkCard
+                key={percorso.id}
+                title={percorso.titolo}
+                description={`Durata: ${percorso.durata}`}
+                badge={percorso.classe}
+                icon={<span>{percorso.classe.replace("L-", "L")}</span>}
               >
-                <Trash2 size={18} color="#78C2FF" />
-                Rimuovi dai preferiti
-              </button>
-            </DarkCard>
-          ))}
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: 13,
+                    borderRadius: 18,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.68)",
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Area:{" "}
+                  <strong style={{ color: "#FFFFFF" }}>
+                    {percorso.settore}
+                  </strong>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: 14,
+                    borderRadius: 20,
+                    background:
+                      "linear-gradient(135deg, rgba(31,111,178,0.34), rgba(58,160,255,0.16))",
+                    border: "1px solid rgba(120,194,255,0.20)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      marginBottom: 10,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        fontSize: 14,
+                        fontWeight: 900,
+                        color: "#FFFFFF",
+                      }}
+                    >
+                      <ShieldCheck size={18} color="#78C2FF" />
+                      Compatibilità col tuo profilo
+                    </div>
+
+                    <strong
+                      style={{
+                        fontSize: 20,
+                        color: "#FFFFFF",
+                        letterSpacing: "-0.4px",
+                      }}
+                    >
+                      {compatibilita}%
+                    </strong>
+                  </div>
+
+                  <div
+                    style={{
+                      width: "100%",
+                      height: 9,
+                      borderRadius: 999,
+                      background: "rgba(255,255,255,0.12)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${compatibilita}%`,
+                        height: "100%",
+                        borderRadius: 999,
+                        background: "#78C2FF",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gap: 9, marginTop: 14 }}>
+                  {motivi.map((motivo, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: "flex",
+                        gap: 9,
+                        padding: 11,
+                        borderRadius: 16,
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.07)",
+                        color: "rgba(255,255,255,0.74)",
+                        fontSize: 13,
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      <CheckCircle2
+                        size={17}
+                        color="#78C2FF"
+                        style={{ flexShrink: 0, marginTop: 1 }}
+                      />
+                      <span>{motivo}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: 14,
+                    borderRadius: 20,
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                  }}
+                >
+                  <h3
+                    style={{
+                      margin: "0 0 10px",
+                      fontSize: 15,
+                      fontWeight: 900,
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    Cosa conviene valutare prima di scegliere
+                  </h3>
+
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {getDomandeUtili().map((domanda) => (
+                      <div
+                        key={domanda}
+                        style={{
+                          fontSize: 13,
+                          lineHeight: 1.45,
+                          color: "rgba(255,255,255,0.68)",
+                        }}
+                      >
+                        • {domanda}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    marginTop: 14,
+                    width: "100%",
+                    minHeight: 56,
+                    borderRadius: 20,
+                    background: "#25D366",
+                    color: "#FFFFFF",
+                    fontSize: 14,
+                    fontWeight: 900,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 9,
+                    textDecoration: "none",
+                    boxShadow: "0 14px 30px rgba(37,211,102,0.24)",
+                  }}
+                >
+                  <MessageCircle size={18} />
+                  Ricevi il piano di studio spiegato
+                  <ArrowRight size={18} />
+                </a>
+
+                <button
+                  onClick={() => rimuoviPreferito(percorso.id)}
+                  style={{
+                    marginTop: 12,
+                    width: "100%",
+                    minHeight: 50,
+                    borderRadius: 18,
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    background: "rgba(255,255,255,0.06)",
+                    color: "rgba(255,255,255,0.78)",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    cursor: "pointer",
+                  }}
+                >
+                  <Trash2 size={17} color="#78C2FF" />
+                  Rimuovi dai preferiti
+                </button>
+              </DarkCard>
+            );
+          })}
         </div>
       )}
 
