@@ -14,6 +14,8 @@ import {
   ArrowRight,
   MessageCircle,
   ShieldCheck,
+  GitCompare,
+  Trophy,
 } from "lucide-react";
 
 type ProfiloUtente = {
@@ -23,6 +25,11 @@ type ProfiloUtente = {
   urgenza: string;
   tempo: string;
   area: string;
+};
+
+type PercorsoConScore = {
+  percorso: Percorso;
+  compatibilita: number;
 };
 
 function getProfiloUtente(): ProfiloUtente {
@@ -54,12 +61,14 @@ function calcolaCompatibilita(percorso: Percorso, profilo: ProfiloUtente) {
   }
 
   if (profilo.tempo === "5-7 ore a settimana") score += 5;
+
   if (
     profilo.tempo === "8-10 ore a settimana" ||
     profilo.tempo === "Più di 10 ore a settimana"
   ) {
     score += 8;
   }
+
   if (profilo.tempo === "2-4 ore a settimana") score += 2;
 
   if (
@@ -98,6 +107,80 @@ function calcolaCompatibilita(percorso: Percorso, profilo: ProfiloUtente) {
   if (profilo.urgenza === "Entro 3 mesi") score += 3;
 
   return Math.min(score, 96);
+}
+
+function getLivelloCompatibilita(score: number) {
+  if (score >= 88) return "Molto alta";
+  if (score >= 82) return "Alta";
+  if (score >= 76) return "Buona";
+  return "Da valutare";
+}
+
+function getSostenibilita(profilo: ProfiloUtente) {
+  if (profilo.tempo === "2-4 ore a settimana") return "Graduale";
+  if (profilo.tempo === "5-7 ore a settimana") return "Equilibrata";
+  if (
+    profilo.tempo === "8-10 ore a settimana" ||
+    profilo.tempo === "Più di 10 ore a settimana"
+  ) {
+    return "Alta";
+  }
+
+  return "Da definire";
+}
+
+function getTempoConsigliato(profilo: ProfiloUtente) {
+  if (profilo.tempo === "2-4 ore a settimana") return "Piano lento";
+  if (profilo.tempo === "5-7 ore a settimana") return "Piano regolare";
+  if (
+    profilo.tempo === "8-10 ore a settimana" ||
+    profilo.tempo === "Più di 10 ore a settimana"
+  ) {
+    return "Piano intenso";
+  }
+
+  return "Piano personalizzato";
+}
+
+function getIdealePer(percorso: Percorso, profilo: ProfiloUtente) {
+  const settore = percorso.settore.toLowerCase();
+  const titolo = percorso.titolo.toLowerCase();
+
+  if (settore.includes("psicologia") || titolo.includes("psicologia")) {
+    return "persone e relazioni";
+  }
+
+  if (
+    settore.includes("educazione") ||
+    settore.includes("scuola") ||
+    titolo.includes("educazione")
+  ) {
+    return "educazione e servizi";
+  }
+
+  if (
+    settore.includes("economia") ||
+    settore.includes("management") ||
+    titolo.includes("economia")
+  ) {
+    return "lavoro e crescita";
+  }
+
+  if (
+    settore.includes("giurisprudenza") ||
+    settore.includes("giuridic") ||
+    titolo.includes("giurisprudenza")
+  ) {
+    return "diritto e concorsi";
+  }
+
+  if (settore.includes("comunicazione") || titolo.includes("comunicazione")) {
+    return "comunicazione e digitale";
+  }
+
+  if (profilo.obiettivo) return profilo.obiettivo.toLowerCase();
+
+  return "crescita personale";
 }
 
 function getMotiviPercorso(percorso: Percorso, profilo: ProfiloUtente) {
@@ -161,10 +244,32 @@ Vorrei capire se è davvero adatto al mio profilo.`
   )}`;
 }
 
+function creaWhatsAppConfrontoUrl(percorsi: PercorsoConScore[]) {
+  const elenco = percorsi
+    .slice(0, 4)
+    .map(
+      (item, index) =>
+        `${index + 1}. ${item.percorso.titolo} - ${
+          item.percorso.classe
+        } - compatibilità ${item.compatibilita}%`
+    )
+    .join("\n");
+
+  return `https://wa.me/393793673257?text=${encodeURIComponent(
+    `Ciao, ho salvato più percorsi su Laurea Smart e vorrei ricevere un confronto spiegato in modo semplice.
+
+Percorsi salvati:
+${elenco}
+
+Vorrei capire quale percorso è più adatto al mio profilo, al mio tempo e ai miei obiettivi.`
+  )}`;
+}
+
 export default function PreferitiPage() {
   const [preferiti, setPreferiti] = useState<Percorso[]>([]);
   const [queryRicerca, setQueryRicerca] = useState("");
   const [profilo, setProfilo] = useState<ProfiloUtente | null>(null);
+  const [mostraConfronto, setMostraConfronto] = useState(false);
 
   useEffect(() => {
     const datiSalvati = localStorage.getItem("percorsi_preferiti");
@@ -185,6 +290,10 @@ export default function PreferitiPage() {
 
     setPreferiti(nuoviPreferiti);
     localStorage.setItem("percorsi_preferiti", JSON.stringify(nuoviPreferiti));
+
+    if (nuoviPreferiti.length < 2) {
+      setMostraConfronto(false);
+    }
   }
 
   const preferitiFiltrati = preferiti.filter((percorso) => {
@@ -198,6 +307,16 @@ export default function PreferitiPage() {
       percorso.tags.some((tag) => tag.toLowerCase().includes(testoRicerca))
     );
   });
+
+  const percorsiConScore: PercorsoConScore[] = preferiti
+    .map((percorso) => ({
+      percorso,
+      compatibilita: profilo ? calcolaCompatibilita(percorso, profilo) : 78,
+    }))
+    .sort((a, b) => b.compatibilita - a.compatibilita);
+
+  const migliorePercorso = percorsiConScore[0];
+  const whatsappConfrontoUrl = creaWhatsAppConfrontoUrl(percorsiConScore);
 
   return (
     <main
@@ -368,6 +487,118 @@ export default function PreferitiPage() {
           </button>
         )}
       </section>
+
+      {preferiti.length >= 2 && migliorePercorso && profilo && (
+        <section
+          style={{
+            marginBottom: 18,
+            padding: 18,
+            borderRadius: 28,
+            background:
+              "linear-gradient(135deg, rgba(31,111,178,0.92) 0%, rgba(58,160,255,0.72) 58%, rgba(21,84,135,0.92) 100%)",
+            border: "1px solid rgba(120,194,255,0.24)",
+            boxShadow: "0 18px 46px rgba(0,0,0,0.26)",
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              right: -38,
+              top: -38,
+              width: 140,
+              height: 140,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.13)",
+            }}
+          />
+
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 20,
+                background: "rgba(255,255,255,0.16)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 15,
+              }}
+            >
+              <GitCompare size={28} />
+            </div>
+
+            <p
+              style={{
+                margin: "0 0 7px",
+                fontSize: 13,
+                fontWeight: 900,
+                color: "rgba(255,255,255,0.88)",
+              }}
+            >
+              Confronto intelligente
+            </p>
+
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 25,
+                lineHeight: 1.08,
+                fontWeight: 900,
+                letterSpacing: "-0.7px",
+              }}
+            >
+              Vuoi capire quale percorso è più adatto a te?
+            </h2>
+
+            <p
+              style={{
+                margin: "11px 0 0",
+                fontSize: 14,
+                lineHeight: 1.55,
+                color: "rgba(255,255,255,0.88)",
+              }}
+            >
+              Hai salvato più corsi. Possiamo confrontarli in base a
+              compatibilità, sostenibilità e coerenza con il tuo obiettivo.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setMostraConfronto(!mostraConfronto)}
+              style={{
+                marginTop: 16,
+                width: "100%",
+                minHeight: 54,
+                borderRadius: 20,
+                border: "none",
+                background: "#FFFFFF",
+                color: "#1F6FB2",
+                fontSize: 15,
+                fontWeight: 900,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 9,
+                cursor: "pointer",
+              }}
+            >
+              {mostraConfronto ? "Nascondi confronto" : "Confronta ora"}
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </section>
+      )}
+
+      {mostraConfronto && preferiti.length >= 2 && profilo && (
+        <ConfrontoPercorsi
+          percorsi={percorsiConScore}
+          profilo={profilo}
+          whatsappUrl={whatsappConfrontoUrl}
+        />
+      )}
 
       {preferiti.length === 0 ? (
         <DarkEmptyCard />
@@ -596,6 +827,273 @@ export default function PreferitiPage() {
 
       <BottomNav />
     </main>
+  );
+}
+
+function ConfrontoPercorsi({
+  percorsi,
+  profilo,
+  whatsappUrl,
+}: {
+  percorsi: PercorsoConScore[];
+  profilo: ProfiloUtente;
+  whatsappUrl: string;
+}) {
+  const topPercorsi = percorsi.slice(0, 4);
+  const migliore = topPercorsi[0];
+
+  return (
+    <section
+      style={{
+        marginBottom: 20,
+        padding: 18,
+        borderRadius: 28,
+        background: "rgba(17,32,51,0.90)",
+        border: "1px solid rgba(120,194,255,0.18)",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        backdropFilter: "blur(16px)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 13,
+          marginBottom: 16,
+        }}
+      >
+        <div
+          style={{
+            width: 54,
+            height: 54,
+            borderRadius: 20,
+            background: "rgba(255,201,64,0.18)",
+            color: "#FFC940",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <Trophy size={27} />
+        </div>
+
+        <div>
+          <div
+            style={{
+              display: "inline-flex",
+              marginBottom: 8,
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: "rgba(255,201,64,0.14)",
+              color: "#FFC940",
+              fontSize: 11,
+              fontWeight: 900,
+            }}
+          >
+            Percorso più coerente
+          </div>
+
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 21,
+              lineHeight: 1.18,
+              fontWeight: 900,
+              color: "#FFFFFF",
+              letterSpacing: "-0.45px",
+            }}
+          >
+            {migliore.percorso.titolo}
+          </h2>
+
+          <p
+            style={{
+              margin: "8px 0 0",
+              color: "rgba(255,255,255,0.66)",
+              fontSize: 14,
+              lineHeight: 1.5,
+            }}
+          >
+            In base ai dati del tuo profilo, questo è il corso che oggi mostra
+            la compatibilità più alta tra quelli salvati.
+          </p>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gap: 10 }}>
+        {topPercorsi.map((item, index) => (
+          <div
+            key={item.percorso.id}
+            style={{
+              padding: 13,
+              borderRadius: 18,
+              background:
+                index === 0
+                  ? "rgba(255,201,64,0.10)"
+                  : "rgba(255,255,255,0.05)",
+              border:
+                index === 0
+                  ? "1px solid rgba(255,201,64,0.22)"
+                  : "1px solid rgba(255,255,255,0.07)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                alignItems: "flex-start",
+                marginBottom: 10,
+              }}
+            >
+              <div>
+                <strong
+                  style={{
+                    display: "block",
+                    fontSize: 14,
+                    lineHeight: 1.25,
+                    color: "#FFFFFF",
+                    fontWeight: 900,
+                  }}
+                >
+                  {index + 1}. {item.percorso.titolo}
+                </strong>
+
+                <span
+                  style={{
+                    display: "block",
+                    marginTop: 4,
+                    fontSize: 12,
+                    color: "rgba(255,255,255,0.58)",
+                  }}
+                >
+                  {item.percorso.classe} · {item.percorso.settore}
+                </span>
+              </div>
+
+              <strong
+                style={{
+                  fontSize: 18,
+                  color: index === 0 ? "#FFC940" : "#78C2FF",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {item.compatibilita}%
+              </strong>
+            </div>
+
+            <div
+              style={{
+                width: "100%",
+                height: 8,
+                borderRadius: 999,
+                background: "rgba(255,255,255,0.10)",
+                overflow: "hidden",
+                marginBottom: 12,
+              }}
+            >
+              <div
+                style={{
+                  width: `${item.compatibilita}%`,
+                  height: "100%",
+                  borderRadius: 999,
+                  background: index === 0 ? "#FFC940" : "#78C2FF",
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 8,
+              }}
+            >
+              <MiniCompareItem
+                label="Compatibilità"
+                value={getLivelloCompatibilita(item.compatibilita)}
+              />
+              <MiniCompareItem
+                label="Sostenibilità"
+                value={getSostenibilita(profilo)}
+              />
+              <MiniCompareItem
+                label="Tempo"
+                value={getTempoConsigliato(profilo)}
+              />
+              <MiniCompareItem
+                label="Ideale per"
+                value={getIdealePer(item.percorso, profilo)}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          marginTop: 16,
+          width: "100%",
+          minHeight: 58,
+          borderRadius: 20,
+          background: "#25D366",
+          color: "#FFFFFF",
+          fontSize: 14,
+          fontWeight: 900,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 9,
+          textDecoration: "none",
+          boxShadow: "0 14px 30px rgba(37,211,102,0.24)",
+        }}
+      >
+        <MessageCircle size={18} />
+        Ricevi il confronto spiegato
+        <ArrowRight size={18} />
+      </a>
+    </section>
+  );
+}
+
+function MiniCompareItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        padding: 10,
+        borderRadius: 14,
+        background: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          color: "rgba(255,255,255,0.48)",
+          fontWeight: 800,
+          marginBottom: 4,
+          textTransform: "uppercase",
+          letterSpacing: "0.3px",
+        }}
+      >
+        {label}
+      </div>
+
+      <div
+        style={{
+          fontSize: 12,
+          color: "#FFFFFF",
+          fontWeight: 850,
+          lineHeight: 1.25,
+        }}
+      >
+        {value}
+      </div>
+    </div>
   );
 }
 
