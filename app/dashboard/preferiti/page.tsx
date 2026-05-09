@@ -875,10 +875,11 @@ export default function PreferitiPage() {
                     <h3
                       style={{
                         margin: 0,
-                        fontSize: 16,
+                        fontSize: 21,
+                        lineHeight: 1.15,
                         fontWeight: 900,
                         color: "#FFFFFF",
-                        letterSpacing: "-0.2px",
+                        letterSpacing: "-0.5px",
                       }}
                     >
                       Dove può portarti questo percorso
@@ -933,10 +934,11 @@ export default function PreferitiPage() {
                     <h3
                       style={{
                         margin: 0,
-                        fontSize: 16,
+                        fontSize: 21,
+                        lineHeight: 1.15,
                         fontWeight: 900,
                         color: "#FFFFFF",
-                        letterSpacing: "-0.2px",
+                        letterSpacing: "-0.5px",
                       }}
                     >
                       Cosa conviene valutare prima di scegliere
