@@ -195,7 +195,11 @@ export default function Register() {
           />
 
           <div style={{ marginTop: 8 }}>
-            <Button label="Inizia il test" variant="primary" type="submit" />
+            <Button
+              label="Vai al Test (Durata 30 Secondi)"
+              variant="primary"
+              type="submit"
+            />
           </div>
         </form>
 
