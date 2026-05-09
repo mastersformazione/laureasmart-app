@@ -515,7 +515,7 @@ export default function OrientamentoPage() {
               area_interesse: data.area || "",
 
               tempo_studio: tempoStudioTag,
-              ha_completato_test: "SI",
+              segmento_urgenza: segmenti.segmento_urgenza,
             }),
           }
         );
