@@ -231,6 +231,116 @@ function getDomandeUtili() {
   ];
 }
 
+function getSviluppiPercorso(percorso: Percorso) {
+  const settore = percorso.settore.toLowerCase();
+  const titolo = percorso.titolo.toLowerCase();
+  const tags = percorso.tags.map((tag) => tag.toLowerCase()).join(" ");
+
+  const testo = `${settore} ${titolo} ${tags}`;
+
+  if (testo.includes("psicologia")) {
+    return [
+      "Risorse umane e selezione",
+      "Formazione e orientamento",
+      "Psicologia del lavoro",
+      "Proseguimento verso magistrale LM-51",
+      "Ambiti educativi e relazionali",
+    ];
+  }
+
+  if (
+    testo.includes("educazione") ||
+    testo.includes("scienze dell’educazione") ||
+    testo.includes("scienze dell'educazione")
+  ) {
+    return [
+      "Servizi educativi e sociali",
+      "Comunità e terzo settore",
+      "Infanzia e formazione",
+      "Coordinamento di attività educative",
+      "Concorsi e servizi alla persona",
+    ];
+  }
+
+  if (
+    testo.includes("economia") ||
+    testo.includes("management") ||
+    testo.includes("aziendale")
+  ) {
+    return [
+      "Aziende e amministrazione",
+      "Management e organizzazione",
+      "Marketing e commerciale",
+      "Concorsi area amministrativa",
+      "Attività autonoma o imprenditoriale",
+    ];
+  }
+
+  if (
+    testo.includes("giurisprudenza") ||
+    testo.includes("giuridic") ||
+    testo.includes("diritto")
+  ) {
+    return [
+      "Concorsi pubblici",
+      "Ambito legale e amministrativo",
+      "Consulenza e servizi giuridici",
+      "Aziende e uffici amministrativi",
+      "Proseguimento verso percorsi specialistici",
+    ];
+  }
+
+  if (
+    testo.includes("comunicazione") ||
+    testo.includes("marketing") ||
+    testo.includes("media")
+  ) {
+    return [
+      "Comunicazione aziendale",
+      "Marketing digitale",
+      "Social media e contenuti",
+      "Branding e pubblicità",
+      "Media e relazioni esterne",
+    ];
+  }
+
+  if (
+    testo.includes("informatica") ||
+    testo.includes("tecnologia") ||
+    testo.includes("digitale")
+  ) {
+    return [
+      "Competenze digitali",
+      "Aziende tecnologiche",
+      "Gestione sistemi e dati",
+      "Progetti digitali",
+      "Ruoli tecnici e innovazione",
+    ];
+  }
+
+  if (
+    testo.includes("motorie") ||
+    testo.includes("sport") ||
+    testo.includes("benessere")
+  ) {
+    return [
+      "Sport e attività motoria",
+      "Benessere e prevenzione",
+      "Preparazione fisica",
+      "Centri sportivi",
+      "Percorsi educativi legati al movimento",
+    ];
+  }
+
+  return [
+    "Crescita professionale",
+    "Nuove opportunità lavorative",
+    "Concorsi e qualificazione",
+    "Percorsi specialistici successivi",
+    "Maggiore solidità del profilo",
+  ];
+}
+
 function creaWhatsAppUrl(percorso: Percorso, compatibilita: number) {
   return `https://wa.me/393793673257?text=${encodeURIComponent(
     `Ciao, vorrei ricevere il piano di studio spiegato in modo semplice per questo percorso:
@@ -733,6 +843,50 @@ export default function PreferitiPage() {
                       <span>{motivo}</span>
                     </div>
                   ))}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: 14,
+                    borderRadius: 20,
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                  }}
+                >
+                  <h3
+                    style={{
+                      margin: "0 0 10px",
+                      fontSize: 15,
+                      fontWeight: 900,
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    Dove può portarti questo percorso
+                  </h3>
+
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {getSviluppiPercorso(percorso).map((sviluppo) => (
+                      <div
+                        key={sviluppo}
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 8,
+                          fontSize: 13,
+                          lineHeight: 1.45,
+                          color: "rgba(255,255,255,0.72)",
+                        }}
+                      >
+                        <CheckCircle2
+                          size={16}
+                          color="#78C2FF"
+                          style={{ flexShrink: 0, marginTop: 1 }}
+                        />
+                        <span>{sviluppo}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div
