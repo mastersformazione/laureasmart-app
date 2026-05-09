@@ -15,6 +15,7 @@ import Button from "@/components/ui/Button";
 import BottomNav from "@/components/ui/BottomNav";
 
 type OrientamentoData = {
+  eta?: string;
   situazione?: string;
   titolo_studio?: string;
   obiettivo?: string;
@@ -92,6 +93,19 @@ export default function OrientamentoPage() {
   };
 
   const steps: StepItem[] = [
+    {
+      id: "eta",
+      domanda: "Qual è la tua fascia d’età?",
+      opzioni: [
+        "18-24",
+        "25-34",
+        "35-44",
+        "45-54",
+        "55+",
+        "Preferisco non indicarlo",
+      ],
+    },
+
     {
       id: "situazione",
       domanda: "Cosa fai oggi?",
@@ -470,6 +484,8 @@ export default function OrientamentoPage() {
 
     localStorage.setItem("profilo_utente", risultato.tipo);
     localStorage.setItem("ha_fatto_test", "si");
+    localStorage.setItem("eta", data.eta || "");
+    localStorage.setItem("situazione", data.situazione || "");
     localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("obiettivo", data.obiettivo || "");
     localStorage.setItem("urgenza_obiettivo", data.urgenza || "");
