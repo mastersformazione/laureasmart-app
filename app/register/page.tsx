@@ -43,7 +43,7 @@ export default function Register() {
           telefono: "",
         });
 
-        router.push("/dashboard/orientamento");
+        router.push("/dashboard/orientamento/test");
       } else {
         alert("Errore: " + data.error);
       }
