@@ -390,7 +390,7 @@ export default function OrientamentoPage() {
   const getSegmenti = (data: OrientamentoData): Segmenti => {
     let segmento_intento = "INDECISO";
     let segmento_ingresso = "ALTRO";
-    let segmento_urgenza = "BASSA";
+    let segmento_urgenza = "NON_DEFINITA";
 
     if (data.obiettivo === "Cambiare lavoro")
       segmento_intento = "CAMBIO_LAVORO";
@@ -424,11 +424,13 @@ export default function OrientamentoPage() {
     else if (data.titolo_studio?.includes("università"))
       segmento_ingresso = "UNIVERSITA_INCOMPLETA";
 
-    if (data.urgenza === "Subito / entro 1 mese") segmento_urgenza = "ALTA";
-    else if (data.urgenza === "Entro 3 mesi") segmento_urgenza = "MEDIO_ALTA";
-    else if (data.urgenza === "Entro 6 mesi") segmento_urgenza = "MEDIA";
-    else if (data.urgenza === "Entro 12 mesi") segmento_urgenza = "BASSA";
-    else if (data.urgenza === "Non ho una scadenza precisa")
+    const urgenza = (data.urgenza || "").trim();
+
+    if (urgenza === "Subito / entro 1 mese") segmento_urgenza = "ALTA";
+    else if (urgenza === "Entro 3 mesi") segmento_urgenza = "MEDIO_ALTA";
+    else if (urgenza === "Entro 6 mesi") segmento_urgenza = "MEDIA";
+    else if (urgenza === "Entro 12 mesi") segmento_urgenza = "BASSA";
+    else if (urgenza === "Non ho una scadenza precisa")
       segmento_urgenza = "FREDDA";
 
     return {
@@ -438,9 +440,22 @@ export default function OrientamentoPage() {
     };
   };
 
+  const getTempoStudioTag = (tempo?: string): string => {
+    const value = (tempo || "").trim();
+
+    if (value === "2-4 ore a settimana") return "POCO_TEMPO";
+    if (value === "5-7 ore a settimana") return "TEMPO_MEDIO";
+    if (value === "8-10 ore a settimana") return "TEMPO_ALTO";
+    if (value === "Più di 10 ore a settimana") return "TEMPO_ALTO";
+    if (value === "Non lo so ancora") return "NON_SO";
+
+    return "NON_DEFINITO";
+  };
+
   const salvaDati = async (data: OrientamentoData) => {
     const risultato = getRisultato(data);
     const segmenti = getSegmenti(data);
+    const tempoStudioTag = getTempoStudioTag(data.tempo);
 
     const storedUser = localStorage.getItem("gps_user");
 
@@ -459,6 +474,7 @@ export default function OrientamentoPage() {
     localStorage.setItem("obiettivo", data.obiettivo || "");
     localStorage.setItem("urgenza_obiettivo", data.urgenza || "");
     localStorage.setItem("tempo_disponibile", data.tempo || "");
+    localStorage.setItem("tempo_studio", tempoStudioTag);
     localStorage.setItem("area_interesse", data.area || "");
     localStorage.setItem("segmento_intento", segmenti.segmento_intento);
     localStorage.setItem("segmento_ingresso", segmenti.segmento_ingresso);
@@ -492,15 +508,14 @@ export default function OrientamentoPage() {
               nome: user.nome || "",
               cognome: user.cognome || "",
               telefono: user.telefono || "",
+
               profilo: risultato.tipo,
               titolo_studio: data.titolo_studio || "",
               obiettivo: data.obiettivo || "",
-              urgenza_obiettivo: data.urgenza || "",
-              tempo_disponibile: data.tempo || "",
               area_interesse: data.area || "",
-              segmento_intento: segmenti.segmento_intento,
-              segmento_ingresso: segmenti.segmento_ingresso,
-              segmento_urgenza: segmenti.segmento_urgenza,
+
+              tempo_studio: tempoStudioTag,
+              ha_completato_test: "SI",
             }),
           }
         );
