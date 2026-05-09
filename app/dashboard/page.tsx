@@ -10,7 +10,6 @@ import {
   Search,
   Heart,
   MessageCircle,
-  GraduationCap,
   TrendingUp,
   CalendarCheck,
   CalendarDays,
@@ -347,27 +346,88 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 12,
-          marginBottom: 20,
-        }}
-      >
-        <QuickCard
-          icon={<Heart size={23} />}
-          title="I miei percorsi"
-          text="Corsi salvati"
+      <section style={{ marginBottom: 20 }}>
+        <button
           onClick={() => router.push("/dashboard/preferiti")}
-        />
+          style={{
+            width: "100%",
+            border: "1px solid rgba(58,160,255,0.28)",
+            background:
+              "linear-gradient(135deg, rgba(31,111,178,0.96) 0%, rgba(58,160,255,0.92) 55%, rgba(21,84,135,0.96) 100%)",
+            borderRadius: 28,
+            padding: 20,
+            textAlign: "left",
+            boxShadow: "0 20px 48px rgba(58,160,255,0.22)",
+            cursor: "pointer",
+            color: "#FFFFFF",
+            position: "relative",
+            overflow: "hidden",
+            fontFamily: "inherit",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              right: -34,
+              top: -34,
+              width: 130,
+              height: 130,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.14)",
+            }}
+          />
 
-        <QuickCard
-          icon={<GraduationCap size={24} />}
-          title="Orientamento"
-          text="Test e consigli"
-          onClick={() => router.push("/dashboard/orientamento")}
-        />
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 20,
+                background: "rgba(255,255,255,0.18)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Heart size={28} />
+            </div>
+
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 23,
+                  lineHeight: 1.1,
+                  fontWeight: 900,
+                  letterSpacing: "-0.5px",
+                }}
+              >
+                I miei percorsi
+              </h2>
+
+              <p
+                style={{
+                  margin: "7px 0 0",
+                  fontSize: 14,
+                  lineHeight: 1.45,
+                  color: "rgba(255,255,255,0.86)",
+                }}
+              >
+                Ritrova subito i corsi salvati e continua da quelli più adatti
+                al tuo profilo.
+              </p>
+            </div>
+          </div>
+        </button>
       </section>
 
       <FeatureCard
@@ -508,72 +568,6 @@ export default function Dashboard() {
 
       <BottomNav />
     </main>
-  );
-}
-
-function QuickCard({
-  icon,
-  title,
-  text,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  text: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        border: "1px solid rgba(255,255,255,0.08)",
-        background: "rgba(17,32,51,0.82)",
-        borderRadius: 24,
-        padding: 16,
-        textAlign: "left",
-        boxShadow: "0 14px 34px rgba(0,0,0,0.22)",
-        cursor: "pointer",
-        backdropFilter: "blur(16px)",
-      }}
-    >
-      <div
-        style={{
-          width: 46,
-          height: 46,
-          borderRadius: 16,
-          background: "rgba(58,160,255,0.16)",
-          color: "#3AA0FF",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 12,
-        }}
-      >
-        {icon}
-      </div>
-
-      <h3
-        style={{
-          margin: 0,
-          fontSize: 16,
-          fontWeight: 850,
-          color: "#FFFFFF",
-          lineHeight: 1.15,
-        }}
-      >
-        {title}
-      </h3>
-
-      <p
-        style={{
-          margin: "6px 0 0",
-          fontSize: 13,
-          color: "rgba(255,255,255,0.62)",
-        }}
-      >
-        {text}
-      </p>
-    </button>
   );
 }
 

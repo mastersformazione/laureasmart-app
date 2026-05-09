@@ -1,102 +1,287 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import StudentiComeTeCard from "@/components/StudentiComeTeCard";
 import { useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
 import BottomNav from "@/components/ui/BottomNav";
 import {
-  Target,
-  GraduationCap,
-  FileCheck2,
-  Sparkles,
-  CheckCircle2,
+  BookOpen,
+  Bell,
+  Search,
+  Heart,
+  MessageCircle,
+  TrendingUp,
+  CalendarCheck,
+  CalendarDays,
 } from "lucide-react";
 
-export default function OrientamentoHubPage() {
-  const router = useRouter();
+type GpsUser = {
+  nome: string;
+  email: string;
+  telefono: string;
+  interesse: string;
+};
 
+type Notifica = {
+  id: string;
+  titolo: string;
+  messaggio: string;
+  categoria: string;
+  created_at: string;
+};
+
+function FeatureCard({
+  icon,
+  title,
+  description,
+  gradient,
+  onClick,
+  highlight = false,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  gradient: string;
+  onClick: () => void;
+  highlight?: boolean;
+}) {
   return (
-    <main
+    <section
+      onClick={onClick}
       style={{
-        minHeight: "100vh",
-        padding: 24,
-        paddingBottom: 120,
-        maxWidth: 430,
-        margin: "0 auto",
-        color: "#FFFFFF",
-        background:
-          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
-        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+        background: "rgba(17,32,51,0.82)",
+        borderRadius: 30,
+        border: highlight
+          ? "1px solid rgba(255,201,64,0.35)"
+          : "1px solid rgba(255,255,255,0.08)",
+        padding: 16,
+        boxShadow: highlight
+          ? "0 18px 44px rgba(255,196,64,0.16)"
+          : "0 18px 46px rgba(0,0,0,0.26)",
+        marginBottom: 20,
+        cursor: "pointer",
+        transition: "all .2s ease",
+        backdropFilter: "blur(16px)",
       }}
     >
-      <section
+      <div
         style={{
+          minHeight: 145,
+          borderRadius: 28,
+          background: gradient,
+          padding: 20,
+          color: "#FFFFFF",
           position: "relative",
           overflow: "hidden",
-          padding: 28,
-          borderRadius: 32,
-          background:
-            "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
-          color: "#FFFFFF",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
-          border: "1px solid rgba(255,255,255,0.14)",
-          marginBottom: 22,
+          boxShadow: "0 16px 34px rgba(31,111,178,0.24)",
         }}
       >
         <div
           style={{
             position: "absolute",
-            right: -42,
-            top: -42,
-            width: 150,
-            height: 150,
+            right: -34,
+            top: -24,
+            width: 140,
+            height: 140,
             borderRadius: 999,
-            background: "rgba(255,255,255,0.14)",
+            background: "rgba(255,255,255,0.13)",
           }}
         />
 
         <div
           style={{
-            width: 60,
-            height: 60,
-            borderRadius: 22,
-            background: "rgba(255,255,255,0.16)",
-            border: "1px solid rgba(255,255,255,0.16)",
+            position: "absolute",
+            right: 18,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 56,
+            height: 56,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.94)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#1F6FB2",
+            fontSize: 36,
+            fontWeight: 900,
+            boxShadow: "0 10px 24px rgba(0,0,0,0.20)",
+          }}
+        >
+          ›
+        </div>
+
+        {highlight && (
+          <div
+            style={{
+              display: "inline-flex",
+              marginBottom: 14,
+              padding: "6px 12px",
+              borderRadius: 999,
+              background: "#FFC940",
+              color: "#FFFFFF",
+              fontSize: 12,
+              fontWeight: 850,
+              letterSpacing: "0.3px",
+              boxShadow: "0 6px 16px rgba(255,201,64,0.30)",
+            }}
+          >
+            NOVITÀ
+          </div>
+        )}
+
+        <div
+          style={{
+            width: 58,
+            height: 58,
+            borderRadius: 20,
+            background: "rgba(0,0,0,0.16)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             marginBottom: 18,
-            position: "relative",
-            zIndex: 1,
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 10px 24px rgba(0,0,0,0.16)",
           }}
         >
-          <Sparkles size={30} />
+          {icon}
         </div>
 
+        <h2
+          style={{
+            margin: "0 80px 8px 0",
+            fontSize: 24,
+            lineHeight: 1.04,
+            fontWeight: 850,
+            letterSpacing: "-0.8px",
+          }}
+        >
+          {title}
+        </h2>
+
+        <p
+          style={{
+            margin: 0,
+            fontSize: 15,
+            lineHeight: 1.55,
+            opacity: 0.96,
+            maxWidth: 290,
+          }}
+        >
+          {description}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+export default function Dashboard() {
+  const router = useRouter();
+  const [user, setUser] = useState<GpsUser | null>(null);
+  const [notifiche, setNotifiche] = useState<Notifica[]>([]);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("gps_user");
+
+    if (!storedUser) {
+      router.push("/register");
+      return;
+    }
+
+    setUser(JSON.parse(storedUser) as GpsUser);
+
+    const aggiornaBadge = (count: number) => {
+      if ("setAppBadge" in navigator && count > 0) {
+        navigator.setAppBadge(count).catch(console.error);
+      }
+
+      if ("clearAppBadge" in navigator && count === 0) {
+        navigator.clearAppBadge().catch(console.error);
+      }
+    };
+
+    const loadNotifiche = () => {
+      fetch("https://laureasmart.it/api/notifiche.php?t=" + Date.now(), {
+        cache: "no-store",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            const lista = data.data || [];
+            setNotifiche(lista);
+            aggiornaBadge(lista.length);
+          }
+        })
+        .catch((error) => {
+          console.error("Errore caricamento notifiche:", error);
+        });
+    };
+
+    loadNotifiche();
+    const interval = setInterval(loadNotifiche, 10000);
+
+    return () => clearInterval(interval);
+  }, [router]);
+
+  if (!user) return null;
+
+  const notificheFiltrate = notifiche.filter((notifica) => {
+    const testo = query.toLowerCase().trim();
+
+    return (
+      testo === "" ||
+      notifica.titolo.toLowerCase().includes(testo) ||
+      notifica.messaggio.toLowerCase().includes(testo) ||
+      notifica.categoria.toLowerCase().includes(testo)
+    );
+  });
+
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: "22px 18px 120px",
+        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+        maxWidth: 430,
+        margin: "0 auto",
+        color: "#FFFFFF",
+        background:
+          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+      }}
+    >
+      <section
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(31,111,178,0.98) 0%, rgba(21,84,135,0.96) 100%)",
+          borderRadius: 30,
+          padding: 24,
+          color: "#FFFFFF",
+          boxShadow: "0 22px 54px rgba(0,0,0,0.34)",
+          marginBottom: 20,
+          border: "1px solid rgba(255,255,255,0.10)",
+        }}
+      >
         <p
           style={{
             margin: "0 0 8px",
             fontSize: 14,
-            opacity: 0.92,
-            fontWeight: 850,
-            position: "relative",
-            zIndex: 1,
+            opacity: 0.9,
+            fontWeight: 700,
           }}
         >
-          Orientamento Laurea Smart
+          Benvenuto, {user.nome} 👋
         </p>
 
         <h1
           style={{
             margin: 0,
-            fontSize: 35,
-            lineHeight: 1.05,
-            fontWeight: 900,
-            letterSpacing: "-0.9px",
-            position: "relative",
-            zIndex: 1,
+            fontSize: 32,
+            lineHeight: 1.08,
+            fontWeight: 850,
+            letterSpacing: "-0.7px",
           }}
         >
-          Capisci da dove partire
+          Costruisci il tuo percorso universitario
         </h1>
 
         <p
@@ -105,159 +290,310 @@ export default function OrientamentoHubPage() {
             fontSize: 15,
             lineHeight: 1.6,
             opacity: 0.95,
-            position: "relative",
-            zIndex: 1,
           }}
         >
-          Fai il test gratuito e scopri quale percorso universitario può essere
-          più adatto al tuo profilo, al tuo lavoro e ai tuoi obiettivi.
+          Ritrova i corsi salvati, ricevi aggiornamenti e scopri opportunità
+          coerenti con il tuo profilo.
         </p>
       </section>
 
-      <div style={{ display: "grid", gap: 16 }}>
-        <DarkActionCard
-          icon={<Target size={25} />}
-          title="Test di orientamento"
-          description="Rispondi a poche domande e ricevi un primo consiglio personalizzato su area, percorso e priorità."
-          badge="Consigliato"
-          buttonLabel="Inizia il test gratuito"
-          onClick={() => router.push("/dashboard/orientamento/test")}
-        />
-
-        <DarkActionCard
-          icon={<GraduationCap size={25} />}
-          title="Percorsi consigliati"
-          description="Esplora lauree e percorsi coerenti con il tuo titolo di studio. Più interagisci, più i consigli diventano personalizzati in base ai tuoi interessi."
-          badge="Nuovo"
-          buttonLabel="Vedi i percorsi consigliati"
-          onClick={() => router.push("/dashboard/percorsi")}
-        />
-
-        <section
+      <section style={{ marginBottom: 18 }}>
+        <div
           style={{
-            padding: 22,
-            borderRadius: 28,
-            background:
-              "linear-gradient(135deg, rgba(17,32,51,0.92) 0%, rgba(17,32,51,0.82) 100%)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            border: "1px solid rgba(255,255,255,0.09)",
+            background: "rgba(17,32,51,0.82)",
+            borderRadius: 22,
+            padding: "14px 16px",
+            boxShadow: "0 12px 30px rgba(0,0,0,0.20)",
             backdropFilter: "blur(16px)",
+          }}
+        >
+          <Search size={22} color="#3AA0FF" />
+
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Cerca notifiche, scadenze, opportunità..."
+            style={{
+              width: "100%",
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              color: "#FFFFFF",
+              fontSize: 14,
+              fontFamily: "inherit",
+            }}
+          />
+
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              style={{
+                border: "none",
+                background: "transparent",
+                color: "rgba(255,255,255,0.65)",
+                fontSize: 18,
+                cursor: "pointer",
+              }}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </section>
+
+      <section style={{ marginBottom: 20 }}>
+        <button
+          onClick={() => router.push("/dashboard/preferiti")}
+          style={{
+            width: "100%",
+            border: "1px solid rgba(58,160,255,0.28)",
+            background:
+              "linear-gradient(135deg, rgba(31,111,178,0.96) 0%, rgba(58,160,255,0.92) 55%, rgba(21,84,135,0.96) 100%)",
+            borderRadius: 28,
+            padding: 20,
+            textAlign: "left",
+            boxShadow: "0 20px 48px rgba(58,160,255,0.22)",
+            cursor: "pointer",
+            color: "#FFFFFF",
+            position: "relative",
+            overflow: "hidden",
+            fontFamily: "inherit",
           }}
         >
           <div
             style={{
-              width: 54,
-              height: 54,
-              borderRadius: 20,
-              background: "rgba(58,160,255,0.16)",
-              color: "#78C2FF",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 16,
-              boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+              position: "absolute",
+              right: -34,
+              top: -34,
+              width: 130,
+              height: 130,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.14)",
             }}
-          >
-            <FileCheck2 size={27} />
-          </div>
+          />
 
           <div
             style={{
-              display: "inline-flex",
-              padding: "7px 11px",
-              borderRadius: 999,
-              background: "rgba(58,160,255,0.16)",
-              color: "#78C2FF",
-              fontSize: 12,
-              fontWeight: 900,
-              marginBottom: 12,
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
             }}
           >
-            Possibile abbreviazione percorso
-          </div>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 20,
+                background: "rgba(255,255,255,0.18)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Heart size={28} />
+            </div>
 
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 23,
+                  lineHeight: 1.1,
+                  fontWeight: 900,
+                  letterSpacing: "-0.5px",
+                }}
+              >
+                I miei percorsi
+              </h2>
+
+              <p
+                style={{
+                  margin: "7px 0 0",
+                  fontSize: 14,
+                  lineHeight: 1.45,
+                  color: "rgba(255,255,255,0.86)",
+                }}
+              >
+                Ritrova subito i corsi salvati e continua da quelli più adatti
+                al tuo profilo.
+              </p>
+            </div>
+          </div>
+        </button>
+      </section>
+
+      <FeatureCard
+        icon={<BookOpen size={30} />}
+        title="Esplora i percorsi consigliati"
+        description="Lauree, magistrali e master ordinati in base al tuo profilo."
+        gradient="linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)"
+        onClick={() => router.push("/dashboard/percorsi")}
+      />
+
+      <FeatureCard
+        icon={<TrendingUp size={30} />}
+        title="Simula il tuo futuro"
+        description="Visualizza come potrebbe crescere il tuo profilo nei prossimi 36 mesi."
+        gradient="linear-gradient(135deg, #102033 0%, #1F6FB2 58%, #3AA0FF 100%)"
+        onClick={() => router.push("/dashboard/simula-futuro")}
+      />
+
+      <FeatureCard
+        icon={<CalendarCheck size={30} />}
+        title="Il tuo percorso reale"
+        description="Scopri se università, lavoro e impegni quotidiani possono stare insieme in modo sostenibile."
+        gradient="linear-gradient(135deg, #0B2440 0%, #155487 52%, #1F6FB2 100%)"
+        onClick={() => router.push("/dashboard/percorso-reale")}
+      />
+
+      <StudentiComeTeCard />
+
+      <FeatureCard
+        icon={<CalendarDays size={30} />}
+        title="Prepara il tuo anno accademico"
+        description="Simula esami, CFU, sessioni e tempo di studio per capire come organizzare il tuo primo anno."
+        gradient="linear-gradient(135deg, #2563EB 0%, #3B82F6 55%, #60A5FA 100%)"
+        highlight
+        onClick={() => router.push("/dashboard/anno-accademico")}
+      />
+
+      <section>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            marginBottom: 14,
+          }}
+        >
           <h2
             style={{
               margin: 0,
-              fontSize: 25,
-              lineHeight: 1.12,
-              fontWeight: 900,
+              fontSize: 22,
               color: "#FFFFFF",
-              letterSpacing: "-0.5px",
+              fontWeight: 850,
+              letterSpacing: "-0.4px",
             }}
           >
-            Hai già esami, titoli o esperienza lavorativa?
+            Notifiche recenti
           </h2>
 
-          <p
-            style={{
-              margin: "12px 0 0",
-              fontSize: 15,
-              lineHeight: 1.6,
-              color: "rgba(255,255,255,0.68)",
-            }}
-          >
-            In alcuni casi è possibile richiedere una valutazione del pregresso:
-            esami universitari già sostenuti, titoli precedenti, certificazioni
-            o competenze documentabili da CV possono aiutarti a costruire un
-            percorso più rapido.
-          </p>
+          {notifiche.length > 0 && (
+            <span
+              style={{
+                minWidth: 30,
+                height: 30,
+                padding: "0 10px",
+                borderRadius: 999,
+                background: "#3AA0FF",
+                color: "#FFFFFF",
+                fontSize: 13,
+                fontWeight: 800,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 8px 22px rgba(58,160,255,0.32)",
+              }}
+            >
+              {notifiche.length}
+            </span>
+          )}
+        </div>
 
+        {notificheFiltrate.length === 0 ? (
+          <DarkCard
+            title="Nessun aggiornamento trovato"
+            description="Quando saranno pubblicate nuove opportunità, le troverai qui."
+          />
+        ) : (
+          <div style={{ display: "grid", gap: 12 }}>
+            {notificheFiltrate.map((notifica) => (
+              <DarkCard
+                key={notifica.id}
+                title={notifica.titolo}
+                description={notifica.messaggio}
+                badge={notifica.categoria}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginTop: 12,
+                    color: "rgba(255,255,255,0.54)",
+                    fontSize: 12,
+                  }}
+                >
+                  <Bell size={14} />
+                  <span>{notifica.created_at}</span>
+                </div>
+              </DarkCard>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section style={{ marginTop: 22 }}>
+        <DarkCard
+          title="Hai bisogno di aiuto?"
+          description="Un orientatore reale può aiutarti gratuitamente a capire quale percorso scegliere."
+          badge="Gratis"
+          onClick={() => router.push("/dashboard/contatti")}
+        >
           <div
             style={{
-              display: "grid",
-              gap: 10,
-              marginTop: 17,
-              color: "rgba(255,255,255,0.76)",
+              marginTop: 12,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              color: "#3AA0FF",
               fontSize: 14,
-              fontWeight: 750,
+              fontWeight: 800,
             }}
           >
-            <Benefit text="Esami universitari già sostenuti" />
-            <Benefit text="Titoli, master o percorsi precedenti" />
-            <Benefit text="Esperienze e competenze documentabili" />
+            <MessageCircle size={18} />
+            Parla con un orientatore
           </div>
-
-          <div style={{ marginTop: 18 }}>
-            <Button
-              label="Verifica il percorso agevolato"
-              variant="primary"
-              onClick={() =>
-                router.push("/dashboard/orientamento/percorso-agevolato")
-              }
-            />
-          </div>
-        </section>
-      </div>
+        </DarkCard>
+      </section>
 
       <BottomNav />
     </main>
   );
 }
 
-function DarkActionCard({
-  icon,
+function DarkCard({
   title,
   description,
   badge,
-  buttonLabel,
+  children,
   onClick,
 }: {
-  icon: React.ReactNode;
   title: string;
   description: string;
-  badge: string;
-  buttonLabel: string;
-  onClick: () => void;
+  badge?: string;
+  children?: React.ReactNode;
+  onClick?: () => void;
 }) {
   return (
     <section
+      onClick={onClick}
       style={{
-        padding: 22,
-        borderRadius: 28,
+        padding: 18,
+        borderRadius: 24,
         background: "rgba(17,32,51,0.86)",
         border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        boxShadow: "0 14px 34px rgba(0,0,0,0.24)",
+        cursor: onClick ? "pointer" : "default",
         backdropFilter: "blur(16px)",
       }}
     >
@@ -265,84 +601,51 @@ function DarkActionCard({
         style={{
           display: "flex",
           alignItems: "flex-start",
-          gap: 14,
+          justifyContent: "space-between",
+          gap: 12,
         }}
       >
-        <div
+        <h3
           style={{
-            width: 54,
-            height: 54,
-            borderRadius: 20,
-            background: "rgba(58,160,255,0.16)",
-            color: "#78C2FF",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+            margin: 0,
+            fontSize: 17,
+            lineHeight: 1.25,
+            color: "#FFFFFF",
+            fontWeight: 850,
           }}
         >
-          {icon}
-        </div>
+          {title}
+        </h3>
 
-        <div style={{ flex: 1 }}>
-          <div
+        {badge && (
+          <span
             style={{
-              display: "inline-flex",
               padding: "6px 10px",
               borderRadius: 999,
               background: "rgba(58,160,255,0.16)",
               color: "#78C2FF",
               fontSize: 11,
-              fontWeight: 900,
-              marginBottom: 9,
+              fontWeight: 850,
+              whiteSpace: "nowrap",
             }}
           >
             {badge}
-          </div>
-
-          <h2
-            style={{
-              margin: 0,
-              fontSize: 22,
-              lineHeight: 1.12,
-              fontWeight: 900,
-              color: "#FFFFFF",
-              letterSpacing: "-0.4px",
-            }}
-          >
-            {title}
-          </h2>
-
-          <p
-            style={{
-              margin: "9px 0 16px",
-              fontSize: 14,
-              lineHeight: 1.55,
-              color: "rgba(255,255,255,0.66)",
-            }}
-          >
-            {description}
-          </p>
-
-          <Button label={buttonLabel} variant="primary" onClick={onClick} />
-        </div>
+          </span>
+        )}
       </div>
-    </section>
-  );
-}
 
-function Benefit({ text }: { text: string }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 9,
-      }}
-    >
-      <CheckCircle2 size={18} color="#78C2FF" />
-      <span>{text}</span>
-    </div>
+      <p
+        style={{
+          margin: "10px 0 0",
+          fontSize: 14,
+          lineHeight: 1.5,
+          color: "rgba(255,255,255,0.68)",
+        }}
+      >
+        {description}
+      </p>
+
+      {children}
+    </section>
   );
 }
