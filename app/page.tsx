@@ -349,18 +349,59 @@ export default function Home() {
           </div>
         </div>
 
-        <p
+        <div
           style={{
-            margin: "14px auto 0",
-            fontSize: 12,
-            color: "rgba(255,255,255,0.65)",
-            lineHeight: 1.45,
-            maxWidth: 320,
+            marginTop: 16,
+            padding: 16,
+            borderRadius: 22,
+            background: "rgba(255,255,255,0.10)",
+            border: "1px solid rgba(255,255,255,0.14)",
             textAlign: "center",
+            backdropFilter: "blur(10px)",
           }}
         >
-          Puoi registrarti anche senza scaricare la app.
-        </p>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: "rgba(37,211,102,0.16)",
+              color: "#7DFFAE",
+              fontSize: 11,
+              fontWeight: 900,
+              marginBottom: 10,
+            }}
+          >
+            ORIENTAMENTO GRATUITO
+          </div>
+
+          <p
+            style={{
+              margin: 0,
+              fontSize: 15,
+              lineHeight: 1.55,
+              color: "#FFFFFF",
+              fontWeight: 700,
+            }}
+          >
+            Puoi fare Gratuitamente il Test di Orientamento anche senza
+            scaricare la app.
+          </p>
+
+          <p
+            style={{
+              margin: "8px 0 0",
+              fontSize: 13,
+              lineHeight: 1.5,
+              color: "rgba(255,255,255,0.74)",
+            }}
+          >
+            Premi “Accedi o Registrati” e scopri in pochi secondi il percorso
+            più adatto al tuo profilo.
+          </p>
+        </div>
       </section>
 
       {iphoneHelpOpen && (
