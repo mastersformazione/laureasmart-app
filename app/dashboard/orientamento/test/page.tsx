@@ -1066,16 +1066,46 @@ Corso suggerito: ${risultato.corsoSuggerito}`
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: 12,
+              gap: 10,
               marginBottom: 12,
             }}
           >
+            {step > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setStep(step - 1);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                style={{
+                  border: "1px solid rgba(120,194,255,0.22)",
+                  background: "rgba(58,160,255,0.12)",
+                  color: "#78C2FF",
+                  borderRadius: 999,
+                  padding: "7px 10px",
+                  fontSize: 12,
+                  fontWeight: 900,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                ← Indietro
+              </button>
+            ) : (
+              <span style={{ width: 82 }} />
+            )}
+
             <p
               style={{
                 margin: 0,
                 fontSize: 13,
                 fontWeight: 900,
                 color: "#78C2FF",
+                textAlign: "center",
+                flex: 1,
               }}
             >
               Domanda {step + 1} di {steps.length}
@@ -1089,6 +1119,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 color: "#78C2FF",
                 fontSize: 12,
                 fontWeight: 900,
+                whiteSpace: "nowrap",
               }}
             >
               {progress}%
