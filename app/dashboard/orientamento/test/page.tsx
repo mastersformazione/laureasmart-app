@@ -530,6 +530,7 @@ export default function OrientamentoPage() {
               titolo_studio: data.titolo_studio || "",
               obiettivo: data.obiettivo || "",
               area_interesse: data.area || "",
+              segmento_intento: segmenti.segmento_intento,
 
               tempo_studio: tempoStudioTag,
               segmento_urgenza: segmenti.segmento_urgenza,
