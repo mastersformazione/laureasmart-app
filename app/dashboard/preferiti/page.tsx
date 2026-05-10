@@ -18,6 +18,7 @@ import {
   Trophy,
   TrendingUp,
   Target,
+  Share2,
 } from "lucide-react";
 
 type ProfiloUtente = {
@@ -383,6 +384,25 @@ export default function PreferitiPage() {
   const [profilo, setProfilo] = useState<ProfiloUtente | null>(null);
   const [mostraConfronto, setMostraConfronto] = useState(false);
 
+  const handleShareApp = async () => {
+    const shareData = {
+      title: "Laurea Smart",
+      text: "Scopri gratuitamente quale percorso universitario è più adatto al tuo profilo.",
+      url: "https://app.laureasmart.it",
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        alert("Link copiato");
+      }
+    } catch {
+      console.log("Condivisione annullata");
+    }
+  };
+
   useEffect(() => {
     const datiSalvati = localStorage.getItem("percorsi_preferiti");
 
@@ -710,6 +730,114 @@ export default function PreferitiPage() {
           profilo={profilo}
           whatsappUrl={whatsappConfrontoUrl}
         />
+      )}
+
+      {preferiti.length > 0 && (
+        <section style={{ marginBottom: 18 }}>
+          <div
+            style={{
+              padding: 18,
+              borderRadius: 28,
+              background:
+                "linear-gradient(135deg, rgba(31,111,178,0.22) 0%, rgba(17,32,51,0.94) 100%)",
+              border: "1px solid rgba(120,194,255,0.16)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
+              backdropFilter: "blur(16px)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 13,
+                marginBottom: 16,
+              }}
+            >
+              <div
+                style={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: 20,
+                  background: "rgba(58,160,255,0.16)",
+                  color: "#78C2FF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Share2 size={25} />
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    padding: "6px 10px",
+                    borderRadius: 999,
+                    background: "rgba(58,160,255,0.16)",
+                    color: "#78C2FF",
+                    fontSize: 11,
+                    fontWeight: 900,
+                    marginBottom: 8,
+                  }}
+                >
+                  CONDIVIDI
+                </div>
+
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: 21,
+                    lineHeight: 1.12,
+                    fontWeight: 900,
+                    color: "#FFFFFF",
+                    letterSpacing: "-0.5px",
+                  }}
+                >
+                  Hai trovato utile il confronto?
+                </h3>
+
+                <p
+                  style={{
+                    margin: "9px 0 0",
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: "rgba(255,255,255,0.72)",
+                  }}
+                >
+                  Condividi Laurea Smart con qualcuno che sta valutando una
+                  laurea: potrà fare il test gratuito e confrontare i percorsi
+                  più adatti al suo profilo.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleShareApp}
+              style={{
+                width: "100%",
+                minHeight: 56,
+                borderRadius: 20,
+                border: "none",
+                background: "#3AA0FF",
+                color: "#FFFFFF",
+                fontSize: 15,
+                fontWeight: 900,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                cursor: "pointer",
+                boxShadow: "0 14px 30px rgba(58,160,255,0.24)",
+              }}
+            >
+              <Share2 size={19} />
+              Condividi Laurea Smart
+            </button>
+          </div>
+        </section>
       )}
 
       {preferiti.length === 0 ? (
