@@ -728,44 +728,75 @@ Corso suggerito: ${risultato.corsoSuggerito}`
               padding: 18,
               borderRadius: 26,
               background:
-                "linear-gradient(135deg, rgba(31,111,178,0.22) 0%, rgba(17,32,51,0.94) 100%)",
-              border: "1px solid rgba(120,194,255,0.16)",
-              boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
+                "linear-gradient(135deg, #1E90FF 0%, #0066FF 58%, #0047D9 100%)",
+              border: "1px solid rgba(255,255,255,0.36)",
+              boxShadow:
+                "0 18px 42px rgba(0,102,255,0.34), inset 0 0 0 1px rgba(255,255,255,0.10)",
               cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
             <div
               style={{
+                position: "absolute",
+                right: -35,
+                bottom: -35,
+                width: 120,
+                height: 120,
+                borderRadius: 999,
+                background: "rgba(255,255,255,0.10)",
+              }}
+            />
+
+            <div
+              style={{
+                position: "absolute",
+                right: 42,
+                top: 22,
+                color: "rgba(255,255,255,0.85)",
+                fontSize: 22,
+                fontWeight: 900,
+              }}
+            >
+              ✦
+            </div>
+
+            <div
+              style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 13,
+                gap: 16,
+                position: "relative",
+                zIndex: 1,
               }}
             >
               <div
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 18,
-                  background: "rgba(58,160,255,0.16)",
-                  color: "#78C2FF",
+                  width: 58,
+                  height: 58,
+                  borderRadius: 20,
+                  background: "rgba(255,255,255,0.18)",
+                  color: "#FFFFFF",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   flexShrink: 0,
+                  boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)",
                 }}
               >
-                <GraduationCap size={25} />
+                <GraduationCap size={29} />
               </div>
 
               <div style={{ flex: 1 }}>
                 <h3
                   style={{
                     margin: 0,
-                    fontSize: 19,
-                    lineHeight: 1.15,
+                    fontSize: 21,
+                    lineHeight: 1.14,
                     fontWeight: 900,
                     color: "#FFFFFF",
-                    letterSpacing: "-0.4px",
+                    letterSpacing: "-0.5px",
                   }}
                 >
                   Visita tutti i corsi disponibili
@@ -776,7 +807,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                     margin: "7px 0 0",
                     fontSize: 14,
                     lineHeight: 1.45,
-                    color: "rgba(255,255,255,0.68)",
+                    color: "rgba(255,255,255,0.90)",
                   }}
                 >
                   Esplora lauree, magistrali e master e salva i percorsi che
@@ -784,7 +815,22 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 </p>
               </div>
 
-              <ArrowRight size={20} color="#78C2FF" />
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.95)",
+                  color: "#0066FF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+                }}
+              >
+                <ArrowRight size={22} />
+              </div>
             </div>
           </section>
 
