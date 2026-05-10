@@ -722,6 +722,72 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             <ArrowRight size={20} />
           </a>
 
+          <section
+            onClick={() => (window.location.href = "/dashboard/percorsi")}
+            style={{
+              padding: 18,
+              borderRadius: 26,
+              background:
+                "linear-gradient(135deg, rgba(31,111,178,0.22) 0%, rgba(17,32,51,0.94) 100%)",
+              border: "1px solid rgba(120,194,255,0.16)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
+              cursor: "pointer",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 13,
+              }}
+            >
+              <div
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 18,
+                  background: "rgba(58,160,255,0.16)",
+                  color: "#78C2FF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <GraduationCap size={25} />
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: 19,
+                    lineHeight: 1.15,
+                    fontWeight: 900,
+                    color: "#FFFFFF",
+                    letterSpacing: "-0.4px",
+                  }}
+                >
+                  Visita tutti i corsi disponibili
+                </h3>
+
+                <p
+                  style={{
+                    margin: "7px 0 0",
+                    fontSize: 14,
+                    lineHeight: 1.45,
+                    color: "rgba(255,255,255,0.68)",
+                  }}
+                >
+                  Esplora lauree, magistrali e master e salva i percorsi che
+                  vuoi confrontare.
+                </p>
+              </div>
+
+              <ArrowRight size={20} color="#78C2FF" />
+            </div>
+          </section>
+
           <p
             style={{
               margin: "0 auto",
