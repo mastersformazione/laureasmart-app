@@ -3,9 +3,15 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
+type MetaPixelFunction = (
+  command: string,
+  eventName: string,
+  params?: Record<string, string | number | boolean>
+) => void;
+
 declare global {
   interface Window {
-    fbq?: (...args: any[]) => void;
+    fbq?: MetaPixelFunction;
   }
 }
 
@@ -13,7 +19,7 @@ export default function MetaPixelTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.fbq) {
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
       window.fbq("track", "PageView");
     }
   }, [pathname]);
