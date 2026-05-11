@@ -160,6 +160,19 @@ export default function AdminPage() {
             <option value="OBIETTIVO:Non sono sicuro">Non sono sicuro</option>
           </optgroup>
 
+          <optgroup label="Urgenza obiettivo">
+            <option value="URGENZA:ALTA">Alta - Subito / entro 1 mese</option>
+            <option value="URGENZA:MEDIO_ALTA">
+              Medio-alta - Entro 3 mesi
+            </option>
+            <option value="URGENZA:MEDIA">Media - Entro 6 mesi</option>
+            <option value="URGENZA:BASSA">Bassa - Entro 12 mesi</option>
+            <option value="URGENZA:FREDDA">
+              Fredda - Nessuna scadenza precisa
+            </option>
+            <option value="URGENZA:NON_DEFINITA">Urgenza non definita</option>
+          </optgroup>
+
           <optgroup label="Titolo di studio">
             <option value="TITOLO:Diploma">Diploma</option>
             <option value="TITOLO:Laurea triennale">Laurea triennale</option>
