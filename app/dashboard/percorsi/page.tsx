@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getPercorsiVisibili, Percorso } from "@/lib/data/percorsi";
 import BottomNav from "@/components/ui/BottomNav";
+import { trackMetaEvent } from "../../../lib/data/metaPixel";
 import {
   Search,
   GraduationCap,
@@ -295,6 +296,11 @@ export default function PercorsiPage() {
     if (!giaPresente) {
       preferiti.push(percorso);
       localStorage.setItem("percorsi_preferiti", JSON.stringify(preferiti));
+      trackMetaEvent("AggiuntoPreferiti", {
+        corso: percorso.titolo,
+        categoria: percorso.settore,
+        tipo: percorso.tipo,
+      });
     }
 
     setInteressi(nuoviInteressi);
