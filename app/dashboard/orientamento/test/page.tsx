@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import OneSignal from "react-onesignal";
+import { trackEvent } from "../../../lib/trackEvent";
 import {
   Sparkles,
   GraduationCap,
@@ -688,6 +689,17 @@ export default function OrientamentoPage() {
     localStorage.setItem("assigned_tutor_click", "si");
     localStorage.setItem("assigned_tutor_click_at", new Date().toISOString());
 
+    void trackEvent({
+      event_name: "assigned_tutor_click",
+      event_category: "conversione",
+      metadata: {
+        tutor: orientatrice.nome,
+        telefono: orientatrice.telefono,
+        profilo: risultato.tipo,
+        corso_suggerito: risultato.corsoSuggerito,
+      },
+    });
+
     window.dispatchEvent(
       new CustomEvent("assigned_tutor_whatsapp", {
         detail: {
@@ -698,12 +710,6 @@ export default function OrientamentoPage() {
         },
       })
     );
-
-    console.log("Assigned tutor WhatsApp click:", {
-      tutor: orientatrice.nome,
-      phone: orientatrice.telefono,
-      profilo: risultato.tipo,
-    });
   };
 
   const handleSelect = async (value: string) => {
