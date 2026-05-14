@@ -590,6 +590,21 @@ export default function OrientamentoPage() {
     localStorage.setItem("orientamento_data", JSON.stringify(data));
     localStorage.setItem("orientamento_risultato", JSON.stringify(risultato));
 
+    void trackEvent({
+      event_name: "test_completato",
+      event_category: "orientamento",
+      metadata: {
+        profilo: risultato.tipo,
+        corso_suggerito: risultato.corsoSuggerito,
+        situazione: data.situazione || "",
+        titolo_studio: data.titolo_studio || "",
+        obiettivo: data.obiettivo || "",
+        urgenza: data.urgenza || "",
+        tempo: data.tempo || "",
+        area: data.area || "",
+      },
+    });
+
     try {
       if (!user?.email) {
         console.log("Email utente mancante");
@@ -680,7 +695,7 @@ export default function OrientamentoPage() {
     }
   };
 
-  const handleTutorWhatsappClick = (
+  const handleTutorWhatsappClick = async (
     orientatrice: Orientatrice,
     risultato: Risultato
   ) => {
@@ -689,7 +704,7 @@ export default function OrientamentoPage() {
     localStorage.setItem("assigned_tutor_click", "si");
     localStorage.setItem("assigned_tutor_click_at", new Date().toISOString());
 
-    void trackEvent({
+    await trackEvent({
       event_name: "assigned_tutor_click",
       event_category: "conversione",
       metadata: {
@@ -825,9 +840,14 @@ Corso suggerito: ${risultato.corsoSuggerito}`
 
           <a
             href={whatsappUrl}
-            target="_blank"
             rel="noopener noreferrer"
-            onClick={() => handleTutorWhatsappClick(orientatrice, risultato)}
+            onClick={async (event) => {
+              event.preventDefault();
+
+              await handleTutorWhatsappClick(orientatrice, risultato);
+
+              window.location.href = whatsappUrl;
+            }}
             style={{
               width: "100%",
               minHeight: 62,
