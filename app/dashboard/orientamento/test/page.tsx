@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import OneSignal from "react-onesignal";
 import {
   Sparkles,
@@ -11,6 +11,8 @@ import {
   CheckCircle2,
   ArrowRight,
   Share2,
+  CalendarCheck,
+  ShieldCheck,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import BottomNav from "@/components/ui/BottomNav";
@@ -47,6 +49,15 @@ type Segmenti = {
   segmento_intento: string;
   segmento_ingresso: string;
   segmento_urgenza: string;
+};
+
+type Orientatrice = {
+  nome: string;
+  ruolo: string;
+  telefono: string;
+  telefonoWhatsapp: string;
+  foto: string;
+  specializzazioni: string[];
 };
 
 export default function OrientamentoPage() {
@@ -106,7 +117,6 @@ export default function OrientamentoPage() {
         "Preferisco non indicarlo",
       ],
     },
-
     {
       id: "situazione",
       domanda: "Cosa fai oggi?",
@@ -467,6 +477,86 @@ export default function OrientamentoPage() {
     return "NON_DEFINITO";
   };
 
+  const getOrientatriceAssegnata = (
+    data: OrientamentoData,
+    risultato: Risultato
+  ): Orientatrice => {
+    const specializzazioni = new Set<string>();
+
+    specializzazioni.add("Percorsi eCampus");
+
+    if (
+      data.situazione?.includes("Lavoro") ||
+      data.situazione === "Studio e lavoro"
+    ) {
+      specializzazioni.add("Studenti lavoratori");
+    }
+
+    if (
+      data.titolo_studio?.includes("AFAM") ||
+      data.titolo_studio?.includes("conservatorio") ||
+      data.titolo_studio?.includes("accademia") ||
+      data.titolo_studio === "Ho iniziato l’università ma non ho terminato"
+    ) {
+      specializzazioni.add("Riconoscimento CFU");
+    }
+
+    if (data.obiettivo === "Partecipare a concorsi") {
+      specializzazioni.add("Percorsi per concorsi pubblici");
+    }
+
+    if (data.obiettivo === "Insegnare" || risultato.tipo === "SCUOLA") {
+      specializzazioni.add("Scuola e insegnamento");
+    }
+
+    if (data.tempo === "2-4 ore a settimana") {
+      specializzazioni.add("Piani di studio sostenibili");
+    }
+
+    if (data.eta === "35-44" || data.eta === "45-54" || data.eta === "55+") {
+      specializzazioni.add("Ripresa degli studi da adulti");
+    }
+
+    if (risultato.tipo === "PSICOLOGIA") {
+      specializzazioni.add("Area psicologica");
+    }
+
+    if (risultato.tipo === "ECONOMIA") {
+      specializzazioni.add("Area economia e management");
+    }
+
+    if (risultato.tipo === "EDUCAZIONE") {
+      specializzazioni.add("Area educazione e formazione");
+    }
+
+    if (risultato.tipo === "GIURIDICA") {
+      specializzazioni.add("Area giuridica");
+    }
+
+    if (risultato.tipo === "TECNOLOGIA") {
+      specializzazioni.add("Area informatica e digitale");
+    }
+
+    if (risultato.tipo === "SPORT") {
+      specializzazioni.add("Area scienze motorie");
+    }
+
+    if (risultato.tipo === "COMUNICAZIONE") {
+      specializzazioni.add("Area comunicazione digitale");
+    }
+
+    specializzazioni.add("Piani di studio personalizzati");
+
+    return {
+      nome: "Giulia C.",
+      ruolo: "Orientatrice per il Polo di Studi eCampus",
+      telefono: "3298170817",
+      telefonoWhatsapp: "393298170817",
+      foto: "/giulia-orientatrice.png",
+      specializzazioni: Array.from(specializzazioni).slice(0, 4),
+    };
+  };
+
   const salvaDati = async (data: OrientamentoData) => {
     const risultato = getRisultato(data);
     const segmenti = getSegmenti(data);
@@ -525,13 +615,11 @@ export default function OrientamentoPage() {
               nome: user.nome || "",
               cognome: user.cognome || "",
               telefono: user.telefono || "",
-
               profilo: risultato.tipo,
               titolo_studio: data.titolo_studio || "",
               obiettivo: data.obiettivo || "",
               area_interesse: data.area || "",
               segmento_intento: segmenti.segmento_intento,
-
               tempo_studio: tempoStudioTag,
               segmento_urgenza: segmenti.segmento_urgenza,
             }),
@@ -591,6 +679,33 @@ export default function OrientamentoPage() {
     }
   };
 
+  const handleTutorWhatsappClick = (
+    orientatrice: Orientatrice,
+    risultato: Risultato
+  ) => {
+    localStorage.setItem("assigned_tutor_name", orientatrice.nome);
+    localStorage.setItem("assigned_tutor_phone", orientatrice.telefono);
+    localStorage.setItem("assigned_tutor_click", "si");
+    localStorage.setItem("assigned_tutor_click_at", new Date().toISOString());
+
+    window.dispatchEvent(
+      new CustomEvent("assigned_tutor_whatsapp", {
+        detail: {
+          tutor: orientatrice.nome,
+          phone: orientatrice.telefono,
+          profilo: risultato.tipo,
+          corso_suggerito: risultato.corsoSuggerito,
+        },
+      })
+    );
+
+    console.log("Assigned tutor WhatsApp click:", {
+      tutor: orientatrice.nome,
+      phone: orientatrice.telefono,
+      profilo: risultato.tipo,
+    });
+  };
+
   const handleSelect = async (value: string) => {
     const currentStep = steps[step];
 
@@ -613,9 +728,12 @@ export default function OrientamentoPage() {
 
   if (step >= steps.length) {
     const risultato = getRisultato();
+    const orientatrice = getOrientatriceAssegnata(formData, risultato);
 
-    const whatsappUrl = `https://wa.me/393793673257?text=${encodeURIComponent(
-      `Ho fatto il test Laurea Smart e vorrei ricevere il mio piano personalizzato.
+    const whatsappUrl = `https://wa.me/${
+      orientatrice.telefonoWhatsapp
+    }?text=${encodeURIComponent(
+      `Ciao Giulia, ho appena completato il test Laurea Smart e vorrei ricevere il mio piano personalizzato.
 
 Situazione attuale: ${formData.situazione || ""}
 Titolo di studio: ${formData.titolo_studio || ""}
@@ -697,10 +815,13 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             badge="Gratis"
           />
 
+          <AssignedTutorCard orientatrice={orientatrice} />
+
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => handleTutorWhatsappClick(orientatrice, risultato)}
             style={{
               width: "100%",
               minHeight: 62,
@@ -718,9 +839,36 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             }}
           >
             <MessageCircle size={22} />
-            Ricevi il tuo piano personalizzato
+            Parla con Giulia su WhatsApp
             <ArrowRight size={20} />
           </a>
+
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.setItem("prenota_chiamata_giulia", "si");
+              window.location.href = `tel:${orientatrice.telefono}`;
+            }}
+            style={{
+              width: "100%",
+              minHeight: 62,
+              borderRadius: 22,
+              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(255,255,255,0.08)",
+              color: "#FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              fontWeight: 900,
+              fontSize: 16,
+              cursor: "pointer",
+            }}
+          >
+            <CalendarCheck size={22} color="#78C2FF" />
+            Chiama Giulia
+            <ArrowRight size={20} color="#78C2FF" />
+          </button>
 
           <section
             onClick={() => (window.location.href = "/dashboard/percorsi")}
@@ -1001,12 +1149,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
           }}
         />
 
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
+        <div style={{ position: "relative", zIndex: 1 }}>
           <div
             style={{
               width: 58,
@@ -1293,6 +1436,155 @@ Corso suggerito: ${risultato.corsoSuggerito}`
   );
 }
 
+function AssignedTutorCard({ orientatrice }: { orientatrice: Orientatrice }) {
+  return (
+    <section
+      style={{
+        padding: 18,
+        borderRadius: 28,
+        background: "#FFFFFF",
+        color: "#101828",
+        border: "1px solid rgba(255,255,255,0.16)",
+        boxShadow: "0 18px 42px rgba(0,0,0,0.28)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 16,
+          alignItems: "flex-start",
+        }}
+      >
+        <img
+          src={orientatrice.foto}
+          alt="Orientatrice Laurea Smart"
+          style={{
+            width: 104,
+            height: 104,
+            borderRadius: 999,
+            objectFit: "cover",
+            flexShrink: 0,
+            border: "4px solid #F1ECFF",
+          }}
+        />
+
+        <div style={{ flex: 1 }}>
+          <p
+            style={{
+              margin: "0 0 6px",
+              fontSize: 12,
+              fontWeight: 900,
+              color: "#6B46C1",
+              textTransform: "uppercase",
+              letterSpacing: "0.4px",
+            }}
+          >
+            Orientatrice assegnata
+          </p>
+
+          <h3
+            style={{
+              margin: 0,
+              fontSize: 25,
+              lineHeight: 1.1,
+              fontWeight: 950,
+              color: "#111827",
+            }}
+          >
+            {orientatrice.nome}
+          </h3>
+
+          <p
+            style={{
+              margin: "6px 0 12px",
+              fontSize: 14,
+              lineHeight: 1.35,
+              color: "#6B46C1",
+              fontWeight: 800,
+            }}
+          >
+            {orientatrice.ruolo}
+          </p>
+
+          <div
+            style={{
+              height: 1,
+              background: "#E5E7EB",
+              marginBottom: 12,
+            }}
+          />
+
+          <p
+            style={{
+              margin: "0 0 10px",
+              fontSize: 14,
+              fontWeight: 850,
+              color: "#111827",
+            }}
+          >
+            Specializzata in:
+          </p>
+
+          <div style={{ display: "grid", gap: 8 }}>
+            {orientatrice.specializzazioni.map((item) => (
+              <div
+                key={item}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: 14,
+                  color: "#1F2937",
+                  fontWeight: 650,
+                }}
+              >
+                <CheckCircle2 size={17} color="#6B46C1" />
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 16,
+          padding: "12px 14px",
+          borderRadius: 18,
+          background: "#F7F2FF",
+          color: "#374151",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          fontSize: 14,
+          fontWeight: 750,
+        }}
+      >
+        <Clock size={18} color="#6B46C1" />
+        Di solito risponde entro pochi minuti.
+      </div>
+
+      <div
+        style={{
+          marginTop: 12,
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 10,
+          color: "#4B5563",
+          fontSize: 13,
+          lineHeight: 1.45,
+        }}
+      >
+        <ShieldCheck size={18} color="#6B46C1" style={{ flexShrink: 0 }} />
+        <span>
+          Il servizio è gratuito e senza impegno. Giulia ti aiuterà a trovare il
+          percorso più adatto al tuo profilo.
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function DarkCard({
   title,
   description,
@@ -1302,7 +1594,7 @@ function DarkCard({
   title?: string;
   description?: string;
   badge?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <section
@@ -1466,7 +1758,7 @@ function ResultMetric({
   title,
   description,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
 }) {
