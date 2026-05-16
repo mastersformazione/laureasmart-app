@@ -498,8 +498,8 @@ export default function Dashboard() {
 
       <FeatureCard
         icon={<CalendarDays size={30} />}
-        title="Prepara il tuo anno accademico"
-        description="Simula esami, CFU, sessioni e tempo di studio per capire come organizzare il tuo primo anno."
+        title="Simula il tuo anno accademico"
+        description="Se non sei ancora iscritto, prova a simulare esami, CFU e tempo di studio. Se sei già iscritto, usa Percorso Smart per monitorare il percorso reale."
         gradient="linear-gradient(135deg, #2563EB 0%, #3B82F6 55%, #60A5FA 100%)"
         highlight
         onClick={() => router.push("/dashboard/anno-accademico")}

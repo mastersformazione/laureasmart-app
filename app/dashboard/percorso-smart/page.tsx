@@ -36,6 +36,8 @@ const STORAGE_OBIETTIVO = "percorso_smart_obiettivo";
 const STORAGE_TIPO_PERCORSO = "percorso_smart_tipo_percorso";
 const STORAGE_ORE_SETTIMANALI = "percorso_smart_ore_settimanali";
 const STORAGE_GIORNI_STUDIO = "percorso_smart_giorni_studio";
+const STORAGE_REMINDER_STUDIO = "percorso_smart_reminder_studio";
+const STORAGE_ORARIO_REMINDER = "percorso_smart_orario_reminder";
 
 export default function PercorsoSmartPage() {
   const [isReady, setIsReady] = useState(false);
@@ -55,6 +57,8 @@ export default function PercorsoSmartPage() {
 
   const [oreSettimanali, setOreSettimanali] = useState("6");
   const [giorniStudio, setGiorniStudio] = useState("3");
+  const [reminderStudio, setReminderStudio] = useState("3_settimana");
+  const [orarioReminder, setOrarioReminder] = useState("18:30");
 
   useEffect(() => {
     const savedEsami = localStorage.getItem(STORAGE_ESAMI);
@@ -65,12 +69,16 @@ export default function PercorsoSmartPage() {
     ) as TipoPercorso | null;
     const savedOreSettimanali = localStorage.getItem(STORAGE_ORE_SETTIMANALI);
     const savedGiorniStudio = localStorage.getItem(STORAGE_GIORNI_STUDIO);
+    const savedReminderStudio = localStorage.getItem(STORAGE_REMINDER_STUDIO);
+    const savedOrarioReminder = localStorage.getItem(STORAGE_ORARIO_REMINDER);
 
     setEsami(savedEsami ? JSON.parse(savedEsami) : []);
     setCfuTotali(savedCfuTotali ? Number(savedCfuTotali) : 180);
     setObiettivo(savedObiettivo || "Laurearti con un piano sostenibile");
     setOreSettimanali(savedOreSettimanali || "6");
     setGiorniStudio(savedGiorniStudio || "3");
+    setReminderStudio(savedReminderStudio || "3_settimana");
+    setOrarioReminder(savedOrarioReminder || "18:30");
 
     if (savedTipoPercorso) {
       setTipoPercorso(savedTipoPercorso);
@@ -95,6 +103,13 @@ export default function PercorsoSmartPage() {
     localStorage.setItem(STORAGE_ORE_SETTIMANALI, oreSettimanali);
     localStorage.setItem(STORAGE_GIORNI_STUDIO, giorniStudio);
   }, [oreSettimanali, giorniStudio, isReady]);
+
+  useEffect(() => {
+    if (!isReady) return;
+
+    localStorage.setItem(STORAGE_REMINDER_STUDIO, reminderStudio);
+    localStorage.setItem(STORAGE_ORARIO_REMINDER, orarioReminder);
+  }, [reminderStudio, orarioReminder, isReady]);
 
   const cfuCompletati = useMemo(
     () =>
@@ -301,6 +316,46 @@ export default function PercorsoSmartPage() {
         year: "numeric",
       })
     : "Non impostata";
+
+  const reminderLabel =
+    reminderStudio === "mai"
+      ? "Disattivato"
+      : reminderStudio === "2_settimana"
+      ? "2 volte a settimana"
+      : reminderStudio === "3_settimana"
+      ? "3 volte a settimana"
+      : "Ogni giorno";
+
+  const avvisoSmartTitolo =
+    percentuale >= 100
+      ? "Percorso completato"
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 7
+      ? "Esame vicino"
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 21
+      ? "Organizza lo studio"
+      : reminderStudio !== "mai"
+      ? "Promemoria attivo"
+      : "Imposta un promemoria";
+
+  const avvisoSmartMessaggio =
+    percentuale >= 100
+      ? "Hai completato il percorso previsto. Puoi usare questa sezione per nuovi obiettivi."
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 7
+      ? "Il prossimo esame è vicino: mantieni il focus su ripasso e argomenti principali."
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 21
+      ? "Hai ancora margine: distribuisci lo studio in piccole sessioni regolari."
+      : reminderStudio !== "mai"
+      ? `Ti ricorderemo di studiare ${reminderLabel.toLowerCase()} alle ${orarioReminder}.`
+      : "Attiva un promemoria per trasformare lo studio in un’abitudine più stabile.";
+
+  const badgeAvvisoSmart =
+    percentuale >= 100
+      ? "Completato"
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 7
+      ? "Priorità"
+      : reminderStudio !== "mai"
+      ? "Attivo"
+      : "Reminder";
 
   const aggiornaTipoPercorso = (value: TipoPercorso) => {
     const nuoviCfu =
@@ -655,6 +710,68 @@ export default function PercorsoSmartPage() {
 
           <div style={positiveBoxStyle}>
             <p style={positiveTextStyle}>{messaggioCalendario}</p>
+          </div>
+        </div>
+      </DarkCard>
+
+      <div style={{ height: 14 }} />
+
+      <DarkCard title="Avvisi Smart" badge={badgeAvvisoSmart}>
+        <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
+          <div style={smartBoxStyle}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 15,
+                fontWeight: 900,
+                color: "#FFFFFF",
+              }}
+            >
+              {avvisoSmartTitolo}
+            </p>
+
+            <p style={mutedTextStyle}>{avvisoSmartMessaggio}</p>
+          </div>
+
+          <div style={softBoxStyle}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 13,
+                fontWeight: 850,
+                color: "#78C2FF",
+                textTransform: "uppercase",
+                letterSpacing: "0.4px",
+              }}
+            >
+              Ricordami di studiare
+            </p>
+
+            <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
+              <select
+                value={reminderStudio}
+                onChange={(e) => setReminderStudio(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="mai">Mai</option>
+                <option value="2_settimana">2 volte a settimana</option>
+                <option value="3_settimana">3 volte a settimana</option>
+                <option value="ogni_giorno">Ogni giorno</option>
+              </select>
+
+              <input
+                value={orarioReminder}
+                onChange={(e) => setOrarioReminder(e.target.value)}
+                type="time"
+                style={inputStyle}
+              />
+            </div>
+
+            <p style={mutedTextStyle}>
+              {reminderStudio === "mai"
+                ? "Il promemoria è disattivato. Puoi attivarlo quando vuoi."
+                : `Promemoria impostato: ${reminderLabel.toLowerCase()} alle ${orarioReminder}.`}
+            </p>
           </div>
         </div>
       </DarkCard>

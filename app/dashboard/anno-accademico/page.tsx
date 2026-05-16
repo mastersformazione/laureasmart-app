@@ -158,15 +158,17 @@ Carico: ${result.carico}`
         </button>
 
         <section className="rounded-[30px] border border-white/10 bg-gradient-to-br from-[#1F6FB2] to-[#155487] p-6 text-white shadow-[0_22px_54px_rgba(0,0,0,0.34)]">
-          <p className="text-sm font-bold opacity-90">Laurea Smart</p>
+          <p className="text-sm font-bold opacity-90">
+            Simulazione orientativa
+          </p>
 
           <h1 className="mt-2 text-[31px] font-extrabold leading-[34px] tracking-[-0.7px]">
             Prepara il tuo anno accademico
           </h1>
 
           <p className="mt-3 text-[15px] leading-6 opacity-95">
-            Simula esami, CFU, sessioni e tempo di studio per capire se il
-            percorso è sostenibile prima ancora di iniziare.
+            Simula il carico di studio del primo anno e scopri se il percorso
+            può essere compatibile con lavoro, famiglia e impegni quotidiani.
           </p>
         </section>
 
