@@ -15,7 +15,9 @@ import {
 import BottomNav from "@/components/ui/BottomNav";
 // import { trackEvent } from "@/lib/trackEvent";
 
-const trackEvent = async (..._args: unknown[]) => {};
+const trackEvent = async (eventData: unknown) => {
+  void eventData;
+};
 
 type TipoPercorso = "triennale" | "magistrale" | "ciclo_unico";
 
