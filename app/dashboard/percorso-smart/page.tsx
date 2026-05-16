@@ -244,6 +244,56 @@ export default function PercorsoSmartPage() {
       ? "Hai ancora tempo, ma conviene organizzare lo studio con regolarità."
       : "Hai un buon margine: puoi prepararti con calma e continuità.";
 
+  const esamiDaPreparare = esami.filter(
+    (esame) => esame.stato === "da_preparare"
+  ).length;
+
+  const esamiInCorso = esami.filter(
+    (esame) => esame.stato === "in_corso"
+  ).length;
+
+  const supportoTitolo =
+    percentuale >= 100
+      ? "Percorso completato"
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 7
+      ? "Priorità della settimana"
+      : esamiInCorso > 0
+      ? "Mantieni il ritmo"
+      : esamiDaPreparare > 0
+      ? "Organizza il prossimo passo"
+      : "Inizia il tuo percorso";
+
+  const supportoMessaggio =
+    percentuale >= 100
+      ? "Hai completato il percorso previsto. Continua a investire nella tua crescita."
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 7
+      ? "L’esame è vicino: concentrati sugli argomenti principali e mantieni continuità."
+      : esamiInCorso > 0
+      ? "Procedere con costanza è più importante della velocità."
+      : esamiDaPreparare > 0
+      ? "Pianificare anche un solo esame può aiutarti a rendere il percorso più concreto."
+      : "Aggiungi i primi esami per iniziare a costruire il tuo piano.";
+
+  const microObiettivo =
+    percentuale >= 100
+      ? "Valuta un nuovo obiettivo formativo o professionale."
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 7
+      ? "Dedica almeno una sessione al ripasso finale."
+      : oreNumero <= 3
+      ? "Trova almeno 2 momenti brevi di studio questa settimana."
+      : oreNumero <= 7
+      ? "Completa un argomento o un modulo entro domenica."
+      : "Prova ad anticipare parte del prossimo esame.";
+
+  const statoMotivazione =
+    percentuale >= 100
+      ? "Completato"
+      : giorniAlProssimoEsame !== null && giorniAlProssimoEsame <= 7
+      ? "Focus"
+      : oreNumero <= 3
+      ? "Graduale"
+      : "Costante";
+
   const dataProssimoEsameLabel = prossimoEsame?.dataEsame
     ? new Date(prossimoEsame.dataEsame).toLocaleDateString("it-IT", {
         day: "2-digit",
@@ -610,6 +660,55 @@ export default function PercorsoSmartPage() {
       </DarkCard>
 
       <div style={{ height: 14 }} />
+
+      <DarkCard title="Supporto Smart" badge={statoMotivazione}>
+        <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
+          <div style={smartBoxStyle}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 15,
+                fontWeight: 900,
+                color: "#FFFFFF",
+              }}
+            >
+              {supportoTitolo}
+            </p>
+
+            <p style={mutedTextStyle}>{supportoMessaggio}</p>
+          </div>
+
+          <div style={softBoxStyle}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 13,
+                fontWeight: 850,
+                color: "#78C2FF",
+                textTransform: "uppercase",
+                letterSpacing: "0.4px",
+              }}
+            >
+              Micro-obiettivo
+            </p>
+
+            <p
+              style={{
+                margin: "8px 0 0",
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: "#FFFFFF",
+                fontWeight: 700,
+              }}
+            >
+              {microObiettivo}
+            </p>
+          </div>
+        </div>
+      </DarkCard>
+
+      <div style={{ height: 14 }} />
+
       <DarkCard title="Prossimo passo consigliato" badge="Smart">
         <div style={smartBoxStyle}>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 850 }}>
