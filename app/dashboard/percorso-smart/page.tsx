@@ -27,6 +27,7 @@ type EsameSmart = {
   cfu: number;
   stato: "da_preparare" | "in_corso" | "completato";
   difficolta: "bassa" | "media" | "alta";
+  dataEsame?: string;
 };
 
 const STORAGE_ESAMI = "percorso_smart_esami";
@@ -48,6 +49,7 @@ export default function PercorsoSmartPage() {
 
   const [nomeEsame, setNomeEsame] = useState("");
   const [cfuEsame, setCfuEsame] = useState("6");
+  const [dataEsame, setDataEsame] = useState("");
   const [difficolta, setDifficolta] =
     useState<EsameSmart["difficolta"]>("media");
 
@@ -111,9 +113,23 @@ export default function PercorsoSmartPage() {
     Math.round((cfuCompletati / cfuTotali) * 100)
   );
 
-  const prossimoEsame =
-    esami.find((esame) => esame.stato === "in_corso") ||
-    esami.find((esame) => esame.stato === "da_preparare");
+  const prossimoEsame = [...esami]
+    .filter((esame) => esame.stato !== "completato")
+    .sort((a, b) => {
+      if (a.stato === "in_corso" && b.stato !== "in_corso") return -1;
+      if (b.stato === "in_corso" && a.stato !== "in_corso") return 1;
+
+      if (a.dataEsame && b.dataEsame) {
+        return (
+          new Date(a.dataEsame).getTime() - new Date(b.dataEsame).getTime()
+        );
+      }
+
+      if (a.dataEsame && !b.dataEsame) return -1;
+      if (!a.dataEsame && b.dataEsame) return 1;
+
+      return 0;
+    })[0];
 
   const oreNumero = Number(oreSettimanali) || 0;
   const giorniNumero = Math.max(1, Number(giorniStudio) || 1);
@@ -199,6 +215,43 @@ export default function PercorsoSmartPage() {
       ? "Hai già superato una parte importante del percorso. La laurea è molto più vicina di quanto sembri."
       : "Anche un ritmo costante e sostenibile può portarti molto lontano, un esame alla volta.";
 
+  const giorniAlProssimoEsame = prossimoEsame?.dataEsame
+    ? Math.ceil(
+        (new Date(prossimoEsame.dataEsame).getTime() - new Date().getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : null;
+
+  const statoCalendario =
+    giorniAlProssimoEsame === null
+      ? "Da pianificare"
+      : giorniAlProssimoEsame < 0
+      ? "Da aggiornare"
+      : giorniAlProssimoEsame <= 7
+      ? "Vicino"
+      : giorniAlProssimoEsame <= 21
+      ? "Da organizzare"
+      : "Tranquillo";
+
+  const messaggioCalendario =
+    giorniAlProssimoEsame === null
+      ? "Aggiungi una data prevista agli esami per avere un calendario più chiaro."
+      : giorniAlProssimoEsame < 0
+      ? "La data prevista è passata: aggiorna l’esame o segnalo come completato."
+      : giorniAlProssimoEsame <= 7
+      ? "L’esame è vicino: concentrati su ripasso, prove e materiali essenziali."
+      : giorniAlProssimoEsame <= 21
+      ? "Hai ancora tempo, ma conviene organizzare lo studio con regolarità."
+      : "Hai un buon margine: puoi prepararti con calma e continuità.";
+
+  const dataProssimoEsameLabel = prossimoEsame?.dataEsame
+    ? new Date(prossimoEsame.dataEsame).toLocaleDateString("it-IT", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "Non impostata";
+
   const aggiornaTipoPercorso = (value: TipoPercorso) => {
     const nuoviCfu =
       value === "triennale" ? 180 : value === "magistrale" ? 120 : 300;
@@ -231,11 +284,13 @@ export default function PercorsoSmartPage() {
       cfu: cfuNumero,
       stato: "da_preparare",
       difficolta,
+      dataEsame: dataEsame || undefined,
     };
 
     setEsami((prev) => [...prev, nuovoEsame]);
     setNomeEsame("");
     setCfuEsame("6");
+    setDataEsame("");
     setDifficolta("media");
     setShowForm(false);
 
@@ -502,6 +557,59 @@ export default function PercorsoSmartPage() {
 
       <div style={{ height: 14 }} />
 
+      <DarkCard title="Calendario esami" badge={statoCalendario}>
+        <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
+          <div style={timelineHeroStyle}>
+            <div style={timelineIconStyle}>
+              <CalendarDays size={24} />
+            </div>
+
+            <p style={timelineLabelStyle}>Prossimo esame previsto</p>
+
+            <h3 style={timelineTitleStyle}>
+              {prossimoEsame ? prossimoEsame.nome : "Nessun esame pianificato"}
+            </h3>
+
+            <p style={timelineTextStyle}>
+              {prossimoEsame
+                ? `Data: ${dataProssimoEsameLabel}`
+                : "Aggiungi un esame con una data prevista per iniziare a pianificare."}
+            </p>
+          </div>
+
+          {prossimoEsame && (
+            <section
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 10,
+              }}
+            >
+              <MiniTimelineBox
+                title={
+                  giorniAlProssimoEsame === null
+                    ? "-"
+                    : giorniAlProssimoEsame < 0
+                    ? "0"
+                    : `${giorniAlProssimoEsame}`
+                }
+                description="Giorni mancanti"
+              />
+
+              <MiniTimelineBox
+                title={`${prossimoEsame.cfu}`}
+                description="CFU esame"
+              />
+            </section>
+          )}
+
+          <div style={positiveBoxStyle}>
+            <p style={positiveTextStyle}>{messaggioCalendario}</p>
+          </div>
+        </div>
+      </DarkCard>
+
+      <div style={{ height: 14 }} />
       <DarkCard title="Prossimo passo consigliato" badge="Smart">
         <div style={smartBoxStyle}>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 850 }}>
@@ -542,7 +650,12 @@ export default function PercorsoSmartPage() {
               type="number"
               style={inputStyle}
             />
-
+            <input
+              value={dataEsame}
+              onChange={(e) => setDataEsame(e.target.value)}
+              type="date"
+              style={inputStyle}
+            />
             <select
               value={difficolta}
               onChange={(e) =>
@@ -631,6 +744,11 @@ export default function PercorsoSmartPage() {
                   }}
                 >
                   {esame.cfu} CFU · difficoltà {esame.difficolta}
+                  {esame.dataEsame
+                    ? ` · data ${new Date(esame.dataEsame).toLocaleDateString(
+                        "it-IT"
+                      )}`
+                    : ""}
                 </p>
 
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
