@@ -65,28 +65,49 @@ export default function PercorsoSmartPage() {
     orarioValue: string
   ) => {
     const storedUser = localStorage.getItem("gps_user");
-    if (!storedUser) return;
+
+    if (!storedUser) {
+      console.log("NESSUN UTENTE SALVATO");
+      return;
+    }
 
     const user = JSON.parse(storedUser) as {
       nome?: string;
       email?: string;
     };
 
-    if (!user?.email) return;
+    console.log("USER RECUPERATO", user);
+
+    if (!user?.email) {
+      console.log("EMAIL NON PRESENTE");
+      return;
+    }
 
     try {
-      await fetch("https://laureasmart.it/api/save-study-reminder.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_email: user.email,
-          user_nome: user.nome || "",
-          reminder_studio: reminderValue,
-          orario_reminder: orarioValue,
-        }),
+      console.log("SALVATAGGIO REMINDER", {
+        reminderValue,
+        orarioValue,
       });
+
+      const response = await fetch(
+        "https://laureasmart.it/api/save-study-reminder.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_email: user.email,
+            user_nome: user.nome || "",
+            reminder_studio: reminderValue,
+            orario_reminder: orarioValue,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("RISPOSTA PHP", data);
     } catch (error) {
       console.error("Errore salvataggio reminder studio:", error);
     }
@@ -142,7 +163,11 @@ export default function PercorsoSmartPage() {
     localStorage.setItem(STORAGE_REMINDER_STUDIO, reminderStudio);
     localStorage.setItem(STORAGE_ORARIO_REMINDER, orarioReminder);
 
-    void salvaReminderSuDatabase(reminderStudio, orarioReminder);
+    const timeout = setTimeout(() => {
+      void salvaReminderSuDatabase(reminderStudio, orarioReminder);
+    }, 700);
+
+    return () => clearTimeout(timeout);
   }, [reminderStudio, orarioReminder, isReady]);
 
   const cfuCompletati = useMemo(
