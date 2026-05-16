@@ -36,6 +36,7 @@ const getStoredUser = (): StoredUser | null => {
 
   try {
     const storedUser = localStorage.getItem("gps_user");
+
     if (!storedUser) return null;
 
     return JSON.parse(storedUser) as StoredUser;
@@ -49,7 +50,7 @@ export const trackEvent = async ({
   event_category = "generale",
   event_value,
   metadata = {},
-}: TrackEventPayload) => {
+}: TrackEventPayload): Promise<void> => {
   if (typeof window === "undefined") return;
 
   const user = getStoredUser();
@@ -61,7 +62,7 @@ export const trackEvent = async ({
     session_id: sessionId,
     event_name,
     event_category,
-    event_value,
+    event_value: event_value ?? null,
     page_url: window.location.href,
     metadata: {
       ...metadata,
