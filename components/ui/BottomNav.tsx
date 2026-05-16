@@ -1,6 +1,7 @@
 "use client";
 
-import { Home, ClipboardList, MessageCircle } from "lucide-react";
+import { Home, ClipboardList, MessageCircle, User } from "lucide-react";
+
 import { usePathname, useRouter } from "next/navigation";
 
 import NavIcon from "@/components/ui/NavIcon";
@@ -15,6 +16,11 @@ const items = [
     label: "Orientamento",
     icon: ClipboardList,
     path: "/dashboard/orientamento",
+  },
+  {
+    label: "Profilo",
+    icon: User,
+    path: "/dashboard/profilo",
   },
   {
     label: "Contatti",
@@ -67,7 +73,7 @@ export default function BottomNav() {
               justifyContent: "center",
               gap: 6,
               cursor: "pointer",
-              minWidth: 78,
+              minWidth: 70,
             }}
           >
             <NavIcon active={active}>

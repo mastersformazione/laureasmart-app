@@ -15,6 +15,7 @@ import {
   CalendarCheck,
   CalendarDays,
   Share2,
+  GraduationCap,
 } from "lucide-react";
 
 type GpsUser = {
@@ -459,6 +460,15 @@ export default function Dashboard() {
       </section>
 
       <CompatibilitaPercorsoCard />
+
+      <FeatureCard
+        icon={<GraduationCap size={30} />}
+        title="Percorso Smart"
+        description="Se sei già iscritto ti aiuta a monitorare CFU, esami e timeline laurea. Se non sei ancora iscritto, puoi usarlo come simulazione utile per capire tempi e impegno."
+        gradient="linear-gradient(135deg, #0F766E 0%, #14B8A6 52%, #0E7490 100%)"
+        highlight
+        onClick={() => router.push("/dashboard/percorso-smart")}
+      />
 
       <FeatureCard
         icon={<BookOpen size={30} />}
