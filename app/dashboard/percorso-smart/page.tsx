@@ -60,6 +60,38 @@ export default function PercorsoSmartPage() {
   const [reminderStudio, setReminderStudio] = useState("3_settimana");
   const [orarioReminder, setOrarioReminder] = useState("18:30");
 
+  const salvaReminderSuDatabase = async (
+    reminderValue: string,
+    orarioValue: string
+  ) => {
+    const storedUser = localStorage.getItem("gps_user");
+    if (!storedUser) return;
+
+    const user = JSON.parse(storedUser) as {
+      nome?: string;
+      email?: string;
+    };
+
+    if (!user?.email) return;
+
+    try {
+      await fetch("https://laureasmart.it/api/save-study-reminder.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_email: user.email,
+          user_nome: user.nome || "",
+          reminder_studio: reminderValue,
+          orario_reminder: orarioValue,
+        }),
+      });
+    } catch (error) {
+      console.error("Errore salvataggio reminder studio:", error);
+    }
+  };
+
   useEffect(() => {
     const savedEsami = localStorage.getItem(STORAGE_ESAMI);
     const savedCfuTotali = localStorage.getItem(STORAGE_CFU_TOTALI);
@@ -109,6 +141,8 @@ export default function PercorsoSmartPage() {
 
     localStorage.setItem(STORAGE_REMINDER_STUDIO, reminderStudio);
     localStorage.setItem(STORAGE_ORARIO_REMINDER, orarioReminder);
+
+    void salvaReminderSuDatabase(reminderStudio, orarioReminder);
   }, [reminderStudio, orarioReminder, isReady]);
 
   const cfuCompletati = useMemo(
