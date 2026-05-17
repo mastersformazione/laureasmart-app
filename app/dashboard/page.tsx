@@ -484,20 +484,16 @@ export default function Dashboard() {
 
       {!isGiaIscritto && <CompatibilitaPercorsoCard />}
 
-      <FeatureCard
-        icon={<GraduationCap size={30} />}
-        title={
-          isGiaIscritto ? "Continua il tuo Percorso Smart" : "Percorso Smart"
-        }
-        description={
-          isGiaIscritto
-            ? "Tieni sotto controllo esami, CFU, timeline laurea e prossimi obiettivi di studio."
-            : "Se sei già iscritto ti aiuta a monitorare CFU, esami e timeline laurea. Se non sei ancora iscritto, puoi usarlo come simulazione utile per capire tempi e impegno."
-        }
-        gradient="linear-gradient(135deg, #0F766E 0%, #14B8A6 52%, #0E7490 100%)"
-        highlight
-        onClick={() => router.push("/dashboard/percorso-smart")}
-      />
+      {!isGiaIscritto && (
+        <FeatureCard
+          icon={<GraduationCap size={30} />}
+          title="Percorso Smart"
+          description="Se sei già iscritto ti aiuta a monitorare CFU, esami e timeline laurea. Se non sei ancora iscritto, puoi usarlo come simulazione utile per capire tempi e impegno."
+          gradient="linear-gradient(135deg, #0F766E 0%, #14B8A6 52%, #0E7490 100%)"
+          highlight
+          onClick={() => router.push("/dashboard/percorso-smart")}
+        />
+      )}
 
       <FeatureCard
         icon={<BookOpen size={30} />}
@@ -523,24 +519,28 @@ export default function Dashboard() {
         onClick={() => router.push("/dashboard/simula-futuro")}
       />
 
-      <FeatureCard
-        icon={<CalendarCheck size={30} />}
-        title="Il tuo percorso reale"
-        description="Scopri se università, lavoro e impegni quotidiani possono stare insieme in modo sostenibile."
-        gradient="linear-gradient(135deg, #0B2440 0%, #155487 52%, #1F6FB2 100%)"
-        onClick={() => router.push("/dashboard/percorso-reale")}
-      />
+      {!isGiaIscritto && (
+        <FeatureCard
+          icon={<CalendarCheck size={30} />}
+          title="Il tuo percorso reale"
+          description="Scopri se università, lavoro e impegni quotidiani possono stare insieme in modo sostenibile."
+          gradient="linear-gradient(135deg, #0B2440 0%, #155487 52%, #1F6FB2 100%)"
+          onClick={() => router.push("/dashboard/percorso-reale")}
+        />
+      )}
 
-      <StudentiComeTeCard />
+      {!isGiaIscritto && <StudentiComeTeCard />}
 
-      <FeatureCard
-        icon={<CalendarDays size={30} />}
-        title="Simula il tuo anno accademico"
-        description="Se non sei ancora iscritto, prova a simulare esami, CFU e tempo di studio. Se sei già iscritto, usa Percorso Smart per monitorare il percorso reale."
-        gradient="linear-gradient(135deg, #2563EB 0%, #3B82F6 55%, #60A5FA 100%)"
-        highlight
-        onClick={() => router.push("/dashboard/anno-accademico")}
-      />
+      {!isGiaIscritto && (
+        <FeatureCard
+          icon={<CalendarDays size={30} />}
+          title="Simula il tuo anno accademico"
+          description="Se non sei ancora iscritto, prova a simulare esami, CFU e tempo di studio. Se sei già iscritto, usa Percorso Smart per monitorare il percorso reale."
+          gradient="linear-gradient(135deg, #2563EB 0%, #3B82F6 55%, #60A5FA 100%)"
+          highlight
+          onClick={() => router.push("/dashboard/anno-accademico")}
+        />
+      )}
 
       <section>
         <div
