@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import OneSignal from "react-onesignal";
 import { trackEvent } from "../../../lib/trackEvent";
 import {
@@ -64,6 +65,7 @@ type Orientatrice = {
 };
 
 export default function OrientamentoPage() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<OrientamentoData>({});
   const [showNotificationModal, setShowNotificationModal] = useState(false);
@@ -772,6 +774,14 @@ export default function OrientamentoPage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       await salvaDati(updatedData);
+
+      const segmenti = getSegmenti(updatedData);
+
+      if (segmenti.segmento_studente === "GIA_ISCRITTO") {
+        router.push("/dashboard/profilo?focus=percorso-smart");
+        return;
+      }
+
       setStep(step + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
