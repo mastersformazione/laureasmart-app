@@ -182,6 +182,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<GpsUser | null>(null);
   const [notifiche, setNotifiche] = useState<Notifica[]>([]);
   const [query, setQuery] = useState("");
+  const [segmentoStudente, setSegmentoStudente] = useState("NON_ISCRITTO");
 
   const handleShareApp = async () => {
     const shareData = {
@@ -210,7 +211,10 @@ export default function Dashboard() {
     }
 
     setUser(JSON.parse(storedUser) as GpsUser);
+    const savedSegmentoStudente =
+      localStorage.getItem("segmento_studente") || "NON_ISCRITTO";
 
+    setSegmentoStudente(savedSegmentoStudente);
     const aggiornaBadge = (count: number) => {
       if ("setAppBadge" in navigator && count > 0) {
         navigator.setAppBadge(count).catch(console.error);
@@ -253,7 +257,10 @@ export default function Dashboard() {
   }, [router]);
 
   if (!user) return null;
-
+  const isGiaIscritto = segmentoStudente === "GIA_ISCRITTO";
+  const isNonIscritto = segmentoStudente === "NON_ISCRITTO";
+  const isUniversitaInterrotta = segmentoStudente === "UNIVERSITA_INTERROTTA";
+  const isTrasferimento = segmentoStudente === "TRASFERIMENTO";
   const notificheFiltrate = notifiche.filter((notifica) => {
     const testo = query.toLowerCase().trim();
 
@@ -310,7 +317,13 @@ export default function Dashboard() {
             letterSpacing: "-0.7px",
           }}
         >
-          Costruisci il tuo percorso universitario
+          {isGiaIscritto
+            ? "Organizza il tuo percorso di studi"
+            : isUniversitaInterrotta
+            ? "Riparti dal percorso giusto"
+            : isTrasferimento
+            ? "Valuta il tuo nuovo percorso"
+            : "Costruisci il tuo percorso universitario"}
         </h1>
 
         <p
@@ -321,8 +334,13 @@ export default function Dashboard() {
             opacity: 0.95,
           }}
         >
-          Ritrova i corsi salvati, ricevi aggiornamenti e scopri opportunità
-          coerenti con il tuo profilo.
+          {isGiaIscritto
+            ? "Monitora esami, CFU e obiettivi settimanali. Laurea Smart ti aiuta a rendere più ordinato il percorso che hai già iniziato."
+            : isUniversitaInterrotta
+            ? "Hai già iniziato l’università? Puoi ripartire valorizzando esami sostenuti, CFU e obiettivi personali."
+            : isTrasferimento
+            ? "Se stai valutando un cambio corso o ateneo, puoi verificare il percorso più adatto e capire quali esami potrebbero essere valorizzati."
+            : "Ritrova i corsi salvati, ricevi aggiornamenti e scopri opportunità coerenti con il tuo profilo."}
         </p>
       </section>
 
@@ -377,7 +395,13 @@ export default function Dashboard() {
 
       <section style={{ marginBottom: 20 }}>
         <button
-          onClick={() => router.push("/dashboard/preferiti")}
+          onClick={() =>
+            router.push(
+              isGiaIscritto
+                ? "/dashboard/percorso-smart"
+                : "/dashboard/preferiti"
+            )
+          }
           style={{
             width: "100%",
             border: "1px solid rgba(58,160,255,0.28)",
@@ -440,7 +464,7 @@ export default function Dashboard() {
                   letterSpacing: "-0.5px",
                 }}
               >
-                I miei percorsi
+                {isGiaIscritto ? "Il mio Percorso Smart" : "I miei percorsi"}
               </h2>
 
               <p
@@ -451,20 +475,27 @@ export default function Dashboard() {
                   color: "rgba(255,255,255,0.86)",
                 }}
               >
-                Ritrova subito i corsi salvati e continua da quelli più adatti
-                al tuo profilo.
+                {isGiaIscritto
+                  ? "Apri il tuo spazio personale per monitorare esami, CFU, avanzamento e prossimi obiettivi."
+                  : "Ritrova subito i corsi salvati e continua da quelli più adatti al tuo profilo."}
               </p>
             </div>
           </div>
         </button>
       </section>
 
-      <CompatibilitaPercorsoCard />
+      {!isGiaIscritto && <CompatibilitaPercorsoCard />}
 
       <FeatureCard
         icon={<GraduationCap size={30} />}
-        title="Percorso Smart"
-        description="Se sei già iscritto ti aiuta a monitorare CFU, esami e timeline laurea. Se non sei ancora iscritto, puoi usarlo come simulazione utile per capire tempi e impegno."
+        title={
+          isGiaIscritto ? "Continua il tuo Percorso Smart" : "Percorso Smart"
+        }
+        description={
+          isGiaIscritto
+            ? "Tieni sotto controllo esami, CFU, timeline laurea e prossimi obiettivi di studio."
+            : "Se sei già iscritto ti aiuta a monitorare CFU, esami e timeline laurea. Se non sei ancora iscritto, puoi usarlo come simulazione utile per capire tempi e impegno."
+        }
         gradient="linear-gradient(135deg, #0F766E 0%, #14B8A6 52%, #0E7490 100%)"
         highlight
         onClick={() => router.push("/dashboard/percorso-smart")}
@@ -472,8 +503,16 @@ export default function Dashboard() {
 
       <FeatureCard
         icon={<BookOpen size={30} />}
-        title="Esplora i percorsi consigliati"
-        description="Lauree, magistrali e master ordinati in base al tuo profilo."
+        title={
+          isGiaIscritto
+            ? "Valuta prossimi step"
+            : "Esplora i percorsi consigliati"
+        }
+        description={
+          isGiaIscritto
+            ? "Scopri percorsi futuri come magistrali, master o alternative coerenti con il tuo profilo."
+            : "Lauree, magistrali e master ordinati in base al tuo profilo."
+        }
         gradient="linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)"
         onClick={() => router.push("/dashboard/percorsi")}
       />
@@ -584,24 +623,46 @@ export default function Dashboard() {
 
       <section style={{ marginTop: 22 }}>
         <DarkCard
-          title="Hai bisogno di aiuto?"
-          description="Un orientatore reale può aiutarti gratuitamente a capire quale percorso scegliere."
-          badge="Gratis"
-          onClick={() => router.push("/dashboard/contatti")}
+          title={
+            isGiaIscritto
+              ? "Continua a organizzare il tuo studio"
+              : "Hai bisogno di aiuto?"
+          }
+          description={
+            isGiaIscritto
+              ? "Usa Percorso Smart per monitorare esami, CFU, obiettivi e prossime attività senza perdere di vista il tuo avanzamento."
+              : "Un orientatore reale può aiutarti gratuitamente a capire quale percorso scegliere."
+          }
+          badge={isGiaIscritto ? "Percorso Smart" : "Gratis"}
+          onClick={() =>
+            router.push(
+              isGiaIscritto
+                ? "/dashboard/percorso-smart"
+                : "/dashboard/contatti"
+            )
+          }
         >
           <div
             style={{
-              marginTop: 12,
+              marginTop: 16,
+              width: "100%",
+              minHeight: 52,
+              borderRadius: 18,
+              background: isGiaIscritto ? "rgba(58,160,255,0.16)" : "#3AA0FF",
+              color: "#FFFFFF",
+              fontSize: 14,
+              fontWeight: 900,
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: 8,
-              color: "#3AA0FF",
-              fontSize: 14,
-              fontWeight: 800,
+              border: isGiaIscritto
+                ? "1px solid rgba(58,160,255,0.28)"
+                : "none",
             }}
           >
-            <MessageCircle size={18} />
-            Parla con un orientatore
+            {isGiaIscritto ? "Apri Percorso Smart" : "Parla con un orientatore"}
+            <span>→</span>
           </div>
         </DarkCard>
       </section>
