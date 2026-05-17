@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import InstallButton from "./install-button";
 import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
-import { CheckCircle, Bell, MessageCircle, UserCircle2 } from "lucide-react";
+import { CheckCircle, Bell, UserCircle2 } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -93,7 +93,7 @@ export default function Home() {
               backdropFilter: "blur(10px)",
             }}
           >
-            Orientamento Universitario Gratuito
+            Orientamento e Percorso Smart
           </div>
 
           <h1
@@ -105,7 +105,7 @@ export default function Home() {
               fontWeight: 800,
             }}
           >
-            La Laurea Giusta, Senza Perdere Tempo
+            Il tuo percorso universitario, più chiaro e organizzato
           </h1>
 
           <p
@@ -117,17 +117,24 @@ export default function Home() {
               maxWidth: 350,
             }}
           >
-            Ricevi notifiche, consigli personalizzati e percorsi online adatti
-            al tuo profilo.
+            Che tu debba ancora scegliere o sia già iscritto, Laurea Smart ti
+            aiuta a orientarti, organizzare lo studio e pianificare i prossimi
+            passi.
           </p>
         </div>
 
         <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
-          <Benefit icon={<CheckCircle size={19} />} text="Test gratuiti" />
-          <Benefit icon={<Bell size={19} />} text="Scadenze e promozioni" />
           <Benefit
-            icon={<MessageCircle size={19} />}
-            text="Supporto Gratuito di un Orientatore Dedicato"
+            icon={<CheckCircle size={19} />}
+            text="Test di orientamento personalizzato"
+          />
+          <Benefit
+            icon={<Bell size={19} />}
+            text="Percorso Smart per esami e CFU"
+          />
+          <Benefit
+            icon={<CheckCircle size={19} />}
+            text="Consigli utili in base al tuo obiettivo"
           />
         </div>
 
@@ -156,7 +163,7 @@ export default function Home() {
               letterSpacing: "0.3px",
             }}
           >
-            ORIENTAMENTO GRATUITO
+            PER CHI SCEGLIE O È GIÀ ISCRITTO
           </div>
 
           <h2
@@ -169,7 +176,7 @@ export default function Home() {
               color: "#FFFFFF",
             }}
           >
-            Non devi scegliere da solo
+            Una app, due percorsi diversi
           </h2>
 
           <p
@@ -180,8 +187,9 @@ export default function Home() {
               color: "rgba(255,255,255,0.78)",
             }}
           >
-            Laurea Smart ti aiuta a orientarti verso l’ateneo e il corso più
-            adatti alle tue esigenze, al tuo tempo e ai tuoi obiettivi.
+            Se devi ancora iscriverti, puoi scoprire l’area più adatta e i
+            percorsi coerenti con il tuo profilo. Se sei già iscritto, puoi
+            usare Percorso Smart per monitorare CFU, esami e obiettivi.
           </p>
 
           <div
@@ -205,9 +213,7 @@ export default function Home() {
                 color="#25D366"
                 style={{ flexShrink: 0, marginTop: 1 }}
               />
-              <span>
-                Gli orientatori ti seguono gratuitamente nella scelta.
-              </span>
+              <span>Scopri percorsi coerenti con il tuo profilo.</span>
             </div>
 
             <div
@@ -224,9 +230,7 @@ export default function Home() {
                 color="#25D366"
                 style={{ flexShrink: 0, marginTop: 1 }}
               />
-              <span>
-                Nessun costo nascosto, nessuna sorpresa e nessun obbligo.
-              </span>
+              <span>Organizza esami, CFU e obiettivi di studio.</span>
             </div>
 
             <div
@@ -243,9 +247,7 @@ export default function Home() {
                 color="#25D366"
                 style={{ flexShrink: 0, marginTop: 1 }}
               />
-              <span>
-                L’obiettivo è aiutarti a scegliere un percorso sostenibile.
-              </span>
+              <span>Ricevi suggerimenti diversi in base al tuo stato.</span>
             </div>
           </div>
         </div>
@@ -374,7 +376,7 @@ export default function Home() {
               marginBottom: 10,
             }}
           >
-            ORIENTAMENTO GRATUITO
+            ACCESSO GRATUITO
           </div>
 
           <p
@@ -386,8 +388,8 @@ export default function Home() {
               fontWeight: 700,
             }}
           >
-            Puoi fare Gratuitamente il Test di Orientamento anche senza
-            scaricare la app.
+            Puoi iniziare gratuitamente: dopo la registrazione ti chiederemo se
+            devi ancora scegliere o se sei già iscritto.
           </p>
 
           <p
@@ -398,8 +400,8 @@ export default function Home() {
               color: "rgba(255,255,255,0.74)",
             }}
           >
-            Premi “Accedi o Registrati” e scopri in pochi secondi il percorso
-            più adatto al tuo profilo.
+            In base alla risposta vedrai una dashboard diversa: orientamento se
+            devi iscriverti, Percorso Smart se stai già studiando.
           </p>
         </div>
       </section>
