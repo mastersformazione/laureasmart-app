@@ -331,14 +331,22 @@ export default function BibliotecaSmartPage() {
       localStorage.getItem("segmento_studente") || "NON_ISCRITTO"
     );
 
-    const savedArea = localStorage.getItem("area_corso_attuale") || "";
     const savedClasse = localStorage.getItem("classe_laurea_attuale") || "";
     const savedTipo = localStorage.getItem(
       "tipo_corso_attuale"
     ) as TipoClasseLaurea | null;
 
-    if (savedArea) setFiltroArea(savedArea);
-    if (savedClasse) setFiltroClasse(savedClasse);
+    /*
+  Non impostiamo automaticamente i filtri della Biblioteca Smart.
+  All'apertura l'utente deve vedere tutti i materiali disponibili.
+  Usiamo invece i dati del profilo solo per precompilare il form di caricamento.
+*/
+
+    setFiltroArea("");
+    setFiltroClasse("");
+    setFiltroTipo("");
+    setSearch("");
+
     if (savedTipo) setTipoPercorso(savedTipo);
     if (savedClasse) setClasseLaurea(savedClasse);
 
