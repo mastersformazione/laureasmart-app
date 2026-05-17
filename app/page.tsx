@@ -1,10 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import InstallButton from "./install-button";
 import { useRouter } from "next/navigation";
 import ActionSheet from "@/components/ActionSheet";
 import { CheckCircle, Bell, UserCircle2 } from "lucide-react";
+
+declare global {
+  interface Window {
+    fbq?: (...args: any[]) => void;
+  }
+}
+
+function trackMetaEvent(eventName: string, params?: Record<string, any>) {
+  if (typeof window !== "undefined" && typeof window.fbq === "function") {
+    window.fbq("trackCustom", eventName, {
+      app: "laurea_smart",
+      page: "home_app",
+      ...params,
+    });
+  }
+}
 
 export default function Home() {
   const router = useRouter();
@@ -25,11 +42,46 @@ export default function Home() {
     }
   }, [router]);
 
+  const handleOpenAccessMenu = () => {
+    trackMetaEvent("ClickAccediRegistrati", {
+      button_text: "Accedi o Registrati",
+      position: "home_main_cta",
+    });
+
+    setMenuOpen(true);
+  };
+
+  const handleIphoneHelpOpen = () => {
+    trackMetaEvent("ClickScaricaIphone", {
+      button_text: "Scarica su iPhone",
+      position: "home_install_cta",
+    });
+
+    setIphoneHelpOpen(true);
+  };
+
   const handleAction = (action: string) => {
     setMenuOpen(false);
 
-    if (action === "Accedi") router.push("/dashboard");
-    if (action === "Registrati") router.push("/register");
+    if (action === "Accedi") {
+      trackMetaEvent("ClickAccediDashboard", {
+        action: "Accedi",
+        button_text: "Accedi",
+        destination: "/dashboard",
+      });
+
+      router.push("/dashboard");
+    }
+
+    if (action === "Registrati") {
+      trackMetaEvent("StartRegistration", {
+        action: "Registrati",
+        button_text: "Registrati",
+        destination: "/register",
+      });
+
+      router.push("/register");
+    }
   };
 
   return (
@@ -266,7 +318,7 @@ export default function Home() {
 
             <button
               type="button"
-              onClick={() => setIphoneHelpOpen(true)}
+              onClick={handleIphoneHelpOpen}
               style={{
                 width: "100%",
                 border: "1px solid rgba(58,160,255,0.22)",
@@ -327,7 +379,8 @@ export default function Home() {
             </button>
 
             <button
-              onClick={() => setMenuOpen(true)}
+              type="button"
+              onClick={handleOpenAccessMenu}
               style={{
                 width: "100%",
                 minHeight: 64,
@@ -532,7 +585,7 @@ export default function Home() {
   );
 }
 
-function Benefit({ icon, text }: { icon: React.ReactNode; text: string }) {
+function Benefit({ icon, text }: { icon: ReactNode; text: string }) {
   return (
     <div
       style={{
@@ -576,7 +629,7 @@ function InstallStep({
 }: {
   number: string;
   emoji?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   title: string;
   text: string;
 }) {
