@@ -10,7 +10,6 @@ import {
   Bell,
   Search,
   Heart,
-  MessageCircle,
   TrendingUp,
   CalendarCheck,
   CalendarDays,
@@ -258,7 +257,6 @@ export default function Dashboard() {
 
   if (!user) return null;
   const isGiaIscritto = segmentoStudente === "GIA_ISCRITTO";
-  const isNonIscritto = segmentoStudente === "NON_ISCRITTO";
   const isUniversitaInterrotta = segmentoStudente === "UNIVERSITA_INTERROTTA";
   const isTrasferimento = segmentoStudente === "TRASFERIMENTO";
   const notificheFiltrate = notifiche.filter((notifica) => {
