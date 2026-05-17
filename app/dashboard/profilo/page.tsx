@@ -15,6 +15,16 @@ import {
   User,
 } from "lucide-react";
 import BottomNav from "@/components/ui/BottomNav";
+import {
+  TIPI_CLASSI_LAUREA,
+  getAreaClasseLabel,
+  getClasseLaureaByCodice,
+  getClasseLaureaLabel,
+  getClassiByTipo,
+  getTipoClasseLabel,
+  type AreaClasseLaurea,
+  type TipoClasseLaurea,
+} from "@/lib/data/classiLaurea";
 
 type GpsUser = {
   nome?: string;
@@ -30,29 +40,6 @@ type EsameSmart = {
   stato: "da_preparare" | "in_corso" | "completato";
   difficolta: "bassa" | "media" | "alta";
 };
-
-const AREE_CORSO_ATTUALE = [
-  { value: "", label: "Seleziona area" },
-  { value: "ECONOMIA", label: "Economia, management e amministrazione" },
-  { value: "PSICOLOGIA", label: "Psicologia" },
-  { value: "EDUCAZIONE", label: "Educazione, formazione e scuola" },
-  { value: "GIURIDICA", label: "Giuridica e servizi legali" },
-  { value: "SPORT", label: "Scienze motorie e sport" },
-  { value: "COMUNICAZIONE", label: "Comunicazione, marketing e media" },
-  { value: "TECNOLOGIA", label: "Informatica, ingegneria e digitale" },
-  { value: "UMANISTICA", label: "Lettere, filosofia, storia e beni culturali" },
-  { value: "SANITARIA", label: "Area sanitaria e socio-sanitaria" },
-  { value: "ALTRO", label: "Altro / non sono sicuro" },
-];
-
-const TIPI_CORSO_ATTUALE = [
-  { value: "", label: "Seleziona tipo percorso" },
-  { value: "laurea_triennale", label: "Laurea triennale" },
-  { value: "laurea_magistrale", label: "Laurea magistrale" },
-  { value: "laurea_ciclo_unico", label: "Laurea a ciclo unico" },
-  { value: "master", label: "Master universitario" },
-  { value: "altro", label: "Altro" },
-];
 
 const ANNI_CORSO = [
   { value: "", label: "Seleziona anno" },
@@ -99,6 +86,16 @@ function getLabel(options: { value: string; label: string }[], value: string) {
   );
 }
 
+function getAreaLabel(value: string) {
+  if (!value) return "Area ancora da indicare";
+  return getAreaClasseLabel(value as AreaClasseLaurea);
+}
+
+function getTipoLabel(value: string) {
+  if (!value) return "Tipo percorso da indicare";
+  return getTipoClasseLabel(value as TipoClasseLaurea);
+}
+
 export default function ProfiloPage() {
   const router = useRouter();
 
@@ -112,6 +109,7 @@ export default function ProfiloPage() {
   const [segmentoStudente, setSegmentoStudente] = useState("NON_ISCRITTO");
   const [preferitiCount, setPreferitiCount] = useState(0);
 
+  const [classeLaureaAttuale, setClasseLaureaAttuale] = useState("");
   const [corsoAttuale, setCorsoAttuale] = useState("");
   const [areaCorsoAttuale, setAreaCorsoAttuale] = useState("");
   const [tipoCorsoAttuale, setTipoCorsoAttuale] = useState("");
@@ -158,7 +156,8 @@ export default function ProfiloPage() {
           : "NON_ISCRITTO")
     );
 
-    setCorsoAttuale(localStorage.getItem("corso_attuale") || "");
+    setClasseLaureaAttuale(localStorage.getItem("classe_laurea_attuale") || "");
+    setCorsoAttuale(localStorage.getItem("corso_attuale_dettaglio") || "");
     setAreaCorsoAttuale(localStorage.getItem("area_corso_attuale") || "");
     setTipoCorsoAttuale(localStorage.getItem("tipo_corso_attuale") || "");
     setAnnoCorsoAttuale(localStorage.getItem("anno_corso_attuale") || "");
@@ -235,6 +234,18 @@ export default function ProfiloPage() {
   const isTrasferimento = segmentoStudente === "TRASFERIMENTO";
   const showProfiloUniversitario = isGiaIscritto || isTrasferimento;
 
+  const classiDisponibili = tipoCorsoAttuale
+    ? getClassiByTipo(tipoCorsoAttuale as TipoClasseLaurea)
+    : [];
+
+  const classeSelezionata = classeLaureaAttuale
+    ? getClasseLaureaByCodice(classeLaureaAttuale)
+    : null;
+
+  const classeLaureaLabel = classeSelezionata
+    ? getClasseLaureaLabel(classeSelezionata)
+    : "Classe di laurea ancora da indicare";
+
   const aggiornaStatoIscrizione = (nuovoStato: string) => {
     const nuovoSegmento = getSegmentoFromStato(nuovoStato);
 
@@ -263,6 +274,24 @@ export default function ProfiloPage() {
     }
   };
 
+  const aggiornaTipoCorsoAttuale = (nuovoTipo: string) => {
+    setTipoCorsoAttuale(nuovoTipo);
+    setClasseLaureaAttuale("");
+    setAreaCorsoAttuale("");
+  };
+
+  const aggiornaClasseLaureaAttuale = (codice: string) => {
+    setClasseLaureaAttuale(codice);
+
+    const classe = getClasseLaureaByCodice(codice);
+
+    if (!classe) return;
+
+    setTipoCorsoAttuale(classe.tipo);
+    setAreaCorsoAttuale(classe.area);
+    setCfuTotali(classe.cfuDefault);
+  };
+
   const getCfuTotaliDaTipoCorso = (tipoCorso: string) => {
     if (tipoCorso === "laurea_magistrale") return 120;
     if (tipoCorso === "laurea_ciclo_unico") return 300;
@@ -277,10 +306,19 @@ export default function ProfiloPage() {
     setProfiloUniversitarioError("");
 
     try {
-      const cfuDefault = getCfuTotaliDaTipoCorso(tipoCorsoAttuale);
-      const corsoAttualePulito = corsoAttuale.trim();
+      const cfuDefault =
+        classeSelezionata?.cfuDefault ||
+        getCfuTotaliDaTipoCorso(tipoCorsoAttuale);
+      const corsoAttualeDettaglio = corsoAttuale.trim();
+      const corsoAttualePulito = classeSelezionata
+        ? `${getClasseLaureaLabel(classeSelezionata)}${
+            corsoAttualeDettaglio ? ` · ${corsoAttualeDettaglio}` : ""
+          }`
+        : corsoAttualeDettaglio;
 
+      localStorage.setItem("classe_laurea_attuale", classeLaureaAttuale);
       localStorage.setItem("corso_attuale", corsoAttualePulito);
+      localStorage.setItem("corso_attuale_dettaglio", corsoAttualeDettaglio);
       localStorage.setItem("area_corso_attuale", areaCorsoAttuale);
       localStorage.setItem("tipo_corso_attuale", tipoCorsoAttuale);
       localStorage.setItem("anno_corso_attuale", annoCorsoAttuale);
@@ -305,6 +343,7 @@ export default function ProfiloPage() {
           },
           body: JSON.stringify({
             user_email: user.email,
+            classe_laurea_attuale: classeLaureaAttuale,
             corso_attuale: corsoAttualePulito,
             area_corso_attuale: areaCorsoAttuale,
             tipo_corso_attuale: tipoCorsoAttuale,
@@ -328,6 +367,7 @@ export default function ProfiloPage() {
       window.dispatchEvent(
         new CustomEvent("profilo_universitario_saved", {
           detail: {
+            classe_laurea_attuale: classeLaureaAttuale,
             corso_attuale: corsoAttualePulito,
             area_corso_attuale: areaCorsoAttuale,
             tipo_corso_attuale: tipoCorsoAttuale,
@@ -418,20 +458,22 @@ export default function ProfiloPage() {
             badge={isTrasferimento ? "Trasferimento" : "Percorso"}
           >
             <p style={mutedTextStyle}>
-              Completa questi dati per rendere Percorso Smart più utile. La
-              priorità è l’area del tuo percorso, perché ci permette di
-              mostrarti suggerimenti coerenti senza chiederti subito un piano di
-              studi completo.
+              Completa questi dati per rendere Percorso Smart più utile. Ora
+              puoi indicare la classe di laurea: l’app ricava automaticamente
+              area e CFU totali, così i prossimi step saranno più coerenti.
             </p>
 
             <div style={formGridStyle}>
-              <FieldLabel label="Area del tuo corso attuale">
+              <FieldLabel label="Tipo di percorso">
                 <select
-                  value={areaCorsoAttuale}
-                  onChange={(event) => setAreaCorsoAttuale(event.target.value)}
+                  value={tipoCorsoAttuale}
+                  onChange={(event) =>
+                    aggiornaTipoCorsoAttuale(event.target.value)
+                  }
                   style={inputStyle}
                 >
-                  {AREE_CORSO_ATTUALE.map((option) => (
+                  <option value="">Seleziona tipo percorso</option>
+                  {TIPI_CLASSI_LAUREA.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -439,18 +481,36 @@ export default function ProfiloPage() {
                 </select>
               </FieldLabel>
 
-              <FieldLabel label="Tipo di percorso">
+              <FieldLabel label="Classe di laurea">
                 <select
-                  value={tipoCorsoAttuale}
-                  onChange={(event) => setTipoCorsoAttuale(event.target.value)}
+                  value={classeLaureaAttuale}
+                  onChange={(event) =>
+                    aggiornaClasseLaureaAttuale(event.target.value)
+                  }
                   style={inputStyle}
+                  disabled={!tipoCorsoAttuale || tipoCorsoAttuale === "altro"}
                 >
-                  {TIPI_CORSO_ATTUALE.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  <option value="">
+                    {tipoCorsoAttuale && tipoCorsoAttuale !== "altro"
+                      ? "Seleziona classe di laurea"
+                      : "Seleziona prima il tipo di percorso"}
+                  </option>
+                  {classiDisponibili.map((classe) => (
+                    <option key={classe.codice} value={classe.codice}>
+                      {getClasseLaureaLabel(classe)}
                     </option>
                   ))}
                 </select>
+              </FieldLabel>
+
+              <FieldLabel label="Area rilevata automaticamente">
+                <input
+                  type="text"
+                  value={areaCorsoAttuale ? getAreaLabel(areaCorsoAttuale) : ""}
+                  readOnly
+                  placeholder="Si compila dopo la scelta della classe"
+                  style={{ ...inputStyle, opacity: 0.82 }}
+                />
               </FieldLabel>
 
               <FieldLabel label="Anno di corso">
@@ -471,7 +531,9 @@ export default function ProfiloPage() {
                 <input
                   type="number"
                   min="0"
-                  max="300"
+                  max={String(
+                    classeSelezionata?.cfuDefault || cfuTotali || 300
+                  )}
                   inputMode="numeric"
                   value={cfuConseguitiProfilo}
                   onChange={(event) =>
@@ -512,12 +574,12 @@ export default function ProfiloPage() {
                 </select>
               </FieldLabel>
 
-              <FieldLabel label="Nome del corso, facoltativo">
+              <FieldLabel label="Nome corso o curriculum, facoltativo">
                 <input
                   type="text"
                   value={corsoAttuale}
                   onChange={(event) => setCorsoAttuale(event.target.value)}
-                  placeholder="Esempio: Scienze dell’Educazione"
+                  placeholder="Esempio: curriculum, indirizzo o nome usato dall’ateneo"
                   style={inputStyle}
                 />
               </FieldLabel>
@@ -526,16 +588,20 @@ export default function ProfiloPage() {
             <div style={summaryBoxStyle}>
               <p style={smallLabelStyle}>Profilo rilevato</p>
               <h3 style={{ ...metricTitleStyle, marginTop: 6 }}>
-                {areaCorsoAttuale
-                  ? getLabel(AREE_CORSO_ATTUALE, areaCorsoAttuale)
-                  : "Area ancora da indicare"}
+                {classeLaureaAttuale
+                  ? classeLaureaLabel
+                  : getAreaLabel(areaCorsoAttuale)}
               </h3>
               <p style={mutedTextStyle}>
                 {tipoCorsoAttuale
-                  ? `${getLabel(
-                      TIPI_CORSO_ATTUALE,
-                      tipoCorsoAttuale
-                    )} · ${getLabel(ANNI_CORSO, annoCorsoAttuale)}`
+                  ? `${getTipoLabel(tipoCorsoAttuale)} · ${getLabel(
+                      ANNI_CORSO,
+                      annoCorsoAttuale
+                    )} · ${
+                      areaCorsoAttuale
+                        ? getAreaLabel(areaCorsoAttuale)
+                        : "Area da completare"
+                    }`
                   : "Questi dati serviranno a personalizzare Percorso Smart e i prossimi step."}
               </p>
             </div>
