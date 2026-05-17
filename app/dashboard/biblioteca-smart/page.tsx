@@ -52,6 +52,7 @@ type MaterialeBiblioteca = {
   updated_at?: string;
   salvato_at?: string;
   saved?: boolean;
+  caricato_da_me?: boolean;
 };
 
 type TabAttiva = "biblioteca" | "carica" | "salvati";
@@ -267,6 +268,7 @@ export default function BibliotecaSmartPage() {
       if (filtroArea) params.set("area_corso", filtroArea);
       if (filtroClasse) params.set("classe_laurea", filtroClasse);
       if (filtroTipo) params.set("tipo_materiale", filtroTipo);
+      if (user?.email) params.set("user_email", user.email);
       params.set("limit", "50");
       params.set("offset", "0");
 
@@ -404,6 +406,52 @@ export default function BibliotecaSmartPage() {
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Errore durante il salvataggio"
+      );
+    }
+  };
+
+  const handleEliminaMateriale = async (materiale: MaterialeBiblioteca) => {
+    if (!user?.email) {
+      setError("Per rimuovere un materiale devi accedere con il tuo profilo.");
+      return;
+    }
+
+    const conferma = window.confirm(
+      "Vuoi rimuovere questo materiale dalla Biblioteca Smart? Non sarà più visibile agli altri utenti."
+    );
+
+    if (!conferma) return;
+
+    setError("");
+    setSuccessMessage("");
+
+    try {
+      const response = await fetch(`${API_BASE}/biblioteca-smart-elimina.php`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_email: user.email,
+          materiale_id: materiale.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Rimozione non riuscita");
+      }
+
+      setSuccessMessage("Materiale rimosso dalla Biblioteca Smart.");
+
+      await fetchMateriali();
+      await fetchSalvati();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Errore durante la rimozione del materiale"
       );
     }
   };
@@ -674,6 +722,21 @@ export default function BibliotecaSmartPage() {
                 <ShieldAlert size={17} />
                 Segnala
               </button>
+
+              {materiale.caricato_da_me && (
+                <button
+                  type="button"
+                  onClick={() => handleEliminaMateriale(materiale)}
+                  style={{
+                    ...secondaryButtonStyle,
+                    borderColor: "rgba(248,113,113,0.45)",
+                    background: "rgba(127,29,29,0.28)",
+                    color: "#FCA5A5",
+                  }}
+                >
+                  Rimuovi
+                </button>
+              )}
             </div>
           </div>
         </div>
