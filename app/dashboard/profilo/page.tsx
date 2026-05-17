@@ -40,6 +40,7 @@ export default function ProfiloPage() {
   const [oreSettimanali, setOreSettimanali] = useState("6");
   const [obiettivo, setObiettivo] = useState("Percorso universitario");
   const [profilo, setProfilo] = useState("Da definire");
+  const [statoIscrizione, setStatoIscrizione] = useState("Non indicato");
   const [preferitiCount, setPreferitiCount] = useState(0);
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function ProfiloPage() {
     const storedOre = localStorage.getItem("percorso_smart_ore_settimanali");
     const storedObiettivo = localStorage.getItem("obiettivo");
     const storedProfilo = localStorage.getItem("profilo_utente");
+    const storedStatoIscrizione = localStorage.getItem("stato_iscrizione");
     const storedPreferiti =
       localStorage.getItem("percorsi_preferiti") ||
       localStorage.getItem("preferiti") ||
@@ -63,6 +65,7 @@ export default function ProfiloPage() {
     setOreSettimanali(storedOre || "6");
     setObiettivo(storedObiettivo || "Percorso universitario");
     setProfilo(storedProfilo || "Da definire");
+    setStatoIscrizione(storedStatoIscrizione || "Non indicato");
 
     try {
       const parsed = JSON.parse(storedPreferiti);
@@ -125,6 +128,35 @@ export default function ProfiloPage() {
     : "Da calcolare";
 
   const nome = user?.nome?.trim() || "Studente";
+
+  const aggiornaStatoIscrizione = (nuovoStato: string) => {
+    const segmentoStudente =
+      nuovoStato === "Sì, sono già iscritto"
+        ? "GIA_ISCRITTO"
+        : nuovoStato === "Ho iniziato ma ho interrotto"
+        ? "UNIVERSITA_INTERROTTA"
+        : nuovoStato === "Sto valutando un trasferimento"
+        ? "TRASFERIMENTO"
+        : "NON_ISCRITTO";
+
+    setStatoIscrizione(nuovoStato);
+    localStorage.setItem("stato_iscrizione", nuovoStato);
+    localStorage.setItem("segmento_studente", segmentoStudente);
+
+    const orientamentoData = localStorage.getItem("orientamento_data");
+
+    if (orientamentoData) {
+      try {
+        const parsed = JSON.parse(orientamentoData);
+        localStorage.setItem(
+          "orientamento_data",
+          JSON.stringify({ ...parsed, stato_iscrizione: nuovoStato })
+        );
+      } catch {
+        console.log("Impossibile aggiornare orientamento_data");
+      }
+    }
+  };
 
   return (
     <main
@@ -234,6 +266,54 @@ export default function ProfiloPage() {
               ? `Con il ritmo attuale potresti completare il percorso in circa ${mesiStimatiLaurea} mesi.`
               : "Aggiungi ore di studio ed esami nel Percorso Smart per ottenere una stima."}
           </p>
+        </div>
+      </DarkCard>
+
+      <div style={{ height: 14 }} />
+
+      <DarkCard title="Stato percorso" badge="Segmento">
+        <InfoRow
+          icon={<GraduationCap size={20} />}
+          title={statoIscrizione}
+          description="Questa scelta serve a mostrarti le funzioni più adatte: Percorso Smart se sei già iscritto, orientamento e scelta corso se devi ancora iscriverti."
+        />
+
+        <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
+          {[
+            "Sì, sono già iscritto",
+            "No, non sono ancora iscritto",
+            "Ho iniziato ma ho interrotto",
+            "Sto valutando un trasferimento",
+          ].map((opzione) => {
+            const active = statoIscrizione === opzione;
+
+            return (
+              <button
+                key={opzione}
+                type="button"
+                onClick={() => aggiornaStatoIscrizione(opzione)}
+                style={{
+                  width: "100%",
+                  minHeight: 48,
+                  borderRadius: 17,
+                  border: active
+                    ? "1px solid rgba(120,194,255,0.75)"
+                    : "1px solid rgba(255,255,255,0.10)",
+                  background: active
+                    ? "rgba(58,160,255,0.20)"
+                    : "rgba(255,255,255,0.06)",
+                  color: "#FFFFFF",
+                  padding: "12px 14px",
+                  textAlign: "left",
+                  fontSize: 14,
+                  fontWeight: 850,
+                  cursor: "pointer",
+                }}
+              >
+                {opzione}
+              </button>
+            );
+          })}
         </div>
       </DarkCard>
 

@@ -19,6 +19,7 @@ import Button from "@/components/ui/Button";
 import BottomNav from "@/components/ui/BottomNav";
 
 type OrientamentoData = {
+  stato_iscrizione?: string;
   eta?: string;
   situazione?: string;
   titolo_studio?: string;
@@ -47,6 +48,7 @@ type Risultato = {
 };
 
 type Segmenti = {
+  segmento_studente: string;
   segmento_intento: string;
   segmento_ingresso: string;
   segmento_urgenza: string;
@@ -106,6 +108,16 @@ export default function OrientamentoPage() {
   };
 
   const steps: StepItem[] = [
+    {
+      id: "stato_iscrizione",
+      domanda: "Sei già iscritto a un corso di laurea?",
+      opzioni: [
+        "Sì, sono già iscritto",
+        "No, non sono ancora iscritto",
+        "Ho iniziato ma ho interrotto",
+        "Sto valutando un trasferimento",
+      ],
+    },
     {
       id: "eta",
       domanda: "Qual è la tua fascia d’età?",
@@ -414,9 +426,18 @@ export default function OrientamentoPage() {
   };
 
   const getSegmenti = (data: OrientamentoData): Segmenti => {
+    let segmento_studente = "NON_ISCRITTO";
     let segmento_intento = "INDECISO";
     let segmento_ingresso = "ALTRO";
     let segmento_urgenza = "NON_DEFINITA";
+
+    if (data.stato_iscrizione === "Sì, sono già iscritto") {
+      segmento_studente = "GIA_ISCRITTO";
+    } else if (data.stato_iscrizione === "Ho iniziato ma ho interrotto") {
+      segmento_studente = "UNIVERSITA_INTERROTTA";
+    } else if (data.stato_iscrizione === "Sto valutando un trasferimento") {
+      segmento_studente = "TRASFERIMENTO";
+    }
 
     if (data.obiettivo === "Cambiare lavoro")
       segmento_intento = "CAMBIO_LAVORO";
@@ -460,6 +481,7 @@ export default function OrientamentoPage() {
       segmento_urgenza = "FREDDA";
 
     return {
+      segmento_studente,
       segmento_intento,
       segmento_ingresso,
       segmento_urgenza,
@@ -576,6 +598,8 @@ export default function OrientamentoPage() {
 
     localStorage.setItem("profilo_utente", risultato.tipo);
     localStorage.setItem("ha_fatto_test", "si");
+    localStorage.setItem("stato_iscrizione", data.stato_iscrizione || "");
+    localStorage.setItem("segmento_studente", segmenti.segmento_studente);
     localStorage.setItem("eta", data.eta || "");
     localStorage.setItem("situazione", data.situazione || "");
     localStorage.setItem("titolo_studio", data.titolo_studio || "");
@@ -596,6 +620,8 @@ export default function OrientamentoPage() {
       metadata: {
         profilo: risultato.tipo,
         corso_suggerito: risultato.corsoSuggerito,
+        stato_iscrizione: data.stato_iscrizione || "",
+        segmento_studente: segmenti.segmento_studente,
         situazione: data.situazione || "",
         titolo_studio: data.titolo_studio || "",
         obiettivo: data.obiettivo || "",
@@ -632,6 +658,8 @@ export default function OrientamentoPage() {
               cognome: user.cognome || "",
               telefono: user.telefono || "",
               profilo: risultato.tipo,
+              stato_iscrizione: data.stato_iscrizione || "",
+              segmento_studente: segmenti.segmento_studente,
               titolo_studio: data.titolo_studio || "",
               obiettivo: data.obiettivo || "",
               area_interesse: data.area || "",
@@ -658,6 +686,8 @@ export default function OrientamentoPage() {
         body: JSON.stringify({
           user_email: user?.email || "",
           user_nome: user?.nome || "",
+          stato_iscrizione: data.stato_iscrizione,
+          segmento_studente: segmenti.segmento_studente,
           situazione: data.situazione,
           titolo_studio: data.titolo_studio,
           obiettivo: data.obiettivo,
@@ -756,6 +786,7 @@ export default function OrientamentoPage() {
     }?text=${encodeURIComponent(
       `Ciao Giulia, ho appena completato il test Laurea Smart e vorrei ricevere il mio piano personalizzato.
 
+Stato iscrizione: ${formData.stato_iscrizione || ""}
 Situazione attuale: ${formData.situazione || ""}
 Titolo di studio: ${formData.titolo_studio || ""}
 Obiettivo: ${formData.obiettivo || ""}
