@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   BookOpen,
-  CheckCircle2,
   Download,
   FileText,
   Filter,
@@ -756,7 +755,7 @@ export default function BibliotecaSmartPage() {
               <p style={mutedText}>
                 Puoi condividere solo materiali creati da te: appunti personali,
                 riassunti originali, schemi o mappe concettuali. Non caricare
-                libri, slide ufficiali dei docenti, dispense dell'ateneo,
+                libri, slide ufficiali dei docenti, dispense dell&apos;ateneo,
                 contenuti da piattaforme e-learning o materiale coperto da
                 copyright. I contenuti non conformi possono essere segnalati e
                 rimossi.
@@ -1104,7 +1103,7 @@ export default function BibliotecaSmartPage() {
                     Confermo che il materiale è stato creato da me e che ho il
                     diritto di condividerlo. Non sto caricando libri, slide
                     ufficiali, dispense universitarie protette, contenuti
-                    dell'ateneo o materiali coperti da copyright.
+                    dell&apos;ateneo o materiali coperti da copyright.
                   </span>
                 </label>
 
