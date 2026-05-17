@@ -119,8 +119,12 @@ export default function ProfiloPage() {
   const [cfuConseguitiProfilo, setCfuConseguitiProfilo] = useState("");
   const [esamiMancantiProfilo, setEsamiMancantiProfilo] = useState("");
   const [obiettivoPostLaurea, setObiettivoPostLaurea] = useState("");
-  const [profiloUniversitarioSalvato, setProfiloUniversitarioSalvato] =
+  const [profiloUniversitarioSaving, setProfiloUniversitarioSaving] =
     useState(false);
+  const [profiloUniversitarioSaved, setProfiloUniversitarioSaved] =
+    useState(false);
+  const [profiloUniversitarioError, setProfiloUniversitarioError] =
+    useState("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("gps_user");
@@ -259,31 +263,91 @@ export default function ProfiloPage() {
     }
   };
 
-  const salvaProfiloUniversitario = () => {
-    localStorage.setItem("corso_attuale", corsoAttuale.trim());
-    localStorage.setItem("area_corso_attuale", areaCorsoAttuale);
-    localStorage.setItem("tipo_corso_attuale", tipoCorsoAttuale);
-    localStorage.setItem("anno_corso_attuale", annoCorsoAttuale);
-    localStorage.setItem("cfu_conseguiti", cfuConseguitiProfilo);
-    localStorage.setItem("esami_mancanti", esamiMancantiProfilo);
-    localStorage.setItem("obiettivo_post_laurea", obiettivoPostLaurea);
+  const getCfuTotaliDaTipoCorso = (tipoCorso: string) => {
+    if (tipoCorso === "laurea_magistrale") return 120;
+    if (tipoCorso === "laurea_ciclo_unico") return 300;
+    if (tipoCorso === "master") return 60;
 
-    const cfuDefault =
-      tipoCorsoAttuale === "laurea_ciclo_unico"
-        ? 300
-        : tipoCorsoAttuale === "laurea_magistrale"
-        ? 120
-        : tipoCorsoAttuale === "master"
-        ? 60
-        : 180;
+    return 180;
+  };
 
-    localStorage.setItem("percorso_smart_cfu_totali", String(cfuDefault));
-    setCfuTotali(cfuDefault);
-    setProfiloUniversitarioSalvato(true);
+  const salvaProfiloUniversitario = async () => {
+    setProfiloUniversitarioSaving(true);
+    setProfiloUniversitarioSaved(false);
+    setProfiloUniversitarioError("");
 
-    window.setTimeout(() => {
-      setProfiloUniversitarioSalvato(false);
-    }, 2600);
+    try {
+      const cfuDefault = getCfuTotaliDaTipoCorso(tipoCorsoAttuale);
+      const corsoAttualePulito = corsoAttuale.trim();
+
+      localStorage.setItem("corso_attuale", corsoAttualePulito);
+      localStorage.setItem("area_corso_attuale", areaCorsoAttuale);
+      localStorage.setItem("tipo_corso_attuale", tipoCorsoAttuale);
+      localStorage.setItem("anno_corso_attuale", annoCorsoAttuale);
+      localStorage.setItem("cfu_conseguiti", cfuConseguitiProfilo);
+      localStorage.setItem("cfu_totali", String(cfuDefault));
+      localStorage.setItem("percorso_smart_cfu_totali", String(cfuDefault));
+      localStorage.setItem("esami_mancanti", esamiMancantiProfilo);
+      localStorage.setItem("obiettivo_post_laurea", obiettivoPostLaurea);
+
+      setCfuTotali(cfuDefault);
+
+      if (!user?.email) {
+        throw new Error("Email utente mancante");
+      }
+
+      const response = await fetch(
+        "https://laureasmart.it/api/profilo-universitario-salva.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_email: user.email,
+            corso_attuale: corsoAttualePulito,
+            area_corso_attuale: areaCorsoAttuale,
+            tipo_corso_attuale: tipoCorsoAttuale,
+            anno_corso_attuale: annoCorsoAttuale,
+            cfu_conseguiti: cfuConseguitiProfilo,
+            cfu_totali: cfuDefault,
+            esami_mancanti: esamiMancantiProfilo,
+            obiettivo_post_laurea: obiettivoPostLaurea,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Salvataggio non riuscito");
+      }
+
+      setProfiloUniversitarioSaved(true);
+
+      window.dispatchEvent(
+        new CustomEvent("profilo_universitario_saved", {
+          detail: {
+            corso_attuale: corsoAttualePulito,
+            area_corso_attuale: areaCorsoAttuale,
+            tipo_corso_attuale: tipoCorsoAttuale,
+            anno_corso_attuale: annoCorsoAttuale,
+            cfu_conseguiti: cfuConseguitiProfilo,
+            cfu_totali: cfuDefault,
+            esami_mancanti: esamiMancantiProfilo,
+            obiettivo_post_laurea: obiettivoPostLaurea,
+          },
+        })
+      );
+    } catch (error) {
+      console.error("Errore salvataggio profilo universitario:", error);
+
+      setProfiloUniversitarioError(
+        error instanceof Error ? error.message : "Errore durante il salvataggio"
+      );
+    } finally {
+      setProfiloUniversitarioSaving(false);
+    }
   };
 
   return (
@@ -479,13 +543,48 @@ export default function ProfiloPage() {
             <button
               type="button"
               onClick={salvaProfiloUniversitario}
-              style={primaryButtonStyle}
+              disabled={profiloUniversitarioSaving}
+              style={{
+                ...primaryButtonStyle,
+                opacity: profiloUniversitarioSaving ? 0.7 : 1,
+                cursor: profiloUniversitarioSaving ? "not-allowed" : "pointer",
+              }}
             >
-              {profiloUniversitarioSalvato
+              {profiloUniversitarioSaving
+                ? "Salvataggio..."
+                : profiloUniversitarioSaved
                 ? "Percorso salvato"
                 : "Salva percorso universitario"}
               <ArrowRight size={19} />
             </button>
+
+            {profiloUniversitarioSaved && (
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  color: "#86EFAC",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  lineHeight: 1.45,
+                }}
+              >
+                Percorso universitario salvato correttamente.
+              </p>
+            )}
+
+            {profiloUniversitarioError && (
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  color: "#FCA5A5",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  lineHeight: 1.45,
+                }}
+              >
+                {profiloUniversitarioError}
+              </p>
+            )}
 
             <button
               type="button"
