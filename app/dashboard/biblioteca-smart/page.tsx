@@ -225,6 +225,11 @@ export default function BibliotecaSmartPage() {
 
   const isGiaIscritto = segmentoStudente === "GIA_ISCRITTO";
   const isTrasferimento = segmentoStudente === "TRASFERIMENTO";
+  const isUniversitaInterrotta = segmentoStudente === "UNIVERSITA_INTERROTTA";
+
+  const canViewBiblioteca =
+    isGiaIscritto || isTrasferimento || isUniversitaInterrotta;
+
   const canUpload = isGiaIscritto || isTrasferimento;
 
   const classiFiltrateUpload = useMemo(
@@ -247,6 +252,12 @@ export default function BibliotecaSmartPage() {
   }, []);
 
   const fetchMateriali = async () => {
+    if (!canViewBiblioteca) {
+      setLoading(false);
+      setMateriali([]);
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -320,8 +331,6 @@ export default function BibliotecaSmartPage() {
     if (savedTipo) setTipoPercorso(savedTipo);
     if (savedClasse) setClasseLaurea(savedClasse);
 
-    fetchMateriali();
-
     if (storedUser?.email) {
       fetchSalvati(storedUser.email);
     }
@@ -335,7 +344,7 @@ export default function BibliotecaSmartPage() {
 
     return () => window.clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, filtroArea, filtroClasse, filtroTipo]);
+  }, [search, filtroArea, filtroClasse, filtroTipo, segmentoStudente]);
 
   const handleOpenMateriale = (materiale: MaterialeBiblioteca) => {
     window.open(
@@ -672,6 +681,151 @@ export default function BibliotecaSmartPage() {
     );
   };
 
+  if (!canViewBiblioteca) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          padding: "22px 18px 92px",
+          background:
+            "radial-gradient(circle at top left, rgba(58,160,255,0.30), transparent 32%), linear-gradient(180deg, #081526 0%, #0A1E33 48%, #07111F 100%)",
+          color: "white",
+        }}
+      >
+        <section
+          style={{
+            maxWidth: 920,
+            margin: "0 auto",
+            display: "grid",
+            gap: 18,
+          }}
+        >
+          <header
+            style={{
+              ...cardStyle,
+              background:
+                "linear-gradient(135deg, rgba(31,111,178,0.98) 0%, rgba(12,35,64,0.96) 100%)",
+            }}
+          >
+            <div
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 20,
+                background: "rgba(255,255,255,0.14)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 14,
+              }}
+            >
+              <BookOpen size={28} />
+            </div>
+
+            <p
+              style={{
+                margin: "0 0 8px",
+                fontSize: 13,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                fontWeight: 900,
+                color: "rgba(255,255,255,0.72)",
+              }}
+            >
+              Biblioteca Smart
+            </p>
+
+            <h1 style={{ margin: "0 0 10px", fontSize: 32, lineHeight: 1.08 }}>
+              Materiali disponibili per studenti iscritti
+            </h1>
+
+            <p style={{ ...mutedText, fontSize: 15, maxWidth: 680 }}>
+              Questa funzione è pensata per chi è già iscritto a un corso di
+              laurea, per chi sta valutando un trasferimento o per chi ha
+              interrotto un percorso universitario e vuole ripartire.
+            </p>
+          </header>
+
+          <section
+            style={{
+              ...cardStyle,
+              borderColor: "rgba(58,160,255,0.24)",
+              background: "rgba(58,160,255,0.10)",
+            }}
+          >
+            <h2 style={{ margin: "0 0 8px", fontSize: 20 }}>
+              Completa il tuo stato nel profilo
+            </h2>
+            <p style={mutedText}>
+              Se sei già iscritto, aggiorna il tuo profilo universitario: potrai
+              accedere alla Biblioteca Smart, cercare materiali coerenti con la
+              tua area di studio e usare gli appunti condivisi dagli studenti.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                flexWrap: "wrap",
+                marginTop: 16,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = "/dashboard/profilo";
+                }}
+                style={primaryButtonStyle}
+              >
+                Vai al profilo
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = "/dashboard/orientamento/test";
+                }}
+                style={secondaryButtonStyle}
+              >
+                Aggiorna il test
+              </button>
+            </div>
+          </section>
+
+          <section
+            style={{
+              ...cardStyle,
+              borderColor: "rgba(251,191,36,0.24)",
+              background: "rgba(251,191,36,0.10)",
+            }}
+          >
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <AlertTriangle
+                size={24}
+                color="#FBBF24"
+                style={{ flexShrink: 0 }}
+              />
+              <div>
+                <h2 style={{ margin: "0 0 6px", fontSize: 16 }}>
+                  Regola fondamentale sui materiali
+                </h2>
+                <p style={mutedText}>
+                  Nella Biblioteca Smart possono essere condivisi solo materiali
+                  creati dagli utenti: appunti personali, riassunti originali,
+                  schemi e mappe concettuali. Non sono ammessi libri, slide
+                  ufficiali, dispense dell&apos;ateneo o contenuti coperti da
+                  copyright.
+                </p>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <BottomNav />
+      </main>
+    );
+  }
+
   return (
     <main
       style={{
@@ -763,6 +917,25 @@ export default function BibliotecaSmartPage() {
             </div>
           </div>
         </section>
+
+        {isUniversitaInterrotta && (
+          <section
+            style={{
+              ...cardStyle,
+              borderColor: "rgba(58,160,255,0.24)",
+              background: "rgba(58,160,255,0.10)",
+            }}
+          >
+            <h2 style={{ margin: "0 0 8px", fontSize: 18 }}>
+              Consultazione attiva
+            </h2>
+            <p style={mutedText}>
+              Puoi consultare, salvare e segnalare i materiali condivisi dagli
+              studenti. Il caricamento, invece, è riservato a chi è già iscritto
+              o sta valutando un trasferimento universitario.
+            </p>
+          </section>
+        )}
 
         <nav
           style={{
