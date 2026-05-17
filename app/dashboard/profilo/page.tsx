@@ -31,6 +31,74 @@ type EsameSmart = {
   difficolta: "bassa" | "media" | "alta";
 };
 
+const AREE_CORSO_ATTUALE = [
+  { value: "", label: "Seleziona area" },
+  { value: "ECONOMIA", label: "Economia, management e amministrazione" },
+  { value: "PSICOLOGIA", label: "Psicologia" },
+  { value: "EDUCAZIONE", label: "Educazione, formazione e scuola" },
+  { value: "GIURIDICA", label: "Giuridica e servizi legali" },
+  { value: "SPORT", label: "Scienze motorie e sport" },
+  { value: "COMUNICAZIONE", label: "Comunicazione, marketing e media" },
+  { value: "TECNOLOGIA", label: "Informatica, ingegneria e digitale" },
+  { value: "UMANISTICA", label: "Lettere, filosofia, storia e beni culturali" },
+  { value: "SANITARIA", label: "Area sanitaria e socio-sanitaria" },
+  { value: "ALTRO", label: "Altro / non sono sicuro" },
+];
+
+const TIPI_CORSO_ATTUALE = [
+  { value: "", label: "Seleziona tipo percorso" },
+  { value: "laurea_triennale", label: "Laurea triennale" },
+  { value: "laurea_magistrale", label: "Laurea magistrale" },
+  { value: "laurea_ciclo_unico", label: "Laurea a ciclo unico" },
+  { value: "master", label: "Master universitario" },
+  { value: "altro", label: "Altro" },
+];
+
+const ANNI_CORSO = [
+  { value: "", label: "Seleziona anno" },
+  { value: "1", label: "1° anno" },
+  { value: "2", label: "2° anno" },
+  { value: "3", label: "3° anno" },
+  { value: "4", label: "4° anno" },
+  { value: "5", label: "5° anno" },
+  { value: "fuori_corso", label: "Fuori corso" },
+];
+
+const OBIETTIVI_POST_LAUREA = [
+  { value: "", label: "Seleziona obiettivo" },
+  { value: "magistrale", label: "Proseguire con una magistrale" },
+  { value: "master", label: "Fare un master" },
+  { value: "concorsi", label: "Partecipare a concorsi" },
+  { value: "cambio_lavoro", label: "Cambiare lavoro" },
+  { value: "crescita_attuale", label: "Migliorare la posizione attuale" },
+  { value: "non_so", label: "Non lo so ancora" },
+];
+
+function getSegmentoFromStato(stato: string) {
+  if (stato === "Sì, sono già iscritto" || stato === "si_iscritto") {
+    return "GIA_ISCRITTO";
+  }
+
+  if (
+    stato === "Ho iniziato ma ho interrotto" ||
+    stato === "universita_interrotta"
+  ) {
+    return "UNIVERSITA_INTERROTTA";
+  }
+
+  if (stato === "Sto valutando un trasferimento" || stato === "trasferimento") {
+    return "TRASFERIMENTO";
+  }
+
+  return "NON_ISCRITTO";
+}
+
+function getLabel(options: { value: string; label: string }[], value: string) {
+  return (
+    options.find((option) => option.value === value)?.label || "Da completare"
+  );
+}
+
 export default function ProfiloPage() {
   const router = useRouter();
 
@@ -41,7 +109,18 @@ export default function ProfiloPage() {
   const [obiettivo, setObiettivo] = useState("Percorso universitario");
   const [profilo, setProfilo] = useState("Da definire");
   const [statoIscrizione, setStatoIscrizione] = useState("Non indicato");
+  const [segmentoStudente, setSegmentoStudente] = useState("NON_ISCRITTO");
   const [preferitiCount, setPreferitiCount] = useState(0);
+
+  const [corsoAttuale, setCorsoAttuale] = useState("");
+  const [areaCorsoAttuale, setAreaCorsoAttuale] = useState("");
+  const [tipoCorsoAttuale, setTipoCorsoAttuale] = useState("");
+  const [annoCorsoAttuale, setAnnoCorsoAttuale] = useState("");
+  const [cfuConseguitiProfilo, setCfuConseguitiProfilo] = useState("");
+  const [esamiMancantiProfilo, setEsamiMancantiProfilo] = useState("");
+  const [obiettivoPostLaurea, setObiettivoPostLaurea] = useState("");
+  const [profiloUniversitarioSalvato, setProfiloUniversitarioSalvato] =
+    useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("gps_user");
@@ -51,6 +130,7 @@ export default function ProfiloPage() {
     const storedObiettivo = localStorage.getItem("obiettivo");
     const storedProfilo = localStorage.getItem("profilo_utente");
     const storedStatoIscrizione = localStorage.getItem("stato_iscrizione");
+    const storedSegmentoStudente = localStorage.getItem("segmento_studente");
     const storedPreferiti =
       localStorage.getItem("percorsi_preferiti") ||
       localStorage.getItem("preferiti") ||
@@ -67,6 +147,21 @@ export default function ProfiloPage() {
     setProfilo(storedProfilo || "Da definire");
     setStatoIscrizione(storedStatoIscrizione || "Non indicato");
 
+    setSegmentoStudente(
+      storedSegmentoStudente ||
+        (storedStatoIscrizione
+          ? getSegmentoFromStato(storedStatoIscrizione)
+          : "NON_ISCRITTO")
+    );
+
+    setCorsoAttuale(localStorage.getItem("corso_attuale") || "");
+    setAreaCorsoAttuale(localStorage.getItem("area_corso_attuale") || "");
+    setTipoCorsoAttuale(localStorage.getItem("tipo_corso_attuale") || "");
+    setAnnoCorsoAttuale(localStorage.getItem("anno_corso_attuale") || "");
+    setCfuConseguitiProfilo(localStorage.getItem("cfu_conseguiti") || "");
+    setEsamiMancantiProfilo(localStorage.getItem("esami_mancanti") || "");
+    setObiettivoPostLaurea(localStorage.getItem("obiettivo_post_laurea") || "");
+
     try {
       const parsed = JSON.parse(storedPreferiti);
       setPreferitiCount(Array.isArray(parsed) ? parsed.length : 0);
@@ -75,13 +170,16 @@ export default function ProfiloPage() {
     }
   }, []);
 
-  const cfuCompletati = useMemo(
+  const cfuDaEsami = useMemo(
     () =>
       esami
         .filter((esame) => esame.stato === "completato")
         .reduce((totale, esame) => totale + esame.cfu, 0),
     [esami]
   );
+
+  const cfuProfiloNumero = Number(cfuConseguitiProfilo) || 0;
+  const cfuCompletati = cfuDaEsami > 0 ? cfuDaEsami : cfuProfiloNumero;
 
   const esamiCompletati = esami.filter(
     (esame) => esame.stato === "completato"
@@ -129,19 +227,18 @@ export default function ProfiloPage() {
 
   const nome = user?.nome?.trim() || "Studente";
 
+  const isGiaIscritto = segmentoStudente === "GIA_ISCRITTO";
+  const isTrasferimento = segmentoStudente === "TRASFERIMENTO";
+  const showProfiloUniversitario = isGiaIscritto || isTrasferimento;
+
   const aggiornaStatoIscrizione = (nuovoStato: string) => {
-    const segmentoStudente =
-      nuovoStato === "Sì, sono già iscritto"
-        ? "GIA_ISCRITTO"
-        : nuovoStato === "Ho iniziato ma ho interrotto"
-        ? "UNIVERSITA_INTERROTTA"
-        : nuovoStato === "Sto valutando un trasferimento"
-        ? "TRASFERIMENTO"
-        : "NON_ISCRITTO";
+    const nuovoSegmento = getSegmentoFromStato(nuovoStato);
 
     setStatoIscrizione(nuovoStato);
+    setSegmentoStudente(nuovoSegmento);
+
     localStorage.setItem("stato_iscrizione", nuovoStato);
-    localStorage.setItem("segmento_studente", segmentoStudente);
+    localStorage.setItem("segmento_studente", nuovoSegmento);
 
     const orientamentoData = localStorage.getItem("orientamento_data");
 
@@ -150,12 +247,43 @@ export default function ProfiloPage() {
         const parsed = JSON.parse(orientamentoData);
         localStorage.setItem(
           "orientamento_data",
-          JSON.stringify({ ...parsed, stato_iscrizione: nuovoStato })
+          JSON.stringify({
+            ...parsed,
+            stato_iscrizione: nuovoStato,
+            segmento_studente: nuovoSegmento,
+          })
         );
       } catch {
         console.log("Impossibile aggiornare orientamento_data");
       }
     }
+  };
+
+  const salvaProfiloUniversitario = () => {
+    localStorage.setItem("corso_attuale", corsoAttuale.trim());
+    localStorage.setItem("area_corso_attuale", areaCorsoAttuale);
+    localStorage.setItem("tipo_corso_attuale", tipoCorsoAttuale);
+    localStorage.setItem("anno_corso_attuale", annoCorsoAttuale);
+    localStorage.setItem("cfu_conseguiti", cfuConseguitiProfilo);
+    localStorage.setItem("esami_mancanti", esamiMancantiProfilo);
+    localStorage.setItem("obiettivo_post_laurea", obiettivoPostLaurea);
+
+    const cfuDefault =
+      tipoCorsoAttuale === "laurea_ciclo_unico"
+        ? 300
+        : tipoCorsoAttuale === "laurea_magistrale"
+        ? 120
+        : tipoCorsoAttuale === "master"
+        ? 60
+        : 180;
+
+    localStorage.setItem("percorso_smart_cfu_totali", String(cfuDefault));
+    setCfuTotali(cfuDefault);
+    setProfiloUniversitarioSalvato(true);
+
+    window.setTimeout(() => {
+      setProfiloUniversitarioSalvato(false);
+    }, 2600);
   };
 
   return (
@@ -219,7 +347,164 @@ export default function ProfiloPage() {
         />
       </section>
 
-      <DarkCard title="Percorso Smart" badge="Attivo">
+      {showProfiloUniversitario && (
+        <>
+          <DarkCard
+            title="Il tuo percorso universitario attuale"
+            badge={isTrasferimento ? "Trasferimento" : "Percorso"}
+          >
+            <p style={mutedTextStyle}>
+              Completa questi dati per rendere Percorso Smart più utile. La
+              priorità è l’area del tuo percorso, perché ci permette di
+              mostrarti suggerimenti coerenti senza chiederti subito un piano di
+              studi completo.
+            </p>
+
+            <div style={formGridStyle}>
+              <FieldLabel label="Area del tuo corso attuale">
+                <select
+                  value={areaCorsoAttuale}
+                  onChange={(event) => setAreaCorsoAttuale(event.target.value)}
+                  style={inputStyle}
+                >
+                  {AREE_CORSO_ATTUALE.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldLabel>
+
+              <FieldLabel label="Tipo di percorso">
+                <select
+                  value={tipoCorsoAttuale}
+                  onChange={(event) => setTipoCorsoAttuale(event.target.value)}
+                  style={inputStyle}
+                >
+                  {TIPI_CORSO_ATTUALE.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldLabel>
+
+              <FieldLabel label="Anno di corso">
+                <select
+                  value={annoCorsoAttuale}
+                  onChange={(event) => setAnnoCorsoAttuale(event.target.value)}
+                  style={inputStyle}
+                >
+                  {ANNI_CORSO.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldLabel>
+
+              <FieldLabel label="CFU già conseguiti">
+                <input
+                  type="number"
+                  min="0"
+                  max="300"
+                  inputMode="numeric"
+                  value={cfuConseguitiProfilo}
+                  onChange={(event) =>
+                    setCfuConseguitiProfilo(event.target.value)
+                  }
+                  placeholder="Esempio: 72"
+                  style={inputStyle}
+                />
+              </FieldLabel>
+
+              <FieldLabel label="Esami mancanti">
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={esamiMancantiProfilo}
+                  onChange={(event) =>
+                    setEsamiMancantiProfilo(event.target.value)
+                  }
+                  placeholder="Esempio: 8"
+                  style={inputStyle}
+                />
+              </FieldLabel>
+
+              <FieldLabel label="Obiettivo dopo la laurea">
+                <select
+                  value={obiettivoPostLaurea}
+                  onChange={(event) =>
+                    setObiettivoPostLaurea(event.target.value)
+                  }
+                  style={inputStyle}
+                >
+                  {OBIETTIVI_POST_LAUREA.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldLabel>
+
+              <FieldLabel label="Nome del corso, facoltativo">
+                <input
+                  type="text"
+                  value={corsoAttuale}
+                  onChange={(event) => setCorsoAttuale(event.target.value)}
+                  placeholder="Esempio: Scienze dell’Educazione"
+                  style={inputStyle}
+                />
+              </FieldLabel>
+            </div>
+
+            <div style={summaryBoxStyle}>
+              <p style={smallLabelStyle}>Profilo rilevato</p>
+              <h3 style={{ ...metricTitleStyle, marginTop: 6 }}>
+                {areaCorsoAttuale
+                  ? getLabel(AREE_CORSO_ATTUALE, areaCorsoAttuale)
+                  : "Area ancora da indicare"}
+              </h3>
+              <p style={mutedTextStyle}>
+                {tipoCorsoAttuale
+                  ? `${getLabel(
+                      TIPI_CORSO_ATTUALE,
+                      tipoCorsoAttuale
+                    )} · ${getLabel(ANNI_CORSO, annoCorsoAttuale)}`
+                  : "Questi dati serviranno a personalizzare Percorso Smart e i prossimi step."}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={salvaProfiloUniversitario}
+              style={primaryButtonStyle}
+            >
+              {profiloUniversitarioSalvato
+                ? "Percorso salvato"
+                : "Salva percorso universitario"}
+              <ArrowRight size={19} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/percorso-smart")}
+              style={secondaryButtonStyle}
+            >
+              Apri Percorso Smart
+              <ArrowRight size={18} />
+            </button>
+          </DarkCard>
+
+          <div style={{ height: 14 }} />
+        </>
+      )}
+
+      <DarkCard
+        title="Percorso Smart"
+        badge={showProfiloUniversitario ? "Attivo" : "Simulazione"}
+      >
         <div style={progressTrackStyle}>
           <div
             style={{
@@ -233,7 +518,9 @@ export default function ProfiloPage() {
 
         <p style={mutedTextStyle}>
           {esami.length === 0
-            ? "Non hai ancora inserito esami. Crea il tuo primo piano per iniziare a monitorare i progressi."
+            ? showProfiloUniversitario
+              ? "Inserisci esami e obiettivi per trasformare il profilo in un piano di studio concreto."
+              : "Non hai ancora inserito esami. Puoi usare Percorso Smart come simulazione per capire tempi e impegno."
             : prossimoEsame
             ? `Prossimo esame: ${prossimoEsame.nome}`
             : "Hai completato tutti gli esami inseriti. Ottimo lavoro."}
@@ -244,14 +531,19 @@ export default function ProfiloPage() {
           onClick={() => router.push("/dashboard/percorso-smart")}
           style={primaryButtonStyle}
         >
-          Apri Percorso Smart
+          {showProfiloUniversitario
+            ? "Apri Percorso Smart"
+            : "Simula Percorso Smart"}
           <ArrowRight size={19} />
         </button>
       </DarkCard>
 
       <div style={{ height: 14 }} />
 
-      <DarkCard title="Timeline laurea" badge="Proiezione">
+      <DarkCard
+        title="Timeline laurea"
+        badge={showProfiloUniversitario ? "Proiezione" : "Simulazione"}
+      >
         <div style={timelineBoxStyle}>
           <div style={smallIconStyle}>
             <CalendarDays size={24} />
@@ -264,7 +556,9 @@ export default function ProfiloPage() {
           <p style={mutedTextStyle}>
             {mesiStimatiLaurea
               ? `Con il ritmo attuale potresti completare il percorso in circa ${mesiStimatiLaurea} mesi.`
-              : "Aggiungi ore di studio ed esami nel Percorso Smart per ottenere una stima."}
+              : showProfiloUniversitario
+              ? "Aggiungi CFU conseguiti, ore di studio ed esami nel Percorso Smart per ottenere una stima."
+              : "Aggiungi ore di studio ed esami nel Percorso Smart per ottenere una simulazione."}
           </p>
         </div>
       </DarkCard>
@@ -341,8 +635,16 @@ export default function ProfiloPage() {
       <DarkCard title="Strumenti utili" badge="App">
         <InfoRow
           icon={<GraduationCap size={20} />}
-          title="Percorsi salvati"
-          description="Consulta i corsi che hai messo tra i preferiti e confrontali con il tuo obiettivo."
+          title={
+            showProfiloUniversitario
+              ? "Percorsi e prossimi step"
+              : "Percorsi salvati"
+          }
+          description={
+            showProfiloUniversitario
+              ? "In base all’area del tuo percorso potremo mostrarti in seguito magistrali, master o alternative coerenti."
+              : "Consulta i corsi che hai messo tra i preferiti e confrontali con il tuo obiettivo."
+          }
         />
 
         <button
@@ -350,29 +652,52 @@ export default function ProfiloPage() {
           onClick={() => router.push("/dashboard/percorsi")}
           style={secondaryButtonStyle}
         >
-          Vai ai percorsi
+          {showProfiloUniversitario
+            ? "Valuta prossimi step"
+            : "Vai ai percorsi"}
           <ArrowRight size={18} />
         </button>
       </DarkCard>
 
-      <div style={{ height: 14 }} />
+      {!isGiaIscritto && (
+        <>
+          <div style={{ height: 14 }} />
 
-      <DarkCard title="Hai bisogno di supporto?" badge="Gratis">
-        <InfoRow
-          icon={<MessageCircle size={20} />}
-          title="Parla con un orientatore"
-          description="Se hai dubbi su piano esami, scelta del corso o obiettivi, puoi chiedere supporto gratuito."
-        />
+          <DarkCard
+            title={
+              isTrasferimento
+                ? "Vuoi valutare un trasferimento?"
+                : "Hai bisogno di supporto?"
+            }
+            badge={isTrasferimento ? "CFU" : "Gratis"}
+          >
+            <InfoRow
+              icon={<MessageCircle size={20} />}
+              title={
+                isTrasferimento
+                  ? "Verifica esami e CFU"
+                  : "Parla con un orientatore"
+              }
+              description={
+                isTrasferimento
+                  ? "Se stai valutando un cambio corso o ateneo, puoi chiedere una verifica del percorso e degli esami già sostenuti."
+                  : "Se hai dubbi su scelta del corso, obiettivi o iscrizione, puoi chiedere supporto gratuito."
+              }
+            />
 
-        <button
-          type="button"
-          onClick={() => router.push("/dashboard/contatti")}
-          style={whatsappButtonStyle}
-        >
-          Contatta un orientatore
-          <ArrowRight size={18} />
-        </button>
-      </DarkCard>
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/contatti")}
+              style={whatsappButtonStyle}
+            >
+              {isTrasferimento
+                ? "Richiedi valutazione"
+                : "Contatta un orientatore"}
+              <ArrowRight size={18} />
+            </button>
+          </DarkCard>
+        </>
+      )}
 
       <BottomNav />
     </main>
@@ -435,6 +760,21 @@ function InfoRow({
         <p style={mutedTextStyle}>{description}</p>
       </div>
     </div>
+  );
+}
+
+function FieldLabel({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <label style={fieldLabelStyle}>
+      <span>{label}</span>
+      {children}
+    </label>
   );
 }
 
@@ -543,6 +883,41 @@ const metricTextStyle: React.CSSProperties = {
   fontSize: 12,
   lineHeight: 1.45,
   color: "rgba(255,255,255,0.62)",
+};
+
+const formGridStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 12,
+  marginTop: 16,
+};
+
+const fieldLabelStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 7,
+  color: "rgba(255,255,255,0.78)",
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: 48,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#FFFFFF",
+  padding: "0 12px",
+  fontSize: 14,
+  fontWeight: 800,
+  outline: "none",
+};
+
+const summaryBoxStyle: React.CSSProperties = {
+  marginTop: 16,
+  padding: 14,
+  borderRadius: 20,
+  background: "rgba(58,160,255,0.12)",
+  border: "1px solid rgba(120,194,255,0.16)",
 };
 
 const progressTrackStyle: React.CSSProperties = {
