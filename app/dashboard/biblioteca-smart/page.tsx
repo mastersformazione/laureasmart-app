@@ -28,7 +28,9 @@ import {
 
 type GpsUser = {
   nome?: string;
+  cognome?: string;
   email?: string;
+  telefono?: string;
 };
 
 type MaterialeBiblioteca = {
@@ -233,6 +235,10 @@ export default function BibliotecaSmartPage() {
 
   const canUpload = isGiaIscritto || isTrasferimento;
 
+  const getCurrentUserEmail = () => {
+    return (user?.email || getUserFromStorage()?.email || "").trim();
+  };
+
   const classiFiltrateUpload = useMemo(
     () => getClassiByTipo(tipoPercorso),
     [tipoPercorso]
@@ -268,7 +274,10 @@ export default function BibliotecaSmartPage() {
       if (filtroArea) params.set("area_corso", filtroArea);
       if (filtroClasse) params.set("classe_laurea", filtroClasse);
       if (filtroTipo) params.set("tipo_materiale", filtroTipo);
-      if (user?.email) params.set("user_email", user.email);
+
+      const userEmail = getCurrentUserEmail();
+      if (userEmail) params.set("user_email", userEmail);
+
       params.set("limit", "50");
       params.set("offset", "0");
 
@@ -289,7 +298,7 @@ export default function BibliotecaSmartPage() {
   };
 
   const fetchSalvati = async (email?: string) => {
-    const userEmail = email || user?.email;
+    const userEmail = (email || getCurrentUserEmail()).trim();
     if (!userEmail) return;
 
     setLoadingSalvati(true);
@@ -346,7 +355,14 @@ export default function BibliotecaSmartPage() {
 
     return () => window.clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, filtroArea, filtroClasse, filtroTipo, segmentoStudente]);
+  }, [
+    search,
+    filtroArea,
+    filtroClasse,
+    filtroTipo,
+    segmentoStudente,
+    user?.email,
+  ]);
 
   const handleOpenMateriale = (materiale: MaterialeBiblioteca) => {
     window.open(
@@ -365,7 +381,9 @@ export default function BibliotecaSmartPage() {
   };
 
   const handleToggleSalvato = async (materiale: MaterialeBiblioteca) => {
-    if (!user?.email) {
+    const userEmail = getCurrentUserEmail();
+
+    if (!userEmail) {
       setError("Per salvare un materiale devi accedere con il tuo profilo.");
       return;
     }
@@ -380,7 +398,7 @@ export default function BibliotecaSmartPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            user_email: user.email,
+            user_email: userEmail,
             materiale_id: materiale.id,
           }),
         }
@@ -411,7 +429,9 @@ export default function BibliotecaSmartPage() {
   };
 
   const handleEliminaMateriale = async (materiale: MaterialeBiblioteca) => {
-    if (!user?.email) {
+    const userEmail = getCurrentUserEmail();
+
+    if (!userEmail) {
       setError("Per rimuovere un materiale devi accedere con il tuo profilo.");
       return;
     }
@@ -432,7 +452,7 @@ export default function BibliotecaSmartPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_email: user.email,
+          user_email: userEmail,
           materiale_id: materiale.id,
         }),
       });
@@ -467,7 +487,9 @@ export default function BibliotecaSmartPage() {
       return;
     }
 
-    if (!user?.email) {
+    const userEmail = getCurrentUserEmail();
+
+    if (!userEmail) {
       setError("Email utente mancante. Accedi nuovamente alla app.");
       return;
     }
@@ -503,7 +525,7 @@ export default function BibliotecaSmartPage() {
         "";
       const formData = new FormData();
 
-      formData.append("user_email", user.email);
+      formData.append("user_email", userEmail);
       formData.append("titolo", titolo.trim());
       formData.append("descrizione", descrizione.trim());
       formData.append("area_corso", area);
@@ -545,6 +567,8 @@ export default function BibliotecaSmartPage() {
   const handleSendReport = async () => {
     if (!segnalazione) return;
 
+    const userEmail = getCurrentUserEmail();
+
     setSendingReport(true);
     setError("");
     setSuccessMessage("");
@@ -554,7 +578,7 @@ export default function BibliotecaSmartPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_email: user?.email || "",
+          user_email: userEmail,
           materiale_id: segnalazione.materiale.id,
           motivo: segnalazione.motivo,
           note: segnalazione.note,
