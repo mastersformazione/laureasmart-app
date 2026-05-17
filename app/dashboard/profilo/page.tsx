@@ -824,6 +824,50 @@ export default function ProfiloPage() {
         </button>
       </DarkCard>
 
+      <div style={{ height: 14 }} />
+
+      <DarkCard
+        title="Biblioteca Smart"
+        badge={
+          isGiaIscritto || isTrasferimento
+            ? "Materiali"
+            : segmentoStudente === "UNIVERSITA_INTERROTTA"
+            ? "Consulta"
+            : "Preview"
+        }
+      >
+        <InfoRow
+          icon={<BookOpen size={20} />}
+          title={
+            isGiaIscritto || isTrasferimento
+              ? "Appunti, schemi e riassunti della tua area"
+              : segmentoStudente === "UNIVERSITA_INTERROTTA"
+              ? "Consulta materiali utili per ripartire"
+              : "Una funzione da usare quando inizierai"
+          }
+          description={
+            isGiaIscritto || isTrasferimento
+              ? "Trova materiali condivisi dagli studenti, salva quelli più utili e carica solo appunti o riassunti creati da te."
+              : segmentoStudente === "UNIVERSITA_INTERROTTA"
+              ? "Puoi consultare e salvare materiali condivisi dagli studenti. Il caricamento è riservato a chi è già iscritto o valuta un trasferimento."
+              : "La Biblioteca Smart raccoglie appunti, schemi e riassunti condivisi dagli studenti. Te la mostriamo ora per ricordarti che potrà accompagnarti anche dopo la scelta del corso."
+          }
+        />
+
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/biblioteca-smart")}
+          style={secondaryButtonStyle}
+        >
+          {isGiaIscritto || isTrasferimento
+            ? "Apri Biblioteca Smart"
+            : segmentoStudente === "UNIVERSITA_INTERROTTA"
+            ? "Consulta Biblioteca Smart"
+            : "Scopri Biblioteca Smart"}
+          <ArrowRight size={18} />
+        </button>
+      </DarkCard>
+
       {!isGiaIscritto && (
         <>
           <div style={{ height: 14 }} />
