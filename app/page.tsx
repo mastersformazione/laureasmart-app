@@ -9,11 +9,18 @@ import { CheckCircle, Bell, UserCircle2 } from "lucide-react";
 
 declare global {
   interface Window {
-    fbq?: (...args: any[]) => void;
+    fbq?: (
+      action: "track" | "trackCustom",
+      eventName: string,
+      params?: Record<string, unknown>
+    ) => void;
   }
 }
 
-function trackMetaEvent(eventName: string, params?: Record<string, any>) {
+function trackMetaEvent(
+  eventName: string,
+  params?: Record<string, string | number | boolean>
+) {
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
     window.fbq("trackCustom", eventName, {
       app: "laurea_smart",
