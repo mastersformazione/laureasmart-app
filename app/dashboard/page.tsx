@@ -259,6 +259,8 @@ export default function Dashboard() {
   const isGiaIscritto = segmentoStudente === "GIA_ISCRITTO";
   const isUniversitaInterrotta = segmentoStudente === "UNIVERSITA_INTERROTTA";
   const isTrasferimento = segmentoStudente === "TRASFERIMENTO";
+  const isBibliotecaAccessoCompleto = isGiaIscritto || isTrasferimento;
+  const isBibliotecaConsultazione = isUniversitaInterrotta;
   const notificheFiltrate = notifiche.filter((notifica) => {
     const testo = query.toLowerCase().trim();
 
@@ -497,6 +499,21 @@ export default function Dashboard() {
 
       <FeatureCard
         icon={<BookOpen size={30} />}
+        title="Biblioteca Smart"
+        description={
+          isBibliotecaAccessoCompleto
+            ? "Trova appunti, schemi e riassunti condivisi dagli studenti della tua area. Puoi salvare i materiali utili e caricare i tuoi appunti originali."
+            : isBibliotecaConsultazione
+            ? "Consulta materiali condivisi dagli studenti per riprendere confidenza con lo studio universitario."
+            : "Una funzione pensata per accompagnarti nello studio quando inizierai il tuo percorso universitario."
+        }
+        gradient="linear-gradient(135deg, #4C1D95 0%, #7C3AED 54%, #3AA0FF 100%)"
+        highlight={isBibliotecaAccessoCompleto}
+        onClick={() => router.push("/dashboard/biblioteca-smart")}
+      />
+
+      <FeatureCard
+        icon={<BookOpen size={30} />}
         title={
           isGiaIscritto
             ? "Valuta prossimi step"
@@ -511,13 +528,15 @@ export default function Dashboard() {
         onClick={() => router.push("/dashboard/percorsi")}
       />
 
-      <FeatureCard
-        icon={<TrendingUp size={30} />}
-        title="Simula il tuo futuro"
-        description="Visualizza come potrebbe crescere il tuo profilo nei prossimi 36 mesi."
-        gradient="linear-gradient(135deg, #102033 0%, #1F6FB2 58%, #3AA0FF 100%)"
-        onClick={() => router.push("/dashboard/simula-futuro")}
-      />
+      {!isGiaIscritto && (
+        <FeatureCard
+          icon={<TrendingUp size={30} />}
+          title="Simula il tuo futuro"
+          description="Visualizza come potrebbe crescere il tuo profilo nei prossimi 36 mesi."
+          gradient="linear-gradient(135deg, #102033 0%, #1F6FB2 58%, #3AA0FF 100%)"
+          onClick={() => router.push("/dashboard/simula-futuro")}
+        />
+      )}
 
       {!isGiaIscritto && (
         <FeatureCard
@@ -619,156 +638,156 @@ export default function Dashboard() {
         )}
       </section>
 
-      <section style={{ marginTop: 22 }}>
-        <DarkCard
-          title={
-            isGiaIscritto
-              ? "Continua a organizzare il tuo studio"
-              : "Hai bisogno di aiuto?"
-          }
-          description={
-            isGiaIscritto
-              ? "Usa Percorso Smart per monitorare esami, CFU, obiettivi e prossime attività senza perdere di vista il tuo avanzamento."
-              : "Un orientatore reale può aiutarti gratuitamente a capire quale percorso scegliere."
-          }
-          badge={isGiaIscritto ? "Percorso Smart" : "Gratis"}
-          onClick={() =>
-            router.push(
-              isGiaIscritto
-                ? "/dashboard/percorso-smart"
-                : "/dashboard/contatti"
-            )
-          }
-        >
-          <div
-            style={{
-              marginTop: 16,
-              width: "100%",
-              minHeight: 52,
-              borderRadius: 18,
-              background: isGiaIscritto ? "rgba(58,160,255,0.16)" : "#3AA0FF",
-              color: "#FFFFFF",
-              fontSize: 14,
-              fontWeight: 900,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              border: isGiaIscritto
-                ? "1px solid rgba(58,160,255,0.28)"
-                : "none",
-            }}
+      {!isGiaIscritto && (
+        <section style={{ marginTop: 22 }}>
+          <DarkCard
+            title={
+              isTrasferimento
+                ? "Vuoi valutare il trasferimento?"
+                : "Hai bisogno di aiuto?"
+            }
+            description={
+              isTrasferimento
+                ? "Puoi richiedere un confronto per capire come valorizzare esami e CFU già sostenuti."
+                : isUniversitaInterrotta
+                ? "Se hai interrotto gli studi, puoi capire quali esami valorizzare e come ripartire con un percorso più chiaro."
+                : "Un orientatore reale può aiutarti gratuitamente a capire quale percorso scegliere."
+            }
+            badge={isTrasferimento || isUniversitaInterrotta ? "CFU" : "Gratis"}
+            onClick={() => router.push("/dashboard/contatti")}
           >
-            {isGiaIscritto ? "Apri Percorso Smart" : "Parla con un orientatore"}
-            <span>→</span>
-          </div>
-        </DarkCard>
-      </section>
+            <div
+              style={{
+                marginTop: 16,
+                width: "100%",
+                minHeight: 52,
+                borderRadius: 18,
+                background: "#3AA0FF",
+                color: "#FFFFFF",
+                fontSize: 14,
+                fontWeight: 900,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                border: "none",
+              }}
+            >
+              {isTrasferimento || isUniversitaInterrotta
+                ? "Richiedi valutazione CFU"
+                : "Parla con un orientatore"}
+              <span>→</span>
+            </div>
+          </DarkCard>
+        </section>
+      )}
 
-      <section style={{ marginTop: 18 }}>
-        <div
-          style={{
-            padding: 18,
-            borderRadius: 28,
-            background:
-              "linear-gradient(135deg, rgba(31,111,178,0.22) 0%, rgba(17,32,51,0.94) 100%)",
-            border: "1px solid rgba(120,194,255,0.16)",
-            boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
-            backdropFilter: "blur(16px)",
-          }}
-        >
+      {!isGiaIscritto && (
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 13,
-              marginBottom: 16,
+              padding: 18,
+              borderRadius: 28,
+              background:
+                "linear-gradient(135deg, rgba(31,111,178,0.22) 0%, rgba(17,32,51,0.94) 100%)",
+              border: "1px solid rgba(120,194,255,0.16)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
+              backdropFilter: "blur(16px)",
             }}
           >
             <div
               style={{
-                width: 54,
-                height: 54,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 13,
+                marginBottom: 16,
+              }}
+            >
+              <div
+                style={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: 20,
+                  background: "rgba(58,160,255,0.16)",
+                  color: "#78C2FF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Share2 size={25} />
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    padding: "6px 10px",
+                    borderRadius: 999,
+                    background: "rgba(58,160,255,0.16)",
+                    color: "#78C2FF",
+                    fontSize: 11,
+                    fontWeight: 900,
+                    marginBottom: 8,
+                  }}
+                >
+                  CONDIVIDI
+                </div>
+
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: 21,
+                    lineHeight: 1.12,
+                    fontWeight: 900,
+                    color: "#FFFFFF",
+                    letterSpacing: "-0.5px",
+                  }}
+                >
+                  Conosci qualcuno che sta cercando la laurea giusta?
+                </h3>
+
+                <p
+                  style={{
+                    margin: "9px 0 0",
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: "rgba(255,255,255,0.72)",
+                  }}
+                >
+                  Condividi Laurea Smart con amici, colleghi o familiari: il
+                  test e l’orientamento sono gratuiti.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleShareApp}
+              style={{
+                width: "100%",
+                minHeight: 56,
                 borderRadius: 20,
-                background: "rgba(58,160,255,0.16)",
-                color: "#78C2FF",
+                border: "none",
+                background: "#3AA0FF",
+                color: "#FFFFFF",
+                fontSize: 15,
+                fontWeight: 900,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                flexShrink: 0,
+                gap: 10,
+                cursor: "pointer",
+                boxShadow: "0 14px 30px rgba(58,160,255,0.24)",
               }}
             >
-              <Share2 size={25} />
-            </div>
-
-            <div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  padding: "6px 10px",
-                  borderRadius: 999,
-                  background: "rgba(58,160,255,0.16)",
-                  color: "#78C2FF",
-                  fontSize: 11,
-                  fontWeight: 900,
-                  marginBottom: 8,
-                }}
-              >
-                CONDIVIDI
-              </div>
-
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: 21,
-                  lineHeight: 1.12,
-                  fontWeight: 900,
-                  color: "#FFFFFF",
-                  letterSpacing: "-0.5px",
-                }}
-              >
-                Conosci qualcuno che sta cercando la laurea giusta?
-              </h3>
-
-              <p
-                style={{
-                  margin: "9px 0 0",
-                  fontSize: 14,
-                  lineHeight: 1.55,
-                  color: "rgba(255,255,255,0.72)",
-                }}
-              >
-                Condividi Laurea Smart con amici, colleghi o familiari: il test
-                e l’orientamento sono gratuiti.
-              </p>
-            </div>
+              <Share2 size={19} />
+              Condividi con un amico
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={handleShareApp}
-            style={{
-              width: "100%",
-              minHeight: 56,
-              borderRadius: 20,
-              border: "none",
-              background: "#3AA0FF",
-              color: "#FFFFFF",
-              fontSize: 15,
-              fontWeight: 900,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              cursor: "pointer",
-              boxShadow: "0 14px 30px rgba(58,160,255,0.24)",
-            }}
-          >
-            <Share2 size={19} />
-            Condividi con un amico
-          </button>
-        </div>
-      </section>
+        </section>
+      )}
 
       <BottomNav />
     </main>
