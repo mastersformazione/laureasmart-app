@@ -3,6 +3,22 @@
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  BookOpen,
+  Building2,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock,
+  GraduationCap,
+  ListChecks,
+  Loader2,
+  MessageCircle,
+  Target,
+  UserRound,
+} from "lucide-react";
+import BottomNav from "@/components/ui/BottomNav";
 
 type User = {
   email?: string;
@@ -22,37 +38,124 @@ type Piano = {
   prossimoPasso: string;
 };
 
-const cardStyle: CSSProperties = {
-  background: "rgba(255,255,255,0.96)",
+type InvioStato = "idle" | "sending" | "sent" | "error";
+
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  padding: "22px 18px 120px",
+  maxWidth: 500,
+  margin: "0 auto",
+  color: "#FFFFFF",
+  background:
+    "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+  fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+};
+
+const heroStyle: CSSProperties = {
+  borderRadius: 32,
+  padding: "26px 20px",
+  marginBottom: 16,
+  border: "1px solid rgba(255,255,255,0.12)",
+  background:
+    "linear-gradient(145deg, rgba(31,111,178,0.32), rgba(255,255,255,0.07))",
+  boxShadow: "0 24px 65px rgba(0,0,0,0.32)",
+};
+
+const heroIconStyle: CSSProperties = {
+  width: 58,
+  height: 58,
   borderRadius: 22,
-  padding: 22,
-  boxShadow: "0 18px 45px rgba(15, 23, 42, 0.12)",
-  border: "1px solid rgba(148, 163, 184, 0.25)",
+  background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: 14,
+  boxShadow: "0 18px 38px rgba(31,111,178,0.36)",
 };
 
-const buttonStyle: CSSProperties = {
+const eyebrowStyle: CSSProperties = {
+  margin: "0 0 8px",
+  textTransform: "uppercase",
+  fontSize: 11,
+  letterSpacing: 1.5,
+  color: "rgba(255,255,255,0.66)",
+  fontWeight: 900,
+};
+
+const heroTitleStyle: CSSProperties = {
+  margin: 0,
+  fontSize: 29,
+  lineHeight: 1.1,
+  letterSpacing: -0.8,
+};
+
+const heroTextStyle: CSSProperties = {
+  margin: "12px 0 0",
+  color: "rgba(255,255,255,0.76)",
+  fontSize: 14,
+  lineHeight: 1.65,
+};
+
+const cardStyle: CSSProperties = {
+  borderRadius: 28,
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.08)",
+  boxShadow: "0 22px 55px rgba(0,0,0,0.24)",
+  padding: 18,
+};
+
+const compactCardStyle: CSSProperties = {
+  borderRadius: 24,
+  border: "1px solid rgba(255,255,255,0.11)",
+  background: "rgba(255,255,255,0.07)",
+  padding: 16,
+};
+
+const primaryButtonStyle: CSSProperties = {
+  minHeight: 52,
+  borderRadius: 18,
   border: "none",
-  borderRadius: 999,
-  padding: "13px 20px",
-  fontWeight: 800,
-  cursor: "pointer",
-  background: "#1F6FB2",
-  color: "#ffffff",
-  boxShadow: "0 12px 25px rgba(31, 111, 178, 0.25)",
-};
-
-const secondaryButtonStyle: CSSProperties = {
-  border: "1px solid rgba(31, 111, 178, 0.25)",
-  borderRadius: 999,
-  padding: "13px 20px",
-  fontWeight: 800,
-  cursor: "pointer",
-  background: "#ffffff",
-  color: "#1F6FB2",
-  textDecoration: "none",
+  background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
+  color: "white",
+  fontSize: 14,
+  fontWeight: 900,
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
+  gap: 8,
+  padding: "0 16px",
+  cursor: "pointer",
+  textDecoration: "none",
+};
+
+const secondaryButtonStyle: CSSProperties = {
+  minHeight: 48,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "rgba(255,255,255,0.08)",
+  color: "white",
+  fontSize: 13,
+  fontWeight: 850,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 7,
+  padding: "0 14px",
+  cursor: "pointer",
+  textDecoration: "none",
+};
+
+const mutedTextStyle: CSSProperties = {
+  margin: 0,
+  color: "rgba(255,255,255,0.72)",
+  fontSize: 13,
+  lineHeight: 1.6,
+};
+
+const sectionTitleStyle: CSSProperties = {
+  margin: 0,
+  fontSize: 17,
+  letterSpacing: -0.2,
 };
 
 function safeLocalStorage(key: string) {
@@ -60,12 +163,31 @@ function safeLocalStorage(key: string) {
   return localStorage.getItem(key) || "";
 }
 
+function getUserFromStorage(): User {
+  if (typeof window === "undefined") return {};
+
+  const keys = ["gps_user", "user", "laurea_smart_user"];
+
+  for (const key of keys) {
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+
+    try {
+      return JSON.parse(raw) as User;
+    } catch {
+      continue;
+    }
+  }
+
+  return {};
+}
+
 function generaPiano(): Piano {
   const segmentoStudente = safeLocalStorage("segmento_studente");
   const statoIscrizione = safeLocalStorage("stato_iscrizione");
-
+  const titoloStudio = safeLocalStorage("titolo_studio");
   const obiettivo = safeLocalStorage("obiettivo");
-
+  const motivazioneStudio = safeLocalStorage("motivazione_studio");
   const areaInteresse = safeLocalStorage("area_interesse");
   const risultatoTipo = safeLocalStorage("profilo_utente");
   const tempoDisponibile = safeLocalStorage("tempo_disponibile");
@@ -108,8 +230,20 @@ function generaPiano(): Piano {
   }
 
   const obiettivoTesto = obiettivo
-    ? `Il tuo obiettivo principale sembra essere: ${obiettivo}. La scelta del percorso dovrebbe quindi tenere conto non solo dell'interesse personale, ma anche della coerenza con il risultato che vuoi raggiungere.`
-    : "Non hai ancora definito un obiettivo preciso. In questa fase può essere utile confrontare più alternative e chiarire quale percorso sia più coerente con il tuo profilo.";
+    ? `Il tuo obiettivo principale sembra essere: ${obiettivo}. ${
+        titoloStudio
+          ? `Parti da un titolo di studio dichiarato: ${titoloStudio}. `
+          : ""
+      }${
+        motivazioneStudio
+          ? `La motivazione che hai indicato è: ${motivazioneStudio}. `
+          : ""
+      }Per questo motivo, la scelta del percorso non dovrebbe basarsi solo sul nome del corso, ma anche sulla coerenza con il risultato che vuoi raggiungere, sui tempi che hai a disposizione e sulle opportunità che vuoi costruire.`
+    : `Non hai ancora definito un obiettivo preciso. ${
+        titoloStudio
+          ? `Parti comunque da un titolo di studio dichiarato: ${titoloStudio}. `
+          : ""
+      }In questa fase può essere utile confrontare più alternative e chiarire quale percorso sia più coerente con il tuo profilo, prima di prendere una decisione definitiva.`;
 
   const areaTesto = areaInteresse
     ? `L'area emersa dal test è: ${areaInteresse}. Questa indicazione può aiutarti a restringere il campo e a valutare percorsi coerenti con interessi, titolo di partenza e obiettivo professionale.`
@@ -199,7 +333,7 @@ function generaPiano(): Piano {
   }
 
   const prossimoPasso =
-    "Il piano che hai generato è una prima analisi orientativa. Per scegliere con maggiore sicurezza, ti consigliamo di parlare gratuitamente con un orientatore. Potrai valutare atenei, corsi, costi, eventuali CFU riconoscibili, agevolazioni e modalità di studio in base al tuo caso specifico.";
+    "Il piano che hai generato è una prima analisi orientativa. Il passaggio successivo è confrontarlo con un orientatore, così da valutare con maggiore precisione quale percorso, ateneo e modalità di studio siano più adatti al tuo caso. In questa fase possono essere approfonditi anche costi, eventuali CFU riconoscibili, agevolazioni, tempi di conclusione e servizi disponibili.";
 
   return {
     puntoPartenza,
@@ -241,35 +375,55 @@ ${piano.prossimoPasso}
 `;
 }
 
+function InfoCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section style={cardStyle}>
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+        <div
+          style={{
+            width: 42,
+            height: 42,
+            minWidth: 42,
+            borderRadius: 16,
+            background: "rgba(31,111,178,0.18)",
+            color: "#7CC4FF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {icon}
+        </div>
+        <div style={{ flex: 1 }}>
+          <h2 style={sectionTitleStyle}>{title}</h2>
+          <div style={{ marginTop: 10 }}>{children}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function PianoPersonalePage() {
   const [piano, setPiano] = useState<Piano | null>(null);
   const [user, setUser] = useState<User>({});
-  const [invioStato, setInvioStato] = useState<
-    "idle" | "sending" | "sent" | "error"
-  >("idle");
+  const [invioStato, setInvioStato] = useState<InvioStato>("idle");
   const [errore, setErrore] = useState("");
 
   useEffect(() => {
-    try {
-      const storedUser =
-        localStorage.getItem("user") ||
-        localStorage.getItem("laurea_smart_user") ||
-        localStorage.getItem("gps_user");
-
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-
-      const nuovoPiano = generaPiano();
-      setPiano(nuovoPiano);
-    } catch (error) {
-      console.error("Errore generazione piano", error);
-    }
+    const storedUser = getUserFromStorage();
+    setUser(storedUser);
+    setPiano(generaPiano());
   }, []);
 
-  const pianoTesto = useMemo(() => {
-    return piano ? pianoToText(piano) : "";
-  }, [piano]);
+  const pianoTesto = useMemo(() => (piano ? pianoToText(piano) : ""), [piano]);
 
   const inviaEmailPiano = async () => {
     if (!piano) return;
@@ -354,183 +508,256 @@ export default function PianoPersonalePage() {
 
   if (!piano) {
     return (
-      <main style={{ padding: 24 }}>
-        <p>Generazione piano in corso...</p>
+      <main style={pageStyle}>
+        <section style={cardStyle}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Loader2 size={18} />
+            <p style={mutedTextStyle}>Generazione piano in corso...</p>
+          </div>
+        </section>
+        <BottomNav />
       </main>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "28px 18px 90px",
-        background:
-          "linear-gradient(180deg, #eef6ff 0%, #f8fafc 45%, #ffffff 100%)",
-        color: "#0f172a",
-      }}
-    >
-      <section style={{ maxWidth: 980, margin: "0 auto" }}>
-        <div style={{ marginBottom: 22 }}>
-          <Link href="/dashboard" style={{ color: "#1F6FB2", fontWeight: 800 }}>
-            ← Torna alla dashboard
+    <main style={pageStyle}>
+      <div style={{ marginBottom: 16 }}>
+        <Link
+          href="/dashboard"
+          style={{
+            color: "rgba(255,255,255,0.82)",
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 7,
+            fontSize: 13,
+            fontWeight: 850,
+          }}
+        >
+          <ArrowLeft size={16} />
+          Dashboard
+        </Link>
+      </div>
+
+      <section style={heroStyle}>
+        <div style={heroIconStyle}>
+          <ClipboardCheck size={30} />
+        </div>
+
+        <p style={eyebrowStyle}>Laurea Smart</p>
+
+        <h1 style={heroTitleStyle}>Piano Universitario Personalizzato</h1>
+
+        <p style={heroTextStyle}>
+          Abbiamo raccolto le informazioni principali del tuo profilo e le
+          abbiamo trasformate in una prima analisi orientativa. Il piano ti
+          aiuta a capire da dove parti, quali aspetti valutare con attenzione e
+          quale potrebbe essere il prossimo passo più utile.
+        </p>
+
+        <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
+          <button
+            type="button"
+            style={{
+              ...primaryButtonStyle,
+              opacity:
+                invioStato === "sending" || invioStato === "sent" ? 0.72 : 1,
+            }}
+            onClick={inviaEmailPiano}
+            disabled={invioStato === "sending" || invioStato === "sent"}
+          >
+            {invioStato === "sending" ? (
+              <Loader2 size={18} />
+            ) : (
+              <CheckCircle2 size={18} />
+            )}
+            {invioStato === "sending"
+              ? "Invio in corso..."
+              : invioStato === "sent"
+              ? "Piano inviato"
+              : "Conferma e invia il piano"}
+          </button>
+
+          <Link href="/dashboard/profilo" style={secondaryButtonStyle}>
+            <UserRound size={17} />
+            Aggiorna profilo
           </Link>
         </div>
 
-        <div style={{ ...cardStyle, marginBottom: 18 }}>
-          <p
+        {invioStato === "sent" && (
+          <div
             style={{
-              margin: "0 0 8px",
-              textTransform: "uppercase",
-              fontSize: 12,
-              letterSpacing: 1.4,
-              color: "#1F6FB2",
-              fontWeight: 900,
+              marginTop: 14,
+              borderRadius: 18,
+              padding: 12,
+              background: "rgba(34,197,94,0.14)",
+              border: "1px solid rgba(34,197,94,0.25)",
             }}
           >
-            Laurea Smart
-          </p>
-
-          <h1 style={{ margin: 0, fontSize: 32, lineHeight: 1.15 }}>
-            Piano Universitario Personalizzato
-          </h1>
-
-          <p style={{ fontSize: 17, lineHeight: 1.7, color: "#475569" }}>
-            Una prima analisi orientativa basata sulle risposte del test e sui
-            dati del tuo profilo. Il piano non sostituisce una valutazione
-            ufficiale, ma ti aiuta a capire quali aspetti approfondire prima di
-            scegliere.
-          </p>
-
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button
-              type="button"
-              style={buttonStyle}
-              onClick={inviaEmailPiano}
-              disabled={invioStato === "sending" || invioStato === "sent"}
-            >
-              {invioStato === "sending"
-                ? "Invio in corso..."
-                : invioStato === "sent"
-                ? "Piano creato"
-                : "Crea il mio piano"}
-            </button>
-
-            <Link href="/dashboard/profilo" style={secondaryButtonStyle}>
-              Aggiorna profilo
-            </Link>
-          </div>
-
-          {invioStato === "sent" && (
-            <p style={{ marginTop: 14, color: "#15803d", fontWeight: 800 }}>
-              Piano creato correttamente. Un orientatore potrà valutare il tuo
-              profilo.
+            <p style={{ ...mutedTextStyle, color: "#BBF7D0", fontWeight: 850 }}>
+              Piano inviato correttamente. Un orientatore potrà leggere il tuo
+              profilo e valutare con maggiore attenzione il percorso più adatto.
             </p>
-          )}
+          </div>
+        )}
 
-          {invioStato === "error" && (
-            <p style={{ marginTop: 14, color: "#b91c1c", fontWeight: 800 }}>
+        {invioStato === "error" && (
+          <div
+            style={{
+              marginTop: 14,
+              borderRadius: 18,
+              padding: 12,
+              background: "rgba(239,68,68,0.14)",
+              border: "1px solid rgba(239,68,68,0.25)",
+            }}
+          >
+            <p style={{ ...mutedTextStyle, color: "#FECACA", fontWeight: 850 }}>
               {errore}
             </p>
-          )}
-        </div>
+          </div>
+        )}
+      </section>
 
-        <div style={{ display: "grid", gap: 16 }}>
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>1. Punto di partenza</h2>
-            <p style={{ lineHeight: 1.7, color: "#334155" }}>
-              {piano.puntoPartenza}
-            </p>
-          </section>
-
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>2. Obiettivo</h2>
-            <p style={{ lineHeight: 1.7, color: "#334155" }}>
-              {piano.obiettivo}
-            </p>
-          </section>
-
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>3. Area consigliata</h2>
-            <p style={{ lineHeight: 1.7, color: "#334155" }}>{piano.area}</p>
-          </section>
-
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>4. Situazione universitaria</h2>
-            <p style={{ lineHeight: 1.7, color: "#334155" }}>
-              {piano.situazioneUniversitaria}
-            </p>
-          </section>
-
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>5. Tempo e sostenibilità</h2>
-            <p style={{ lineHeight: 1.7, color: "#334155" }}>
-              {piano.sostenibilita}
-            </p>
-          </section>
-
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>6. Aspetti da verificare</h2>
-            <ul style={{ lineHeight: 1.8, color: "#334155", paddingLeft: 22 }}>
-              {piano.criticita.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
-
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>7. Azioni consigliate</h2>
-            <ol style={{ lineHeight: 1.8, color: "#334155", paddingLeft: 22 }}>
-              {piano.azioni.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ol>
-          </section>
-
-          <section style={cardStyle}>
-            <h2 style={{ marginTop: 0 }}>8. Prossimo passo</h2>
-            <p style={{ lineHeight: 1.7, color: "#334155" }}>
-              {piano.prossimoPasso}
-            </p>
-
-            <a
-              href="https://wa.me/393472769291?text=Ciao%2C%20ho%20generato%20il%20mio%20Piano%20Universitario%20Personalizzato%20su%20Laurea%20Smart%20e%20vorrei%20parlare%20con%20un%20orientatore."
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                ...buttonStyle,
-                display: "inline-flex",
-                textDecoration: "none",
-                marginTop: 8,
-              }}
-            >
-              Parla gratis con un orientatore
-            </a>
-          </section>
-
-          <section
+      <section
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 12,
+          marginBottom: 14,
+        }}
+      >
+        <div style={compactCardStyle}>
+          <Target size={22} color="#7CC4FF" />
+          <p
             style={{
-              ...cardStyle,
-              background: "#f8fafc",
-              boxShadow: "none",
+              margin: "10px 0 4px",
+              fontSize: 12,
+              color: "rgba(255,255,255,0.62)",
             }}
           >
-            <p
-              style={{
-                margin: 0,
-                fontSize: 13,
-                lineHeight: 1.6,
-                color: "#64748b",
-              }}
-            >
-              Questo piano ha valore esclusivamente orientativo. La scelta del
-              percorso universitario, il riconoscimento di eventuali CFU, le
-              agevolazioni, i costi e le condizioni di iscrizione devono essere
-              verificati con l’ateneo o con un orientatore autorizzato.
-            </p>
-          </section>
+            Obiettivo
+          </p>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 900 }}>
+            {safeLocalStorage("obiettivo") || "Da definire"}
+          </p>
+        </div>
+
+        <div style={compactCardStyle}>
+          <GraduationCap size={22} color="#7CC4FF" />
+          <p
+            style={{
+              margin: "10px 0 4px",
+              fontSize: 12,
+              color: "rgba(255,255,255,0.62)",
+            }}
+          >
+            Modalità
+          </p>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 900 }}>
+            {safeLocalStorage("modalita_studio") || "Da indicare"}
+          </p>
         </div>
       </section>
+
+      <div style={{ display: "grid", gap: 14 }}>
+        <InfoCard icon={<UserRound size={21} />} title="1. Punto di partenza">
+          <p style={mutedTextStyle}>{piano.puntoPartenza}</p>
+        </InfoCard>
+
+        <InfoCard icon={<Target size={21} />} title="2. Obiettivo">
+          <p style={mutedTextStyle}>{piano.obiettivo}</p>
+        </InfoCard>
+
+        <InfoCard icon={<BookOpen size={21} />} title="3. Area consigliata">
+          <p style={mutedTextStyle}>{piano.area}</p>
+        </InfoCard>
+
+        <InfoCard
+          icon={<Building2 size={21} />}
+          title="4. Situazione universitaria"
+        >
+          <p style={mutedTextStyle}>{piano.situazioneUniversitaria}</p>
+        </InfoCard>
+
+        <InfoCard icon={<Clock size={21} />} title="5. Tempo e sostenibilità">
+          <p style={mutedTextStyle}>{piano.sostenibilita}</p>
+        </InfoCard>
+
+        <InfoCard
+          icon={<AlertTriangle size={21} />}
+          title="6. Aspetti da verificare"
+        >
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: 18,
+              color: "rgba(255,255,255,0.74)",
+              lineHeight: 1.7,
+              fontSize: 13,
+            }}
+          >
+            {piano.criticita.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </InfoCard>
+
+        <InfoCard icon={<ListChecks size={21} />} title="7. Azioni consigliate">
+          <ol
+            style={{
+              margin: 0,
+              paddingLeft: 18,
+              color: "rgba(255,255,255,0.74)",
+              lineHeight: 1.7,
+              fontSize: 13,
+            }}
+          >
+            {piano.azioni.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ol>
+        </InfoCard>
+
+        <InfoCard icon={<MessageCircle size={21} />} title="8. Prossimo passo">
+          <p style={mutedTextStyle}>{piano.prossimoPasso}</p>
+
+          <a
+            href="https://wa.me/393472769291?text=Ciao%2C%20ho%20generato%20il%20mio%20Piano%20Universitario%20Personalizzato%20su%20Laurea%20Smart%20e%20vorrei%20parlare%20con%20un%20orientatore."
+            target="_blank"
+            rel="noreferrer"
+            style={{ ...primaryButtonStyle, marginTop: 14, width: "100%" }}
+          >
+            <MessageCircle size={18} />
+            Parla gratis con un orientatore
+          </a>
+        </InfoCard>
+
+        <section
+          style={{
+            borderRadius: 22,
+            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.05)",
+            padding: 14,
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 12,
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.56)",
+            }}
+          >
+            Questo piano ha valore esclusivamente orientativo. La scelta del
+            percorso universitario, il riconoscimento di eventuali CFU, le
+            agevolazioni, i costi e le condizioni di iscrizione devono essere
+            verificati con l’ateneo o con un orientatore autorizzato.
+          </p>
+        </section>
+      </div>
+
+      <BottomNav />
     </main>
   );
 }
