@@ -29,6 +29,7 @@ type OrientamentoData = {
   urgenza?: string;
   tempo?: string;
   area?: string;
+  aspetto_da_valutare?: string;
 };
 
 type StepItem = {
@@ -55,6 +56,7 @@ type Segmenti = {
   segmento_motivazione: string;
   segmento_ingresso: string;
   segmento_urgenza: string;
+  segmento_aspetto: string;
 };
 
 type Orientatrice = {
@@ -225,6 +227,20 @@ export default function OrientamentoPage() {
         "Informatica / tecnologia",
         "Scuola e insegnamento",
         "Non so ancora",
+      ],
+    },
+
+    {
+      id: "aspetto_da_valutare",
+      domanda:
+        "C’è qualche aspetto che sarebbe utile valutare prima dell’iscrizione?",
+      opzioni: [
+        "Esami universitari già sostenuti",
+        "Esperienze lavorative o certificazioni",
+        "Possibili agevolazioni o convenzioni",
+        "Esigenze di supporto allo studio, DSA, BES o disabilità",
+        "Non saprei",
+        "Preferisco parlarne con un orientatore",
       ],
     },
   ];
@@ -513,6 +529,7 @@ export default function OrientamentoPage() {
     let segmento_motivazione = "INDECISO";
     let segmento_ingresso = "ALTRO";
     let segmento_urgenza = "NON_DEFINITA";
+    let segmento_aspetto = "NESSUNO";
 
     if (data.stato_iscrizione === "Sì, sono già iscritto") {
       segmento_studente = "GIA_ISCRITTO";
@@ -597,12 +614,35 @@ export default function OrientamentoPage() {
     else if (urgenza === "Non ho una scadenza precisa")
       segmento_urgenza = "FREDDA";
 
+    if (data.aspetto_da_valutare === "Esami universitari già sostenuti")
+      segmento_aspetto = "CFU_INTERESSE";
+    else if (
+      data.aspetto_da_valutare === "Esperienze lavorative o certificazioni"
+    )
+      segmento_aspetto = "VALUTAZIONE_CARRIERA";
+    else if (
+      data.aspetto_da_valutare === "Possibili agevolazioni o convenzioni"
+    )
+      segmento_aspetto = "AGEVOLAZIONI_INTERESSE";
+    else if (
+      data.aspetto_da_valutare ===
+      "Esigenze di supporto allo studio, DSA, BES o disabilità"
+    )
+      segmento_aspetto = "SUPPORTO_STUDIO_AGEVOLAZIONI";
+    else if (data.aspetto_da_valutare === "Non saprei")
+      segmento_aspetto = "DA_ORIENTARE";
+    else if (
+      data.aspetto_da_valutare === "Preferisco parlarne con un orientatore"
+    )
+      segmento_aspetto = "CONTATTO_RISERVATO";
+
     return {
       segmento_studente,
       segmento_intento,
       segmento_motivazione,
       segmento_ingresso,
       segmento_urgenza,
+      segmento_aspetto,
     };
   };
 
@@ -728,6 +768,8 @@ export default function OrientamentoPage() {
     localStorage.setItem("tempo_disponibile", data.tempo || "");
     localStorage.setItem("tempo_studio", tempoStudioTag);
     localStorage.setItem("area_interesse", data.area || "");
+    localStorage.setItem("aspetto_da_valutare", data.aspetto_da_valutare || "");
+    localStorage.setItem("segmento_aspetto", segmenti.segmento_aspetto);
     localStorage.setItem("segmento_intento", segmenti.segmento_intento);
     localStorage.setItem("segmento_ingresso", segmenti.segmento_ingresso);
     localStorage.setItem("segmento_urgenza", segmenti.segmento_urgenza);
@@ -750,6 +792,8 @@ export default function OrientamentoPage() {
         urgenza: data.urgenza || "",
         tempo: data.tempo || "",
         area: data.area || "",
+        aspetto_da_valutare: data.aspetto_da_valutare || "",
+        segmento_aspetto: segmenti.segmento_aspetto,
       },
     });
 
@@ -928,6 +972,7 @@ Motivazione studio: ${formData.motivazione_studio || ""}
 Urgenza obiettivo: ${formData.urgenza || ""}
 Tempo disponibile: ${formData.tempo || ""}
 Area di interesse: ${formData.area || ""}
+Aspetto da valutare: ${formData.aspetto_da_valutare || ""}
 
 Risultato: ${risultato.percorso}
 Corso suggerito: ${risultato.corsoSuggerito}`
