@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -17,6 +16,9 @@ import {
   User,
 } from "lucide-react";
 import BottomNav from "@/components/ui/BottomNav";
+import ProfileAccordionCard from "@/components/ProfileAccordionCard";
+import ProfileSummaryCard from "@/components/ProfileSummaryCard";
+import ProfileActionCard from "@/components/ProfileActionCard";
 import {
   TIPI_CLASSI_LAUREA,
   getAreaClasseLabel,
@@ -510,9 +512,45 @@ export default function ProfiloPage() {
 
       {showProfiloUniversitario && (
         <>
-          <DarkCard
-            title="Il tuo percorso universitario"
+          <ProfileSummaryCard
+            corsoAttuale={
+              classeLaureaAttuale
+                ? classeLaureaLabel
+                : corsoAttuale || "Percorso universitario da completare"
+            }
+            ateneoAttuale={ateneoAttuale}
+            categoriaAteneo={
+              categoriaAteneoAttuale
+                ? getAteneoCategoriaLabel(categoriaAteneoAttuale)
+                : ""
+            }
+            modalitaStudio={
+              modalitaAteneoAttuale === "online"
+                ? "ONLINE"
+                : modalitaAteneoAttuale === "presenza"
+                ? "PRESENZA"
+                : ""
+            }
+            cfuConseguiti={cfuCompletati}
+            cfuTotali={cfuTotali}
+            esamiMancanti={esamiMancantiProfilo}
+            traguardoStimato={dataStimataLabel}
+          />
+
+          <div style={{ height: 14 }} />
+
+          <ProfileAccordionCard
+            title="Dati universitari"
             badge={isTrasferimento ? "Trasferimento" : "Percorso"}
+            subtitle={
+              classeLaureaAttuale || ateneoAttuale || cfuConseguitiProfilo
+                ? "Apri questa scheda solo quando vuoi aggiornare ateneo, corso, CFU o obiettivo."
+                : "Completa questi dati per rendere Percorso Smart più utile."
+            }
+            icon={<GraduationCap size={19} />}
+            defaultOpen={
+              !classeLaureaAttuale && !ateneoAttuale && !cfuConseguitiProfilo
+            }
           >
             <p style={mutedTextStyle}>
               Completa questi dati per rendere Percorso Smart più utile. Puoi
@@ -740,16 +778,7 @@ export default function ProfiloPage() {
                 {profiloUniversitarioError}
               </p>
             )}
-
-            <button
-              type="button"
-              onClick={() => router.push("/dashboard/percorso-smart")}
-              style={secondaryButtonStyle}
-            >
-              Apri Percorso Smart
-              <ArrowRight size={18} />
-            </button>
-          </DarkCard>
+          </ProfileAccordionCard>
 
           <div style={{ height: 14 }} />
         </>
@@ -819,7 +848,13 @@ export default function ProfiloPage() {
 
       <div style={{ height: 14 }} />
 
-      <DarkCard title="Stato percorso" badge="Segmento">
+      <ProfileAccordionCard
+        title="Stato percorso"
+        badge="Segmento"
+        subtitle={statoIscrizione}
+        icon={<GraduationCap size={19} />}
+        defaultOpen={false}
+      >
         <InfoRow
           icon={<GraduationCap size={20} />}
           title={statoIscrizione}
@@ -863,11 +898,17 @@ export default function ProfiloPage() {
             );
           })}
         </div>
-      </DarkCard>
+      </ProfileAccordionCard>
 
       <div style={{ height: 14 }} />
 
-      <DarkCard title="Il tuo obiettivo" badge="Profilo">
+      <ProfileAccordionCard
+        title="Il tuo obiettivo"
+        badge="Profilo"
+        subtitle={`${obiettivo} · Profilo orientativo: ${profilo}`}
+        icon={<Target size={19} />}
+        defaultOpen={false}
+      >
         <InfoRow
           icon={<Target size={20} />}
           title={obiettivo}
@@ -882,34 +923,33 @@ export default function ProfiloPage() {
           Aggiorna orientamento
           <ArrowRight size={18} />
         </button>
-      </DarkCard>
+      </ProfileAccordionCard>
 
       <div style={{ height: 14 }} />
 
-      <DarkCard title="Piano Universitario Personalizzato" badge="Novità">
-        <InfoRow
-          icon={<FileText size={20} />}
-          title="Trasforma il tuo profilo in un piano"
-          description={
-            showProfiloUniversitario
-              ? "Usa test, ateneo, corso, CFU e obiettivo per generare una prima analisi orientativa da far valutare a un orientatore."
-              : "Usa il risultato del test per generare una prima analisi con obiettivo, area consigliata, sostenibilità e prossimi passi."
-          }
-        />
-
-        <button
-          type="button"
-          onClick={() => router.push("/dashboard/piano-personale")}
-          style={secondaryButtonStyle}
-        >
-          Genera il piano
-          <ArrowRight size={18} />
-        </button>
-      </DarkCard>
+      <ProfileActionCard
+        title="Piano Universitario Personalizzato"
+        badge="Novità"
+        icon={<FileText size={19} />}
+        description={
+          showProfiloUniversitario
+            ? "Usa test, ateneo, corso, CFU e obiettivo per generare una prima analisi orientativa da far valutare a un orientatore."
+            : "Usa il risultato del test per generare una prima analisi con obiettivo, area consigliata, sostenibilità e prossimi passi."
+        }
+        href="/dashboard/piano-personale"
+        buttonText="Genera il piano"
+        variant="primary"
+      />
 
       <div style={{ height: 14 }} />
 
-      <DarkCard title="Strumenti utili" badge="App">
+      <ProfileAccordionCard
+        title="Strumenti utili"
+        badge="App"
+        subtitle="Percorsi, prossimi step e funzioni da consultare quando servono."
+        icon={<GraduationCap size={19} />}
+        defaultOpen={false}
+      >
         <InfoRow
           icon={<GraduationCap size={20} />}
           title={
@@ -934,11 +974,11 @@ export default function ProfiloPage() {
             : "Vai ai percorsi"}
           <ArrowRight size={18} />
         </button>
-      </DarkCard>
+      </ProfileAccordionCard>
 
       <div style={{ height: 14 }} />
 
-      <DarkCard
+      <ProfileAccordionCard
         title="Biblioteca Smart"
         badge={
           isGiaIscritto || isTrasferimento
@@ -947,6 +987,9 @@ export default function ProfiloPage() {
             ? "Consulta"
             : "Preview"
         }
+        subtitle="Appunti, schemi e materiali utili quando vuoi approfondire."
+        icon={<BookOpen size={19} />}
+        defaultOpen={false}
       >
         <InfoRow
           icon={<BookOpen size={20} />}
@@ -978,7 +1021,7 @@ export default function ProfiloPage() {
             : "Scopri Biblioteca Smart"}
           <ArrowRight size={18} />
         </button>
-      </DarkCard>
+      </ProfileAccordionCard>
 
       {!isGiaIscritto && (
         <>
