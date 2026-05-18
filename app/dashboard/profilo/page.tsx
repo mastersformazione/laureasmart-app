@@ -520,21 +520,20 @@ export default function ProfiloPage() {
 
             <div style={formGridStyle}>
               <FieldLabel label="Ateneo attuale o precedente">
-                <input
-                  type="text"
-                  list="atenei-italiani-list"
+                <select
                   value={ateneoAttuale}
                   onChange={(event) =>
                     aggiornaAteneoAttuale(event.target.value)
                   }
-                  placeholder="Cerca il tuo ateneo o seleziona una voce"
                   style={inputStyle}
-                />
-                <datalist id="atenei-italiani-list">
+                >
+                  <option value="">Seleziona ateneo</option>
                   {ateneiItaliani.map((ateneo) => (
-                    <option key={ateneo.id} value={ateneo.nome} />
+                    <option key={ateneo.id} value={ateneo.nome}>
+                      {ateneo.nome}
+                    </option>
                   ))}
-                </datalist>
+                </select>
               </FieldLabel>
 
               <FieldLabel label="Categoria ateneo rilevata">
