@@ -6,6 +6,7 @@ import {
   ArrowRight,
   BookOpen,
   CalendarDays,
+  FileText,
   CheckCircle2,
   GraduationCap,
   Heart,
@@ -352,8 +353,6 @@ export default function ProfiloPage() {
         ateneoRilevato?.categoria || categoriaAteneoAttuale || "altro";
       const modalitaAteneo =
         ateneoRilevato?.modalita || modalitaAteneoAttuale || "non_applicabile";
-      const modalitaStudioTag =
-        modalitaAteneo === "online" ? "ONLINE" : "PRESENZA";
       const cfuDefault =
         classeSelezionata?.cfuDefault ||
         getCfuTotaliDaTipoCorso(tipoCorsoAttuale);
@@ -367,7 +366,6 @@ export default function ProfiloPage() {
       localStorage.setItem("ateneo_attuale", ateneoAttuale);
       localStorage.setItem("categoria_ateneo_attuale", categoriaAteneo);
       localStorage.setItem("modalita_ateneo_attuale", modalitaAteneo);
-      localStorage.setItem("modalita_studio", modalitaStudioTag);
       localStorage.setItem("classe_laurea_attuale", classeLaureaAttuale);
       localStorage.setItem("corso_attuale", corsoAttualePulito);
       localStorage.setItem("corso_attuale_dettaglio", corsoAttualeDettaglio);
@@ -398,7 +396,6 @@ export default function ProfiloPage() {
             ateneo_attuale: ateneoAttuale,
             categoria_ateneo_attuale: categoriaAteneo,
             modalita_ateneo_attuale: modalitaAteneo,
-            modalita_studio: modalitaStudioTag,
             classe_laurea_attuale: classeLaureaAttuale,
             corso_attuale: corsoAttualePulito,
             area_corso_attuale: areaCorsoAttuale,
@@ -418,36 +415,6 @@ export default function ProfiloPage() {
         throw new Error(result.error || "Salvataggio non riuscito");
       }
 
-      await fetch("https://laureasmart.it/api/sync-onesignal-tags.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: user.email,
-          nome: user.nome || "",
-          cognome: user.cognome || "",
-          telefono: user.telefono || "",
-          profilo: localStorage.getItem("profilo_utente") || "",
-          stato_iscrizione: statoIscrizione,
-          segmento_studente: segmentoStudente,
-          titolo_studio: localStorage.getItem("titolo_studio") || "",
-          obiettivo: localStorage.getItem("obiettivo") || "",
-          area_interesse:
-            localStorage.getItem("area_interesse") || areaCorsoAttuale,
-          tempo_studio: localStorage.getItem("tempo_disponibile") || "",
-          segmento_urgenza: localStorage.getItem("segmento_urgenza") || "",
-          segmento_intento: localStorage.getItem("segmento_intento") || "",
-          segmento_aspetto: localStorage.getItem("segmento_aspetto") || "",
-          aspetto_extra:
-            localStorage.getItem("segmento_aspetto") &&
-            localStorage.getItem("segmento_aspetto") !== "NESSUNO"
-              ? "SI"
-              : "",
-          modalita_studio: modalitaStudioTag,
-        }),
-      });
-
       setProfiloUniversitarioSaved(true);
 
       window.dispatchEvent(
@@ -456,7 +423,6 @@ export default function ProfiloPage() {
             ateneo_attuale: ateneoAttuale,
             categoria_ateneo_attuale: categoriaAteneo,
             modalita_ateneo_attuale: modalitaAteneo,
-            modalita_studio: modalitaStudioTag,
             classe_laurea_attuale: classeLaureaAttuale,
             corso_attuale: corsoAttualePulito,
             area_corso_attuale: areaCorsoAttuale,
@@ -913,6 +879,29 @@ export default function ProfiloPage() {
           style={secondaryButtonStyle}
         >
           Aggiorna orientamento
+          <ArrowRight size={18} />
+        </button>
+      </DarkCard>
+
+      <div style={{ height: 14 }} />
+
+      <DarkCard title="Piano Universitario Personalizzato" badge="Novità">
+        <InfoRow
+          icon={<FileText size={20} />}
+          title="Trasforma il tuo profilo in un piano"
+          description={
+            showProfiloUniversitario
+              ? "Usa test, ateneo, corso, CFU e obiettivo per generare una prima analisi orientativa da far valutare a un orientatore."
+              : "Usa il risultato del test per generare una prima analisi con obiettivo, area consigliata, sostenibilità e prossimi passi."
+          }
+        />
+
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/piano-personale")}
+          style={secondaryButtonStyle}
+        >
+          Genera il piano
           <ArrowRight size={18} />
         </button>
       </DarkCard>
