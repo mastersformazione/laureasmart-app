@@ -25,6 +25,7 @@ type OrientamentoData = {
   situazione?: string;
   titolo_studio?: string;
   obiettivo?: string;
+  motivazione_studio?: string;
   urgenza?: string;
   tempo?: string;
   area?: string;
@@ -51,6 +52,7 @@ type Risultato = {
 type Segmenti = {
   segmento_studente: string;
   segmento_intento: string;
+  segmento_motivazione: string;
   segmento_ingresso: string;
   segmento_urgenza: string;
 };
@@ -175,6 +177,20 @@ export default function OrientamentoPage() {
       ],
     },
     {
+      id: "motivazione_studio",
+      domanda:
+        "Qual è il motivo principale per cui vuoi iniziare o completare un percorso universitario?",
+      opzioni: [
+        "Voglio imparare e acquisire nuove conoscenze",
+        "Mi serve un titolo per migliorare lavoro o carriera",
+        "Voglio ottenere il titolo nel modo più rapido e organizzato possibile",
+        "Mi serve una laurea per concorsi, graduatorie o avanzamenti",
+        "Voglio cambiare settore professionale",
+        "Voglio completare un percorso universitario iniziato in passato",
+        "Non lo so ancora, vorrei essere guidato nella scelta",
+      ],
+    },
+    {
       id: "urgenza",
       domanda: "Entro quanto tempo vuoi realizzare questo obiettivo?",
       opzioni: [
@@ -217,6 +233,7 @@ export default function OrientamentoPage() {
     const situazione = data.situazione || "";
     const titolo = data.titolo_studio || "";
     const obiettivo = data.obiettivo || "";
+    const motivazioneStudio = data.motivazione_studio || "";
     const urgenza = data.urgenza || "";
     const tempo = data.tempo || "";
     const area = data.area || "";
@@ -268,6 +285,69 @@ export default function OrientamentoPage() {
       );
       prossimoPasso = "Richiedere una valutazione gratuita dei CFU";
       ctaSecondaria = "Verifica subito il percorso agevolato";
+    }
+
+    if (motivazioneStudio === "Voglio imparare e acquisire nuove conoscenze") {
+      motivazioni.push(
+        "Hai indicato una motivazione orientata alla conoscenza: la scelta dovrebbe valorizzare interessi reali, contenuti e crescita personale."
+      );
+    }
+
+    if (
+      motivazioneStudio ===
+      "Mi serve un titolo per migliorare lavoro o carriera"
+    ) {
+      motivazioni.push(
+        "Il tuo obiettivo è professionale: conviene valutare un percorso spendibile, coerente con il ruolo che vuoi rafforzare o raggiungere."
+      );
+    }
+
+    if (
+      motivazioneStudio ===
+      "Voglio ottenere il titolo nel modo più rapido e organizzato possibile"
+    ) {
+      motivazioni.push(
+        "Vuoi arrivare al titolo in modo rapido e ordinato: è importante verificare tempi, sostenibilità e possibili riconoscimenti del percorso precedente."
+      );
+      prossimoPasso = "Verificare il percorso più rapido e sostenibile";
+      ctaSecondaria = "Richiedi una verifica del percorso più lineare";
+    }
+
+    if (
+      motivazioneStudio ===
+      "Mi serve una laurea per concorsi, graduatorie o avanzamenti"
+    ) {
+      motivazioni.push(
+        "Se il titolo ti serve per concorsi, graduatorie o avanzamenti, bisogna controllare con attenzione classe di laurea e requisiti richiesti."
+      );
+      prossimoPasso = "Controllare classe di laurea e spendibilità del titolo";
+      ctaSecondaria = "Verifica il percorso più coerente con il tuo obiettivo";
+    }
+
+    if (motivazioneStudio === "Voglio cambiare settore professionale") {
+      motivazioni.push(
+        "Stai ragionando su un cambio di settore: il percorso dovrebbe aiutarti a costruire competenze spendibili in una nuova direzione."
+      );
+    }
+
+    if (
+      motivazioneStudio ===
+      "Voglio completare un percorso universitario iniziato in passato"
+    ) {
+      motivazioni.push(
+        "Vuoi riprendere un percorso lasciato in sospeso: una valutazione degli esami già sostenuti può aiutarti a non ricominciare da zero."
+      );
+      prossimoPasso = "Richiedere una valutazione degli esami già sostenuti";
+      ctaSecondaria = "Scopri se puoi valorizzare il percorso precedente";
+    }
+
+    if (
+      motivazioneStudio ===
+      "Non lo so ancora, vorrei essere guidato nella scelta"
+    ) {
+      motivazioni.push(
+        "Hai bisogno di chiarire meglio la motivazione prima di scegliere: un confronto orientativo può evitare una decisione affrettata."
+      );
     }
 
     if (urgenza === "Subito / entro 1 mese") {
@@ -430,6 +510,7 @@ export default function OrientamentoPage() {
   const getSegmenti = (data: OrientamentoData): Segmenti => {
     let segmento_studente = "NON_ISCRITTO";
     let segmento_intento = "INDECISO";
+    let segmento_motivazione = "INDECISO";
     let segmento_ingresso = "ALTRO";
     let segmento_urgenza = "NON_DEFINITA";
 
@@ -454,6 +535,40 @@ export default function OrientamentoPage() {
       segmento_intento = "COMPLETAMENTO_PROFILO";
     else if (data.obiettivo === "Non sono sicuro")
       segmento_intento = "INDECISO";
+
+    if (
+      data.motivazione_studio === "Voglio imparare e acquisire nuove conoscenze"
+    )
+      segmento_motivazione = "CONOSCENZA";
+    else if (
+      data.motivazione_studio ===
+      "Mi serve un titolo per migliorare lavoro o carriera"
+    )
+      segmento_motivazione = "CARRIERA";
+    else if (
+      data.motivazione_studio ===
+      "Voglio ottenere il titolo nel modo più rapido e organizzato possibile"
+    )
+      segmento_motivazione = "TITOLO_RAPIDO";
+    else if (
+      data.motivazione_studio ===
+      "Mi serve una laurea per concorsi, graduatorie o avanzamenti"
+    )
+      segmento_motivazione = "CONCORSI";
+    else if (
+      data.motivazione_studio === "Voglio cambiare settore professionale"
+    )
+      segmento_motivazione = "CAMBIO_SETTORE";
+    else if (
+      data.motivazione_studio ===
+      "Voglio completare un percorso universitario iniziato in passato"
+    )
+      segmento_motivazione = "COMPLETAMENTO";
+    else if (
+      data.motivazione_studio ===
+      "Non lo so ancora, vorrei essere guidato nella scelta"
+    )
+      segmento_motivazione = "INDECISO";
 
     if (data.titolo_studio === "Diploma") segmento_ingresso = "DIPLOMA";
     else if (data.titolo_studio === "Laurea triennale")
@@ -485,6 +600,7 @@ export default function OrientamentoPage() {
     return {
       segmento_studente,
       segmento_intento,
+      segmento_motivazione,
       segmento_ingresso,
       segmento_urgenza,
     };
@@ -508,7 +624,7 @@ export default function OrientamentoPage() {
   ): Orientatrice => {
     const specializzazioni = new Set<string>();
 
-    specializzazioni.add("Percorsi eCampus");
+    specializzazioni.add("Orientamento universitario personalizzato");
 
     if (
       data.situazione?.includes("Lavoro") ||
@@ -574,7 +690,7 @@ export default function OrientamentoPage() {
 
     return {
       nome: "Giulia C.",
-      ruolo: "Orientatrice per il Polo di Studi eCampus",
+      ruolo: "Orientatrice suggerita Laurea Smart",
       telefono: "3298170817",
       telefonoWhatsapp: "393298170817",
       foto: "/giulia-orientatrice.png",
@@ -606,6 +722,8 @@ export default function OrientamentoPage() {
     localStorage.setItem("situazione", data.situazione || "");
     localStorage.setItem("titolo_studio", data.titolo_studio || "");
     localStorage.setItem("obiettivo", data.obiettivo || "");
+    localStorage.setItem("motivazione_studio", data.motivazione_studio || "");
+    localStorage.setItem("segmento_motivazione", segmenti.segmento_motivazione);
     localStorage.setItem("urgenza_obiettivo", data.urgenza || "");
     localStorage.setItem("tempo_disponibile", data.tempo || "");
     localStorage.setItem("tempo_studio", tempoStudioTag);
@@ -627,6 +745,8 @@ export default function OrientamentoPage() {
         situazione: data.situazione || "",
         titolo_studio: data.titolo_studio || "",
         obiettivo: data.obiettivo || "",
+        motivazione_studio: data.motivazione_studio || "",
+        segmento_motivazione: segmenti.segmento_motivazione,
         urgenza: data.urgenza || "",
         tempo: data.tempo || "",
         area: data.area || "",
@@ -664,8 +784,10 @@ export default function OrientamentoPage() {
               segmento_studente: segmenti.segmento_studente,
               titolo_studio: data.titolo_studio || "",
               obiettivo: data.obiettivo || "",
+              motivazione_studio: data.motivazione_studio || "",
               area_interesse: data.area || "",
               segmento_intento: segmenti.segmento_intento,
+              segmento_motivazione: segmenti.segmento_motivazione,
               tempo_studio: tempoStudioTag,
               segmento_urgenza: segmenti.segmento_urgenza,
             }),
@@ -693,6 +815,8 @@ export default function OrientamentoPage() {
           situazione: data.situazione,
           titolo_studio: data.titolo_studio,
           obiettivo: data.obiettivo,
+          motivazione_studio: data.motivazione_studio,
+          segmento_motivazione: segmenti.segmento_motivazione,
           urgenza_obiettivo: data.urgenza,
           tempo: data.tempo,
           area: data.area,
@@ -800,6 +924,7 @@ Stato iscrizione: ${formData.stato_iscrizione || ""}
 Situazione attuale: ${formData.situazione || ""}
 Titolo di studio: ${formData.titolo_studio || ""}
 Obiettivo: ${formData.obiettivo || ""}
+Motivazione studio: ${formData.motivazione_studio || ""}
 Urgenza obiettivo: ${formData.urgenza || ""}
 Tempo disponibile: ${formData.tempo || ""}
 Area di interesse: ${formData.area || ""}
@@ -827,7 +952,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
         <div style={{ display: "grid", gap: 14, marginTop: 20 }}>
           <ResultMetric
             icon={<GraduationCap size={22} />}
-            title="Corso suggerito"
+            title="Profilo orientativo"
             description={risultato.corsoSuggerito}
           />
 
