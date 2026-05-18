@@ -25,6 +25,13 @@ import {
   type AreaClasseLaurea,
   type TipoClasseLaurea,
 } from "@/lib/data/classiLaurea";
+import {
+  ateneiItaliani,
+  getAteneoByNome,
+  getAteneoCategoriaLabel,
+  type CategoriaAteneo,
+  type ModalitaAteneo,
+} from "@/lib/data/atenei";
 
 type GpsUser = {
   nome?: string;
@@ -107,6 +114,13 @@ export default function ProfiloPage() {
   const [profilo, setProfilo] = useState("Da definire");
   const [statoIscrizione, setStatoIscrizione] = useState("Non indicato");
   const [segmentoStudente, setSegmentoStudente] = useState("NON_ISCRITTO");
+  const [ateneoAttuale, setAteneoAttuale] = useState("");
+  const [categoriaAteneoAttuale, setCategoriaAteneoAttuale] = useState<
+    CategoriaAteneo | ""
+  >("");
+  const [modalitaAteneoAttuale, setModalitaAteneoAttuale] = useState<
+    ModalitaAteneo | ""
+  >("");
   const [preferitiCount, setPreferitiCount] = useState(0);
 
   const [classeLaureaAttuale, setClasseLaureaAttuale] = useState("");
@@ -156,6 +170,14 @@ export default function ProfiloPage() {
           : "NON_ISCRITTO")
     );
 
+    setAteneoAttuale(localStorage.getItem("ateneo_attuale") || "");
+    setCategoriaAteneoAttuale(
+      (localStorage.getItem("categoria_ateneo_attuale") as CategoriaAteneo) ||
+        ""
+    );
+    setModalitaAteneoAttuale(
+      (localStorage.getItem("modalita_ateneo_attuale") as ModalitaAteneo) || ""
+    );
     setClasseLaureaAttuale(localStorage.getItem("classe_laurea_attuale") || "");
     setCorsoAttuale(localStorage.getItem("corso_attuale_dettaglio") || "");
     setAreaCorsoAttuale(localStorage.getItem("area_corso_attuale") || "");
@@ -232,7 +254,9 @@ export default function ProfiloPage() {
 
   const isGiaIscritto = segmentoStudente === "GIA_ISCRITTO";
   const isTrasferimento = segmentoStudente === "TRASFERIMENTO";
-  const showProfiloUniversitario = isGiaIscritto || isTrasferimento;
+  const isUniversitaInterrotta = segmentoStudente === "UNIVERSITA_INTERROTTA";
+  const showProfiloUniversitario =
+    isGiaIscritto || isTrasferimento || isUniversitaInterrotta;
 
   const classiDisponibili = tipoCorsoAttuale
     ? getClassiByTipo(tipoCorsoAttuale as TipoClasseLaurea)
@@ -274,6 +298,23 @@ export default function ProfiloPage() {
     }
   };
 
+  const aggiornaAteneoAttuale = (nomeAteneo: string) => {
+    setAteneoAttuale(nomeAteneo);
+
+    const ateneo = getAteneoByNome(nomeAteneo);
+
+    if (ateneo) {
+      setCategoriaAteneoAttuale(ateneo.categoria);
+      setModalitaAteneoAttuale(ateneo.modalita);
+    } else if (nomeAteneo.trim()) {
+      setCategoriaAteneoAttuale("altro");
+      setModalitaAteneoAttuale("non_applicabile");
+    } else {
+      setCategoriaAteneoAttuale("");
+      setModalitaAteneoAttuale("");
+    }
+  };
+
   const aggiornaTipoCorsoAttuale = (nuovoTipo: string) => {
     setTipoCorsoAttuale(nuovoTipo);
     setClasseLaureaAttuale("");
@@ -306,6 +347,11 @@ export default function ProfiloPage() {
     setProfiloUniversitarioError("");
 
     try {
+      const ateneoRilevato = getAteneoByNome(ateneoAttuale);
+      const categoriaAteneo =
+        ateneoRilevato?.categoria || categoriaAteneoAttuale || "altro";
+      const modalitaAteneo =
+        ateneoRilevato?.modalita || modalitaAteneoAttuale || "non_applicabile";
       const cfuDefault =
         classeSelezionata?.cfuDefault ||
         getCfuTotaliDaTipoCorso(tipoCorsoAttuale);
@@ -316,6 +362,9 @@ export default function ProfiloPage() {
           }`
         : corsoAttualeDettaglio;
 
+      localStorage.setItem("ateneo_attuale", ateneoAttuale);
+      localStorage.setItem("categoria_ateneo_attuale", categoriaAteneo);
+      localStorage.setItem("modalita_ateneo_attuale", modalitaAteneo);
       localStorage.setItem("classe_laurea_attuale", classeLaureaAttuale);
       localStorage.setItem("corso_attuale", corsoAttualePulito);
       localStorage.setItem("corso_attuale_dettaglio", corsoAttualeDettaglio);
@@ -343,6 +392,9 @@ export default function ProfiloPage() {
           },
           body: JSON.stringify({
             user_email: user.email,
+            ateneo_attuale: ateneoAttuale,
+            categoria_ateneo_attuale: categoriaAteneo,
+            modalita_ateneo_attuale: modalitaAteneo,
             classe_laurea_attuale: classeLaureaAttuale,
             corso_attuale: corsoAttualePulito,
             area_corso_attuale: areaCorsoAttuale,
@@ -367,6 +419,9 @@ export default function ProfiloPage() {
       window.dispatchEvent(
         new CustomEvent("profilo_universitario_saved", {
           detail: {
+            ateneo_attuale: ateneoAttuale,
+            categoria_ateneo_attuale: categoriaAteneo,
+            modalita_ateneo_attuale: modalitaAteneo,
             classe_laurea_attuale: classeLaureaAttuale,
             corso_attuale: corsoAttualePulito,
             area_corso_attuale: areaCorsoAttuale,
@@ -454,16 +509,48 @@ export default function ProfiloPage() {
       {showProfiloUniversitario && (
         <>
           <DarkCard
-            title="Il tuo percorso universitario attuale"
+            title="Il tuo percorso universitario"
             badge={isTrasferimento ? "Trasferimento" : "Percorso"}
           >
             <p style={mutedTextStyle}>
-              Completa questi dati per rendere Percorso Smart più utile. Ora
-              puoi indicare la classe di laurea: l’app ricava automaticamente
-              area e CFU totali, così i prossimi step saranno più coerenti.
+              Completa questi dati per rendere Percorso Smart più utile. Puoi
+              indicare anche l’ateneo attuale o precedente: ci aiuta a capire
+              meglio il tuo punto di partenza e a valutare eventuali passaggi.
             </p>
 
             <div style={formGridStyle}>
+              <FieldLabel label="Ateneo attuale o precedente">
+                <input
+                  type="text"
+                  list="atenei-italiani-list"
+                  value={ateneoAttuale}
+                  onChange={(event) =>
+                    aggiornaAteneoAttuale(event.target.value)
+                  }
+                  placeholder="Cerca il tuo ateneo o seleziona una voce"
+                  style={inputStyle}
+                />
+                <datalist id="atenei-italiani-list">
+                  {ateneiItaliani.map((ateneo) => (
+                    <option key={ateneo.id} value={ateneo.nome} />
+                  ))}
+                </datalist>
+              </FieldLabel>
+
+              <FieldLabel label="Categoria ateneo rilevata">
+                <input
+                  type="text"
+                  value={
+                    categoriaAteneoAttuale
+                      ? getAteneoCategoriaLabel(categoriaAteneoAttuale)
+                      : ""
+                  }
+                  readOnly
+                  placeholder="Si compila dopo la scelta dell’ateneo"
+                  style={{ ...inputStyle, opacity: 0.82 }}
+                />
+              </FieldLabel>
+
               <FieldLabel label="Tipo di percorso">
                 <select
                   value={tipoCorsoAttuale}
@@ -593,11 +680,12 @@ export default function ProfiloPage() {
                   : getAreaLabel(areaCorsoAttuale)}
               </h3>
               <p style={mutedTextStyle}>
-                {tipoCorsoAttuale
-                  ? `${getTipoLabel(tipoCorsoAttuale)} · ${getLabel(
-                      ANNI_CORSO,
-                      annoCorsoAttuale
-                    )} · ${
+                {tipoCorsoAttuale || ateneoAttuale
+                  ? `${ateneoAttuale || "Ateneo da completare"} · ${
+                      tipoCorsoAttuale
+                        ? getTipoLabel(tipoCorsoAttuale)
+                        : "Tipo percorso da completare"
+                    } · ${getLabel(ANNI_CORSO, annoCorsoAttuale)} · ${
                       areaCorsoAttuale
                         ? getAreaLabel(areaCorsoAttuale)
                         : "Area da completare"
