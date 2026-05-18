@@ -864,6 +864,8 @@ export default function OrientamentoPage() {
           urgenza_obiettivo: data.urgenza,
           tempo: data.tempo,
           area: data.area,
+          aspetto_da_valutare: data.aspetto_da_valutare || "",
+          segmento_aspetto: segmenti.segmento_aspetto,
           risultato_tipo: risultato.tipo,
           corso_suggerito: risultato.corsoSuggerito,
           segmento_intento: segmenti.segmento_intento,
