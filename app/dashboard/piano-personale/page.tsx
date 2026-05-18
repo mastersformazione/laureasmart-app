@@ -63,9 +63,9 @@ function safeLocalStorage(key: string) {
 function generaPiano(): Piano {
   const segmentoStudente = safeLocalStorage("segmento_studente");
   const statoIscrizione = safeLocalStorage("stato_iscrizione");
-  const titoloStudio = safeLocalStorage("titolo_studio");
+
   const obiettivo = safeLocalStorage("obiettivo");
-  const motivazioneStudio = safeLocalStorage("motivazione_studio");
+
   const areaInteresse = safeLocalStorage("area_interesse");
   const risultatoTipo = safeLocalStorage("profilo_utente");
   const tempoDisponibile = safeLocalStorage("tempo_disponibile");
