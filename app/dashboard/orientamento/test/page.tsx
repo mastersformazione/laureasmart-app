@@ -769,10 +769,10 @@ export default function OrientamentoPage() {
     localStorage.setItem("tempo_studio", tempoStudioTag);
     localStorage.setItem("area_interesse", data.area || "");
     localStorage.setItem("aspetto_da_valutare", data.aspetto_da_valutare || "");
-    localStorage.setItem("segmento_aspetto", segmenti.segmento_aspetto);
     localStorage.setItem("segmento_intento", segmenti.segmento_intento);
     localStorage.setItem("segmento_ingresso", segmenti.segmento_ingresso);
     localStorage.setItem("segmento_urgenza", segmenti.segmento_urgenza);
+    localStorage.setItem("segmento_aspetto", segmenti.segmento_aspetto);
     localStorage.setItem("orientamento_data", JSON.stringify(data));
     localStorage.setItem("orientamento_risultato", JSON.stringify(risultato));
 
@@ -834,6 +834,9 @@ export default function OrientamentoPage() {
               segmento_motivazione: segmenti.segmento_motivazione,
               tempo_studio: tempoStudioTag,
               segmento_urgenza: segmenti.segmento_urgenza,
+              segmento_aspetto: segmenti.segmento_aspetto,
+              aspetto_extra:
+                segmenti.segmento_aspetto !== "NESSUNO" ? "SI" : "NO",
             }),
           }
         );
@@ -864,13 +867,13 @@ export default function OrientamentoPage() {
           urgenza_obiettivo: data.urgenza,
           tempo: data.tempo,
           area: data.area,
-          aspetto_da_valutare: data.aspetto_da_valutare || "",
-          segmento_aspetto: segmenti.segmento_aspetto,
           risultato_tipo: risultato.tipo,
           corso_suggerito: risultato.corsoSuggerito,
+          aspetto_da_valutare: data.aspetto_da_valutare || "",
           segmento_intento: segmenti.segmento_intento,
           segmento_ingresso: segmenti.segmento_ingresso,
           segmento_urgenza: segmenti.segmento_urgenza,
+          segmento_aspetto: segmenti.segmento_aspetto,
         }),
       });
     } catch (error) {
