@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
@@ -21,7 +22,7 @@ type Piano = {
   prossimoPasso: string;
 };
 
-const cardStyle: React.CSSProperties = {
+const cardStyle: CSSProperties = {
   background: "rgba(255,255,255,0.96)",
   borderRadius: 22,
   padding: 22,
@@ -29,7 +30,7 @@ const cardStyle: React.CSSProperties = {
   border: "1px solid rgba(148, 163, 184, 0.25)",
 };
 
-const buttonStyle: React.CSSProperties = {
+const buttonStyle: CSSProperties = {
   border: "none",
   borderRadius: 999,
   padding: "13px 20px",
@@ -40,7 +41,7 @@ const buttonStyle: React.CSSProperties = {
   boxShadow: "0 12px 25px rgba(31, 111, 178, 0.25)",
 };
 
-const secondaryButtonStyle: React.CSSProperties = {
+const secondaryButtonStyle: CSSProperties = {
   border: "1px solid rgba(31, 111, 178, 0.25)",
   borderRadius: 999,
   padding: "13px 20px",
