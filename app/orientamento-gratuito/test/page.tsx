@@ -224,7 +224,16 @@ export default function OrientamentoPage() {
         "Scienze motorie",
         "Comunicazione",
         "Informatica / tecnologia",
+        "Ingegneria",
+        "Architettura, design e moda",
+        "Lettere, arte e spettacolo",
+        "Lingue",
+        "Turismo",
+        "Scienze politiche e sociali",
+        "Biologia e nutrizione",
+        "Agraria e gastronomia",
         "Scuola e insegnamento",
+        "Sanità",
         "Non so ancora",
       ],
     },
@@ -409,7 +418,7 @@ export default function OrientamentoPage() {
       corsoSuggerito = "Laurea online in area Economia e Management";
       percorso = "Percorso consigliato: crescita professionale e aziendale";
       descrizione =
-        "Questo percorso è indicato se vuoi migliorare il tuo profilo nel lavoro, crescere in azienda, gestire attività o aprirti nuove opportunità professionali.";
+        "Questo percorso è indicato se vuoi migliorare il tuo profilo nel lavoro, crescere in azienda, gestire attività, amministrazione, marketing o aprirti nuove opportunità professionali.";
     }
 
     if (area === "Psicologia") {
@@ -417,7 +426,7 @@ export default function OrientamentoPage() {
       corsoSuggerito = "Laurea online in area Psicologia";
       percorso = "Percorso consigliato: persone, relazioni e organizzazioni";
       descrizione =
-        "Questo percorso è indicato se ti interessa lavorare con le persone, comprendere comportamenti, dinamiche relazionali, formazione o contesti organizzativi.";
+        "Questo percorso è indicato se ti interessa comprendere persone, comportamenti, relazioni, contesti sociali, formazione, risorse umane o dinamiche organizzative.";
     }
 
     if (area === "Scienze dell’educazione") {
@@ -426,7 +435,7 @@ export default function OrientamentoPage() {
       percorso =
         "Percorso consigliato: educazione, formazione e servizi alla persona";
       descrizione =
-        "Questo percorso è adatto se vuoi lavorare in ambito educativo, sociale, formativo o nei servizi rivolti a bambini, ragazzi, famiglie e comunità.";
+        "Questo percorso è adatto se vuoi lavorare o crescere in ambito educativo, sociale, formativo, nei servizi alla persona o nei contesti rivolti a bambini, ragazzi, famiglie e comunità.";
     }
 
     if (area === "Giurisprudenza / servizi giuridici") {
@@ -434,7 +443,7 @@ export default function OrientamentoPage() {
       corsoSuggerito = "Laurea online in area Giuridica";
       percorso = "Percorso consigliato: diritto, amministrazione e concorsi";
       descrizione =
-        "Questo percorso può essere utile se vuoi rafforzare il tuo profilo in ambito amministrativo, legale, aziendale, pubblico o concorsuale.";
+        "Questo percorso può essere utile se vuoi rafforzare il tuo profilo in ambito legale, amministrativo, aziendale, pubblico, concorsuale o nei servizi giuridici.";
     }
 
     if (area === "Scienze motorie") {
@@ -442,7 +451,7 @@ export default function OrientamentoPage() {
       corsoSuggerito = "Laurea online in Scienze Motorie";
       percorso = "Percorso consigliato: sport, benessere e attività motoria";
       descrizione =
-        "Questo percorso è adatto se vuoi lavorare nel mondo dello sport, del benessere, della preparazione fisica o dell’attività motoria.";
+        "Questo percorso è adatto se vuoi lavorare o specializzarti nel mondo dello sport, del benessere, della preparazione fisica, dell’attività motoria o della promozione di stili di vita attivi.";
     }
 
     if (area === "Comunicazione") {
@@ -450,7 +459,7 @@ export default function OrientamentoPage() {
       corsoSuggerito = "Laurea online in Comunicazione";
       percorso = "Percorso consigliato: comunicazione, marketing e digitale";
       descrizione =
-        "Questo percorso è indicato se vuoi lavorare nella comunicazione, nel marketing, nei media, nei contenuti digitali o migliorare il tuo profilo creativo.";
+        "Questo percorso è indicato se vuoi lavorare nella comunicazione, nel marketing, nei media, nella comunicazione d’impresa, nei contenuti digitali o migliorare il tuo profilo creativo.";
     }
 
     if (area === "Informatica / tecnologia") {
@@ -458,7 +467,76 @@ export default function OrientamentoPage() {
       corsoSuggerito = "Laurea online in Informatica o area Tecnologica";
       percorso = "Percorso consigliato: competenze digitali e tecnologia";
       descrizione =
-        "Questo percorso è utile se vuoi sviluppare competenze tecniche e digitali, oggi molto richieste nel lavoro e nelle aziende.";
+        "Questo percorso è utile se vuoi sviluppare competenze tecniche e digitali, lavorare con software, dati, sistemi informatici, innovazione o tecnologie applicate al lavoro.";
+    }
+
+    if (area === "Ingegneria") {
+      tipo = "TECNOLOGIA";
+      corsoSuggerito = "Laurea online in area Ingegneria";
+      percorso = "Percorso consigliato: progettazione, industria e innovazione";
+      descrizione =
+        "Questo percorso è indicato se ti interessano progettazione, processi tecnici, industria, produzione, organizzazione, energia, infrastrutture o innovazione applicata.";
+    }
+
+    if (area === "Architettura, design e moda") {
+      tipo = "COMUNICAZIONE";
+      corsoSuggerito = "Laurea online in area Architettura, Design o Moda";
+      percorso =
+        "Percorso consigliato: creatività, progetto e comunicazione visiva";
+      descrizione =
+        "Questo percorso è indicato se ti interessano progettazione, estetica, design, moda, comunicazione visiva, prodotto, spazi o linguaggi creativi.";
+    }
+
+    if (area === "Lettere, arte e spettacolo") {
+      tipo = "COMUNICAZIONE";
+      corsoSuggerito = "Laurea online in area Lettere, Arte o Spettacolo";
+      percorso =
+        "Percorso consigliato: cultura, contenuti e discipline umanistiche";
+      descrizione =
+        "Questo percorso è adatto se ti interessano scrittura, cultura, editoria, arte, spettacolo, contenuti, comunicazione culturale o valorizzazione del patrimonio.";
+    }
+
+    if (area === "Lingue") {
+      tipo = "COMUNICAZIONE";
+      corsoSuggerito = "Laurea online in area Lingue";
+      percorso =
+        "Percorso consigliato: lingue, comunicazione e contesti internazionali";
+      descrizione =
+        "Questo percorso è indicato se vuoi valorizzare competenze linguistiche, comunicazione interculturale, traduzione, mediazione, turismo, commercio o relazioni internazionali.";
+    }
+
+    if (area === "Turismo") {
+      tipo = "ECONOMIA";
+      corsoSuggerito = "Laurea online in area Turismo";
+      percorso =
+        "Percorso consigliato: turismo, territorio e gestione dei servizi";
+      descrizione =
+        "Questo percorso è utile se ti interessano turismo, ospitalità, promozione del territorio, beni culturali, organizzazione di servizi, eventi o gestione di strutture turistiche.";
+    }
+
+    if (area === "Scienze politiche e sociali") {
+      tipo = "GIURIDICA";
+      corsoSuggerito = "Laurea online in area Politico-sociale";
+      percorso = "Percorso consigliato: istituzioni, società e amministrazione";
+      descrizione =
+        "Questo percorso è indicato se ti interessano istituzioni, pubblica amministrazione, politiche sociali, relazioni internazionali, organizzazioni, terzo settore o concorsi.";
+    }
+
+    if (area === "Biologia e nutrizione") {
+      tipo = "TECNOLOGIA";
+      corsoSuggerito = "Laurea online in area Biologia o Nutrizione";
+      percorso =
+        "Percorso consigliato: scienze della vita, alimentazione e benessere";
+      descrizione =
+        "Questo percorso è adatto se ti interessano biologia, alimentazione, nutrizione, salute, benessere, qualità, ambiente o ambiti tecnico-scientifici collegati.";
+    }
+
+    if (area === "Agraria e gastronomia") {
+      tipo = "ECONOMIA";
+      corsoSuggerito = "Laurea online in area Agraria o Gastronomia";
+      percorso = "Percorso consigliato: agroalimentare, territorio e gestione";
+      descrizione =
+        "Questo percorso è indicato se ti interessano filiere agroalimentari, sostenibilità, produzione, valorizzazione del territorio, gastronomia, qualità e gestione dei servizi collegati al food.";
     }
 
     if (area === "Scuola e insegnamento" || obiettivo === "Insegnare") {
@@ -466,7 +544,26 @@ export default function OrientamentoPage() {
       corsoSuggerito = "Percorso online collegato a scuola e insegnamento";
       percorso = "Percorso consigliato: scuola, titoli e graduatorie";
       descrizione =
-        "Questo percorso è indicato se vuoi lavorare nella scuola, migliorare il tuo profilo per graduatorie, concorsi o percorsi collegati all’insegnamento.";
+        "Questo percorso è indicato se vuoi lavorare nella scuola, migliorare il tuo profilo per graduatorie, concorsi, aggiornamento professionale o percorsi collegati all’insegnamento.";
+    }
+
+    if (area === "Sanità") {
+      tipo = "PSICOLOGIA";
+      corsoSuggerito = "Percorso online in area Sanità e servizi alla persona";
+      percorso =
+        "Percorso consigliato: salute, supporto e servizi alla persona";
+      descrizione =
+        "Questo percorso è indicato se ti interessano salute, prevenzione, servizi alla persona, organizzazione sanitaria, benessere o percorsi collegati alle professioni di cura e supporto.";
+    }
+
+    if (area === "Non so ancora" || obiettivo === "Non sono sicuro") {
+      tipo = "ORIENTAMENTO";
+      corsoSuggerito = "Percorso di orientamento universitario";
+      percorso = "Percorso consigliato: chiarire la scelta prima di iscriversi";
+      descrizione =
+        "Le tue risposte indicano che prima di scegliere un corso è utile fare una valutazione guidata. La cosa più importante è evitare una scelta casuale.";
+      prossimoPasso = "Parlare con un orientatore prima di scegliere";
+      ctaSecondaria = "Ricevi una consulenza orientativa gratuita";
     }
 
     if (obiettivo === "Aumentare lo stipendio") {
