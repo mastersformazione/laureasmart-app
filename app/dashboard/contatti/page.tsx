@@ -50,8 +50,8 @@ type ProfileSnapshot = {
 const ORIENTATRICE = {
   nome: "Giulia C.",
   ruolo: "Orientatrice suggerita Laurea Smart",
-  telefono: "3298170817",
-  telefonoWhatsapp: "393298170817",
+  telefono: "3793673257",
+  telefonoWhatsapp: "39793673257",
   email: "info@laureasmart.it",
   foto: "/giulia-orientatrice.png",
 };
