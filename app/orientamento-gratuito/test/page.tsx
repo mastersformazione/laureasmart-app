@@ -1,19 +1,24 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  ArrowLeft,
   ArrowRight,
+  BriefcaseBusiness,
   CheckCircle2,
   ClipboardCheck,
   GraduationCap,
+  HeartHandshake,
+  HelpCircle,
   Loader2,
   LockKeyhole,
   MessageCircle,
   ShieldCheck,
   Sparkles,
   Target,
+  Timer,
   UserRound,
 } from "lucide-react";
 
@@ -54,17 +59,82 @@ type LeadForm = {
   privacy: boolean;
 };
 
-const steps: {
+type StepItem = {
   id: keyof OrientamentoData;
   domanda: string;
-  sottotitolo?: string;
+  sottotitolo: string;
   opzioni: string[];
-}[] = [
+};
+
+type Tone = "blue" | "purple" | "teal" | "amber" | "rose" | "cyan";
+
+const tones: Record<
+  Tone,
+  {
+    accent: string;
+    icon: string;
+    bg: string;
+    softBg: string;
+    border: string;
+    glow: string;
+  }
+> = {
+  blue: {
+    accent: "#60A5FA",
+    icon: "#BFDBFE",
+    bg: "linear-gradient(135deg, rgba(59,130,246,0.24), rgba(12,25,42,0.96))",
+    softBg: "rgba(59,130,246,0.13)",
+    border: "rgba(96,165,250,0.28)",
+    glow: "rgba(59,130,246,0.22)",
+  },
+  purple: {
+    accent: "#A78BFA",
+    icon: "#DDD6FE",
+    bg: "linear-gradient(135deg, rgba(139,92,246,0.26), rgba(12,25,42,0.96))",
+    softBg: "rgba(139,92,246,0.13)",
+    border: "rgba(167,139,250,0.30)",
+    glow: "rgba(139,92,246,0.22)",
+  },
+  teal: {
+    accent: "#2DD4BF",
+    icon: "#99F6E4",
+    bg: "linear-gradient(135deg, rgba(20,184,166,0.24), rgba(12,25,42,0.96))",
+    softBg: "rgba(20,184,166,0.13)",
+    border: "rgba(45,212,191,0.28)",
+    glow: "rgba(20,184,166,0.22)",
+  },
+  amber: {
+    accent: "#FBBF24",
+    icon: "#FDE68A",
+    bg: "linear-gradient(135deg, rgba(245,158,11,0.25), rgba(12,25,42,0.96))",
+    softBg: "rgba(245,158,11,0.13)",
+    border: "rgba(251,191,36,0.28)",
+    glow: "rgba(245,158,11,0.20)",
+  },
+  rose: {
+    accent: "#FB7185",
+    icon: "#FECDD3",
+    bg: "linear-gradient(135deg, rgba(244,63,94,0.22), rgba(12,25,42,0.96))",
+    softBg: "rgba(244,63,94,0.12)",
+    border: "rgba(251,113,133,0.26)",
+    glow: "rgba(244,63,94,0.18)",
+  },
+  cyan: {
+    accent: "#22D3EE",
+    icon: "#A5F3FC",
+    bg: "linear-gradient(135deg, rgba(6,182,212,0.22), rgba(12,25,42,0.96))",
+    softBg: "rgba(6,182,212,0.12)",
+    border: "rgba(34,211,238,0.24)",
+    glow: "rgba(6,182,212,0.18)",
+  },
+};
+
+const steps: StepItem[] = [
   {
     id: "stato_iscrizione",
     domanda: "Sei già iscritto a un corso di laurea?",
     sottotitolo:
-      "Ci aiuta a capire se stai iniziando da zero, se vuoi riprendere o se stai valutando un cambio percorso.",
+      "Ci aiuta a capire se stai iniziando da zero, se vuoi riprendere un percorso o se stai valutando un trasferimento.",
     opzioni: [
       "Sì, sono già iscritto",
       "No, non sono ancora iscritto",
@@ -75,27 +145,58 @@ const steps: {
   {
     id: "eta",
     domanda: "Qual è la tua fascia d’età?",
-    opzioni: ["18-24", "25-34", "35-44", "45 o più"],
+    sottotitolo:
+      "Serve solo per rendere il risultato più aderente alla tua situazione personale e professionale.",
+    opzioni: [
+      "18-24",
+      "25-34",
+      "35-44",
+      "45-54",
+      "55+",
+      "Preferisco non indicarlo",
+    ],
+  },
+  {
+    id: "situazione",
+    domanda: "Cosa fai oggi?",
+    sottotitolo:
+      "La sostenibilità del percorso cambia molto se lavori, studi o devi conciliare più impegni.",
+    opzioni: [
+      "Lavoro full-time",
+      "Lavoro part-time",
+      "Studio",
+      "Studio e lavoro",
+      "Non lavoro al momento",
+      "Altro",
+    ],
   },
   {
     id: "titolo_studio",
     domanda: "Qual è il tuo titolo di studio attuale?",
+    sottotitolo:
+      "Il titolo di partenza è fondamentale per capire quali percorsi puoi valutare e con quali requisiti di accesso.",
     opzioni: [
       "Diploma",
       "Laurea triennale",
       "Laurea magistrale",
       "Laurea vecchio ordinamento",
       "Master universitario",
-      "Ho iniziato l’università ma non ho concluso",
+      "Diploma accademico di primo livello (AFAM)",
+      "Diploma accademico di secondo livello (AFAM)",
+      "Diploma conservatorio (vecchio ordinamento)",
+      "Diploma accademia di belle arti",
+      "Ho iniziato l’università ma non ho terminato",
       "Altro",
     ],
   },
   {
     id: "obiettivo",
-    domanda: "Qual è il tuo obiettivo principale?",
+    domanda: "Perché vuoi laurearti?",
+    sottotitolo:
+      "Questa risposta orienta il test verso lavoro, concorsi, crescita personale o completamento del profilo.",
     opzioni: [
-      "Cambiare lavoro",
       "Aumentare lo stipendio",
+      "Cambiare lavoro",
       "Partecipare a concorsi",
       "Insegnare",
       "Crescita personale",
@@ -105,9 +206,10 @@ const steps: {
   },
   {
     id: "motivazione_studio",
-    domanda: "Perché vuoi laurearti?",
+    domanda:
+      "Qual è il motivo principale per cui vuoi iniziare o completare un percorso universitario?",
     sottotitolo:
-      "Non esiste una risposta giusta: serve solo a capire quale percorso può essere più coerente con te.",
+      "Non esiste una risposta giusta: serve a capire quale tipo di supporto e quale percorso possono essere più coerenti.",
     opzioni: [
       "Voglio imparare e acquisire nuove conoscenze",
       "Mi serve un titolo per migliorare lavoro o carriera",
@@ -120,7 +222,9 @@ const steps: {
   },
   {
     id: "urgenza",
-    domanda: "Quando vorresti iniziare?",
+    domanda: "Entro quanto tempo vuoi realizzare questo obiettivo?",
+    sottotitolo:
+      "La tempistica aiuta a distinguere chi vuole partire subito da chi sta ancora esplorando le alternative.",
     opzioni: [
       "Subito / entro 1 mese",
       "Entro 3 mesi",
@@ -131,7 +235,9 @@ const steps: {
   },
   {
     id: "tempo",
-    domanda: "Quanto tempo pensi di poter dedicare allo studio?",
+    domanda: "Quanto tempo puoi dedicare allo studio?",
+    sottotitolo:
+      "Meglio un percorso sostenibile che una scelta teoricamente perfetta ma difficile da mantenere.",
     opzioni: [
       "2-4 ore a settimana",
       "5-7 ore a settimana",
@@ -143,19 +249,18 @@ const steps: {
   {
     id: "area",
     domanda: "Quale area ti interessa di più?",
+    sottotitolo:
+      "Scegli l’area che senti più vicina. Se hai dubbi, puoi indicare che non sai ancora.",
     opzioni: [
-      "Economia",
+      "Economia e management",
       "Psicologia",
       "Scienze dell’educazione",
-      "Giurisprudenza",
-      "Ingegneria",
-      "Informatica",
+      "Giurisprudenza / servizi giuridici",
       "Scienze motorie",
       "Comunicazione",
-      "Lettere",
-      "Lingue",
-      "Scuola",
-      "Non lo so",
+      "Informatica / tecnologia",
+      "Scuola e insegnamento",
+      "Non so ancora",
     ],
   },
   {
@@ -163,7 +268,7 @@ const steps: {
     domanda:
       "C’è qualche aspetto che sarebbe utile valutare prima dell’iscrizione?",
     sottotitolo:
-      "Puoi indicare un elemento da approfondire oppure scegliere di parlarne con un orientatore.",
+      "Puoi indicare un elemento da approfondire. Se riguarda una situazione personale, verrà gestito con discrezione.",
     opzioni: [
       "Esami universitari già sostenuti",
       "Esperienze lavorative o certificazioni",
@@ -185,6 +290,7 @@ const pageStyle: CSSProperties = {
     "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
   fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
   overflowX: "hidden",
+  boxSizing: "border-box",
 };
 
 const glassCard: CSSProperties = {
@@ -230,16 +336,38 @@ const secondaryButtonStyle: CSSProperties = {
   textDecoration: "none",
 };
 
+function getStepTone(id: keyof OrientamentoData): Tone {
+  if (id === "stato_iscrizione" || id === "titolo_studio") return "blue";
+  if (id === "obiettivo" || id === "motivazione_studio") return "purple";
+  if (id === "urgenza" || id === "tempo") return "teal";
+  if (id === "aspetto_da_valutare") return "amber";
+  if (id === "situazione") return "cyan";
+  return "blue";
+}
+
+function getStepIcon(id: keyof OrientamentoData) {
+  if (id === "stato_iscrizione") return <GraduationCap size={25} />;
+  if (id === "eta") return <UserRound size={25} />;
+  if (id === "situazione") return <BriefcaseBusiness size={25} />;
+  if (id === "titolo_studio") return <ClipboardCheck size={25} />;
+  if (id === "obiettivo") return <Target size={25} />;
+  if (id === "motivazione_studio") return <HeartHandshake size={25} />;
+  if (id === "urgenza") return <Timer size={25} />;
+  if (id === "tempo") return <Timer size={25} />;
+  if (id === "area") return <Sparkles size={25} />;
+  if (id === "aspetto_da_valutare") return <HelpCircle size={25} />;
+  return <Sparkles size={25} />;
+}
+
 function getSegmenti(data: OrientamentoData): Segmenti {
   let segmento_studente = "NON_ISCRITTO";
 
-  if (data.stato_iscrizione === "Sì, sono già iscritto") {
+  if (data.stato_iscrizione === "Sì, sono già iscritto")
     segmento_studente = "GIA_ISCRITTO";
-  } else if (data.stato_iscrizione === "Ho iniziato ma ho interrotto") {
+  else if (data.stato_iscrizione === "Ho iniziato ma ho interrotto")
     segmento_studente = "UNIVERSITA_INTERROTTA";
-  } else if (data.stato_iscrizione === "Sto valutando un trasferimento") {
+  else if (data.stato_iscrizione === "Sto valutando un trasferimento")
     segmento_studente = "TRASFERIMENTO";
-  }
 
   let segmento_intento = "INDECISO";
 
@@ -294,7 +422,15 @@ function getSegmenti(data: OrientamentoData): Segmenti {
     segmento_ingresso = "LAUREA_VECCHIO_ORDINAMENTO";
   else if (data.titolo_studio === "Master universitario")
     segmento_ingresso = "MASTER";
-  else if (data.titolo_studio === "Ho iniziato l’università ma non ho concluso")
+  else if (
+    data.titolo_studio?.includes("AFAM") ||
+    data.titolo_studio?.includes("conservatorio") ||
+    data.titolo_studio?.includes("accademia")
+  )
+    segmento_ingresso = "AFAM";
+  else if (
+    data.titolo_studio === "Ho iniziato l’università ma non ho terminato"
+  )
     segmento_ingresso = "UNIVERSITA_INCOMPLETA";
 
   let segmento_urgenza = "NON_DEFINITA";
@@ -341,12 +477,12 @@ function getSegmenti(data: OrientamentoData): Segmenti {
 function getRisultato(data: OrientamentoData): Risultato {
   const area = data.area || "";
 
-  if (area === "Economia") {
+  if (area === "Economia e management") {
     return {
       tipo: "ECONOMIA",
       titolo: "Profilo economico-manageriale",
       descrizione:
-        "Le tue risposte indicano un interesse verso percorsi legati a organizzazione, gestione, amministrazione, impresa o crescita professionale.",
+        "Le tue risposte indicano un interesse verso organizzazione, gestione, amministrazione, impresa, marketing o crescita professionale.",
       percorso:
         "Potresti valutare percorsi in Economia, Management, Amministrazione, Marketing o ambiti affini.",
     };
@@ -363,9 +499,9 @@ function getRisultato(data: OrientamentoData): Risultato {
     };
   }
 
-  if (area === "Scienze dell’educazione" || area === "Scuola") {
+  if (area === "Scienze dell’educazione" || area === "Scuola e insegnamento") {
     return {
-      tipo: "EDUCAZIONE",
+      tipo: area === "Scuola e insegnamento" ? "SCUOLA" : "EDUCAZIONE",
       titolo: "Profilo educativo e formativo",
       descrizione:
         "Le tue risposte evidenziano un interesse per formazione, educazione, servizi alla persona, scuola o supporto nei contesti educativi.",
@@ -374,10 +510,10 @@ function getRisultato(data: OrientamentoData): Risultato {
     };
   }
 
-  if (area === "Giurisprudenza") {
+  if (area === "Giurisprudenza / servizi giuridici") {
     return {
       tipo: "GIURIDICA",
-      titolo: "Profilo giuridico",
+      titolo: "Profilo giuridico-amministrativo",
       descrizione:
         "Il tuo profilo sembra orientato verso norme, istituzioni, diritto, amministrazione o concorsi.",
       percorso:
@@ -385,14 +521,14 @@ function getRisultato(data: OrientamentoData): Risultato {
     };
   }
 
-  if (area === "Ingegneria" || area === "Informatica") {
+  if (area === "Informatica / tecnologia") {
     return {
       tipo: "TECNOLOGIA",
       titolo: "Profilo tecnico e digitale",
       descrizione:
         "Le tue risposte indicano un interesse per ambiti tecnici, digitali, progettuali o tecnologici.",
       percorso:
-        "Potresti valutare percorsi in Ingegneria, Informatica, tecnologie digitali o ambiti tecnico-scientifici.",
+        "Potresti valutare percorsi in Informatica, Ingegneria, tecnologie digitali o ambiti tecnico-scientifici.",
     };
   }
 
@@ -407,14 +543,14 @@ function getRisultato(data: OrientamentoData): Risultato {
     };
   }
 
-  if (area === "Comunicazione" || area === "Lettere" || area === "Lingue") {
+  if (area === "Comunicazione") {
     return {
       tipo: "COMUNICAZIONE",
       titolo: "Profilo comunicativo e umanistico",
       descrizione:
         "Le tue risposte indicano un interesse per comunicazione, linguaggi, cultura, scrittura, relazioni e contenuti.",
       percorso:
-        "Potresti valutare percorsi in Comunicazione, Lingue, Lettere, discipline umanistiche o creative.",
+        "Potresti valutare percorsi in Comunicazione, discipline umanistiche, linguistiche o creative.",
     };
   }
 
@@ -422,7 +558,7 @@ function getRisultato(data: OrientamentoData): Risultato {
     tipo: "GENERALE",
     titolo: "Profilo da orientare",
     descrizione:
-      "Le tue risposte mostrano che potresti avere bisogno di confrontare più aree prima di scegliere.",
+      "Le tue risposte mostrano che potrebbe essere utile confrontare più aree prima di scegliere.",
     percorso:
       "Il passo più utile è valutare con attenzione obiettivo, tempo disponibile, titolo di partenza e sostenibilità del percorso.",
   };
@@ -439,6 +575,8 @@ function saveToLocalStorage(
   localStorage.setItem("ha_fatto_test", "si");
 
   localStorage.setItem("stato_iscrizione", data.stato_iscrizione || "");
+  localStorage.setItem("eta", data.eta || "");
+  localStorage.setItem("situazione", data.situazione || "");
   localStorage.setItem("titolo_studio", data.titolo_studio || "");
   localStorage.setItem("obiettivo", data.obiettivo || "");
   localStorage.setItem("motivazione_studio", data.motivazione_studio || "");
@@ -458,6 +596,29 @@ function saveToLocalStorage(
   localStorage.setItem("segmento_aspetto", segmenti.segmento_aspetto);
 }
 
+function InfoPill({ children, tone }: { children: ReactNode; tone: Tone }) {
+  const theme = tones[tone];
+
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "7px 11px",
+        borderRadius: 999,
+        background: theme.softBg,
+        border: `1px solid ${theme.border}`,
+        color: theme.icon,
+        fontSize: 11,
+        fontWeight: 950,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
 export default function OrientamentoGratuitoTestPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<OrientamentoData>({});
@@ -474,6 +635,8 @@ export default function OrientamentoGratuitoTestPage() {
 
   const currentStep = steps[stepIndex];
   const progress = Math.round(((stepIndex + 1) / steps.length) * 100);
+  const stepTone = getStepTone(currentStep.id);
+  const theme = tones[stepTone];
 
   const segmenti = useMemo(() => getSegmenti(data), [data]);
   const risultato = useMemo(() => getRisultato(data), [data]);
@@ -533,15 +696,12 @@ export default function OrientamentoGratuitoTestPage() {
         cognome: lead.cognome,
         email: lead.email,
         telefono: lead.telefono,
-
         ...data,
         ...segmenti,
-
         risultato_tipo: risultato.tipo,
         risultato_titolo: risultato.titolo,
         risultato_descrizione: risultato.descrizione,
         corso_suggerito: risultato.percorso,
-
         source: "orientamento_gratuito",
       };
 
@@ -575,7 +735,6 @@ export default function OrientamentoGratuitoTestPage() {
       localStorage.setItem("onboarding_lead_data", new Date().toISOString());
 
       saveToLocalStorage(data, segmenti, risultato);
-
       setFase("risultato");
     } catch (error) {
       console.error("Errore orientamento gratuito", error);
@@ -602,7 +761,8 @@ export default function OrientamentoGratuitoTestPage() {
             fontWeight: 850,
           }}
         >
-          ← Torna indietro
+          <ArrowLeft size={16} />
+          Torna all’introduzione
         </Link>
       </header>
 
@@ -613,58 +773,82 @@ export default function OrientamentoGratuitoTestPage() {
               ...glassCard,
               padding: 18,
               marginBottom: 16,
-              background:
-                "linear-gradient(145deg, rgba(31,111,178,0.30), rgba(139,92,246,0.16), rgba(255,255,255,0.06))",
+              background: theme.bg,
+              border: `1px solid ${theme.border}`,
+              boxShadow: `0 24px 60px ${theme.glow}`,
+              overflow: "hidden",
+              position: "relative",
             }}
           >
             <div
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 7,
-                padding: "7px 12px",
-                borderRadius: 999,
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                marginBottom: 13,
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 4,
+                background: `linear-gradient(90deg, ${theme.accent}, transparent)`,
               }}
-            >
-              <Sparkles size={14} color="#BFDBFE" />
-              <span
+            />
+
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 13 }}>
+              <div
                 style={{
-                  fontSize: 11,
-                  fontWeight: 950,
-                  color: "#DBEAFE",
-                  letterSpacing: 0.5,
+                  width: 56,
+                  minWidth: 56,
+                  height: 56,
+                  borderRadius: 21,
+                  background: theme.softBg,
+                  border: `1px solid ${theme.border}`,
+                  color: theme.icon,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: `0 14px 30px ${theme.glow}`,
                 }}
               >
-                Test gratuito · domanda {stepIndex + 1} di {steps.length}
-              </span>
+                {getStepIcon(currentStep.id)}
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 7,
+                    marginBottom: 10,
+                  }}
+                >
+                  <InfoPill tone={stepTone}>
+                    <Sparkles size={13} /> Domanda {stepIndex + 1} di{" "}
+                    {steps.length}
+                  </InfoPill>
+                  <InfoPill tone="blue">Test gratuito</InfoPill>
+                </div>
+
+                <h1
+                  style={{
+                    margin: 0,
+                    fontSize: 26,
+                    lineHeight: 1.12,
+                    letterSpacing: -0.8,
+                  }}
+                >
+                  {currentStep.domanda}
+                </h1>
+
+                <p
+                  style={{
+                    margin: "10px 0 0",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.72)",
+                  }}
+                >
+                  {currentStep.sottotitolo}
+                </p>
+              </div>
             </div>
-
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 27,
-                lineHeight: 1.12,
-                letterSpacing: -0.8,
-              }}
-            >
-              {currentStep.domanda}
-            </h1>
-
-            {currentStep.sottotitolo && (
-              <p
-                style={{
-                  margin: "10px 0 0",
-                  fontSize: 13,
-                  lineHeight: 1.6,
-                  color: "rgba(255,255,255,0.70)",
-                }}
-              >
-                {currentStep.sottotitolo}
-              </p>
-            )}
 
             <div
               style={{
@@ -680,8 +864,7 @@ export default function OrientamentoGratuitoTestPage() {
                   width: `${progress}%`,
                   height: "100%",
                   borderRadius: 999,
-                  background:
-                    "linear-gradient(90deg, #1F6FB2 0%, #3AA0FF 50%, #A78BFA 100%)",
+                  background: `linear-gradient(90deg, ${theme.accent}, #3AA0FF, #A78BFA)`,
                 }}
               />
             </div>
@@ -701,19 +884,30 @@ export default function OrientamentoGratuitoTestPage() {
                     textAlign: "left",
                     borderRadius: 22,
                     border: selected
-                      ? "1px solid rgba(96,165,250,0.58)"
+                      ? `1px solid ${theme.border}`
                       : "1px solid rgba(255,255,255,0.10)",
-                    background: selected
-                      ? "linear-gradient(135deg, rgba(59,130,246,0.24), rgba(139,92,246,0.14))"
-                      : "rgba(255,255,255,0.065)",
+                    background: selected ? theme.bg : "rgba(255,255,255,0.065)",
                     color: "#FFFFFF",
                     padding: 15,
                     cursor: "pointer",
                     boxShadow: selected
-                      ? "0 18px 38px rgba(59,130,246,0.18)"
+                      ? `0 18px 38px ${theme.glow}`
                       : "0 12px 28px rgba(0,0,0,0.18)",
+                    position: "relative",
+                    overflow: "hidden",
                   }}
                 >
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 4,
+                      background: theme.accent,
+                      opacity: selected ? 1 : 0.55,
+                    }}
+                  />
                   <span
                     style={{
                       display: "flex",
@@ -723,10 +917,11 @@ export default function OrientamentoGratuitoTestPage() {
                       fontSize: 14,
                       lineHeight: 1.4,
                       fontWeight: 850,
+                      paddingLeft: 4,
                     }}
                   >
                     {opzione}
-                    <ArrowRight size={17} color="#93C5FD" />
+                    <ArrowRight size={17} color={theme.icon} />
                   </span>
                 </button>
               );
@@ -737,11 +932,7 @@ export default function OrientamentoGratuitoTestPage() {
             <button
               type="button"
               onClick={goBack}
-              style={{
-                marginTop: 16,
-                width: "100%",
-                ...secondaryButtonStyle,
-              }}
+              style={{ marginTop: 16, width: "100%", ...secondaryButtonStyle }}
             >
               Torna alla domanda precedente
             </button>
@@ -909,10 +1100,7 @@ export default function OrientamentoGratuitoTestPage() {
             <button
               type="button"
               onClick={goBack}
-              style={{
-                ...secondaryButtonStyle,
-                width: "100%",
-              }}
+              style={{ ...secondaryButtonStyle, width: "100%" }}
             >
               Modifica risposte
             </button>
@@ -921,12 +1109,7 @@ export default function OrientamentoGratuitoTestPage() {
       )}
 
       {fase === "risultato" && (
-        <section
-          style={{
-            display: "grid",
-            gap: 14,
-          }}
-        >
+        <section style={{ display: "grid", gap: 14 }}>
           <div
             style={{
               ...glassCard,
@@ -990,8 +1173,8 @@ export default function OrientamentoGratuitoTestPage() {
             icon={<GraduationCap size={20} />}
             title="Percorso da valutare"
             text={risultato.percorso}
+            tone="blue"
           />
-
           <ResultCard
             icon={<Target size={20} />}
             title="Aspetto da approfondire"
@@ -999,12 +1182,13 @@ export default function OrientamentoGratuitoTestPage() {
               data.aspetto_da_valutare ||
               "Costi, tempi, modalità di studio, CFU ed eventuali agevolazioni."
             }
+            tone="amber"
           />
-
           <ResultCard
             icon={<ShieldCheck size={20} />}
             title="Prossimo passo"
             text="Puoi ora generare il tuo Piano Universitario Personalizzato oppure entrare nell’app per salvare il profilo e continuare l’orientamento."
+            tone="teal"
           />
 
           <div style={{ display: "grid", gap: 10 }}>
@@ -1077,17 +1261,24 @@ function ResultCard({
   icon,
   title,
   text,
+  tone,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   text: string;
+  tone: Tone;
 }) {
+  const theme = tones[tone];
+
   return (
     <section
       style={{
         ...glassCard,
         padding: 16,
         borderRadius: 24,
+        border: `1px solid ${theme.border}`,
+        background: theme.bg,
+        boxShadow: `0 20px 42px ${theme.glow}`,
       }}
     >
       <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
@@ -1097,9 +1288,9 @@ function ResultCard({
             minWidth: 42,
             height: 42,
             borderRadius: 16,
-            background: "rgba(59,130,246,0.13)",
-            border: "1px solid rgba(96,165,250,0.22)",
-            color: "#BFDBFE",
+            background: theme.softBg,
+            border: `1px solid ${theme.border}`,
+            color: theme.icon,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1114,7 +1305,7 @@ function ResultCard({
               margin: "7px 0 0",
               fontSize: 13,
               lineHeight: 1.6,
-              color: "rgba(255,255,255,0.70)",
+              color: "rgba(255,255,255,0.72)",
             }}
           >
             {text}
