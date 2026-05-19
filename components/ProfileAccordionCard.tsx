@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { getSmartTheme, type SmartTone } from "@/components/ui/cardThemes";
 
 type ProfileAccordionCardProps = {
   title: string;
@@ -10,6 +11,7 @@ type ProfileAccordionCardProps = {
   badge?: string;
   defaultOpen?: boolean;
   icon?: ReactNode;
+  tone?: SmartTone;
   children: ReactNode;
 };
 
@@ -19,24 +21,50 @@ export default function ProfileAccordionCard({
   badge,
   defaultOpen = false,
   icon,
+  tone = "blue",
   children,
 }: ProfileAccordionCardProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const theme = getSmartTheme(tone);
 
   return (
     <section
       style={{
-        background: "rgba(15, 35, 58, 0.94)",
-        border: "1px solid rgba(148, 163, 184, 0.18)",
-        borderRadius: 20,
-        padding: 14,
-        boxShadow: "0 18px 40px rgba(0,0,0,0.18)",
+        position: "relative",
+        overflow: "hidden",
+        background: theme.bg,
+        border: `1px solid ${open ? theme.borderStrong : theme.border}`,
+        borderRadius: 24,
+        padding: 15,
+        boxShadow: `0 18px 44px rgba(0,0,0,0.24), 0 0 0 1px ${theme.glow}`,
       }}
     >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(circle at 90% 0%, ${theme.glow} 0%, transparent 34%)`,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 5,
+          background: theme.accent,
+          boxShadow: `0 0 24px ${theme.glow}`,
+        }}
+      />
+
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         style={{
+          position: "relative",
+          zIndex: 1,
           width: "100%",
           border: "none",
           background: "transparent",
@@ -50,19 +78,19 @@ export default function ProfileAccordionCard({
           textAlign: "left",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0 }}>
           {icon && (
             <div
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: 12,
-                background: "rgba(31,111,178,0.22)",
-                border: "1px solid rgba(96,165,250,0.22)",
+                width: 40,
+                height: 40,
+                borderRadius: 15,
+                background: theme.iconBg,
+                border: `1px solid ${theme.border}`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#60a5fa",
+                color: theme.accentStrong,
                 flexShrink: 0,
               }}
             >
@@ -70,21 +98,15 @@ export default function ProfileAccordionCard({
             </div>
           )}
 
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                flexWrap: "wrap",
-              }}
-            >
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h2
                 style={{
                   margin: 0,
-                  fontSize: 15,
-                  fontWeight: 900,
-                  letterSpacing: "-0.01em",
+                  fontSize: 16,
+                  lineHeight: 1.18,
+                  fontWeight: 950,
+                  letterSpacing: "-0.02em",
                 }}
               >
                 {title}
@@ -94,12 +116,13 @@ export default function ProfileAccordionCard({
                 <span
                   style={{
                     fontSize: 10,
-                    fontWeight: 900,
-                    color: "#bfdbfe",
-                    background: "rgba(37,99,235,0.28)",
-                    border: "1px solid rgba(96,165,250,0.24)",
-                    padding: "4px 8px",
+                    fontWeight: 950,
+                    color: theme.accentStrong,
+                    background: theme.accentSoft,
+                    border: `1px solid ${theme.border}`,
+                    padding: "5px 9px",
                     borderRadius: 999,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {badge}
@@ -110,10 +133,10 @@ export default function ProfileAccordionCard({
             {subtitle && (
               <p
                 style={{
-                  margin: "5px 0 0",
-                  fontSize: 12,
+                  margin: "6px 0 0",
+                  fontSize: 12.5,
                   lineHeight: 1.45,
-                  color: "#cbd5e1",
+                  color: theme.muted,
                 }}
               >
                 {subtitle}
@@ -124,15 +147,15 @@ export default function ProfileAccordionCard({
 
         <div
           style={{
-            width: 30,
-            height: 30,
-            borderRadius: 10,
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            width: 34,
+            height: 34,
+            borderRadius: 13,
+            background: theme.accentSoft,
+            border: `1px solid ${theme.border}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#bfdbfe",
+            color: theme.accentStrong,
             flexShrink: 0,
           }}
         >
@@ -143,9 +166,11 @@ export default function ProfileAccordionCard({
       {open && (
         <div
           style={{
-            marginTop: 14,
-            paddingTop: 14,
-            borderTop: "1px solid rgba(148, 163, 184, 0.16)",
+            position: "relative",
+            zIndex: 1,
+            marginTop: 15,
+            paddingTop: 15,
+            borderTop: `1px solid ${theme.border}`,
           }}
         >
           {children}

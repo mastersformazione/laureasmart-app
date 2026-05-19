@@ -513,6 +513,7 @@ export default function ProfiloPage() {
       {showProfiloUniversitario && (
         <>
           <ProfileSummaryCard
+            tone="green"
             corsoAttuale={
               classeLaureaAttuale
                 ? classeLaureaLabel
@@ -540,6 +541,7 @@ export default function ProfiloPage() {
           <div style={{ height: 14 }} />
 
           <ProfileAccordionCard
+            tone="blue"
             title="Dati universitari"
             badge={isTrasferimento ? "Trasferimento" : "Percorso"}
             subtitle={
@@ -849,6 +851,7 @@ export default function ProfiloPage() {
       <div style={{ height: 14 }} />
 
       <ProfileAccordionCard
+        tone={isTrasferimento || isUniversitaInterrotta ? "amber" : "cyan"}
         title="Stato percorso"
         badge="Segmento"
         subtitle={statoIscrizione}
@@ -903,6 +906,7 @@ export default function ProfiloPage() {
       <div style={{ height: 14 }} />
 
       <ProfileAccordionCard
+        tone="purple"
         title="Il tuo obiettivo"
         badge="Profilo"
         subtitle={`${obiettivo} · Profilo orientativo: ${profilo}`}
@@ -928,6 +932,7 @@ export default function ProfiloPage() {
       <div style={{ height: 14 }} />
 
       <ProfileActionCard
+        tone="purple"
         title="Piano Universitario Personalizzato"
         badge="Novità"
         icon={<FileText size={19} />}
@@ -944,6 +949,7 @@ export default function ProfiloPage() {
       <div style={{ height: 14 }} />
 
       <ProfileAccordionCard
+        tone="green"
         title="Strumenti utili"
         badge="App"
         subtitle="Percorsi, prossimi step e funzioni da consultare quando servono."
@@ -979,6 +985,7 @@ export default function ProfiloPage() {
       <div style={{ height: 14 }} />
 
       <ProfileAccordionCard
+        tone="purple"
         title="Biblioteca Smart"
         badge={
           isGiaIscritto || isTrasferimento
@@ -1145,10 +1152,12 @@ function FieldLabel({
 const heroStyle: React.CSSProperties = {
   padding: 24,
   borderRadius: 32,
-  background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
-  boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+  background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 45%, #7C3AED 100%)",
+  boxShadow: "0 26px 70px rgba(58,160,255,0.28)",
   marginBottom: 18,
-  border: "1px solid rgba(255,255,255,0.14)",
+  border: "1px solid rgba(147,197,253,0.34)",
+  position: "relative",
+  overflow: "hidden",
 };
 
 const heroIconStyle: React.CSSProperties = {
@@ -1186,9 +1195,13 @@ const heroTextStyle: React.CSSProperties = {
 const darkCardStyle: React.CSSProperties = {
   padding: 18,
   borderRadius: 26,
-  background: "rgba(17,32,51,0.86)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+  background:
+    "linear-gradient(135deg, rgba(58,160,255,0.18) 0%, rgba(17,32,51,0.94) 72%)",
+  border: "1px solid rgba(120,194,255,0.28)",
+  boxShadow:
+    "inset 5px 0 0 rgba(58,160,255,0.85), 0 18px 44px rgba(0,0,0,0.26), 0 0 0 1px rgba(58,160,255,0.10)",
+  position: "relative",
+  overflow: "hidden",
 };
 
 const cardHeaderStyle: React.CSSProperties = {
@@ -1208,27 +1221,32 @@ const cardTitleStyle: React.CSSProperties = {
 const badgeStyle: React.CSSProperties = {
   padding: "6px 10px",
   borderRadius: 999,
-  background: "rgba(58,160,255,0.16)",
-  color: "#78C2FF",
+  background: "rgba(58,160,255,0.30)",
+  border: "1px solid rgba(120,194,255,0.42)",
+  color: "#BFDBFE",
   fontSize: 11,
-  fontWeight: 900,
+  fontWeight: 950,
   whiteSpace: "nowrap",
 };
 
 const metricCardStyle: React.CSSProperties = {
   padding: 14,
   borderRadius: 22,
-  background: "rgba(17,32,51,0.86)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 12px 30px rgba(0,0,0,0.22)",
+  background:
+    "linear-gradient(135deg, rgba(31,111,178,0.28), rgba(17,32,51,0.92))",
+  border: "1px solid rgba(120,194,255,0.26)",
+  boxShadow:
+    "inset 0 3px 0 rgba(58,160,255,0.72), 0 14px 34px rgba(0,0,0,0.24)",
 };
 
 const metricIconStyle: React.CSSProperties = {
   width: 42,
   height: 42,
   borderRadius: 16,
-  background: "rgba(58,160,255,0.16)",
-  color: "#78C2FF",
+  background:
+    "linear-gradient(135deg, rgba(58,160,255,0.36), rgba(31,111,178,0.16))",
+  border: "1px solid rgba(120,194,255,0.30)",
+  color: "#BFDBFE",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -1267,21 +1285,24 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   minHeight: 48,
   borderRadius: 16,
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(120,194,255,0.24)",
+  background: "rgba(255,255,255,0.10)",
   color: "#FFFFFF",
   padding: "0 12px",
   fontSize: 14,
   fontWeight: 800,
   outline: "none",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
 };
 
 const summaryBoxStyle: React.CSSProperties = {
   marginTop: 16,
   padding: 14,
   borderRadius: 20,
-  background: "rgba(58,160,255,0.12)",
-  border: "1px solid rgba(120,194,255,0.16)",
+  background:
+    "linear-gradient(135deg, rgba(20,184,166,0.18), rgba(58,160,255,0.12))",
+  border: "1px solid rgba(94,234,212,0.26)",
+  boxShadow: "inset 4px 0 0 rgba(20,184,166,0.72)",
 };
 
 const progressTrackStyle: React.CSSProperties = {
@@ -1304,27 +1325,28 @@ const primaryButtonStyle: React.CSSProperties = {
   minHeight: 56,
   borderRadius: 20,
   border: "none",
-  background: "#3AA0FF",
+  background: "linear-gradient(135deg, #1F6FB2, #3AA0FF)",
   color: "#FFFFFF",
   fontSize: 15,
-  fontWeight: 900,
+  fontWeight: 950,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   gap: 8,
   marginTop: 14,
   cursor: "pointer",
+  boxShadow: "0 14px 30px rgba(58,160,255,0.28)",
 };
 
 const secondaryButtonStyle: React.CSSProperties = {
   width: "100%",
   minHeight: 52,
   borderRadius: 18,
-  border: "1px solid rgba(255,255,255,0.10)",
-  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(120,194,255,0.22)",
+  background: "rgba(255,255,255,0.10)",
   color: "#FFFFFF",
   fontSize: 14,
-  fontWeight: 850,
+  fontWeight: 900,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -1344,16 +1366,19 @@ const timelineBoxStyle: React.CSSProperties = {
   padding: 16,
   borderRadius: 22,
   background:
-    "linear-gradient(135deg, rgba(58,160,255,0.18) 0%, rgba(120,194,255,0.08) 100%)",
-  border: "1px solid rgba(120,194,255,0.16)",
+    "linear-gradient(135deg, rgba(251,191,36,0.20) 0%, rgba(58,160,255,0.12) 100%)",
+  border: "1px solid rgba(253,230,138,0.26)",
+  boxShadow: "inset 4px 0 0 rgba(251,191,36,0.75)",
 };
 
 const smallIconStyle: React.CSSProperties = {
   width: 44,
   height: 44,
   borderRadius: 16,
-  background: "rgba(58,160,255,0.16)",
-  color: "#78C2FF",
+  background:
+    "linear-gradient(135deg, rgba(58,160,255,0.34), rgba(31,111,178,0.16))",
+  border: "1px solid rgba(120,194,255,0.28)",
+  color: "#BFDBFE",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
