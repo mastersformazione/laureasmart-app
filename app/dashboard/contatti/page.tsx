@@ -51,7 +51,7 @@ const ORIENTATRICE = {
   nome: "Giulia C.",
   ruolo: "Orientatrice suggerita Laurea Smart",
   telefono: "3793673257",
-  telefonoWhatsapp: "39793673257",
+  telefonoWhatsapp: "393793673257",
   email: "info@laureasmart.it",
   foto: "/giulia-orientatrice.png",
 };
