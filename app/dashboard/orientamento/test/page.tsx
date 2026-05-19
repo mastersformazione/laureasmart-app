@@ -68,6 +68,64 @@ type Orientatrice = {
   specializzazioni: string[];
 };
 
+type StepTone = {
+  accent: string;
+  border: string;
+  optionBg: string;
+  glow: string;
+  progress: string;
+};
+
+function getStepTone(id: keyof OrientamentoData): StepTone {
+  if (id === "obiettivo" || id === "motivazione_studio") {
+    return {
+      accent: "#A78BFA",
+      border: "rgba(167,139,250,0.40)",
+      optionBg: "rgba(139,92,246,0.24)",
+      glow: "rgba(139,92,246,0.22)",
+      progress: "linear-gradient(90deg, #8B5CF6, #C4B5FD)",
+    };
+  }
+
+  if (id === "tempo" || id === "urgenza") {
+    return {
+      accent: "#22C55E",
+      border: "rgba(34,197,94,0.36)",
+      optionBg: "rgba(20,184,166,0.22)",
+      glow: "rgba(20,184,166,0.20)",
+      progress: "linear-gradient(90deg, #14B8A6, #5EEAD4)",
+    };
+  }
+
+  if (id === "aspetto_da_valutare") {
+    return {
+      accent: "#FBBF24",
+      border: "rgba(251,191,36,0.42)",
+      optionBg: "rgba(251,191,36,0.17)",
+      glow: "rgba(251,191,36,0.18)",
+      progress: "linear-gradient(90deg, #F59E0B, #FDE68A)",
+    };
+  }
+
+  if (id === "area" || id === "titolo_studio") {
+    return {
+      accent: "#38BDF8",
+      border: "rgba(56,189,248,0.38)",
+      optionBg: "rgba(14,165,233,0.20)",
+      glow: "rgba(14,165,233,0.20)",
+      progress: "linear-gradient(90deg, #0EA5E9, #7DD3FC)",
+    };
+  }
+
+  return {
+    accent: "#78C2FF",
+    border: "rgba(120,194,255,0.34)",
+    optionBg: "rgba(58,160,255,0.20)",
+    glow: "rgba(58,160,255,0.20)",
+    progress: "linear-gradient(90deg, #3AA0FF, #78C2FF)",
+  };
+}
+
 export default function OrientamentoPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -1351,6 +1409,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
 
   const current = steps[step];
   const progress = Math.round(((step + 1) / steps.length) * 100);
+  const stepTone = getStepTone(current.id);
 
   return (
     <main
@@ -1362,7 +1421,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
         margin: "0 auto",
         color: "#FFFFFF",
         background:
-          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+          "radial-gradient(circle at top left, rgba(58,160,255,0.34), transparent 30%), radial-gradient(circle at top right, rgba(139,92,246,0.20), transparent 28%), linear-gradient(180deg, #081526 0%, #0B1728 44%, #07111F 100%)",
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
       }}
     >
@@ -1500,8 +1559,9 @@ Corso suggerito: ${risultato.corsoSuggerito}`
               style={{
                 padding: "6px 10px",
                 borderRadius: 999,
-                background: "rgba(58,160,255,0.16)",
-                color: "#78C2FF",
+                background: "rgba(58,160,255,0.26)",
+                border: "1px solid rgba(120,194,255,0.28)",
+                color: "#BFDBFE",
                 fontSize: 12,
                 fontWeight: 900,
                 whiteSpace: "nowrap",
@@ -1526,7 +1586,8 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 width: `${progress}%`,
                 height: "100%",
                 borderRadius: 999,
-                background: "linear-gradient(90deg, #3AA0FF, #78C2FF)",
+                background: stepTone.progress,
+                boxShadow: `0 0 18px ${stepTone.glow}`,
               }}
             />
           </div>
@@ -1554,8 +1615,8 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 width: "100%",
                 minHeight: 58,
                 borderRadius: 20,
-                border: "1px solid rgba(255,255,255,0.10)",
-                background: "rgba(255,255,255,0.07)",
+                border: `1px solid ${stepTone.border}`,
+                background: `linear-gradient(135deg, ${stepTone.optionBg}, rgba(17,32,51,0.92))`,
                 color: "#FFFFFF",
                 padding: "14px 15px",
                 display: "flex",
@@ -1566,11 +1627,11 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 fontSize: 15,
                 fontWeight: 850,
                 cursor: "pointer",
-                boxShadow: "0 10px 24px rgba(0,0,0,0.14)",
+                boxShadow: `inset 4px 0 0 ${stepTone.accent}, 0 12px 28px rgba(0,0,0,0.18)`,
               }}
             >
               <span>{opzione}</span>
-              <ArrowRight size={18} color="#78C2FF" />
+              <ArrowRight size={18} color={stepTone.accent} />
             </button>
           ))}
         </div>
@@ -1609,8 +1670,9 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 width: 76,
                 height: 76,
                 borderRadius: 26,
-                background: "rgba(58,160,255,0.16)",
-                color: "#78C2FF",
+                background: "rgba(58,160,255,0.26)",
+                border: "1px solid rgba(120,194,255,0.28)",
+                color: "#BFDBFE",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1843,10 +1905,12 @@ function DarkCard({
       style={{
         padding: 20,
         borderRadius: 28,
-        background: "rgba(17,32,51,0.86)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
-        backdropFilter: "blur(16px)",
+        background:
+          "linear-gradient(135deg, rgba(58,160,255,0.14), rgba(17,32,51,0.92))",
+        border: "1px solid rgba(120,194,255,0.20)",
+        boxShadow:
+          "inset 0 4px 0 rgba(120,194,255,0.48), 0 18px 44px rgba(0,0,0,0.28)",
+        backdropFilter: "blur(18px)",
       }}
     >
       {(title || badge) && (
@@ -1877,8 +1941,9 @@ function DarkCard({
             <span
               style={{
                 borderRadius: 999,
-                background: "rgba(58,160,255,0.16)",
-                color: "#78C2FF",
+                background: "rgba(58,160,255,0.26)",
+                border: "1px solid rgba(120,194,255,0.28)",
+                color: "#BFDBFE",
                 padding: "6px 10px",
                 fontSize: 11,
                 fontWeight: 900,
