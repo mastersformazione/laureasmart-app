@@ -67,6 +67,81 @@ type Orientatrice = {
   specializzazioni: string[];
 };
 
+type StepTone = {
+  accent: string;
+  border: string;
+  optionBg: string;
+  glow: string;
+  progress: string;
+  hero: string;
+};
+
+function getStepTone(id: keyof OrientamentoData): StepTone {
+  if (id === "obiettivo" || id === "motivazione_studio") {
+    return {
+      accent: "#A78BFA",
+      border: "rgba(167,139,250,0.42)",
+      optionBg: "rgba(139,92,246,0.24)",
+      glow: "rgba(139,92,246,0.22)",
+      progress: "linear-gradient(90deg, #8B5CF6, #C4B5FD)",
+      hero: "linear-gradient(135deg, rgba(139,92,246,0.34), rgba(31,111,178,0.20), rgba(17,32,51,0.94))",
+    };
+  }
+
+  if (id === "tempo" || id === "urgenza") {
+    return {
+      accent: "#2DD4BF",
+      border: "rgba(45,212,191,0.40)",
+      optionBg: "rgba(20,184,166,0.22)",
+      glow: "rgba(20,184,166,0.20)",
+      progress: "linear-gradient(90deg, #14B8A6, #5EEAD4)",
+      hero: "linear-gradient(135deg, rgba(20,184,166,0.30), rgba(31,111,178,0.20), rgba(17,32,51,0.94))",
+    };
+  }
+
+  if (id === "aspetto_da_valutare") {
+    return {
+      accent: "#FBBF24",
+      border: "rgba(251,191,36,0.44)",
+      optionBg: "rgba(251,191,36,0.17)",
+      glow: "rgba(251,191,36,0.18)",
+      progress: "linear-gradient(90deg, #F59E0B, #FDE68A)",
+      hero: "linear-gradient(135deg, rgba(245,158,11,0.28), rgba(31,111,178,0.18), rgba(17,32,51,0.94))",
+    };
+  }
+
+  if (id === "area" || id === "titolo_studio") {
+    return {
+      accent: "#38BDF8",
+      border: "rgba(56,189,248,0.42)",
+      optionBg: "rgba(14,165,233,0.22)",
+      glow: "rgba(14,165,233,0.20)",
+      progress: "linear-gradient(90deg, #0EA5E9, #7DD3FC)",
+      hero: "linear-gradient(135deg, rgba(14,165,233,0.30), rgba(31,111,178,0.24), rgba(17,32,51,0.94))",
+    };
+  }
+
+  if (id === "stato_iscrizione" || id === "situazione" || id === "eta") {
+    return {
+      accent: "#60A5FA",
+      border: "rgba(96,165,250,0.40)",
+      optionBg: "rgba(59,130,246,0.20)",
+      glow: "rgba(59,130,246,0.20)",
+      progress: "linear-gradient(90deg, #3B82F6, #93C5FD)",
+      hero: "linear-gradient(135deg, rgba(59,130,246,0.30), rgba(31,111,178,0.22), rgba(17,32,51,0.94))",
+    };
+  }
+
+  return {
+    accent: "#78C2FF",
+    border: "rgba(120,194,255,0.36)",
+    optionBg: "rgba(58,160,255,0.20)",
+    glow: "rgba(58,160,255,0.20)",
+    progress: "linear-gradient(90deg, #3AA0FF, #78C2FF)",
+    hero: "linear-gradient(135deg, rgba(31,111,178,0.30), rgba(17,32,51,0.94))",
+  };
+}
+
 export default function OrientamentoPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -1054,6 +1129,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
           background:
             "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
           fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+          overflowX: "hidden",
         }}
       >
         <ResultHero risultato={risultato} />
@@ -1410,6 +1486,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
 
   const current = steps[step];
   const progress = Math.round(((step + 1) / steps.length) * 100);
+  const currentTone = getStepTone(current.id);
 
   return (
     <main
@@ -1431,10 +1508,9 @@ Corso suggerito: ${risultato.corsoSuggerito}`
           overflow: "hidden",
           borderRadius: 32,
           padding: 26,
-          background:
-            "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
-          border: "1px solid rgba(255,255,255,0.14)",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
+          background: currentTone.hero,
+          border: `1px solid ${currentTone.border}`,
+          boxShadow: `0 24px 60px rgba(0,0,0,0.36), 0 0 46px ${currentTone.glow}`,
           marginBottom: 20,
         }}
       >
@@ -1446,7 +1522,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             width: 150,
             height: 150,
             borderRadius: 999,
-            background: "rgba(255,255,255,0.14)",
+            background: currentTone.glow,
           }}
         />
 
@@ -1456,7 +1532,9 @@ Corso suggerito: ${risultato.corsoSuggerito}`
               width: 58,
               height: 58,
               borderRadius: 22,
-              background: "rgba(255,255,255,0.16)",
+              background: currentTone.optionBg,
+              border: `1px solid ${currentTone.border}`,
+              boxShadow: `0 14px 34px ${currentTone.glow}`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1503,7 +1581,14 @@ Corso suggerito: ${risultato.corsoSuggerito}`
         </div>
       </section>
 
-      <DarkCard>
+      <DarkCard
+        tone={{
+          border: currentTone.border,
+          background: currentTone.hero,
+          glow: currentTone.glow,
+          accent: currentTone.accent,
+        }}
+      >
         <div style={{ marginBottom: 18 }}>
           <div
             style={{
@@ -1522,9 +1607,9 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 style={{
-                  border: "1px solid rgba(120,194,255,0.22)",
-                  background: "rgba(58,160,255,0.12)",
-                  color: "#78C2FF",
+                  border: `1px solid ${currentTone.border}`,
+                  background: currentTone.optionBg,
+                  color: currentTone.accent,
                   borderRadius: 999,
                   padding: "7px 10px",
                   fontSize: 12,
@@ -1547,7 +1632,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 margin: 0,
                 fontSize: 13,
                 fontWeight: 900,
-                color: "#78C2FF",
+                color: currentTone.accent,
                 textAlign: "center",
                 flex: 1,
               }}
@@ -1560,7 +1645,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 padding: "6px 10px",
                 borderRadius: 999,
                 background: "rgba(58,160,255,0.16)",
-                color: "#78C2FF",
+                color: currentTone.accent,
                 fontSize: 12,
                 fontWeight: 900,
                 whiteSpace: "nowrap",
@@ -1585,7 +1670,7 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 width: `${progress}%`,
                 height: "100%",
                 borderRadius: 999,
-                background: "linear-gradient(90deg, #3AA0FF, #78C2FF)",
+                background: currentTone.progress,
               }}
             />
           </div>
@@ -1613,8 +1698,8 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 width: "100%",
                 minHeight: 58,
                 borderRadius: 20,
-                border: "1px solid rgba(255,255,255,0.10)",
-                background: "rgba(255,255,255,0.07)",
+                border: `1px solid ${currentTone.border}`,
+                background: `linear-gradient(135deg, ${currentTone.optionBg}, rgba(255,255,255,0.065))`,
                 color: "#FFFFFF",
                 padding: "14px 15px",
                 display: "flex",
@@ -1625,11 +1710,24 @@ Corso suggerito: ${risultato.corsoSuggerito}`
                 fontSize: 15,
                 fontWeight: 850,
                 cursor: "pointer",
-                boxShadow: "0 10px 24px rgba(0,0,0,0.14)",
+                boxShadow: `0 14px 34px ${currentTone.glow}`,
+                position: "relative",
+                overflow: "hidden",
               }}
             >
-              <span>{opzione}</span>
-              <ArrowRight size={18} color="#78C2FF" />
+              <span
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 4,
+                  background: currentTone.accent,
+                  opacity: 0.75,
+                }}
+              />
+              <span style={{ position: "relative", zIndex: 1 }}>{opzione}</span>
+              <ArrowRight size={18} color={currentTone.accent} />
             </button>
           ))}
         </div>
@@ -1891,21 +1989,35 @@ function DarkCard({
   description,
   badge,
   children,
+  tone,
 }: {
   title?: string;
   description?: string;
   badge?: string;
   children?: ReactNode;
+  tone?: {
+    border: string;
+    background: string;
+    glow: string;
+    accent: string;
+  };
 }) {
+  const cardBorder = tone?.border || "rgba(255,255,255,0.08)";
+  const cardBackground = tone?.background || "rgba(17,32,51,0.86)";
+  const cardGlow = tone?.glow || "rgba(0,0,0,0.26)";
+  const cardAccent = tone?.accent || "#78C2FF";
+
   return (
     <section
       style={{
         padding: 20,
         borderRadius: 28,
-        background: "rgba(17,32,51,0.86)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        background: cardBackground,
+        border: `1px solid ${cardBorder}`,
+        boxShadow: `0 16px 40px rgba(0,0,0,0.26), inset 0 3px 0 ${cardAccent}, 0 0 32px ${cardGlow}`,
         backdropFilter: "blur(16px)",
+        overflow: "hidden",
+        position: "relative",
       }}
     >
       {(title || badge) && (
@@ -1937,7 +2049,7 @@ function DarkCard({
               style={{
                 borderRadius: 999,
                 background: "rgba(58,160,255,0.16)",
-                color: "#78C2FF",
+                color: cardAccent,
                 padding: "6px 10px",
                 fontSize: 11,
                 fontWeight: 900,
@@ -2070,9 +2182,10 @@ function ResultMetric({
         gap: 13,
         padding: 16,
         borderRadius: 24,
-        background: "rgba(17,32,51,0.86)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 14px 34px rgba(0,0,0,0.24)",
+        background:
+          "linear-gradient(135deg, rgba(59,130,246,0.16), rgba(17,32,51,0.92))",
+        border: "1px solid rgba(96,165,250,0.22)",
+        boxShadow: "0 18px 38px rgba(59,130,246,0.14)",
         backdropFilter: "blur(16px)",
       }}
     >
@@ -2081,8 +2194,10 @@ function ResultMetric({
           width: 48,
           height: 48,
           borderRadius: 18,
-          background: "rgba(58,160,255,0.16)",
-          color: "#78C2FF",
+          background:
+            "linear-gradient(135deg, rgba(59,130,246,0.28), rgba(139,92,246,0.18))",
+          border: "1px solid rgba(147,197,253,0.30)",
+          color: "#BFDBFE",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
