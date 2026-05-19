@@ -222,7 +222,7 @@ const steps: StepItem[] = [
   },
   {
     id: "urgenza",
-    domanda: "Entro quanto tempo vuoi realizzare questo obiettivo?",
+    domanda: "Entro quanto tempo vorresti iniziare un Corso?",
     sottotitolo:
       "La tempistica aiuta a distinguere chi vuole partire subito da chi sta ancora esplorando le alternative.",
     opzioni: [
@@ -253,13 +253,30 @@ const steps: StepItem[] = [
       "Scegli l’area che senti più vicina. Se hai dubbi, puoi indicare che non sai ancora.",
     opzioni: [
       "Economia e management",
+      "Marketing e comunicazione digitale",
       "Psicologia",
       "Scienze dell’educazione",
+      "Pedagogia e formazione",
       "Giurisprudenza / servizi giuridici",
+      "Criminologia e sicurezza",
+      "Scienze politiche e relazioni internazionali",
+      "Sociologia e servizi sociali",
       "Scienze motorie",
+      "Sport e benessere",
       "Comunicazione",
+      "Lettere, arte e spettacolo",
+      "Lingue e mediazione linguistica",
+      "Turismo, cultura e territorio",
       "Informatica / tecnologia",
+      "Data, AI e innovazione digitale",
+      "Ingegneria industriale",
+      "Ingegneria civile e ambientale",
+      "Architettura, design e moda",
+      "Biologia e nutrizione",
+      "Sanità e professioni sanitarie",
+      "Agraria, alimentazione e gastronomia",
       "Scuola e insegnamento",
+      "Pubblica amministrazione e concorsi",
       "Non so ancora",
     ],
   },
@@ -488,6 +505,28 @@ function getRisultato(data: OrientamentoData): Risultato {
     };
   }
 
+  if (area === "Economia e management") {
+    return {
+      tipo: "ECONOMIA",
+      titolo: "Profilo economico-manageriale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso gestione, organizzazione, amministrazione, impresa, marketing o crescita professionale.",
+      percorso:
+        "Potresti valutare percorsi in Economia, Management, Amministrazione, Marketing o ambiti aziendali affini.",
+    };
+  }
+
+  if (area === "Marketing e comunicazione digitale") {
+    return {
+      tipo: "COMUNICAZIONE",
+      titolo: "Profilo marketing e comunicazione digitale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso comunicazione, contenuti digitali, social media, pubblicità, brand e strategie online.",
+      percorso:
+        "Potresti valutare percorsi in Comunicazione, Marketing digitale, Digital media o ambiti legati alla comunicazione d’impresa.",
+    };
+  }
+
   if (area === "Psicologia") {
     return {
       tipo: "PSICOLOGIA",
@@ -499,14 +538,25 @@ function getRisultato(data: OrientamentoData): Risultato {
     };
   }
 
-  if (area === "Scienze dell’educazione" || area === "Scuola e insegnamento") {
+  if (area === "Scienze dell’educazione") {
     return {
-      tipo: area === "Scuola e insegnamento" ? "SCUOLA" : "EDUCAZIONE",
+      tipo: "EDUCAZIONE",
       titolo: "Profilo educativo e formativo",
       descrizione:
-        "Le tue risposte evidenziano un interesse per formazione, educazione, servizi alla persona, scuola o supporto nei contesti educativi.",
+        "Il tuo profilo sembra orientato verso educazione, formazione, servizi alla persona, infanzia, comunità e contesti sociali.",
       percorso:
-        "Potresti valutare percorsi in Scienze dell’Educazione, formazione, pedagogia o ambiti collegati alla scuola.",
+        "Potresti valutare percorsi in Scienze dell’Educazione, formazione, pedagogia o servizi socio-educativi.",
+    };
+  }
+
+  if (area === "Pedagogia e formazione") {
+    return {
+      tipo: "EDUCAZIONE",
+      titolo: "Profilo pedagogico e formativo",
+      descrizione:
+        "Il tuo profilo sembra orientato verso apprendimento, crescita personale, progettazione educativa, formazione e supporto nei percorsi di sviluppo.",
+      percorso:
+        "Potresti valutare percorsi in Pedagogia, Scienze dell’Educazione, formazione degli adulti o progettazione educativa.",
     };
   }
 
@@ -515,20 +565,42 @@ function getRisultato(data: OrientamentoData): Risultato {
       tipo: "GIURIDICA",
       titolo: "Profilo giuridico-amministrativo",
       descrizione:
-        "Il tuo profilo sembra orientato verso norme, istituzioni, diritto, amministrazione o concorsi.",
+        "Il tuo profilo sembra orientato verso diritto, norme, amministrazione, servizi giuridici, tutela, istituzioni o concorsi.",
       percorso:
-        "Potresti valutare percorsi giuridici o politico-amministrativi, anche in relazione a concorsi e avanzamenti.",
+        "Potresti valutare percorsi in Giurisprudenza, Servizi giuridici, Scienze giuridiche o aree amministrative.",
     };
   }
 
-  if (area === "Informatica / tecnologia") {
+  if (area === "Criminologia e sicurezza") {
     return {
-      tipo: "TECNOLOGIA",
-      titolo: "Profilo tecnico e digitale",
+      tipo: "GIURIDICA",
+      titolo: "Profilo criminologico e sicurezza",
       descrizione:
-        "Le tue risposte indicano un interesse per ambiti tecnici, digitali, progettuali o tecnologici.",
+        "Il tuo profilo sembra orientato verso sicurezza, criminologia, diritto, prevenzione, analisi dei fenomeni sociali e contesti investigativi.",
       percorso:
-        "Potresti valutare percorsi in Informatica, Ingegneria, tecnologie digitali o ambiti tecnico-scientifici.",
+        "Potresti valutare percorsi in area giuridica, criminologica, sicurezza, investigazione o discipline socio-giuridiche.",
+    };
+  }
+
+  if (area === "Scienze politiche e relazioni internazionali") {
+    return {
+      tipo: "GIURIDICA",
+      titolo: "Profilo politico-istituzionale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso istituzioni, pubblica amministrazione, politica, relazioni internazionali, società e organizzazioni.",
+      percorso:
+        "Potresti valutare percorsi in Scienze Politiche, Relazioni Internazionali, Pubblica Amministrazione o studi politico-sociali.",
+    };
+  }
+
+  if (area === "Sociologia e servizi sociali") {
+    return {
+      tipo: "EDUCAZIONE",
+      titolo: "Profilo sociale e comunitario",
+      descrizione:
+        "Il tuo profilo sembra orientato verso persone, comunità, inclusione, servizi sociali, disagio, territorio e progettazione sociale.",
+      percorso:
+        "Potresti valutare percorsi in Sociologia, Servizi Sociali, Scienze dell’Educazione o aree socio-comunitarie.",
     };
   }
 
@@ -537,20 +609,185 @@ function getRisultato(data: OrientamentoData): Risultato {
       tipo: "SPORT",
       titolo: "Profilo sportivo e motorio",
       descrizione:
-        "Il tuo profilo è vicino all’area del benessere, movimento, sport e attività motorie.",
+        "Il tuo profilo sembra orientato verso sport, movimento, benessere, preparazione fisica e promozione di stili di vita attivi.",
       percorso:
-        "Potresti valutare percorsi in Scienze Motorie o ambiti legati a sport, benessere e salute.",
+        "Potresti valutare percorsi in Scienze Motorie, sport, benessere o attività motorie.",
+    };
+  }
+
+  if (area === "Sport e benessere") {
+    return {
+      tipo: "SPORT",
+      titolo: "Profilo sport e benessere",
+      descrizione:
+        "Il tuo profilo sembra orientato verso fitness, benessere, movimento, salute preventiva, preparazione fisica e qualità della vita.",
+      percorso:
+        "Potresti valutare percorsi in Scienze Motorie, sport, benessere, wellness o attività fisica adattata.",
     };
   }
 
   if (area === "Comunicazione") {
     return {
       tipo: "COMUNICAZIONE",
-      titolo: "Profilo comunicativo e umanistico",
+      titolo: "Profilo comunicativo",
       descrizione:
-        "Le tue risposte indicano un interesse per comunicazione, linguaggi, cultura, scrittura, relazioni e contenuti.",
+        "Il tuo profilo sembra orientato verso linguaggi, media, relazioni, contenuti, comunicazione d’impresa e comunicazione digitale.",
       percorso:
-        "Potresti valutare percorsi in Comunicazione, discipline umanistiche, linguistiche o creative.",
+        "Potresti valutare percorsi in Comunicazione, media digitali, marketing, contenuti o comunicazione aziendale.",
+    };
+  }
+
+  if (area === "Lettere, arte e spettacolo") {
+    return {
+      tipo: "COMUNICAZIONE",
+      titolo: "Profilo umanistico e culturale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso cultura, scrittura, editoria, arte, spettacolo, contenuti e valorizzazione del patrimonio.",
+      percorso:
+        "Potresti valutare percorsi in Lettere, Arte, Spettacolo, discipline umanistiche o comunicazione culturale.",
+    };
+  }
+
+  if (area === "Lingue e mediazione linguistica") {
+    return {
+      tipo: "COMUNICAZIONE",
+      titolo: "Profilo linguistico e internazionale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso lingue, comunicazione interculturale, mediazione, traduzione, turismo e contesti internazionali.",
+      percorso:
+        "Potresti valutare percorsi in Lingue, Mediazione linguistica, comunicazione interculturale o relazioni internazionali.",
+    };
+  }
+
+  if (area === "Turismo, cultura e territorio") {
+    return {
+      tipo: "ECONOMIA",
+      titolo: "Profilo turistico-culturale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso turismo, ospitalità, promozione del territorio, beni culturali, eventi e gestione dei servizi.",
+      percorso:
+        "Potresti valutare percorsi in Turismo, Management del turismo, Beni culturali o valorizzazione territoriale.",
+    };
+  }
+
+  if (area === "Informatica / tecnologia") {
+    return {
+      tipo: "TECNOLOGIA",
+      titolo: "Profilo tecnologico e digitale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso informatica, software, dati, sistemi digitali, innovazione e tecnologie applicate.",
+      percorso:
+        "Potresti valutare percorsi in Informatica, Ingegneria informatica, tecnologie digitali o sistemi informativi.",
+    };
+  }
+
+  if (area === "Data, AI e innovazione digitale") {
+    return {
+      tipo: "TECNOLOGIA",
+      titolo: "Profilo data, AI e innovazione",
+      descrizione:
+        "Il tuo profilo sembra orientato verso dati, intelligenza artificiale, automazione, innovazione digitale e trasformazione tecnologica.",
+      percorso:
+        "Potresti valutare percorsi in Informatica, Data Science, AI, innovazione digitale o tecnologie applicate al lavoro.",
+    };
+  }
+
+  if (area === "Ingegneria industriale") {
+    return {
+      tipo: "TECNOLOGIA",
+      titolo: "Profilo ingegneristico-industriale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso industria, produzione, energia, processi tecnici, organizzazione e innovazione applicata.",
+      percorso:
+        "Potresti valutare percorsi in Ingegneria Industriale, Gestionale, Meccanica, Energetica o ambiti tecnico-produttivi.",
+    };
+  }
+
+  if (area === "Ingegneria civile e ambientale") {
+    return {
+      tipo: "TECNOLOGIA",
+      titolo: "Profilo civile e ambientale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso costruzioni, territorio, ambiente, infrastrutture, sicurezza, progettazione e sostenibilità.",
+      percorso:
+        "Potresti valutare percorsi in Ingegneria Civile, Ambientale, Edile o ambiti collegati alla gestione del territorio.",
+    };
+  }
+
+  if (area === "Architettura, design e moda") {
+    return {
+      tipo: "COMUNICAZIONE",
+      titolo: "Profilo creativo e progettuale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso creatività, estetica, progettazione, design, moda, spazi e comunicazione visiva.",
+      percorso:
+        "Potresti valutare percorsi in Design, Moda, Architettura, comunicazione visiva o discipline creative.",
+    };
+  }
+
+  if (area === "Biologia e nutrizione") {
+    return {
+      tipo: "TECNOLOGIA",
+      titolo: "Profilo scientifico e nutrizionale",
+      descrizione:
+        "Il tuo profilo sembra orientato verso biologia, alimentazione, nutrizione, salute, benessere, qualità e ambiente.",
+      percorso:
+        "Potresti valutare percorsi in Scienze Biologiche, Nutrizione, alimentazione, benessere o aree scientifiche collegate.",
+    };
+  }
+
+  if (area === "Sanità e professioni sanitarie") {
+    return {
+      tipo: "PSICOLOGIA",
+      titolo: "Profilo sanitario e servizi alla persona",
+      descrizione:
+        "Il tuo profilo sembra orientato verso salute, prevenzione, cura, benessere, organizzazione sanitaria e supporto alla persona.",
+      percorso:
+        "Potresti valutare percorsi in area sanitaria, servizi alla persona, management sanitario o discipline collegate al benessere.",
+    };
+  }
+
+  if (area === "Agraria, alimentazione e gastronomia") {
+    return {
+      tipo: "ECONOMIA",
+      titolo: "Profilo agroalimentare e gastronomico",
+      descrizione:
+        "Il tuo profilo sembra orientato verso alimentazione, filiere agroalimentari, sostenibilità, gastronomia, qualità e valorizzazione del territorio.",
+      percorso:
+        "Potresti valutare percorsi in Agraria, Gastronomia, Scienze dell’alimentazione, food management o valorizzazione agroalimentare.",
+    };
+  }
+
+  if (area === "Scuola e insegnamento") {
+    return {
+      tipo: "SCUOLA",
+      titolo: "Profilo scuola e insegnamento",
+      descrizione:
+        "Il tuo profilo sembra orientato verso scuola, insegnamento, graduatorie, concorsi, aggiornamento professionale e formazione.",
+      percorso:
+        "Potresti valutare percorsi utili per la scuola, l’insegnamento, le graduatorie o il rafforzamento del profilo formativo.",
+    };
+  }
+
+  if (area === "Pubblica amministrazione e concorsi") {
+    return {
+      tipo: "GIURIDICA",
+      titolo: "Profilo pubblica amministrazione e concorsi",
+      descrizione:
+        "Il tuo profilo sembra orientato verso concorsi pubblici, graduatorie, amministrazione, avanzamenti professionali e ruoli istituzionali.",
+      percorso:
+        "Potresti valutare percorsi in area giuridica, economica, politico-sociale o amministrativa, in base al bando o all’obiettivo.",
+    };
+  }
+
+  if (area === "Non so ancora") {
+    return {
+      tipo: "GENERALE",
+      titolo: "Profilo da orientare",
+      descrizione:
+        "Le tue risposte mostrano che potresti avere bisogno di confrontare più aree prima di scegliere.",
+      percorso:
+        "Il passo più utile è valutare con attenzione obiettivo, tempo disponibile, titolo di partenza e sostenibilità del percorso.",
     };
   }
 
