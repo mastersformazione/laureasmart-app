@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import BottomNav from "@/components/ui/BottomNav";
 import {
   ArrowRight,
-  BadgeCheck,
   BookOpenCheck,
   CalendarCheck,
   CheckCircle2,
