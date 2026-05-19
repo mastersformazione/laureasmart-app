@@ -125,6 +125,8 @@ const pageStyle: CSSProperties = {
   background:
     "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
   fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+  overflowX: "hidden",
+  boxSizing: "border-box",
 };
 
 const glassCard: CSSProperties = {
@@ -658,6 +660,11 @@ export default function PercorsiPage() {
           display: "grid",
           gap: 10,
           marginBottom: 14,
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          overflow: "hidden",
+          boxSizing: "border-box",
         }}
       >
         <FilterBlock label="Tipo percorso">
@@ -1024,9 +1031,14 @@ function FilterBlock({
     <section
       style={{
         ...glassCard,
+        width: "100%",
+        maxWidth: "100%",
+        minWidth: 0,
         borderRadius: 22,
         padding: 12,
         background: "rgba(255,255,255,0.055)",
+        overflow: "hidden",
+        boxSizing: "border-box",
       }}
     >
       <p
@@ -1041,13 +1053,30 @@ function FilterBlock({
       >
         {label}
       </p>
+
       <div
         style={{
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
           overflowX: "auto",
+          overflowY: "hidden",
           WebkitOverflowScrolling: "touch",
+          overscrollBehaviorX: "contain",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          boxSizing: "border-box",
         }}
       >
-        <div style={{ display: "flex", gap: 8, paddingBottom: 2 }}>
+        <div
+          style={{
+            display: "inline-flex",
+            gap: 8,
+            paddingBottom: 2,
+            minWidth: "max-content",
+            maxWidth: "none",
+          }}
+        >
           {children}
         </div>
       </div>
