@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -8,13 +8,15 @@ import {
   ArrowLeft,
   BookOpen,
   Building2,
-  CheckCircle2,
+  ChevronRight,
   ClipboardCheck,
   Clock,
+  FileText,
   GraduationCap,
   ListChecks,
   Loader2,
   MessageCircle,
+  Sparkles,
   Target,
   UserRound,
 } from "lucide-react";
@@ -40,6 +42,69 @@ type Piano = {
 
 type InvioStato = "idle" | "sending" | "sent" | "error";
 
+type Tone = "blue" | "purple" | "teal" | "amber" | "rose" | "cyan";
+
+const tones: Record<
+  Tone,
+  {
+    accent: string;
+    icon: string;
+    bg: string;
+    softBg: string;
+    border: string;
+    glow: string;
+  }
+> = {
+  blue: {
+    accent: "#60A5FA",
+    icon: "#BFDBFE",
+    bg: "linear-gradient(135deg, rgba(59,130,246,0.22), rgba(12,25,42,0.96))",
+    softBg: "rgba(59,130,246,0.12)",
+    border: "rgba(96,165,250,0.26)",
+    glow: "rgba(59,130,246,0.24)",
+  },
+  purple: {
+    accent: "#A78BFA",
+    icon: "#DDD6FE",
+    bg: "linear-gradient(135deg, rgba(139,92,246,0.24), rgba(12,25,42,0.96))",
+    softBg: "rgba(139,92,246,0.12)",
+    border: "rgba(167,139,250,0.28)",
+    glow: "rgba(139,92,246,0.24)",
+  },
+  teal: {
+    accent: "#2DD4BF",
+    icon: "#99F6E4",
+    bg: "linear-gradient(135deg, rgba(20,184,166,0.22), rgba(12,25,42,0.96))",
+    softBg: "rgba(20,184,166,0.12)",
+    border: "rgba(45,212,191,0.24)",
+    glow: "rgba(20,184,166,0.24)",
+  },
+  amber: {
+    accent: "#FBBF24",
+    icon: "#FDE68A",
+    bg: "linear-gradient(135deg, rgba(245,158,11,0.24), rgba(12,25,42,0.96))",
+    softBg: "rgba(245,158,11,0.12)",
+    border: "rgba(251,191,36,0.26)",
+    glow: "rgba(245,158,11,0.22)",
+  },
+  rose: {
+    accent: "#FB7185",
+    icon: "#FECDD3",
+    bg: "linear-gradient(135deg, rgba(244,63,94,0.22), rgba(12,25,42,0.96))",
+    softBg: "rgba(244,63,94,0.12)",
+    border: "rgba(251,113,133,0.24)",
+    glow: "rgba(244,63,94,0.22)",
+  },
+  cyan: {
+    accent: "#22D3EE",
+    icon: "#A5F3FC",
+    bg: "linear-gradient(135deg, rgba(6,182,212,0.22), rgba(12,25,42,0.96))",
+    softBg: "rgba(6,182,212,0.12)",
+    border: "rgba(34,211,238,0.24)",
+    glow: "rgba(6,182,212,0.22)",
+  },
+};
+
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
   padding: "22px 18px 120px",
@@ -51,68 +116,16 @@ const pageStyle: CSSProperties = {
   fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
 };
 
-const heroStyle: CSSProperties = {
-  borderRadius: 32,
-  padding: "26px 20px",
-  marginBottom: 16,
+const shellCardStyle: CSSProperties = {
+  borderRadius: 30,
   border: "1px solid rgba(255,255,255,0.12)",
-  background:
-    "linear-gradient(145deg, rgba(31,111,178,0.32), rgba(255,255,255,0.07))",
-  boxShadow: "0 24px 65px rgba(0,0,0,0.32)",
-};
-
-const heroIconStyle: CSSProperties = {
-  width: 58,
-  height: 58,
-  borderRadius: 22,
-  background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  marginBottom: 14,
-  boxShadow: "0 18px 38px rgba(31,111,178,0.36)",
-};
-
-const eyebrowStyle: CSSProperties = {
-  margin: "0 0 8px",
-  textTransform: "uppercase",
-  fontSize: 11,
-  letterSpacing: 1.5,
-  color: "rgba(255,255,255,0.66)",
-  fontWeight: 900,
-};
-
-const heroTitleStyle: CSSProperties = {
-  margin: 0,
-  fontSize: 29,
-  lineHeight: 1.1,
-  letterSpacing: -0.8,
-};
-
-const heroTextStyle: CSSProperties = {
-  margin: "12px 0 0",
-  color: "rgba(255,255,255,0.76)",
-  fontSize: 14,
-  lineHeight: 1.65,
-};
-
-const cardStyle: CSSProperties = {
-  borderRadius: 28,
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.08)",
-  boxShadow: "0 22px 55px rgba(0,0,0,0.24)",
-  padding: 18,
-};
-
-const compactCardStyle: CSSProperties = {
-  borderRadius: 24,
-  border: "1px solid rgba(255,255,255,0.11)",
-  background: "rgba(255,255,255,0.07)",
-  padding: 16,
+  background: "rgba(255,255,255,0.06)",
+  boxShadow: "0 24px 60px rgba(0,0,0,0.26)",
+  backdropFilter: "blur(10px)",
 };
 
 const primaryButtonStyle: CSSProperties = {
-  minHeight: 52,
+  minHeight: 54,
   borderRadius: 18,
   border: "none",
   background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
@@ -126,6 +139,7 @@ const primaryButtonStyle: CSSProperties = {
   padding: "0 16px",
   cursor: "pointer",
   textDecoration: "none",
+  boxShadow: "0 18px 38px rgba(31,111,178,0.30)",
 };
 
 const secondaryButtonStyle: CSSProperties = {
@@ -147,15 +161,9 @@ const secondaryButtonStyle: CSSProperties = {
 
 const mutedTextStyle: CSSProperties = {
   margin: 0,
-  color: "rgba(255,255,255,0.72)",
+  color: "rgba(255,255,255,0.74)",
   fontSize: 13,
-  lineHeight: 1.6,
-};
-
-const sectionTitleStyle: CSSProperties = {
-  margin: 0,
-  fontSize: 17,
-  letterSpacing: -0.2,
+  lineHeight: 1.65,
 };
 
 function safeLocalStorage(key: string) {
@@ -375,36 +383,145 @@ ${piano.prossimoPasso}
 `;
 }
 
-function InfoCard({
+function SummaryPill({
+  label,
+  value,
+  tone = "blue",
   icon,
+}: {
+  label: string;
+  value: string;
+  tone?: Tone;
+  icon: ReactNode;
+}) {
+  const theme = tones[tone];
+
+  return (
+    <div
+      style={{
+        borderRadius: 20,
+        padding: 12,
+        border: `1px solid ${theme.border}`,
+        background: theme.bg,
+        boxShadow: `0 18px 35px ${theme.glow}`,
+      }}
+    >
+      <div
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 14,
+          background: theme.softBg,
+          border: `1px solid ${theme.border}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: theme.icon,
+          marginBottom: 10,
+        }}
+      >
+        {icon}
+      </div>
+      <p
+        style={{
+          margin: "0 0 4px",
+          fontSize: 11,
+          color: "rgba(255,255,255,0.62)",
+          fontWeight: 800,
+        }}
+      >
+        {label}
+      </p>
+      <p style={{ margin: 0, fontSize: 14, fontWeight: 900, lineHeight: 1.25 }}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function SectionCard({
+  index,
   title,
+  tone,
+  icon,
   children,
 }: {
-  icon: React.ReactNode;
+  index: number;
   title: string;
-  children: React.ReactNode;
+  tone: Tone;
+  icon: ReactNode;
+  children: ReactNode;
 }) {
+  const theme = tones[tone];
+
   return (
-    <section style={cardStyle}>
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-        <div
-          style={{
-            width: 42,
-            height: 42,
-            minWidth: 42,
-            borderRadius: 16,
-            background: "rgba(31,111,178,0.18)",
-            color: "#7CC4FF",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {icon}
-        </div>
-        <div style={{ flex: 1 }}>
-          <h2 style={sectionTitleStyle}>{title}</h2>
-          <div style={{ marginTop: 10 }}>{children}</div>
+    <section
+      style={{
+        borderRadius: 28,
+        border: `1px solid ${theme.border}`,
+        background: theme.bg,
+        boxShadow: `0 24px 50px ${theme.glow}`,
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 4,
+          background: `linear-gradient(90deg, ${theme.accent}, transparent)`,
+        }}
+      />
+      <div style={{ padding: 18 }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+          <div
+            style={{
+              width: 46,
+              minWidth: 46,
+              height: 46,
+              borderRadius: 18,
+              background: theme.softBg,
+              border: `1px solid ${theme.border}`,
+              color: theme.icon,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: `0 14px 28px ${theme.glow}`,
+            }}
+          >
+            {icon}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                flexWrap: "wrap",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 900,
+                  color: theme.icon,
+                  background: theme.softBg,
+                  border: `1px solid ${theme.border}`,
+                  borderRadius: 999,
+                  padding: "4px 8px",
+                }}
+              >
+                Step {index}
+              </span>
+              <h2 style={{ margin: 0, fontSize: 17, letterSpacing: -0.3 }}>
+                {title}
+              </h2>
+            </div>
+            <div style={{ marginTop: 12 }}>{children}</div>
+          </div>
         </div>
       </div>
     </section>
@@ -424,6 +541,28 @@ export default function PianoPersonalePage() {
   }, []);
 
   const pianoTesto = useMemo(() => (piano ? pianoToText(piano) : ""), [piano]);
+
+  const metrics = useMemo(() => {
+    const obiettivo = safeLocalStorage("obiettivo") || "Da definire";
+    const modalita = safeLocalStorage("modalita_studio") || "Da indicare";
+    const area =
+      safeLocalStorage("area_interesse") ||
+      safeLocalStorage("profilo_utente") ||
+      "Da definire";
+    const cfu = safeLocalStorage("cfu_conseguiti");
+    const cfuTot = safeLocalStorage("cfu_totali");
+    const esami = safeLocalStorage("esami_mancanti");
+    const urgenza = safeLocalStorage("urgenza_obiettivo") || "Da indicare";
+
+    return {
+      obiettivo,
+      modalita,
+      area,
+      progresso: cfu && cfuTot ? `${cfu}/${cfuTot} CFU` : "CFU da indicare",
+      esami: esami ? `${esami} esami mancanti` : "Esami da indicare",
+      urgenza,
+    };
+  }, [piano]);
 
   const inviaEmailPiano = async () => {
     if (!piano) return;
@@ -509,7 +648,7 @@ export default function PianoPersonalePage() {
   if (!piano) {
     return (
       <main style={pageStyle}>
-        <section style={cardStyle}>
+        <section style={{ ...shellCardStyle, padding: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Loader2 size={18} />
             <p style={mutedTextStyle}>Generazione piano in corso...</p>
@@ -522,7 +661,7 @@ export default function PianoPersonalePage() {
 
   return (
     <main style={pageStyle}>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 14 }}>
         <Link
           href="/dashboard"
           style={{
@@ -540,29 +679,160 @@ export default function PianoPersonalePage() {
         </Link>
       </div>
 
-      <section style={heroStyle}>
-        <div style={heroIconStyle}>
-          <ClipboardCheck size={30} />
+      <section
+        style={{
+          ...shellCardStyle,
+          padding: 20,
+          marginBottom: 16,
+          background:
+            "linear-gradient(145deg, rgba(31,111,178,0.34), rgba(139,92,246,0.22), rgba(255,255,255,0.07))",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: -35,
+            right: -10,
+            width: 120,
+            height: 120,
+            borderRadius: 999,
+            background:
+              "radial-gradient(circle, rgba(58,160,255,0.24), transparent 70%)",
+          }}
+        />
+
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 7,
+            padding: "7px 12px",
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            marginBottom: 14,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <Sparkles size={14} color="#BFDBFE" />
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 900,
+              color: "#DBEAFE",
+              letterSpacing: 0.6,
+            }}
+          >
+            Laurea Smart · Analisi orientativa
+          </span>
         </div>
 
-        <p style={eyebrowStyle}>Laurea Smart</p>
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            alignItems: "flex-start",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div
+            style={{
+              width: 60,
+              minWidth: 60,
+              height: 60,
+              borderRadius: 22,
+              background: "linear-gradient(135deg, #1F6FB2 0%, #8B5CF6 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 18px 40px rgba(31,111,178,0.36)",
+            }}
+          >
+            <ClipboardCheck size={30} />
+          </div>
 
-        <h1 style={heroTitleStyle}>Piano Universitario Personalizzato</h1>
+          <div style={{ flex: 1 }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 28,
+                lineHeight: 1.08,
+                letterSpacing: -0.8,
+              }}
+            >
+              Piano Universitario Personalizzato
+            </h1>
+            <p
+              style={{
+                margin: "10px 0 0",
+                color: "rgba(255,255,255,0.78)",
+                fontSize: 14,
+                lineHeight: 1.65,
+              }}
+            >
+              Abbiamo trasformato test, profilo e percorso in una lettura chiara
+              del tuo momento attuale. Qui trovi una sintesi pratica di dove
+              parti, cosa valutare e quale potrebbe essere il prossimo passo più
+              utile.
+            </p>
+          </div>
+        </div>
 
-        <p style={heroTextStyle}>
-          Abbiamo raccolto le informazioni principali del tuo profilo e le
-          abbiamo trasformate in una prima analisi orientativa. Il piano ti
-          aiuta a capire da dove parti, quali aspetti valutare con attenzione e
-          quale potrebbe essere il prossimo passo più utile.
-        </p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            marginTop: 16,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <SummaryPill
+            label="Obiettivo"
+            value={metrics.obiettivo}
+            tone="blue"
+            icon={<Target size={17} />}
+          />
+          <SummaryPill
+            label="Modalità"
+            value={metrics.modalita}
+            tone="purple"
+            icon={<GraduationCap size={17} />}
+          />
+          <SummaryPill
+            label="Progresso"
+            value={metrics.progresso}
+            tone="teal"
+            icon={<ClipboardCheck size={17} />}
+          />
+          <SummaryPill
+            label="Urgenza"
+            value={metrics.urgenza}
+            tone="amber"
+            icon={<Clock size={17} />}
+          />
+        </div>
 
-        <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
+        <div
+          style={{
+            display: "grid",
+            gap: 10,
+            marginTop: 16,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
           <button
             type="button"
             style={{
               ...primaryButtonStyle,
               opacity:
-                invioStato === "sending" || invioStato === "sent" ? 0.72 : 1,
+                invioStato === "sending" || invioStato === "sent" ? 0.74 : 1,
             }}
             onClick={inviaEmailPiano}
             disabled={invioStato === "sending" || invioStato === "sent"}
@@ -570,7 +840,7 @@ export default function PianoPersonalePage() {
             {invioStato === "sending" ? (
               <Loader2 size={18} />
             ) : (
-              <CheckCircle2 size={18} />
+              <FileText size={18} />
             )}
             {invioStato === "sending"
               ? "Invio in corso..."
@@ -579,10 +849,23 @@ export default function PianoPersonalePage() {
               : "Conferma e invia il piano"}
           </button>
 
-          <Link href="/dashboard/profilo" style={secondaryButtonStyle}>
-            <UserRound size={17} />
-            Aggiorna profilo
-          </Link>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
+          >
+            <Link href="/dashboard/profilo" style={secondaryButtonStyle}>
+              <UserRound size={17} />
+              Aggiorna profilo
+            </Link>
+            <a
+              href="https://wa.me/393472769291?text=Ciao%2C%20ho%20generato%20il%20mio%20Piano%20Universitario%20Personalizzato%20su%20Laurea%20Smart%20e%20vorrei%20parlare%20con%20un%20orientatore."
+              target="_blank"
+              rel="noreferrer"
+              style={secondaryButtonStyle}
+            >
+              <MessageCircle size={17} />
+              Parla con noi
+            </a>
+          </div>
         </div>
 
         {invioStato === "sent" && (
@@ -590,14 +873,17 @@ export default function PianoPersonalePage() {
             style={{
               marginTop: 14,
               borderRadius: 18,
-              padding: 12,
+              padding: 13,
               background: "rgba(34,197,94,0.14)",
               border: "1px solid rgba(34,197,94,0.25)",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             <p style={{ ...mutedTextStyle, color: "#BBF7D0", fontWeight: 850 }}>
-              Piano inviato correttamente. Un orientatore potrà leggere il tuo
-              profilo e valutare con maggiore attenzione il percorso più adatto.
+              Piano inviato correttamente. Un orientatore potrà leggerlo e
+              valutare con maggiore attenzione il percorso più adatto al tuo
+              caso.
             </p>
           </div>
         )}
@@ -607,9 +893,11 @@ export default function PianoPersonalePage() {
             style={{
               marginTop: 14,
               borderRadius: 18,
-              padding: 12,
+              padding: 13,
               background: "rgba(239,68,68,0.14)",
               border: "1px solid rgba(239,68,68,0.25)",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             <p style={{ ...mutedTextStyle, color: "#FECACA", fontWeight: 850 }}>
@@ -619,81 +907,170 @@ export default function PianoPersonalePage() {
         )}
       </section>
 
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 12,
-          marginBottom: 14,
-        }}
-      >
-        <div style={compactCardStyle}>
-          <Target size={22} color="#7CC4FF" />
-          <p
+      <section style={{ ...shellCardStyle, padding: 16, marginBottom: 16 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 10,
+          }}
+        >
+          <div
             style={{
-              margin: "10px 0 4px",
-              fontSize: 12,
-              color: "rgba(255,255,255,0.62)",
+              width: 38,
+              height: 38,
+              borderRadius: 14,
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#BFDBFE",
             }}
           >
-            Obiettivo
-          </p>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 900 }}>
-            {safeLocalStorage("obiettivo") || "Da definire"}
-          </p>
+            <Sparkles size={19} />
+          </div>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 16 }}>In sintesi</h2>
+            <p
+              style={{
+                margin: "4px 0 0",
+                color: "rgba(255,255,255,0.64)",
+                fontSize: 12,
+              }}
+            >
+              I quattro punti che definiscono il tuo piano in questo momento.
+            </p>
+          </div>
         </div>
 
-        <div style={compactCardStyle}>
-          <GraduationCap size={22} color="#7CC4FF" />
-          <p
-            style={{
-              margin: "10px 0 4px",
-              fontSize: 12,
-              color: "rgba(255,255,255,0.62)",
-            }}
-          >
-            Modalità
-          </p>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 900 }}>
-            {safeLocalStorage("modalita_studio") || "Da indicare"}
-          </p>
+        <div style={{ display: "grid", gap: 10 }}>
+          {[
+            {
+              label: "Area consigliata",
+              value: metrics.area,
+              tone: "cyan" as Tone,
+            },
+            { label: "Esami", value: metrics.esami, tone: "rose" as Tone },
+            {
+              label: "Prossimo focus",
+              value:
+                safeLocalStorage("aspetto_da_valutare") ||
+                "Chiarire costi, tempi e sostenibilità",
+              tone: "amber" as Tone,
+            },
+            {
+              label: "Ateneo / percorso attuale",
+              value:
+                safeLocalStorage("ateneo_attuale") ||
+                safeLocalStorage("corso_attuale") ||
+                "Non ancora indicato",
+              tone: "blue" as Tone,
+            },
+          ].map((item) => {
+            const theme = tones[item.tone];
+            return (
+              <div
+                key={item.label}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  alignItems: "center",
+                  borderRadius: 18,
+                  border: `1px solid ${theme.border}`,
+                  background: theme.softBg,
+                  padding: "12px 14px",
+                }}
+              >
+                <div>
+                  <p
+                    style={{
+                      margin: "0 0 4px",
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.60)",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {item.label}
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 13,
+                      fontWeight: 850,
+                      lineHeight: 1.35,
+                    }}
+                  >
+                    {item.value}
+                  </p>
+                </div>
+                <ChevronRight size={18} color={theme.icon} />
+              </div>
+            );
+          })}
         </div>
       </section>
 
       <div style={{ display: "grid", gap: 14 }}>
-        <InfoCard icon={<UserRound size={21} />} title="1. Punto di partenza">
+        <SectionCard
+          index={1}
+          title="Punto di partenza"
+          tone="blue"
+          icon={<UserRound size={22} />}
+        >
           <p style={mutedTextStyle}>{piano.puntoPartenza}</p>
-        </InfoCard>
+        </SectionCard>
 
-        <InfoCard icon={<Target size={21} />} title="2. Obiettivo">
+        <SectionCard
+          index={2}
+          title="Obiettivo"
+          tone="purple"
+          icon={<Target size={22} />}
+        >
           <p style={mutedTextStyle}>{piano.obiettivo}</p>
-        </InfoCard>
+        </SectionCard>
 
-        <InfoCard icon={<BookOpen size={21} />} title="3. Area consigliata">
+        <SectionCard
+          index={3}
+          title="Area consigliata"
+          tone="cyan"
+          icon={<BookOpen size={22} />}
+        >
           <p style={mutedTextStyle}>{piano.area}</p>
-        </InfoCard>
+        </SectionCard>
 
-        <InfoCard
-          icon={<Building2 size={21} />}
-          title="4. Situazione universitaria"
+        <SectionCard
+          index={4}
+          title="Situazione universitaria"
+          tone="teal"
+          icon={<Building2 size={22} />}
         >
           <p style={mutedTextStyle}>{piano.situazioneUniversitaria}</p>
-        </InfoCard>
+        </SectionCard>
 
-        <InfoCard icon={<Clock size={21} />} title="5. Tempo e sostenibilità">
+        <SectionCard
+          index={5}
+          title="Tempo e sostenibilità"
+          tone="amber"
+          icon={<Clock size={22} />}
+        >
           <p style={mutedTextStyle}>{piano.sostenibilita}</p>
-        </InfoCard>
+        </SectionCard>
 
-        <InfoCard
-          icon={<AlertTriangle size={21} />}
-          title="6. Aspetti da verificare"
+        <SectionCard
+          index={6}
+          title="Aspetti da verificare"
+          tone="rose"
+          icon={<AlertTriangle size={22} />}
         >
           <ul
             style={{
               margin: 0,
               paddingLeft: 18,
-              color: "rgba(255,255,255,0.74)",
-              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.76)",
+              lineHeight: 1.75,
               fontSize: 13,
             }}
           >
@@ -701,15 +1078,20 @@ export default function PianoPersonalePage() {
               <li key={item}>{item}</li>
             ))}
           </ul>
-        </InfoCard>
+        </SectionCard>
 
-        <InfoCard icon={<ListChecks size={21} />} title="7. Azioni consigliate">
+        <SectionCard
+          index={7}
+          title="Azioni consigliate"
+          tone="teal"
+          icon={<ListChecks size={22} />}
+        >
           <ol
             style={{
               margin: 0,
               paddingLeft: 18,
-              color: "rgba(255,255,255,0.74)",
-              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.76)",
+              lineHeight: 1.75,
               fontSize: 13,
             }}
           >
@@ -717,9 +1099,14 @@ export default function PianoPersonalePage() {
               <li key={item}>{item}</li>
             ))}
           </ol>
-        </InfoCard>
+        </SectionCard>
 
-        <InfoCard icon={<MessageCircle size={21} />} title="8. Prossimo passo">
+        <SectionCard
+          index={8}
+          title="Prossimo passo"
+          tone="purple"
+          icon={<MessageCircle size={22} />}
+        >
           <p style={mutedTextStyle}>{piano.prossimoPasso}</p>
 
           <a
@@ -731,12 +1118,12 @@ export default function PianoPersonalePage() {
             <MessageCircle size={18} />
             Parla gratis con un orientatore
           </a>
-        </InfoCard>
+        </SectionCard>
 
         <section
           style={{
-            borderRadius: 22,
-            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 24,
+            border: "1px solid rgba(255,255,255,0.10)",
             background: "rgba(255,255,255,0.05)",
             padding: 14,
           }}
@@ -745,8 +1132,8 @@ export default function PianoPersonalePage() {
             style={{
               margin: 0,
               fontSize: 12,
-              lineHeight: 1.6,
-              color: "rgba(255,255,255,0.56)",
+              lineHeight: 1.65,
+              color: "rgba(255,255,255,0.60)",
             }}
           >
             Questo piano ha valore esclusivamente orientativo. La scelta del
