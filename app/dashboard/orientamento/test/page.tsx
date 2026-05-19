@@ -790,8 +790,8 @@ export default function OrientamentoPage() {
     return {
       nome: "Giulia C.",
       ruolo: "Orientatrice suggerita Laurea Smart",
-      telefono: "3298170817",
-      telefonoWhatsapp: "393298170817",
+      telefono: "3793673257",
+      telefonoWhatsapp: "393793673257",
       foto: "/giulia-orientatrice.png",
       specializzazioni: Array.from(specializzazioni).slice(0, 4),
     };

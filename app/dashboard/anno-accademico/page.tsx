@@ -144,7 +144,7 @@ CFU sostenibili: ${result.cfuRealistici}
 Carico: ${result.carico}`
     );
 
-    window.open(`https://wa.me/393298170817?text=${testo}`, "_blank");
+    window.open(`https://wa.me/393793673257?text=${testo}`, "_blank");
   }
 
   return (

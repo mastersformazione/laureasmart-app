@@ -294,7 +294,7 @@ export default function PercorsoRealePage() {
       "Ciao, ho fatto la simulazione del mio percorso reale su Laurea Smart e vorrei capire meglio il percorso più adatto a me."
     );
 
-    window.open(`https://wa.me/393298170817?text=${testo}`, "_blank");
+    window.open(`https://wa.me/393793673257?text=${testo}`, "_blank");
   }
 
   return (
