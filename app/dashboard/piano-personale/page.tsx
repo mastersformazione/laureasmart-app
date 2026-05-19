@@ -1110,7 +1110,7 @@ export default function PianoPersonalePage() {
           <p style={mutedTextStyle}>{piano.prossimoPasso}</p>
 
           <a
-            href="https://wa.me/393472769291?text=Ciao%2C%20ho%20generato%20il%20mio%20Piano%20Universitario%20Personalizzato%20su%20Laurea%20Smart%20e%20vorrei%20parlare%20con%20un%20orientatore."
+            href="https://wa.me/393793673257?text=Ciao%2C%20ho%20generato%20il%20mio%20Piano%20Universitario%20Personalizzato%20su%20Laurea%20Smart%20e%20vorrei%20parlare%20con%20un%20orientatore."
             target="_blank"
             rel="noreferrer"
             style={{ ...primaryButtonStyle, marginTop: 14, width: "100%" }}
