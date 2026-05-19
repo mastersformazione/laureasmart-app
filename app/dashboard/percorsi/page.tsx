@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { getPercorsiVisibili, Percorso } from "@/lib/data/percorsi";
 import BottomNav from "@/components/ui/BottomNav";
@@ -50,6 +51,119 @@ const nomiTipi: Record<string, string> = {
   laurea_magistrale: "Magistrali",
   master: "Master",
 };
+
+type Tone = "blue" | "purple" | "teal" | "amber" | "rose" | "cyan";
+
+const toneStyles: Record<
+  Tone,
+  {
+    accent: string;
+    icon: string;
+    bg: string;
+    softBg: string;
+    border: string;
+    glow: string;
+  }
+> = {
+  blue: {
+    accent: "#60A5FA",
+    icon: "#BFDBFE",
+    bg: "linear-gradient(135deg, rgba(59,130,246,0.24), rgba(12,25,42,0.96))",
+    softBg: "rgba(59,130,246,0.13)",
+    border: "rgba(96,165,250,0.30)",
+    glow: "rgba(59,130,246,0.22)",
+  },
+  purple: {
+    accent: "#A78BFA",
+    icon: "#DDD6FE",
+    bg: "linear-gradient(135deg, rgba(139,92,246,0.24), rgba(12,25,42,0.96))",
+    softBg: "rgba(139,92,246,0.13)",
+    border: "rgba(167,139,250,0.30)",
+    glow: "rgba(139,92,246,0.22)",
+  },
+  teal: {
+    accent: "#2DD4BF",
+    icon: "#99F6E4",
+    bg: "linear-gradient(135deg, rgba(20,184,166,0.23), rgba(12,25,42,0.96))",
+    softBg: "rgba(20,184,166,0.13)",
+    border: "rgba(45,212,191,0.28)",
+    glow: "rgba(20,184,166,0.20)",
+  },
+  amber: {
+    accent: "#FBBF24",
+    icon: "#FDE68A",
+    bg: "linear-gradient(135deg, rgba(245,158,11,0.23), rgba(12,25,42,0.96))",
+    softBg: "rgba(245,158,11,0.13)",
+    border: "rgba(251,191,36,0.30)",
+    glow: "rgba(245,158,11,0.20)",
+  },
+  rose: {
+    accent: "#FB7185",
+    icon: "#FECDD3",
+    bg: "linear-gradient(135deg, rgba(244,63,94,0.23), rgba(12,25,42,0.96))",
+    softBg: "rgba(244,63,94,0.13)",
+    border: "rgba(251,113,133,0.28)",
+    glow: "rgba(244,63,94,0.20)",
+  },
+  cyan: {
+    accent: "#22D3EE",
+    icon: "#A5F3FC",
+    bg: "linear-gradient(135deg, rgba(6,182,212,0.23), rgba(12,25,42,0.96))",
+    softBg: "rgba(6,182,212,0.13)",
+    border: "rgba(34,211,238,0.28)",
+    glow: "rgba(6,182,212,0.20)",
+  },
+};
+
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  padding: 20,
+  paddingBottom: 120,
+  maxWidth: 500,
+  margin: "0 auto",
+  color: "#FFFFFF",
+  background:
+    "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+  fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+};
+
+const glassCard: CSSProperties = {
+  borderRadius: 28,
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.07)",
+  boxShadow: "0 22px 55px rgba(0,0,0,0.26)",
+  backdropFilter: "blur(16px)",
+};
+
+function getSettoreTone(settore: string): Tone {
+  const mappa: Record<string, Tone> = {
+    giuridico: "amber",
+    politico_sociale: "cyan",
+    psicologia: "purple",
+    scienze_motorie: "teal",
+    comunicazione: "blue",
+    educazione: "teal",
+    turismo: "amber",
+    biologia: "teal",
+    lingue: "cyan",
+    lettere_arte_spettacolo: "purple",
+    informatica_ingegneria: "cyan",
+    ingegneria_industriale: "amber",
+    ingegneria_civile: "blue",
+    economia: "blue",
+    design_moda: "purple",
+    scuola: "teal",
+    sanitario: "rose",
+  };
+
+  return mappa[settore] || "blue";
+}
+
+function formatTipo(tipo: string) {
+  if (tipo === "master_primo_livello") return "Master I livello";
+  if (tipo === "master_secondo_livello") return "Master II livello";
+  return nomiTipi[tipo] || tipo.replaceAll("_", " ");
+}
 
 export default function PercorsiPage() {
   const [titoloStudio, setTitoloStudio] = useState("diploma");
@@ -341,213 +455,251 @@ export default function PercorsiPage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: 20,
-        paddingBottom: 120,
-        maxWidth: 500,
-        margin: "0 auto",
-        color: "#FFFFFF",
-        background:
-          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
-        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
-      }}
-    >
+    <main style={pageStyle}>
       <section
         style={{
+          ...glassCard,
           position: "relative",
           overflow: "hidden",
-          borderRadius: 32,
-          padding: 28,
+          padding: 22,
+          marginBottom: 16,
           background:
-            "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
-          border: "1px solid rgba(255,255,255,0.14)",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
-          marginBottom: 20,
+            "linear-gradient(145deg, rgba(31,111,178,0.42), rgba(139,92,246,0.20), rgba(255,255,255,0.06))",
         }}
       >
         <div
           style={{
             position: "absolute",
-            right: -44,
-            top: -44,
-            width: 155,
-            height: 155,
+            right: -48,
+            top: -48,
+            width: 170,
+            height: 170,
             borderRadius: 999,
-            background: "rgba(255,255,255,0.14)",
+            background:
+              "radial-gradient(circle, rgba(58,160,255,0.25), transparent 68%)",
           }}
         />
-
-        <div
-          style={{
-            width: 60,
-            height: 60,
-            borderRadius: 22,
-            background: "rgba(255,255,255,0.16)",
-            border: "1px solid rgba(255,255,255,0.16)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 18,
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          <GraduationCap size={31} />
-        </div>
-
-        <p
-          style={{
-            margin: "0 0 8px",
-            fontSize: 14,
-            fontWeight: 850,
-            opacity: 0.92,
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          Laurea Smart
-        </p>
-
-        <h1
-          style={{
-            margin: 0,
-            fontSize: 34,
-            lineHeight: 1.05,
-            fontWeight: 900,
-            letterSpacing: "-1px",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          Percorsi consigliati
-        </h1>
-
-        <p
-          style={{
-            margin: "14px 0 0",
-            fontSize: 15,
-            lineHeight: 1.6,
-            opacity: 0.95,
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          In base al tuo titolo di studio, questi sono i percorsi più adatti da
-          valutare.
-        </p>
 
         <div
           style={{
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
-            marginTop: 16,
-            padding: "8px 12px",
+            padding: "7px 12px",
             borderRadius: 999,
-            background: "rgba(255,255,255,0.16)",
-            color: "#FFFFFF",
-            fontSize: 12,
-            fontWeight: 900,
+            background: "rgba(255,255,255,0.10)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            marginBottom: 14,
             position: "relative",
             zIndex: 1,
           }}
         >
-          <Sparkles size={14} />
-          Titolo rilevato: {titoloStudio}
+          <Sparkles size={14} color="#BFDBFE" />
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 900,
+              color: "#DBEAFE",
+              letterSpacing: 0.5,
+            }}
+          >
+            Laurea Smart · Catalogo percorsi
+          </span>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            alignItems: "flex-start",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div
+            style={{
+              width: 62,
+              minWidth: 62,
+              height: 62,
+              borderRadius: 24,
+              background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 20px 42px rgba(31,111,178,0.36)",
+            }}
+          >
+            <GraduationCap size={32} />
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 32,
+                lineHeight: 1.05,
+                fontWeight: 950,
+                letterSpacing: "-1px",
+              }}
+            >
+              Percorsi consigliati
+            </h1>
+
+            <p
+              style={{
+                margin: "12px 0 0",
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.78)",
+              }}
+            >
+              Esplora lauree, magistrali e master coerenti con il tuo titolo di
+              studio. Salva i percorsi più interessanti per ricevere
+              suggerimenti sempre più precisi.
+            </p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            marginTop: 18,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <HeroMetric
+            label="Titolo rilevato"
+            value={titoloStudio}
+            icon={<Sparkles size={16} />}
+            tone="blue"
+          />
+          <HeroMetric
+            label="Risultati"
+            value={`${percorsiOrdinati.length} percorsi`}
+            icon={<Search size={16} />}
+            tone="purple"
+          />
         </div>
       </section>
 
       <section
         style={{
-          marginBottom: 16,
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "14px 16px",
-          borderRadius: 22,
-          background: "rgba(17,32,51,0.86)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 14px 34px rgba(0,0,0,0.24)",
-          backdropFilter: "blur(16px)",
+          ...glassCard,
+          marginBottom: 14,
+          padding: 14,
+          background:
+            "linear-gradient(135deg, rgba(6,182,212,0.16), rgba(255,255,255,0.06))",
+          border: "1px solid rgba(34,211,238,0.22)",
         }}
       >
-        <Search size={22} color="#78C2FF" />
-
-        <input
-          type="text"
-          value={queryRicerca}
-          onChange={(e) => setQueryRicerca(e.target.value)}
-          placeholder="Cerca corso, area o parola chiave..."
-          style={{
-            width: "100%",
-            border: "none",
-            outline: "none",
-            background: "transparent",
-            color: "#FFFFFF",
-            fontSize: 14,
-            fontFamily: "inherit",
-          }}
-        />
-
-        {queryRicerca && (
-          <button
-            type="button"
-            onClick={() => setQueryRicerca("")}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
             style={{
-              border: "none",
-              background: "transparent",
-              color: "rgba(255,255,255,0.55)",
-              cursor: "pointer",
+              width: 42,
+              height: 42,
+              borderRadius: 16,
+              background: "rgba(34,211,238,0.12)",
+              border: "1px solid rgba(34,211,238,0.22)",
+              color: "#A5F3FC",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
             }}
           >
-            <X size={18} />
-          </button>
-        )}
+            <Search size={22} />
+          </div>
+
+          <input
+            type="text"
+            value={queryRicerca}
+            onChange={(e) => setQueryRicerca(e.target.value)}
+            placeholder="Cerca corso, classe, area o parola chiave..."
+            style={{
+              width: "100%",
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              color: "#FFFFFF",
+              fontSize: 14,
+              fontFamily: "inherit",
+            }}
+          />
+
+          {queryRicerca && (
+            <button
+              type="button"
+              onClick={() => setQueryRicerca("")}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 12,
+                border: "1px solid rgba(255,255,255,0.10)",
+                background: "rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.70)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
       </section>
 
-      <FilterScroller>
-        {["tutti", "laurea_triennale", "laurea_magistrale", "master"].map(
-          (tipo) => (
-            <FilterButton
-              key={tipo}
-              active={tipoAttivo === tipo}
-              onClick={() => setTipoAttivo(tipo)}
-              label={nomiTipi[tipo]}
-              variant="pill"
-            />
-          )
-        )}
-      </FilterScroller>
+      <div
+        style={{
+          display: "grid",
+          gap: 10,
+          marginBottom: 14,
+        }}
+      >
+        <FilterBlock label="Tipo percorso">
+          {["tutti", "laurea_triennale", "laurea_magistrale", "master"].map(
+            (tipo) => (
+              <FilterButton
+                key={tipo}
+                active={tipoAttivo === tipo}
+                onClick={() => setTipoAttivo(tipo)}
+                label={nomiTipi[tipo]}
+                tone={tipo === "master" ? "purple" : "blue"}
+              />
+            )
+          )}
+        </FilterBlock>
 
-      <FilterScroller>
-        {settoriDisponibili.map((settore) => (
-          <FilterButton
-            key={settore}
-            active={settoreAttivo === settore}
-            onClick={() => setSettoreAttivo(settore)}
-            label={nomiSettori[settore] || settore}
-            variant="soft"
-          />
-        ))}
-      </FilterScroller>
+        <FilterBlock label="Area di interesse">
+          {settoriDisponibili.map((settore) => (
+            <FilterButton
+              key={settore}
+              active={settoreAttivo === settore}
+              onClick={() => setSettoreAttivo(settore)}
+              label={nomiSettori[settore] || settore}
+              tone={settore === "tutti" ? "blue" : getSettoreTone(settore)}
+            />
+          ))}
+        </FilterBlock>
+      </div>
 
       {messaggio && (
         <div
           style={{
             marginBottom: 16,
             padding: 14,
-            borderRadius: 18,
-            background: "rgba(37,211,102,0.13)",
-            border: "1px solid rgba(37,211,102,0.25)",
-            color: "#7CFFB1",
+            borderRadius: 20,
+            background: "rgba(34,197,94,0.14)",
+            border: "1px solid rgba(34,197,94,0.28)",
+            color: "#BBF7D0",
             fontSize: 13,
             lineHeight: 1.45,
-            fontWeight: 800,
+            fontWeight: 850,
+            boxShadow: "0 14px 30px rgba(34,197,94,0.10)",
           }}
         >
           {messaggio}
@@ -560,34 +712,51 @@ export default function PercorsiPage() {
           alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
-          marginBottom: 14,
+          margin: "18px 0 14px",
         }}
       >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 20,
-            fontWeight: 900,
-            letterSpacing: "-0.4px",
-            color: "#FFFFFF",
-          }}
-        >
-          Risultati
-        </h2>
+        <div>
+          <p
+            style={{
+              margin: "0 0 4px",
+              fontSize: 11,
+              textTransform: "uppercase",
+              letterSpacing: 1.1,
+              color: "rgba(255,255,255,0.54)",
+              fontWeight: 900,
+            }}
+          >
+            Catalogo filtrato
+          </p>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 22,
+              fontWeight: 950,
+              letterSpacing: "-0.5px",
+              color: "#FFFFFF",
+            }}
+          >
+            Risultati
+          </h2>
+        </div>
 
         <span
           style={{
-            minWidth: 34,
-            height: 32,
-            padding: "0 11px",
+            minWidth: 44,
+            height: 38,
+            padding: "0 13px",
             borderRadius: 999,
-            background: "rgba(58,160,255,0.16)",
-            color: "#78C2FF",
-            fontSize: 13,
-            fontWeight: 900,
+            background:
+              "linear-gradient(135deg, rgba(58,160,255,0.24), rgba(139,92,246,0.18))",
+            border: "1px solid rgba(120,194,255,0.25)",
+            color: "#BFDBFE",
+            fontSize: 14,
+            fontWeight: 950,
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
+            boxShadow: "0 14px 28px rgba(58,160,255,0.12)",
           }}
         >
           {percorsiOrdinati.length}
@@ -618,24 +787,39 @@ export default function PercorsiPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(2,7,18,0.82)",
+            background: "rgba(2,7,18,0.84)",
             padding: 20,
-            backdropFilter: "blur(10px)",
+            backdropFilter: "blur(12px)",
           }}
         >
           <div
             style={{
               width: "100%",
-              maxWidth: 390,
+              maxWidth: 392,
               borderRadius: 32,
               background:
-                "linear-gradient(135deg, rgba(17,32,51,0.98) 0%, rgba(11,23,40,0.98) 100%)",
-              padding: 24,
-              boxShadow: "0 30px 90px rgba(0,0,0,0.45)",
-              border: "1px solid rgba(255,255,255,0.10)",
+                "linear-gradient(145deg, rgba(31,111,178,0.28), rgba(139,92,246,0.16), rgba(11,23,40,0.98))",
+              padding: 22,
+              boxShadow: "0 34px 90px rgba(0,0,0,0.48)",
+              border: "1px solid rgba(255,255,255,0.12)",
               color: "#FFFFFF",
+              overflow: "hidden",
+              position: "relative",
             }}
           >
+            <div
+              style={{
+                position: "absolute",
+                top: -40,
+                right: -24,
+                width: 135,
+                height: 135,
+                borderRadius: 999,
+                background:
+                  "radial-gradient(circle, rgba(37,211,102,0.18), transparent 70%)",
+              }}
+            />
+
             <div
               style={{
                 display: "inline-flex",
@@ -643,11 +827,14 @@ export default function PercorsiPage() {
                 gap: 8,
                 marginBottom: 16,
                 borderRadius: 999,
-                background: "rgba(37,211,102,0.13)",
-                color: "#7CFFB1",
+                background: "rgba(37,211,102,0.14)",
+                color: "#BBF7D0",
                 padding: "8px 12px",
                 fontSize: 12,
                 fontWeight: 900,
+                border: "1px solid rgba(37,211,102,0.24)",
+                position: "relative",
+                zIndex: 1,
               }}
             >
               <Heart size={15} />
@@ -659,9 +846,11 @@ export default function PercorsiPage() {
                 margin: 0,
                 fontSize: 27,
                 lineHeight: 1.08,
-                fontWeight: 900,
+                fontWeight: 950,
                 letterSpacing: "-0.8px",
                 color: "#FFFFFF",
+                position: "relative",
+                zIndex: 1,
               }}
             >
               {percorsoAttivo.titolo}
@@ -672,7 +861,9 @@ export default function PercorsiPage() {
                 margin: "14px 0 0",
                 fontSize: 14,
                 lineHeight: 1.65,
-                color: "rgba(255,255,255,0.68)",
+                color: "rgba(255,255,255,0.72)",
+                position: "relative",
+                zIndex: 1,
               }}
             >
               Vuoi fare un passo in più? Puoi scoprire costi, agevolazioni,
@@ -685,6 +876,8 @@ export default function PercorsiPage() {
                 display: "grid",
                 gap: 11,
                 marginTop: 22,
+                position: "relative",
+                zIndex: 1,
               }}
             >
               <button
@@ -693,16 +886,16 @@ export default function PercorsiPage() {
                   minHeight: 56,
                   borderRadius: 20,
                   border: "none",
-                  background: "#25D366",
+                  background: "linear-gradient(135deg, #22C55E, #25D366)",
                   color: "#FFFFFF",
                   fontSize: 15,
-                  fontWeight: 900,
+                  fontWeight: 950,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 9,
                   cursor: "pointer",
-                  boxShadow: "0 16px 34px rgba(37,211,102,0.28)",
+                  boxShadow: "0 18px 38px rgba(37,211,102,0.25)",
                 }}
               >
                 <Wallet size={19} />
@@ -711,20 +904,7 @@ export default function PercorsiPage() {
 
               <button
                 onClick={() => vaiAPercorsoAgevolato(percorsoAttivo)}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 20,
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#78C2FF",
-                  fontSize: 14,
-                  fontWeight: 900,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 9,
-                  cursor: "pointer",
-                }}
+                style={modalButtonStyle}
               >
                 <FileCheck2 size={18} />
                 Verifica CFU e percorso agevolato
@@ -732,20 +912,7 @@ export default function PercorsiPage() {
 
               <button
                 onClick={() => parlaConOrientatore(percorsoAttivo)}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 20,
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#78C2FF",
-                  fontSize: 14,
-                  fontWeight: 900,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 9,
-                  cursor: "pointer",
-                }}
+                style={modalButtonStyle}
               >
                 <MessageCircle size={18} />
                 Parla con un orientatore
@@ -756,10 +923,10 @@ export default function PercorsiPage() {
                 style={{
                   border: "none",
                   background: "transparent",
-                  color: "rgba(255,255,255,0.45)",
+                  color: "rgba(255,255,255,0.48)",
                   padding: "8px 4px",
                   fontSize: 13,
-                  fontWeight: 700,
+                  fontWeight: 750,
                   cursor: "pointer",
                 }}
               >
@@ -775,25 +942,116 @@ export default function PercorsiPage() {
   );
 }
 
-function FilterScroller({ children }: { children: React.ReactNode }) {
+const modalButtonStyle: CSSProperties = {
+  minHeight: 54,
+  borderRadius: 20,
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#BFDBFE",
+  fontSize: 14,
+  fontWeight: 900,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 9,
+  cursor: "pointer",
+};
+
+function HeroMetric({
+  label,
+  value,
+  icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  icon: ReactNode;
+  tone: Tone;
+}) {
+  const theme = toneStyles[tone];
+
   return (
     <div
       style={{
-        marginBottom: 14,
-        overflowX: "auto",
-        WebkitOverflowScrolling: "touch",
+        borderRadius: 20,
+        border: `1px solid ${theme.border}`,
+        background: theme.bg,
+        padding: 12,
+        boxShadow: `0 14px 30px ${theme.glow}`,
       }}
     >
       <div
         style={{
+          width: 34,
+          height: 34,
+          borderRadius: 13,
+          background: theme.softBg,
+          border: `1px solid ${theme.border}`,
+          color: theme.icon,
           display: "flex",
-          gap: 8,
-          paddingBottom: 3,
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 8,
         }}
       >
-        {children}
+        {icon}
       </div>
+      <p
+        style={{
+          margin: "0 0 4px",
+          fontSize: 10,
+          color: "rgba(255,255,255,0.58)",
+          fontWeight: 900,
+        }}
+      >
+        {label}
+      </p>
+      <p style={{ margin: 0, fontSize: 13, fontWeight: 950, lineHeight: 1.25 }}>
+        {value}
+      </p>
     </div>
+  );
+}
+
+function FilterBlock({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      style={{
+        ...glassCard,
+        borderRadius: 22,
+        padding: 12,
+        background: "rgba(255,255,255,0.055)",
+      }}
+    >
+      <p
+        style={{
+          margin: "0 0 10px",
+          fontSize: 11,
+          color: "rgba(255,255,255,0.56)",
+          fontWeight: 900,
+          textTransform: "uppercase",
+          letterSpacing: 0.9,
+        }}
+      >
+        {label}
+      </p>
+      <div
+        style={{
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        <div style={{ display: "flex", gap: 8, paddingBottom: 2 }}>
+          {children}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -801,29 +1059,31 @@ function FilterButton({
   active,
   onClick,
   label,
-  variant,
+  tone,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
-  variant: "pill" | "soft";
+  tone: Tone;
 }) {
+  const theme = toneStyles[tone];
+
   return (
     <button
       onClick={onClick}
       style={{
         whiteSpace: "nowrap",
-        borderRadius: variant === "pill" ? 999 : 15,
+        borderRadius: 999,
         border: active
-          ? "1px solid rgba(58,160,255,0.55)"
+          ? `1px solid ${theme.border}`
           : "1px solid rgba(255,255,255,0.08)",
-        padding: variant === "pill" ? "10px 15px" : "9px 12px",
-        background: active ? "rgba(58,160,255,0.20)" : "rgba(17,32,51,0.72)",
-        color: active ? "#78C2FF" : "rgba(255,255,255,0.62)",
-        fontSize: variant === "pill" ? 13 : 12,
+        padding: "10px 13px",
+        background: active ? theme.softBg : "rgba(17,32,51,0.72)",
+        color: active ? theme.icon : "rgba(255,255,255,0.62)",
+        fontSize: 12,
         fontWeight: 900,
         cursor: "pointer",
-        boxShadow: active ? "0 10px 24px rgba(58,160,255,0.12)" : "none",
+        boxShadow: active ? `0 12px 24px ${theme.glow}` : "none",
         backdropFilter: "blur(12px)",
       }}
     >
@@ -841,196 +1101,255 @@ function PercorsoCard({
   percorsiSimili: Percorso[];
   onInteresse: (percorso: Percorso) => void;
 }) {
+  const tone = getSettoreTone(percorso.settore);
+  const theme = toneStyles[tone];
+
   return (
     <section
       style={{
-        padding: 18,
-        borderRadius: 28,
-        background: "rgba(17,32,51,0.86)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 16px 40px rgba(0,0,0,0.26)",
+        borderRadius: 30,
+        background: theme.bg,
+        border: `1px solid ${theme.border}`,
+        boxShadow: `0 22px 52px ${theme.glow}`,
         backdropFilter: "blur(16px)",
+        overflow: "hidden",
+        position: "relative",
       }}
     >
       <div
         style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 13,
+          position: "absolute",
+          inset: "0 0 auto 0",
+          height: 4,
+          background: `linear-gradient(90deg, ${theme.accent}, transparent)`,
         }}
-      >
-        <div
+      />
+
+      <div style={{ padding: 18 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 13 }}>
+          <div
+            style={{
+              width: 58,
+              height: 58,
+              borderRadius: 22,
+              background: theme.softBg,
+              border: `1px solid ${theme.border}`,
+              color: theme.icon,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              fontSize: 16,
+              fontWeight: 950,
+              boxShadow: `0 14px 28px ${theme.glow}`,
+            }}
+          >
+            {percorso.classe.replace("L-", "L")}
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 7,
+                flexWrap: "wrap",
+                marginBottom: 10,
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-flex",
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  background: theme.softBg,
+                  border: `1px solid ${theme.border}`,
+                  color: theme.icon,
+                  fontSize: 11,
+                  fontWeight: 950,
+                }}
+              >
+                {nomiSettori[percorso.settore] || percorso.settore}
+              </span>
+              <span
+                style={{
+                  display: "inline-flex",
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.72)",
+                  fontSize: 11,
+                  fontWeight: 850,
+                }}
+              >
+                {formatTipo(percorso.tipo)}
+              </span>
+            </div>
+
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 21,
+                lineHeight: 1.14,
+                fontWeight: 950,
+                color: "#FFFFFF",
+                letterSpacing: "-0.45px",
+              }}
+            >
+              {percorso.titolo}
+            </h2>
+
+            <p
+              style={{
+                margin: "9px 0 0",
+                color: "rgba(255,255,255,0.66)",
+                fontSize: 13,
+                lineHeight: 1.5,
+              }}
+            >
+              Classe {percorso.classe} · Durata {percorso.durata}
+            </p>
+          </div>
+        </div>
+
+        {percorso.tags && percorso.tags.length > 0 && (
+          <div
+            style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 14 }}
+          >
+            {percorso.tags.slice(0, 4).map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  borderRadius: 999,
+                  padding: "6px 9px",
+                  background: "rgba(255,255,255,0.065)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.64)",
+                  fontSize: 11,
+                  fontWeight: 800,
+                }}
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {percorso.sbocchi && percorso.sbocchi.length > 0 && (
+          <InfoList
+            title="Sbocchi principali"
+            items={percorso.sbocchi}
+            tone={tone}
+          />
+        )}
+
+        {percorso.prosecuzione && percorso.prosecuzione.length > 0 && (
+          <InfoList
+            title="Se vuoi proseguire"
+            items={percorso.prosecuzione}
+            tone={tone}
+          />
+        )}
+
+        {percorsiSimili.length > 0 && (
+          <div
+            style={{
+              marginTop: 16,
+              padding: 14,
+              borderRadius: 22,
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            <h3
+              style={{
+                margin: "0 0 10px",
+                fontSize: 14,
+                fontWeight: 950,
+                color: "#FFFFFF",
+              }}
+            >
+              Percorsi simili
+            </h3>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {percorsiSimili.map((simile) => (
+                <button
+                  key={simile.id}
+                  onClick={() => onInteresse(simile)}
+                  style={{
+                    borderRadius: 999,
+                    border: `1px solid ${theme.border}`,
+                    background: theme.softBg,
+                    color: theme.icon,
+                    padding: "8px 11px",
+                    fontSize: 12,
+                    fontWeight: 850,
+                    cursor: "pointer",
+                  }}
+                >
+                  {simile.titolo}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => onInteresse(percorso)}
           style={{
-            width: 54,
-            height: 54,
+            marginTop: 18,
+            width: "100%",
+            minHeight: 56,
             borderRadius: 20,
-            background: "rgba(58,160,255,0.16)",
-            color: "#78C2FF",
+            border: "none",
+            background: `linear-gradient(135deg, ${theme.accent}, #1F6FB2)`,
+            color: "#FFFFFF",
+            fontSize: 16,
+            fontWeight: 950,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            flexShrink: 0,
-            fontSize: 16,
-            fontWeight: 900,
-            boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+            gap: 10,
+            cursor: "pointer",
+            boxShadow: `0 18px 36px ${theme.glow}`,
           }}
         >
-          {percorso.classe.replace("L-", "L")}
-        </div>
-
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              display: "inline-flex",
-              marginBottom: 9,
-              padding: "6px 10px",
-              borderRadius: 999,
-              background: "rgba(58,160,255,0.16)",
-              color: "#78C2FF",
-              fontSize: 11,
-              fontWeight: 900,
-            }}
-          >
-            {nomiSettori[percorso.settore] || percorso.settore}
-          </div>
-
-          <h2
-            style={{
-              margin: 0,
-              fontSize: 21,
-              lineHeight: 1.14,
-              fontWeight: 900,
-              color: "#FFFFFF",
-              letterSpacing: "-0.45px",
-            }}
-          >
-            {percorso.titolo}
-          </h2>
-
-          <p
-            style={{
-              margin: "9px 0 0",
-              color: "rgba(255,255,255,0.64)",
-              fontSize: 14,
-              lineHeight: 1.5,
-            }}
-          >
-            Durata: {percorso.durata}
-          </p>
-        </div>
+          <Heart size={19} />
+          Mi interessa
+          <ArrowRight size={19} />
+        </button>
       </div>
-
-      {percorso.sbocchi && percorso.sbocchi.length > 0 && (
-        <InfoList title="Sbocchi principali" items={percorso.sbocchi} />
-      )}
-
-      {percorso.prosecuzione && percorso.prosecuzione.length > 0 && (
-        <InfoList title="Se vuoi proseguire" items={percorso.prosecuzione} />
-      )}
-
-      {percorsiSimili.length > 0 && (
-        <div
-          style={{
-            marginTop: 16,
-            padding: 14,
-            borderRadius: 22,
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
-          <h3
-            style={{
-              margin: "0 0 10px",
-              fontSize: 14,
-              fontWeight: 900,
-              color: "#FFFFFF",
-            }}
-          >
-            Percorsi simili
-          </h3>
-
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-            }}
-          >
-            {percorsiSimili.map((simile) => (
-              <button
-                key={simile.id}
-                onClick={() => onInteresse(simile)}
-                style={{
-                  borderRadius: 999,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.72)",
-                  padding: "8px 11px",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  cursor: "pointer",
-                }}
-              >
-                {simile.titolo}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <button
-        onClick={() => onInteresse(percorso)}
-        style={{
-          marginTop: 18,
-          width: "100%",
-          minHeight: 56,
-          borderRadius: 20,
-          border: "none",
-          background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
-          color: "#FFFFFF",
-          fontSize: 16,
-          fontWeight: 900,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          cursor: "pointer",
-          boxShadow: "0 16px 34px rgba(31,111,178,0.28)",
-        }}
-      >
-        <Heart size={19} />
-        Mi interessa
-        <ArrowRight size={19} />
-      </button>
     </section>
   );
 }
 
-function InfoList({ title, items }: { title: string; items: string[] }) {
+function InfoList({
+  title,
+  items,
+  tone,
+}: {
+  title: string;
+  items: string[];
+  tone: Tone;
+}) {
+  const theme = toneStyles[tone];
+
   return (
-    <div
-      style={{
-        marginTop: 15,
-      }}
-    >
+    <div style={{ marginTop: 15 }}>
       <h3
         style={{
           margin: "0 0 9px",
           fontSize: 14,
-          fontWeight: 900,
+          fontWeight: 950,
           color: "#FFFFFF",
         }}
       >
         {title}
       </h3>
 
-      <div
-        style={{
-          display: "grid",
-          gap: 8,
-        }}
-      >
-        {items.map((item) => (
+      <div style={{ display: "grid", gap: 8 }}>
+        {items.slice(0, 4).map((item) => (
           <div
             key={item}
             style={{
@@ -1038,12 +1357,12 @@ function InfoList({ title, items }: { title: string; items: string[] }) {
               gap: 9,
               fontSize: 13,
               lineHeight: 1.45,
-              color: "rgba(255,255,255,0.66)",
+              color: "rgba(255,255,255,0.69)",
             }}
           >
             <CheckCircle2
               size={16}
-              color="#78C2FF"
+              color={theme.icon}
               style={{ flexShrink: 0, marginTop: 1 }}
             />
             <span>{item}</span>
