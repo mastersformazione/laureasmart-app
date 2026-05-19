@@ -11,6 +11,7 @@ import {
   Target,
   MessageCircle,
   CheckCircle2,
+  FileText,
   ArrowRight,
   Share2,
   CalendarCheck,
@@ -1020,12 +1021,18 @@ export default function OrientamentoPage() {
 
   if (step >= steps.length) {
     const risultato = getRisultato();
-    const orientatrice = getOrientatriceAssegnata(formData, risultato);
+    const segmentiRisultato = getSegmenti(formData);
+    const isGiaIscritto =
+      segmentiRisultato.segmento_studente === "GIA_ISCRITTO";
+    const orientatrice = isGiaIscritto
+      ? null
+      : getOrientatriceAssegnata(formData, risultato);
 
-    const whatsappUrl = `https://wa.me/${
-      orientatrice.telefonoWhatsapp
-    }?text=${encodeURIComponent(
-      `Ciao Giulia, ho appena completato il test Laurea Smart e vorrei ricevere il mio piano personalizzato.
+    const whatsappUrl = orientatrice
+      ? `https://wa.me/${
+          orientatrice.telefonoWhatsapp
+        }?text=${encodeURIComponent(
+          `Ciao Giulia, ho appena completato il test Laurea Smart e vorrei ricevere il mio piano personalizzato.
 
 Stato iscrizione: ${formData.stato_iscrizione || ""}
 Situazione attuale: ${formData.situazione || ""}
@@ -1039,7 +1046,8 @@ Aspetto da valutare: ${formData.aspetto_da_valutare || ""}
 
 Risultato: ${risultato.percorso}
 Corso suggerito: ${risultato.corsoSuggerito}`
-    )}`;
+        )}`
+      : "";
 
     return (
       <main
@@ -1110,65 +1118,186 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             badge="Gratis"
           />
 
-          <AssignedTutorCard orientatrice={orientatrice} />
+          {!isGiaIscritto && (
+            <section
+              onClick={() => router.push("/dashboard/piano-personale")}
+              style={{
+                padding: 18,
+                borderRadius: 28,
+                background:
+                  "linear-gradient(135deg, rgba(139,92,246,0.95) 0%, rgba(31,111,178,0.96) 58%, rgba(17,32,51,0.96) 100%)",
+                border: "1px solid rgba(221,214,254,0.34)",
+                boxShadow:
+                  "0 18px 44px rgba(139,92,246,0.30), inset 0 0 0 1px rgba(255,255,255,0.10)",
+                cursor: "pointer",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  right: -38,
+                  top: -38,
+                  width: 130,
+                  height: 130,
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.12)",
+                }}
+              />
 
-          <a
-            href={whatsappUrl}
-            rel="noopener noreferrer"
-            onClick={async (event) => {
-              event.preventDefault();
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 15,
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
+                <div
+                  style={{
+                    width: 58,
+                    height: 58,
+                    borderRadius: 20,
+                    background: "rgba(255,255,255,0.16)",
+                    color: "#FFFFFF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)",
+                  }}
+                >
+                  <FileText size={28} />
+                </div>
 
-              await handleTutorWhatsappClick(orientatrice, risultato);
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      padding: "5px 9px",
+                      borderRadius: 999,
+                      background: "rgba(255,255,255,0.14)",
+                      color: "#F5F3FF",
+                      fontSize: 11,
+                      fontWeight: 900,
+                      marginBottom: 8,
+                    }}
+                  >
+                    STEP CONSIGLIATO
+                  </div>
 
-              window.location.href = whatsappUrl;
-            }}
-            style={{
-              width: "100%",
-              minHeight: 62,
-              borderRadius: 22,
-              background: "#25D366",
-              color: "#FFFFFF",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              textDecoration: "none",
-              fontWeight: 900,
-              fontSize: 16,
-              boxShadow: "0 16px 34px rgba(37,211,102,0.30)",
-            }}
-          >
-            <MessageCircle size={22} />
-            Parla con Giulia su WhatsApp
-            <ArrowRight size={20} />
-          </a>
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: 21,
+                      lineHeight: 1.14,
+                      fontWeight: 900,
+                      color: "#FFFFFF",
+                      letterSpacing: "-0.5px",
+                    }}
+                  >
+                    Genera il Piano Universitario Personalizzato
+                  </h3>
 
-          <button
-            type="button"
-            onClick={() => {
-              localStorage.setItem("prenota_chiamata_giulia", "si");
-              window.location.href = `tel:${orientatrice.telefono}`;
-            }}
-            style={{
-              width: "100%",
-              minHeight: 62,
-              borderRadius: 22,
-              border: "1px solid rgba(255,255,255,0.10)",
-              background: "rgba(255,255,255,0.08)",
-              color: "#FFFFFF",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              fontWeight: 900,
-              fontSize: 16,
-              cursor: "pointer",
-            }}
-          >
-            <CalendarCheck size={22} color="#78C2FF" />
-            Chiama Giulia
-            <ArrowRight size={20} color="#78C2FF" />
-          </button>
+                  <p
+                    style={{
+                      margin: "7px 0 0",
+                      fontSize: 14,
+                      lineHeight: 1.45,
+                      color: "rgba(255,255,255,0.90)",
+                    }}
+                  >
+                    Trasforma il risultato del test in una prima analisi
+                    orientativa con obiettivo, tempi, aspetti da verificare e
+                    prossimo passo.
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 999,
+                    background: "rgba(255,255,255,0.95)",
+                    color: "#6D28D9",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+                  }}
+                >
+                  <ArrowRight size={22} />
+                </div>
+              </div>
+            </section>
+          )}
+
+          {orientatrice && <AssignedTutorCard orientatrice={orientatrice} />}
+
+          {orientatrice && (
+            <a
+              href={whatsappUrl}
+              rel="noopener noreferrer"
+              onClick={async (event) => {
+                event.preventDefault();
+
+                await handleTutorWhatsappClick(orientatrice, risultato);
+
+                window.location.href = whatsappUrl;
+              }}
+              style={{
+                width: "100%",
+                minHeight: 62,
+                borderRadius: 22,
+                background: "#25D366",
+                color: "#FFFFFF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                textDecoration: "none",
+                fontWeight: 900,
+                fontSize: 16,
+                boxShadow: "0 16px 34px rgba(37,211,102,0.30)",
+              }}
+            >
+              <MessageCircle size={22} />
+              Parla con Giulia su WhatsApp
+              <ArrowRight size={20} />
+            </a>
+          )}
+
+          {orientatrice && (
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.setItem("prenota_chiamata_giulia", "si");
+                window.location.href = `tel:${orientatrice.telefono}`;
+              }}
+              style={{
+                width: "100%",
+                minHeight: 62,
+                borderRadius: 22,
+                border: "1px solid rgba(255,255,255,0.10)",
+                background: "rgba(255,255,255,0.08)",
+                color: "#FFFFFF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                fontWeight: 900,
+                fontSize: 16,
+                cursor: "pointer",
+              }}
+            >
+              <CalendarCheck size={22} color="#78C2FF" />
+              Chiama Giulia
+              <ArrowRight size={20} color="#78C2FF" />
+            </button>
+          )}
 
           <section
             onClick={() => (window.location.href = "/dashboard/percorsi")}
