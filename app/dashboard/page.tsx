@@ -51,31 +51,35 @@ function FeatureCard({
     <section
       onClick={onClick}
       style={{
-        background: "rgba(17,32,51,0.82)",
+        background:
+          "linear-gradient(135deg, rgba(255,255,255,0.10), rgba(17,32,51,0.92))",
         borderRadius: 30,
         border: highlight
-          ? "1px solid rgba(255,201,64,0.35)"
-          : "1px solid rgba(255,255,255,0.08)",
+          ? "1px solid rgba(255,201,64,0.48)"
+          : "1px solid rgba(120,194,255,0.18)",
         padding: 16,
         boxShadow: highlight
-          ? "0 18px 44px rgba(255,196,64,0.16)"
-          : "0 18px 46px rgba(0,0,0,0.26)",
+          ? "inset 0 4px 0 rgba(255,201,64,0.92), 0 20px 52px rgba(255,196,64,0.18)"
+          : "inset 0 4px 0 rgba(120,194,255,0.42), 0 18px 46px rgba(0,0,0,0.28)",
         marginBottom: 20,
         cursor: "pointer",
-        transition: "all .2s ease",
-        backdropFilter: "blur(16px)",
+        transition:
+          "transform .18s ease, box-shadow .18s ease, border-color .18s ease",
+        backdropFilter: "blur(18px)",
       }}
     >
       <div
         style={{
-          minHeight: 145,
+          minHeight: 150,
           borderRadius: 28,
           background: gradient,
           padding: 20,
           color: "#FFFFFF",
           position: "relative",
           overflow: "hidden",
-          boxShadow: "0 16px 34px rgba(31,111,178,0.24)",
+          boxShadow: highlight
+            ? "0 18px 42px rgba(255,201,64,0.20)"
+            : "0 18px 38px rgba(31,111,178,0.26)",
         }}
       >
         <div
@@ -136,7 +140,8 @@ function FeatureCard({
             width: 58,
             height: 58,
             borderRadius: 20,
-            background: "rgba(0,0,0,0.16)",
+            background: "rgba(255,255,255,0.16)",
+            border: "1px solid rgba(255,255,255,0.18)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -350,8 +355,9 @@ export default function Dashboard() {
             display: "flex",
             alignItems: "center",
             gap: 12,
-            border: "1px solid rgba(255,255,255,0.09)",
-            background: "rgba(17,32,51,0.82)",
+            border: "1px solid rgba(120,194,255,0.20)",
+            background:
+              "linear-gradient(135deg, rgba(58,160,255,0.14), rgba(17,32,51,0.88))",
             borderRadius: 22,
             padding: "14px 16px",
             boxShadow: "0 12px 30px rgba(0,0,0,0.20)",
@@ -485,6 +491,15 @@ export default function Dashboard() {
       </section>
 
       {!isGiaIscritto && <CompatibilitaPercorsoCard />}
+
+      <FeatureCard
+        icon={<CalendarCheck size={30} />}
+        title="Piano Universitario Personalizzato"
+        description="Trasforma test, profilo e percorso in una prima analisi orientativa da far valutare a un orientatore."
+        gradient="linear-gradient(135deg, #4C1D95 0%, #8B5CF6 52%, #3AA0FF 100%)"
+        highlight
+        onClick={() => router.push("/dashboard/piano-personale")}
+      />
 
       {!isGiaIscritto && (
         <FeatureCard
@@ -813,9 +828,11 @@ function DarkCard({
       style={{
         padding: 18,
         borderRadius: 24,
-        background: "rgba(17,32,51,0.86)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 14px 34px rgba(0,0,0,0.24)",
+        background:
+          "linear-gradient(135deg, rgba(58,160,255,0.14), rgba(17,32,51,0.92))",
+        border: "1px solid rgba(120,194,255,0.20)",
+        boxShadow:
+          "inset 4px 0 0 rgba(58,160,255,0.72), 0 16px 38px rgba(0,0,0,0.26)",
         cursor: onClick ? "pointer" : "default",
         backdropFilter: "blur(16px)",
       }}
@@ -845,8 +862,9 @@ function DarkCard({
             style={{
               padding: "6px 10px",
               borderRadius: 999,
-              background: "rgba(58,160,255,0.16)",
-              color: "#78C2FF",
+              background: "rgba(58,160,255,0.26)",
+              border: "1px solid rgba(120,194,255,0.28)",
+              color: "#BFDBFE",
               fontSize: 11,
               fontWeight: 850,
               whiteSpace: "nowrap",
