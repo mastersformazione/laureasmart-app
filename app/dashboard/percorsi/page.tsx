@@ -49,6 +49,7 @@ const nomiTipi: Record<string, string> = {
   tutti: "Tutti",
   laurea_triennale: "Triennali",
   laurea_magistrale: "Magistrali",
+  laurea_ciclo_unico: "Ciclo unico",
   master: "Master",
 };
 
@@ -293,6 +294,7 @@ export default function PercorsiPage() {
       if (tipo === "master_secondo_livello") return 40;
       if (tipo === "master_primo_livello") return 35;
       if (tipo === "laurea_magistrale") return 20;
+      if (tipo === "laurea_ciclo_unico") return 12;
       if (tipo === "laurea_triennale") return 5;
       return 0;
     };
@@ -715,17 +717,21 @@ export default function PercorsiPage() {
         }}
       >
         <FilterBlock label="Tipo percorso">
-          {["tutti", "laurea_triennale", "laurea_magistrale", "master"].map(
-            (tipo) => (
-              <FilterButton
-                key={tipo}
-                active={tipoAttivo === tipo}
-                onClick={() => setTipoAttivo(tipo)}
-                label={nomiTipi[tipo]}
-                tone={tipo === "master" ? "purple" : "blue"}
-              />
-            )
-          )}
+          {[
+            "tutti",
+            "laurea_triennale",
+            "laurea_magistrale",
+            "laurea_ciclo_unico",
+            "master",
+          ].map((tipo) => (
+            <FilterButton
+              key={tipo}
+              active={tipoAttivo === tipo}
+              onClick={() => setTipoAttivo(tipo)}
+              label={nomiTipi[tipo]}
+              tone={tipo === "master" ? "purple" : "blue"}
+            />
+          ))}
         </FilterBlock>
 
         <FilterBlock label="Area di interesse">
