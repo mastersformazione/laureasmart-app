@@ -135,7 +135,7 @@ export default function CompatibilitaPercorsoCard() {
 
   return (
     <section
-      onClick={() => router.push("/dashboard/percorso-reale")}
+      onClick={() => router.push("/dashboard/percorso-smart")}
       style={{
         background: "rgba(17,32,51,0.82)",
         borderRadius: 30,
