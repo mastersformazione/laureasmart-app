@@ -33,6 +33,7 @@ type OrientamentoData = {
   tempo?: string;
   area?: string;
   aspetto_da_valutare?: string;
+  budget_mensile?: string;
 };
 
 type Segmenti = {
@@ -295,6 +296,18 @@ const steps: StepItem[] = [
       "Preferisco parlarne con un orientatore",
     ],
   },
+  {
+    id: "budget_mensile",
+    domanda: "Qual è il budget mensile massimo che vorresti non superare?",
+    sottotitolo:
+      "Indica un riferimento mensile tutto compreso: serve solo per orientare la valutazione, senza finanziarie e senza interessi. L’importo effettivo dipende sempre da ateneo, percorso, convenzioni disponibili e valutazione personalizzata.",
+    opzioni: [
+      "100 - 200 € al mese",
+      "200 - 300 € al mese",
+      "Oltre 300 € al mese",
+      "Preferisco parlare con un orientatore",
+    ],
+  },
 ];
 
 const pageStyle: CSSProperties = {
@@ -358,6 +371,7 @@ function getStepTone(id: keyof OrientamentoData): Tone {
   if (id === "obiettivo" || id === "motivazione_studio") return "purple";
   if (id === "urgenza" || id === "tempo") return "teal";
   if (id === "aspetto_da_valutare") return "amber";
+  if (id === "budget_mensile") return "cyan";
   if (id === "situazione") return "cyan";
   return "blue";
 }
@@ -373,6 +387,7 @@ function getStepIcon(id: keyof OrientamentoData) {
   if (id === "tempo") return <Timer size={25} />;
   if (id === "area") return <Sparkles size={25} />;
   if (id === "aspetto_da_valutare") return <HelpCircle size={25} />;
+  if (id === "budget_mensile") return <ShieldCheck size={25} />;
   return <Sparkles size={25} />;
 }
 
@@ -821,6 +836,7 @@ function saveToLocalStorage(
   localStorage.setItem("tempo_disponibile", data.tempo || "");
   localStorage.setItem("area_interesse", data.area || "");
   localStorage.setItem("aspetto_da_valutare", data.aspetto_da_valutare || "");
+  localStorage.setItem("budget_studi_mensile", data.budget_mensile || "");
 
   localStorage.setItem("profilo_utente", risultato.tipo);
   localStorage.setItem("corso_suggerito", risultato.percorso);
@@ -870,8 +886,19 @@ export default function OrientamentoGratuitoTestPage() {
   const [loading, setLoading] = useState(false);
   const [errore, setErrore] = useState("");
 
-  const currentStep = steps[stepIndex];
-  const progress = Math.round(((stepIndex + 1) / steps.length) * 100);
+  const activeSteps = useMemo(
+    () =>
+      steps.filter(
+        (step) =>
+          step.id !== "budget_mensile" ||
+          data.stato_iscrizione !== "Sì, sono già iscritto"
+      ),
+    [data.stato_iscrizione]
+  );
+
+  const currentStep =
+    activeSteps[stepIndex] || activeSteps[activeSteps.length - 1];
+  const progress = Math.round(((stepIndex + 1) / activeSteps.length) * 100);
   const stepTone = getStepTone(currentStep.id);
   const theme = tones[stepTone];
 
@@ -886,7 +913,7 @@ export default function OrientamentoGratuitoTestPage() {
 
     setData(nextData);
 
-    if (stepIndex < steps.length - 1) {
+    if (stepIndex < activeSteps.length - 1) {
       setStepIndex((index) => index + 1);
       return;
     }
@@ -901,7 +928,7 @@ export default function OrientamentoGratuitoTestPage() {
   function goBack() {
     if (fase === "form") {
       setFase("test");
-      setStepIndex(steps.length - 1);
+      setStepIndex(activeSteps.length - 1);
       return;
     }
 
@@ -1058,7 +1085,7 @@ export default function OrientamentoGratuitoTestPage() {
                 >
                   <InfoPill tone={stepTone}>
                     <Sparkles size={13} /> Domanda {stepIndex + 1} di{" "}
-                    {steps.length}
+                    {activeSteps.length}
                   </InfoPill>
                   <InfoPill tone="blue">Test gratuito</InfoPill>
                 </div>
