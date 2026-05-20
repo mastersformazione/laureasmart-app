@@ -1,863 +1,572 @@
+// File: app/orientamento-gratuito/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import StudentiComeTeCard from "@/components/StudentiComeTeCard";
-import { useRouter } from "next/navigation";
-import CompatibilitaPercorsoCard from "@/components/CompatibilitaPercorsoCard";
-import BottomNav from "@/components/ui/BottomNav";
+import type { CSSProperties, ReactNode } from "react";
+import Link from "next/link";
 import {
-  BookOpen,
-  Bell,
-  Search,
-  Heart,
-  TrendingUp,
-  CalendarCheck,
-  CalendarDays,
-  Share2,
+  ArrowRight,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock,
+  FileText,
   GraduationCap,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  Target,
 } from "lucide-react";
 
-type GpsUser = {
-  nome: string;
-  email: string;
-  telefono: string;
-  interesse: string;
+type Tone = "blue" | "purple" | "teal" | "amber";
+
+const tones: Record<
+  Tone,
+  {
+    accent: string;
+    icon: string;
+    bg: string;
+    softBg: string;
+    border: string;
+    glow: string;
+  }
+> = {
+  blue: {
+    accent: "#60A5FA",
+    icon: "#BFDBFE",
+    bg: "linear-gradient(135deg, rgba(59,130,246,0.24), rgba(12,25,42,0.96))",
+    softBg: "rgba(59,130,246,0.13)",
+    border: "rgba(96,165,250,0.28)",
+    glow: "rgba(59,130,246,0.22)",
+  },
+  purple: {
+    accent: "#A78BFA",
+    icon: "#DDD6FE",
+    bg: "linear-gradient(135deg, rgba(139,92,246,0.26), rgba(12,25,42,0.96))",
+    softBg: "rgba(139,92,246,0.13)",
+    border: "rgba(167,139,250,0.30)",
+    glow: "rgba(139,92,246,0.22)",
+  },
+  teal: {
+    accent: "#2DD4BF",
+    icon: "#99F6E4",
+    bg: "linear-gradient(135deg, rgba(20,184,166,0.24), rgba(12,25,42,0.96))",
+    softBg: "rgba(20,184,166,0.13)",
+    border: "rgba(45,212,191,0.28)",
+    glow: "rgba(20,184,166,0.22)",
+  },
+  amber: {
+    accent: "#FBBF24",
+    icon: "#FDE68A",
+    bg: "linear-gradient(135deg, rgba(245,158,11,0.25), rgba(12,25,42,0.96))",
+    softBg: "rgba(245,158,11,0.13)",
+    border: "rgba(251,191,36,0.28)",
+    glow: "rgba(245,158,11,0.20)",
+  },
 };
 
-type Notifica = {
-  id: string;
-  titolo: string;
-  messaggio: string;
-  categoria: string;
-  created_at: string;
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  padding: "22px 18px 54px",
+  maxWidth: 500,
+  margin: "0 auto",
+  color: "#FFFFFF",
+  background:
+    "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+  fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
+  overflowX: "hidden",
+  boxSizing: "border-box",
 };
 
-function FeatureCard({
+const glassCard: CSSProperties = {
+  borderRadius: 28,
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.06)",
+  boxShadow: "0 24px 60px rgba(0,0,0,0.26)",
+  backdropFilter: "blur(12px)",
+};
+
+const primaryButtonStyle: CSSProperties = {
+  minHeight: 56,
+  borderRadius: 18,
+  border: "none",
+  background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
+  color: "white",
+  fontSize: 15,
+  fontWeight: 950,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 9,
+  padding: "0 18px",
+  cursor: "pointer",
+  textDecoration: "none",
+  boxShadow: "0 18px 38px rgba(31,111,178,0.34)",
+};
+
+function startOnboarding() {
+  try {
+    localStorage.setItem("onboarding_start", new Date().toISOString());
+    localStorage.setItem("onboarding_source", "landing_orientamento_gratuito");
+  } catch {
+    // evita blocchi se localStorage non è disponibile
+  }
+}
+
+function MiniCard({
   icon,
   title,
-  description,
-  gradient,
-  onClick,
-  highlight = false,
+  text,
+  tone,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
-  description: string;
-  gradient: string;
-  onClick: () => void;
-  highlight?: boolean;
+  text: string;
+  tone: Tone;
 }) {
+  const theme = tones[tone];
+
   return (
     <section
-      onClick={onClick}
       style={{
-        background:
-          "linear-gradient(135deg, rgba(255,255,255,0.10), rgba(17,32,51,0.92))",
-        borderRadius: 30,
-        border: highlight
-          ? "1px solid rgba(255,201,64,0.48)"
-          : "1px solid rgba(120,194,255,0.18)",
-        padding: 16,
-        boxShadow: highlight
-          ? "inset 0 4px 0 rgba(255,201,64,0.92), 0 20px 52px rgba(255,196,64,0.18)"
-          : "inset 0 4px 0 rgba(120,194,255,0.42), 0 18px 46px rgba(0,0,0,0.28)",
-        marginBottom: 20,
-        cursor: "pointer",
-        transition:
-          "transform .18s ease, box-shadow .18s ease, border-color .18s ease",
-        backdropFilter: "blur(18px)",
+        borderRadius: 24,
+        border: `1px solid ${theme.border}`,
+        background: theme.bg,
+        padding: 15,
+        boxShadow: `0 20px 42px ${theme.glow}`,
       }}
     >
       <div
         style={{
-          minHeight: 150,
-          borderRadius: 28,
-          background: gradient,
-          padding: 20,
-          color: "#FFFFFF",
+          width: 42,
+          height: 42,
+          borderRadius: 16,
+          background: theme.softBg,
+          border: `1px solid ${theme.border}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: theme.icon,
+          marginBottom: 11,
+        }}
+      >
+        {icon}
+      </div>
+      <h2 style={{ margin: 0, fontSize: 15, lineHeight: 1.25 }}>{title}</h2>
+      <p
+        style={{
+          margin: "7px 0 0",
+          fontSize: 12,
+          lineHeight: 1.55,
+          color: "rgba(255,255,255,0.72)",
+        }}
+      >
+        {text}
+      </p>
+    </section>
+  );
+}
+
+function StepRow({
+  number,
+  title,
+  text,
+}: {
+  number: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        alignItems: "flex-start",
+        padding: "13px 0",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
+      <div
+        style={{
+          width: 34,
+          minWidth: 34,
+          height: 34,
+          borderRadius: 13,
+          background: "rgba(58,160,255,0.16)",
+          border: "1px solid rgba(96,165,250,0.25)",
+          color: "#BFDBFE",
+          fontSize: 12,
+          fontWeight: 950,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {number}
+      </div>
+      <div>
+        <h3 style={{ margin: 0, fontSize: 14 }}>{title}</h3>
+        <p
+          style={{
+            margin: "5px 0 0",
+            fontSize: 12,
+            lineHeight: 1.55,
+            color: "rgba(255,255,255,0.68)",
+          }}
+        >
+          {text}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function OrientamentoGratuitoLandingPage() {
+  return (
+    <main style={pageStyle}>
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 18,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 16,
+              background: "linear-gradient(135deg, #1F6FB2, #3AA0FF)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 14px 30px rgba(31,111,178,0.32)",
+            }}
+          >
+            <GraduationCap size={23} />
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 950 }}>
+              Laurea Smart
+            </p>
+            <p
+              style={{
+                margin: "3px 0 0",
+                fontSize: 11,
+                color: "rgba(255,255,255,0.58)",
+              }}
+            >
+              Orientamento universitario gratuito
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/register"
+          style={{
+            color: "#BFDBFE",
+            textDecoration: "none",
+            fontSize: 12,
+            fontWeight: 900,
+            border: "1px solid rgba(96,165,250,0.22)",
+            borderRadius: 999,
+            padding: "8px 11px",
+            background: "rgba(59,130,246,0.10)",
+          }}
+        >
+          Accedi
+        </Link>
+      </header>
+
+      <section
+        style={{
+          ...glassCard,
           position: "relative",
           overflow: "hidden",
-          boxShadow: highlight
-            ? "0 18px 42px rgba(255,201,64,0.20)"
-            : "0 18px 38px rgba(31,111,178,0.26)",
+          padding: 21,
+          marginBottom: 16,
+          background:
+            "linear-gradient(145deg, rgba(31,111,178,0.36), rgba(139,92,246,0.22), rgba(255,255,255,0.07))",
         }}
       >
         <div
           style={{
             position: "absolute",
-            right: -34,
-            top: -24,
-            width: 140,
-            height: 140,
+            right: -38,
+            top: -35,
+            width: 145,
+            height: 145,
             borderRadius: 999,
-            background: "rgba(255,255,255,0.13)",
+            background:
+              "radial-gradient(circle, rgba(58,160,255,0.24), transparent 70%)",
           }}
         />
 
         <div
           style={{
-            position: "absolute",
-            right: 18,
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: 56,
-            height: 56,
-            borderRadius: 999,
-            background: "rgba(255,255,255,0.94)",
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
-            justifyContent: "center",
-            color: "#1F6FB2",
-            fontSize: 36,
-            fontWeight: 900,
-            boxShadow: "0 10px 24px rgba(0,0,0,0.20)",
+            gap: 7,
+            padding: "7px 12px",
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            marginBottom: 15,
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          ›
-        </div>
-
-        {highlight && (
-          <div
+          <Sparkles size={14} color="#BFDBFE" />
+          <span
             style={{
-              display: "inline-flex",
-              marginBottom: 14,
-              padding: "6px 12px",
-              borderRadius: 999,
-              background: "#FFC940",
-              color: "#FFFFFF",
-              fontSize: 12,
-              fontWeight: 850,
-              letterSpacing: "0.3px",
-              boxShadow: "0 6px 16px rgba(255,201,64,0.30)",
+              fontSize: 11,
+              fontWeight: 950,
+              color: "#DBEAFE",
+              letterSpacing: 0.5,
             }}
           >
-            NOVITÀ
-          </div>
-        )}
-
-        <div
-          style={{
-            width: 58,
-            height: 58,
-            borderRadius: 20,
-            background: "rgba(255,255,255,0.16)",
-            border: "1px solid rgba(255,255,255,0.18)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 18,
-            backdropFilter: "blur(8px)",
-            boxShadow: "0 10px 24px rgba(0,0,0,0.16)",
-          }}
-        >
-          {icon}
+            Test gratuito · risultato personalizzato
+          </span>
         </div>
-
-        <h2
-          style={{
-            margin: "0 80px 8px 0",
-            fontSize: 24,
-            lineHeight: 1.04,
-            fontWeight: 850,
-            letterSpacing: "-0.8px",
-          }}
-        >
-          {title}
-        </h2>
-
-        <p
-          style={{
-            margin: 0,
-            fontSize: 15,
-            lineHeight: 1.55,
-            opacity: 0.96,
-            maxWidth: 290,
-          }}
-        >
-          {description}
-        </p>
-      </div>
-    </section>
-  );
-}
-
-export default function Dashboard() {
-  const router = useRouter();
-  const [user, setUser] = useState<GpsUser | null>(null);
-  const [notifiche, setNotifiche] = useState<Notifica[]>([]);
-  const [query, setQuery] = useState("");
-  const [segmentoStudente, setSegmentoStudente] = useState("NON_ISCRITTO");
-
-  const handleShareApp = async () => {
-    const shareData = {
-      title: "Laurea Smart",
-      text: "Scopri gratuitamente quale percorso universitario è più adatto al tuo profilo.",
-      url: "https://app.laureasmart.it",
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareData.url);
-        alert("Link copiato");
-      }
-    } catch {
-      console.log("Condivisione annullata");
-    }
-  };
-  useEffect(() => {
-    const storedUser = localStorage.getItem("gps_user");
-
-    if (!storedUser) {
-      router.push("/register");
-      return;
-    }
-
-    setUser(JSON.parse(storedUser) as GpsUser);
-    const savedSegmentoStudente =
-      localStorage.getItem("segmento_studente") || "NON_ISCRITTO";
-
-    setSegmentoStudente(savedSegmentoStudente);
-    const aggiornaBadge = (count: number) => {
-      if ("setAppBadge" in navigator && count > 0) {
-        navigator.setAppBadge(count).catch(console.error);
-      }
-
-      if ("clearAppBadge" in navigator && count === 0) {
-        navigator.clearAppBadge().catch(console.error);
-      }
-    };
-
-    const loadNotifiche = () => {
-      const registeredAt = localStorage.getItem("registered_at") || "";
-
-      const url =
-        "https://laureasmart.it/api/notifiche.php?t=" +
-        Date.now() +
-        "&registered_at=" +
-        encodeURIComponent(registeredAt);
-
-      fetch(url, {
-        cache: "no-store",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            const lista = data.data || [];
-            setNotifiche(lista);
-            aggiornaBadge(lista.length);
-          }
-        })
-        .catch((error) => {
-          console.error("Errore caricamento notifiche:", error);
-        });
-    };
-
-    loadNotifiche();
-    const interval = setInterval(loadNotifiche, 10000);
-
-    return () => clearInterval(interval);
-  }, [router]);
-
-  if (!user) return null;
-  const isGiaIscritto = segmentoStudente === "GIA_ISCRITTO";
-  const isUniversitaInterrotta = segmentoStudente === "UNIVERSITA_INTERROTTA";
-  const isTrasferimento = segmentoStudente === "TRASFERIMENTO";
-  const isBibliotecaAccessoCompleto = isGiaIscritto || isTrasferimento;
-  const isBibliotecaConsultazione = isUniversitaInterrotta;
-  const notificheFiltrate = notifiche.filter((notifica) => {
-    const testo = query.toLowerCase().trim();
-
-    return (
-      testo === "" ||
-      notifica.titolo.toLowerCase().includes(testo) ||
-      notifica.messaggio.toLowerCase().includes(testo) ||
-      notifica.categoria.toLowerCase().includes(testo)
-    );
-  });
-
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "22px 18px 120px",
-        fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
-        maxWidth: 430,
-        margin: "0 auto",
-        color: "#FFFFFF",
-        background:
-          "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
-      }}
-    >
-      <section
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(31,111,178,0.98) 0%, rgba(21,84,135,0.96) 100%)",
-          borderRadius: 30,
-          padding: 24,
-          color: "#FFFFFF",
-          boxShadow: "0 22px 54px rgba(0,0,0,0.34)",
-          marginBottom: 20,
-          border: "1px solid rgba(255,255,255,0.10)",
-        }}
-      >
-        <p
-          style={{
-            margin: "0 0 8px",
-            fontSize: 14,
-            opacity: 0.9,
-            fontWeight: 700,
-          }}
-        >
-          Benvenuto, {user.nome} 👋
-        </p>
 
         <h1
           style={{
             margin: 0,
-            fontSize: 32,
-            lineHeight: 1.08,
-            fontWeight: 850,
-            letterSpacing: "-0.7px",
+            fontSize: 34,
+            lineHeight: 1.04,
+            letterSpacing: -1.15,
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          {isGiaIscritto
-            ? "Organizza il tuo percorso di studi"
-            : isUniversitaInterrotta
-            ? "Riparti dal percorso giusto"
-            : isTrasferimento
-            ? "Valuta il tuo nuovo percorso"
-            : "Costruisci il tuo percorso universitario"}
+          Scopri il percorso universitario più adatto a te
         </h1>
 
         <p
           style={{
             margin: "14px 0 0",
-            fontSize: 15,
-            lineHeight: 1.6,
-            opacity: 0.95,
-          }}
-        >
-          {isGiaIscritto
-            ? "Monitora esami, CFU e obiettivi settimanali. Laurea Smart ti aiuta a rendere più ordinato il percorso che hai già iniziato."
-            : isUniversitaInterrotta
-            ? "Hai già iniziato l’università? Puoi ripartire valorizzando esami sostenuti, CFU e obiettivi personali."
-            : isTrasferimento
-            ? "Se stai valutando un cambio corso o ateneo, puoi verificare il percorso più adatto e capire quali esami potrebbero essere valorizzati."
-            : "Ritrova i corsi salvati, ricevi aggiornamenti e scopri opportunità coerenti con il tuo profilo."}
-        </p>
-      </section>
-
-      <section style={{ marginBottom: 18 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            border: "1px solid rgba(120,194,255,0.20)",
-            background:
-              "linear-gradient(135deg, rgba(58,160,255,0.14), rgba(17,32,51,0.88))",
-            borderRadius: 22,
-            padding: "14px 16px",
-            boxShadow: "0 12px 30px rgba(0,0,0,0.20)",
-            backdropFilter: "blur(16px)",
-          }}
-        >
-          <Search size={22} color="#3AA0FF" />
-
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cerca notifiche, scadenze, opportunità..."
-            style={{
-              width: "100%",
-              border: "none",
-              outline: "none",
-              background: "transparent",
-              color: "#FFFFFF",
-              fontSize: 14,
-              fontFamily: "inherit",
-            }}
-          />
-
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              style={{
-                border: "none",
-                background: "transparent",
-                color: "rgba(255,255,255,0.65)",
-                fontSize: 18,
-                cursor: "pointer",
-              }}
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </section>
-
-      <section style={{ marginBottom: 20 }}>
-        <button
-          onClick={() =>
-            router.push(
-              isGiaIscritto
-                ? "/dashboard/percorso-smart"
-                : "/dashboard/preferiti"
-            )
-          }
-          style={{
-            width: "100%",
-            border: "1px solid rgba(58,160,255,0.28)",
-            background:
-              "linear-gradient(135deg, rgba(31,111,178,0.96) 0%, rgba(58,160,255,0.92) 55%, rgba(21,84,135,0.96) 100%)",
-            borderRadius: 28,
-            padding: 20,
-            textAlign: "left",
-            boxShadow: "0 20px 48px rgba(58,160,255,0.22)",
-            cursor: "pointer",
-            color: "#FFFFFF",
+            color: "rgba(255,255,255,0.78)",
+            fontSize: 14,
+            lineHeight: 1.7,
             position: "relative",
-            overflow: "hidden",
-            fontFamily: "inherit",
+            zIndex: 1,
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              right: -34,
-              top: -34,
-              width: 130,
-              height: 130,
-              borderRadius: 999,
-              background: "rgba(255,255,255,0.14)",
-            }}
-          />
+          Rispondi a poche domande su obiettivo, tempo disponibile, situazione
+          attuale e aspetti da valutare. Alla fine potrai salvare il risultato e
+          ricevere una prima indicazione orientativa.
+        </p>
 
-          <div
-            style={{
-              position: "relative",
-              zIndex: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 14,
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 20,
-                background: "rgba(255,255,255,0.18)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Heart size={28} />
-            </div>
-
-            <div>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: 23,
-                  lineHeight: 1.1,
-                  fontWeight: 900,
-                  letterSpacing: "-0.5px",
-                }}
-              >
-                {isGiaIscritto ? "Il mio Percorso Smart" : "I miei percorsi"}
-              </h2>
-
-              <p
-                style={{
-                  margin: "7px 0 0",
-                  fontSize: 14,
-                  lineHeight: 1.45,
-                  color: "rgba(255,255,255,0.86)",
-                }}
-              >
-                {isGiaIscritto
-                  ? "Apri il tuo spazio personale per monitorare esami, CFU, avanzamento e prossimi obiettivi."
-                  : "Ritrova subito i corsi salvati e continua da quelli più adatti al tuo profilo."}
-              </p>
-            </div>
-          </div>
-        </button>
-      </section>
-
-      {!isGiaIscritto && <CompatibilitaPercorsoCard />}
-
-      <FeatureCard
-        icon={<CalendarCheck size={30} />}
-        title="Piano Universitario Personalizzato"
-        description="Trasforma test, profilo e percorso in una prima analisi orientativa da far valutare a un orientatore."
-        gradient="linear-gradient(135deg, #4C1D95 0%, #8B5CF6 52%, #3AA0FF 100%)"
-        highlight
-        onClick={() => router.push("/dashboard/piano-personale")}
-      />
-
-      <FeatureCard
-        icon={<GraduationCap size={30} />}
-        title="Percorso Smart"
-        description={
-          isGiaIscritto
-            ? "Monitora CFU, esami, timeline laurea, calendario e reminder in un’unica area."
-            : "Simula anno accademico, compatibilità con la vita reale e futuro professionale prima di scegliere il percorso."
-        }
-        gradient="linear-gradient(135deg, #0F766E 0%, #14B8A6 52%, #0E7490 100%)"
-        highlight
-        onClick={() => router.push("/dashboard/percorso-smart")}
-      />
-
-      <FeatureCard
-        icon={<BookOpen size={30} />}
-        title="Biblioteca Smart"
-        description={
-          isBibliotecaAccessoCompleto
-            ? "Trova appunti, schemi e riassunti condivisi dagli studenti della tua area. Puoi salvare i materiali utili e caricare i tuoi appunti originali."
-            : isBibliotecaConsultazione
-            ? "Consulta materiali condivisi dagli studenti per riprendere confidenza con lo studio universitario."
-            : "Una funzione pensata per accompagnarti nello studio quando inizierai il tuo percorso universitario."
-        }
-        gradient="linear-gradient(135deg, #4C1D95 0%, #7C3AED 54%, #3AA0FF 100%)"
-        highlight={isBibliotecaAccessoCompleto}
-        onClick={() => router.push("/dashboard/biblioteca-smart")}
-      />
-
-      <FeatureCard
-        icon={<BookOpen size={30} />}
-        title={
-          isGiaIscritto
-            ? "Valuta prossimi step"
-            : "Esplora i percorsi consigliati"
-        }
-        description={
-          isGiaIscritto
-            ? "Scopri percorsi futuri come magistrali, master o alternative coerenti con il tuo profilo."
-            : "Lauree, magistrali e master ordinati in base al tuo profilo."
-        }
-        gradient="linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)"
-        onClick={() => router.push("/dashboard/percorsi")}
-      />
-
-      {!isGiaIscritto && <StudentiComeTeCard />}
-
-      <section>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            marginBottom: 14,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            marginTop: 18,
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          <h2
+          <MiniCard
+            tone="blue"
+            icon={<Clock size={18} />}
+            title="2 minuti"
+            text="Un test breve, pensato per partire subito."
+          />
+          <MiniCard
+            tone="purple"
+            icon={<FileText size={18} />}
+            title="Risultato"
+            text="Area, percorso e prossimo passo consigliato."
+          />
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gap: 10,
+            marginTop: 18,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <Link
+            href="/orientamento-gratuito/test"
+            onClick={startOnboarding}
+            style={primaryButtonStyle}
+          >
+            Inizia il test gratuito
+            <ArrowRight size={19} />
+          </Link>
+
+          <p
             style={{
               margin: 0,
-              fontSize: 22,
-              color: "#FFFFFF",
-              fontWeight: 850,
-              letterSpacing: "-0.4px",
+              textAlign: "center",
+              fontSize: 11,
+              lineHeight: 1.45,
+              color: "rgba(255,255,255,0.56)",
             }}
           >
-            Notifiche recenti
-          </h2>
-
-          {notifiche.length > 0 && (
-            <span
-              style={{
-                minWidth: 30,
-                height: 30,
-                padding: "0 10px",
-                borderRadius: 999,
-                background: "#3AA0FF",
-                color: "#FFFFFF",
-                fontSize: 13,
-                fontWeight: 800,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 8px 22px rgba(58,160,255,0.32)",
-              }}
-            >
-              {notifiche.length}
-            </span>
-          )}
+            Gratuito, senza obbligo di iscrizione. Il risultato completo viene
+            salvato solo dopo aver inserito i tuoi dati.
+          </p>
         </div>
-
-        {notificheFiltrate.length === 0 ? (
-          <DarkCard
-            title="Nessun aggiornamento trovato"
-            description="Quando saranno pubblicate nuove opportunità, le troverai qui."
-          />
-        ) : (
-          <div style={{ display: "grid", gap: 12 }}>
-            {notificheFiltrate.map((notifica) => (
-              <DarkCard
-                key={notifica.id}
-                title={notifica.titolo}
-                description={notifica.messaggio}
-                badge={notifica.categoria}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    marginTop: 12,
-                    color: "rgba(255,255,255,0.54)",
-                    fontSize: 12,
-                  }}
-                >
-                  <Bell size={14} />
-                  <span>{notifica.created_at}</span>
-                </div>
-              </DarkCard>
-            ))}
-          </div>
-        )}
       </section>
 
-      {!isGiaIscritto && (
-        <section style={{ marginTop: 22 }}>
-          <DarkCard
-            title={
-              isTrasferimento
-                ? "Vuoi valutare il trasferimento?"
-                : "Hai bisogno di aiuto?"
-            }
-            description={
-              isTrasferimento
-                ? "Puoi richiedere un confronto per capire come valorizzare esami e CFU già sostenuti."
-                : isUniversitaInterrotta
-                ? "Se hai interrotto gli studi, puoi capire quali esami valorizzare e come ripartire con un percorso più chiaro."
-                : "Un orientatore reale può aiutarti gratuitamente a capire quale percorso scegliere."
-            }
-            badge={isTrasferimento || isUniversitaInterrotta ? "CFU" : "Gratis"}
-            onClick={() => router.push("/dashboard/contatti")}
-          >
-            <div
-              style={{
-                marginTop: 16,
-                width: "100%",
-                minHeight: 52,
-                borderRadius: 18,
-                background: "#3AA0FF",
-                color: "#FFFFFF",
-                fontSize: 14,
-                fontWeight: 900,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                border: "none",
-              }}
-            >
-              {isTrasferimento || isUniversitaInterrotta
-                ? "Richiedi valutazione CFU"
-                : "Parla con un orientatore"}
-              <span>→</span>
-            </div>
-          </DarkCard>
-        </section>
-      )}
-
-      {!isGiaIscritto && (
-        <section style={{ marginTop: 18 }}>
-          <div
-            style={{
-              padding: 18,
-              borderRadius: 28,
-              background:
-                "linear-gradient(135deg, rgba(31,111,178,0.22) 0%, rgba(17,32,51,0.94) 100%)",
-              border: "1px solid rgba(120,194,255,0.16)",
-              boxShadow: "0 16px 40px rgba(0,0,0,0.24)",
-              backdropFilter: "blur(16px)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 13,
-                marginBottom: 16,
-              }}
-            >
-              <div
-                style={{
-                  width: 54,
-                  height: 54,
-                  borderRadius: 20,
-                  background: "rgba(58,160,255,0.16)",
-                  color: "#78C2FF",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Share2 size={25} />
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    padding: "6px 10px",
-                    borderRadius: 999,
-                    background: "rgba(58,160,255,0.16)",
-                    color: "#78C2FF",
-                    fontSize: 11,
-                    fontWeight: 900,
-                    marginBottom: 8,
-                  }}
-                >
-                  CONDIVIDI
-                </div>
-
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: 21,
-                    lineHeight: 1.12,
-                    fontWeight: 900,
-                    color: "#FFFFFF",
-                    letterSpacing: "-0.5px",
-                  }}
-                >
-                  Conosci qualcuno che sta cercando la laurea giusta?
-                </h3>
-
-                <p
-                  style={{
-                    margin: "9px 0 0",
-                    fontSize: 14,
-                    lineHeight: 1.55,
-                    color: "rgba(255,255,255,0.72)",
-                  }}
-                >
-                  Condividi Laurea Smart con amici, colleghi o familiari: il
-                  test e l’orientamento sono gratuiti.
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleShareApp}
-              style={{
-                width: "100%",
-                minHeight: 56,
-                borderRadius: 20,
-                border: "none",
-                background: "#3AA0FF",
-                color: "#FFFFFF",
-                fontSize: 15,
-                fontWeight: 900,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-                cursor: "pointer",
-                boxShadow: "0 14px 30px rgba(58,160,255,0.24)",
-              }}
-            >
-              <Share2 size={19} />
-              Condividi con un amico
-            </button>
-          </div>
-        </section>
-      )}
-
-      <BottomNav />
-    </main>
-  );
-}
-
-function DarkCard({
-  title,
-  description,
-  badge,
-  children,
-  onClick,
-}: {
-  title: string;
-  description: string;
-  badge?: string;
-  children?: React.ReactNode;
-  onClick?: () => void;
-}) {
-  return (
-    <section
-      onClick={onClick}
-      style={{
-        padding: 18,
-        borderRadius: 24,
-        background:
-          "linear-gradient(135deg, rgba(58,160,255,0.14), rgba(17,32,51,0.92))",
-        border: "1px solid rgba(120,194,255,0.20)",
-        boxShadow:
-          "inset 4px 0 0 rgba(58,160,255,0.72), 0 16px 38px rgba(0,0,0,0.26)",
-        cursor: onClick ? "pointer" : "default",
-        backdropFilter: "blur(16px)",
-      }}
-    >
-      <div
+      <section
         style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 12,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 10,
+          marginBottom: 16,
         }}
       >
-        <h3
+        <MiniCard
+          tone="teal"
+          icon={<Target size={18} />}
+          title="Obiettivo"
+          text="Capire quale percorso è coerente con ciò che vuoi ottenere."
+        />
+        <MiniCard
+          tone="amber"
+          icon={<ShieldCheck size={18} />}
+          title="Valutazione"
+          text="CFU, tempi, sostenibilità e possibili supporti da verificare."
+        />
+      </section>
+
+      <section style={{ ...glassCard, padding: 18, marginBottom: 16 }}>
+        <div
           style={{
-            margin: 0,
-            fontSize: 17,
-            lineHeight: 1.25,
-            color: "#FFFFFF",
-            fontWeight: 850,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 4,
           }}
         >
-          {title}
-        </h3>
-
-        {badge && (
-          <span
+          <div
             style={{
-              padding: "6px 10px",
-              borderRadius: 999,
-              background: "rgba(58,160,255,0.26)",
-              border: "1px solid rgba(120,194,255,0.28)",
+              width: 40,
+              height: 40,
+              borderRadius: 15,
+              background: "rgba(59,130,246,0.13)",
+              border: "1px solid rgba(96,165,250,0.22)",
               color: "#BFDBFE",
-              fontSize: 11,
-              fontWeight: 850,
-              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            {badge}
-          </span>
-        )}
-      </div>
+            <ClipboardCheck size={20} />
+          </div>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 18 }}>Come funziona</h2>
+            <p
+              style={{
+                margin: "4px 0 0",
+                fontSize: 12,
+                color: "rgba(255,255,255,0.58)",
+              }}
+            >
+              Un percorso guidato, senza domande inutili.
+            </p>
+          </div>
+        </div>
 
-      <p
+        <StepRow
+          number="01"
+          title="Rispondi al test"
+          text="Indichi situazione, obiettivo, tempo disponibile, area di interesse e aspetti da valutare."
+        />
+        <StepRow
+          number="02"
+          title="Salvi il risultato"
+          text="Alla fine inserisci i dati per conservare il profilo e ricevere il riepilogo completo."
+        />
+        <StepRow
+          number="03"
+          title="Generi il piano"
+          text="Puoi trasformare il risultato in un Piano Universitario Personalizzato e parlare con un orientatore."
+        />
+      </section>
+
+      <section
         style={{
-          margin: "10px 0 0",
-          fontSize: 14,
-          lineHeight: 1.5,
-          color: "rgba(255,255,255,0.68)",
+          borderRadius: 26,
+          border: "1px solid rgba(45,212,191,0.24)",
+          background:
+            "linear-gradient(135deg, rgba(20,184,166,0.18), rgba(12,25,42,0.94))",
+          padding: 18,
+          marginBottom: 16,
+          boxShadow: "0 22px 48px rgba(20,184,166,0.14)",
         }}
       >
-        {description}
-      </p>
+        <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
+          <div
+            style={{
+              width: 42,
+              minWidth: 42,
+              height: 42,
+              borderRadius: 16,
+              background: "rgba(20,184,166,0.14)",
+              border: "1px solid rgba(45,212,191,0.24)",
+              color: "#99F6E4",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MessageCircle size={20} />
+          </div>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 17 }}>
+              Non sai da dove partire?
+            </h2>
+            <p
+              style={{
+                margin: "8px 0 0",
+                fontSize: 13,
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.72)",
+              }}
+            >
+              Il test serve proprio a questo: mettere ordine tra corsi,
+              obiettivi, tempi, costi, eventuali CFU e supporti allo studio.
+            </p>
+          </div>
+        </div>
+      </section>
 
-      {children}
-    </section>
+      <section
+        style={{
+          borderRadius: 22,
+          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(255,255,255,0.045)",
+          padding: 14,
+        }}
+      >
+        <div style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
+          <CheckCircle2
+            size={17}
+            color="#93C5FD"
+            style={{ marginTop: 1, flexShrink: 0 }}
+          />
+          <p
+            style={{
+              margin: 0,
+              fontSize: 12,
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.58)",
+            }}
+          >
+            Il risultato ha valore orientativo. Costi, agevolazioni, CFU
+            riconoscibili e condizioni di iscrizione devono sempre essere
+            verificati con l’ateneo o con un orientatore.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
