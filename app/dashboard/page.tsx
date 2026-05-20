@@ -10,9 +10,7 @@ import {
   Bell,
   Search,
   Heart,
-  TrendingUp,
   CalendarCheck,
-  CalendarDays,
   Share2,
   GraduationCap,
 } from "lucide-react";

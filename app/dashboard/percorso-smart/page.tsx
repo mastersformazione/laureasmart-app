@@ -15,7 +15,6 @@ import {
   GraduationCap,
   MessageCircle,
   Plus,
-  RefreshCcw,
   Sparkles,
   Target,
   Trash2,
