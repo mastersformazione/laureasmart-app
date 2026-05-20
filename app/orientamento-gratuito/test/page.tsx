@@ -49,9 +49,17 @@ type Risultato = {
   tipo: string;
   titolo: string;
   descrizione: string;
-  percorso: string;
-};
 
+  // Manteniamo percorso per compatibilità con PHP, localStorage e vecchie logiche
+  percorso: string;
+
+  // Nuovi campi per risposta più intelligente
+  percorso_prioritario: string;
+  percorsi_compatibili: string[];
+  approfondimento: string;
+  prossimo_passo: string;
+  cta_orientatore: string;
+};
 type LeadForm = {
   nome: string;
   cognome: string;
@@ -506,313 +514,926 @@ function getSegmenti(data: OrientamentoData): Segmenti {
   };
 }
 
+type ProfiloBase = {
+  tipo: string;
+  titolo: string;
+  descrizione: string;
+  percorsiDiploma: string[];
+  percorsiLaureaTriennale: string[];
+  percorsiLaureaMagistrale: string[];
+  percorsiGenerici: string[];
+};
+
+const profiliPerArea: Record<string, ProfiloBase> = {
+  "Economia e management": {
+    tipo: "ECONOMIA",
+    titolo: "Profilo economico-manageriale",
+    descrizione:
+      "Le tue risposte indicano un interesse verso organizzazione, gestione, amministrazione, impresa, marketing o crescita professionale.",
+    percorsiDiploma: [
+      "Laurea triennale in Economia",
+      "Laurea triennale in Scienze dell’Amministrazione",
+      "Laurea triennale in ambito manageriale",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Economia",
+      "Laurea magistrale in Management",
+      "Master universitari in area economico-aziendale",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello",
+      "Percorsi executive in management",
+      "Corsi di perfezionamento in area aziendale",
+    ],
+    percorsiGenerici: [
+      "Economia",
+      "Management",
+      "Amministrazione",
+      "Marketing",
+    ],
+  },
+
+  "Marketing e comunicazione digitale": {
+    tipo: "COMUNICAZIONE",
+    titolo: "Profilo marketing e comunicazione digitale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso comunicazione, contenuti digitali, social media, pubblicità, brand e strategie online.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze della Comunicazione",
+      "Laurea triennale in ambito marketing e comunicazione",
+      "Percorsi digitali e comunicazione d’impresa",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Comunicazione",
+      "Master in marketing digitale",
+      "Master in comunicazione d’impresa",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master specialistici in digital marketing",
+      "Percorsi executive in comunicazione",
+      "Corsi di perfezionamento in strategia digitale",
+    ],
+    percorsiGenerici: [
+      "Comunicazione",
+      "Marketing digitale",
+      "Digital media",
+      "Comunicazione d’impresa",
+    ],
+  },
+
+  Psicologia: {
+    tipo: "PSICOLOGIA",
+    titolo: "Profilo psicologico e relazionale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso la comprensione delle persone, dei comportamenti, delle relazioni e dei contesti sociali.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze e Tecniche Psicologiche",
+      "Laurea triennale in Scienze dell’Educazione",
+      "Percorsi introduttivi nelle scienze umane e sociali",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Psicologia",
+      "Master universitari in area psicologica, educativa o relazionale",
+      "Percorsi di specializzazione nelle scienze umane",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area psicologica",
+      "Percorsi post-laurea in ambito clinico, educativo o organizzativo",
+      "Corsi di perfezionamento per professionisti",
+    ],
+    percorsiGenerici: [
+      "Scienze e Tecniche Psicologiche",
+      "Psicologia",
+      "Scienze dell’Educazione",
+      "Area relazionale e sociale",
+    ],
+  },
+
+  "Scienze dell’educazione": {
+    tipo: "EDUCAZIONE",
+    titolo: "Profilo educativo e formativo",
+    descrizione:
+      "Il tuo profilo sembra orientato verso educazione, formazione, servizi alla persona, infanzia, comunità e contesti sociali.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze dell’Educazione",
+      "Percorsi per educatore socio-pedagogico",
+      "Percorsi in area infanzia, comunità e formazione",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Pedagogia",
+      "Laurea magistrale in Scienze Pedagogiche",
+      "Master universitari in area educativa",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area pedagogica",
+      "Percorsi di coordinamento educativo",
+      "Corsi di perfezionamento per la formazione",
+    ],
+    percorsiGenerici: [
+      "Scienze dell’Educazione",
+      "Pedagogia",
+      "Formazione",
+      "Servizi socio-educativi",
+    ],
+  },
+
+  "Pedagogia e formazione": {
+    tipo: "EDUCAZIONE",
+    titolo: "Profilo pedagogico e formativo",
+    descrizione:
+      "Il tuo profilo sembra orientato verso apprendimento, crescita personale, progettazione educativa, formazione e supporto nei percorsi di sviluppo.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze dell’Educazione",
+      "Percorsi in area educativa e formativa",
+      "Percorsi per servizi alla persona",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Pedagogia",
+      "Laurea magistrale in Scienze Pedagogiche",
+      "Master in progettazione educativa",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area pedagogica",
+      "Percorsi per coordinamento e progettazione formativa",
+      "Corsi di perfezionamento in formazione",
+    ],
+    percorsiGenerici: [
+      "Pedagogia",
+      "Scienze dell’Educazione",
+      "Formazione degli adulti",
+      "Progettazione educativa",
+    ],
+  },
+
+  "Giurisprudenza / servizi giuridici": {
+    tipo: "GIURIDICA",
+    titolo: "Profilo giuridico-amministrativo",
+    descrizione:
+      "Il tuo profilo sembra orientato verso diritto, norme, amministrazione, servizi giuridici, tutela, istituzioni o concorsi.",
+    percorsiDiploma: [
+      "Laurea in Servizi Giuridici",
+      "Laurea magistrale a ciclo unico in Giurisprudenza",
+      "Percorsi in area amministrativa e giuridica",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale coerente con l’area giuridico-amministrativa",
+      "Master in area legale, amministrativa o compliance",
+      "Percorsi per pubblica amministrazione e concorsi",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area giuridica",
+      "Percorsi specialistici per pubblica amministrazione",
+      "Corsi di perfezionamento in ambito legale",
+    ],
+    percorsiGenerici: [
+      "Giurisprudenza",
+      "Servizi Giuridici",
+      "Scienze giuridiche",
+      "Area amministrativa",
+    ],
+  },
+
+  "Criminologia e sicurezza": {
+    tipo: "GIURIDICA",
+    titolo: "Profilo criminologico e sicurezza",
+    descrizione:
+      "Il tuo profilo sembra orientato verso sicurezza, criminologia, diritto, prevenzione, analisi dei fenomeni sociali e contesti investigativi.",
+    percorsiDiploma: [
+      "Laurea in Servizi Giuridici",
+      "Percorsi in area criminologica e sicurezza",
+      "Percorsi in scienze sociali e giuridiche",
+    ],
+    percorsiLaureaTriennale: [
+      "Master in criminologia e sicurezza",
+      "Laurea magistrale in area giuridica o sociale",
+      "Percorsi specialistici per sicurezza e investigazione",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in criminologia",
+      "Percorsi post-laurea in sicurezza e prevenzione",
+      "Corsi di perfezionamento in ambito socio-giuridico",
+    ],
+    percorsiGenerici: [
+      "Criminologia",
+      "Sicurezza",
+      "Area giuridica",
+      "Discipline socio-giuridiche",
+    ],
+  },
+
+  "Scienze politiche e relazioni internazionali": {
+    tipo: "GIURIDICA",
+    titolo: "Profilo politico-istituzionale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso istituzioni, pubblica amministrazione, politica, relazioni internazionali, società e organizzazioni.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze Politiche",
+      "Laurea triennale in Relazioni Internazionali",
+      "Percorsi in pubblica amministrazione",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Scienze Politiche",
+      "Laurea magistrale in Relazioni Internazionali",
+      "Master in pubblica amministrazione o politiche pubbliche",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello",
+      "Percorsi specialistici per PA e istituzioni",
+      "Corsi di perfezionamento in relazioni internazionali",
+    ],
+    percorsiGenerici: [
+      "Scienze Politiche",
+      "Relazioni Internazionali",
+      "Pubblica Amministrazione",
+      "Studi politico-sociali",
+    ],
+  },
+
+  "Sociologia e servizi sociali": {
+    tipo: "EDUCAZIONE",
+    titolo: "Profilo sociale e comunitario",
+    descrizione:
+      "Il tuo profilo sembra orientato verso persone, comunità, inclusione, servizi sociali, disagio, territorio e progettazione sociale.",
+    percorsiDiploma: [
+      "Laurea triennale in Sociologia",
+      "Laurea triennale in Scienze dell’Educazione",
+      "Percorsi in area sociale e comunitaria",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in area sociale",
+      "Master in progettazione sociale",
+      "Percorsi in servizi alla persona",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area sociale",
+      "Percorsi post-laurea in inclusione e comunità",
+      "Corsi di perfezionamento in progettazione sociale",
+    ],
+    percorsiGenerici: [
+      "Sociologia",
+      "Servizi sociali",
+      "Scienze dell’Educazione",
+      "Area socio-comunitaria",
+    ],
+  },
+
+  "Scienze motorie": {
+    tipo: "SPORT",
+    titolo: "Profilo sportivo e motorio",
+    descrizione:
+      "Il tuo profilo sembra orientato verso sport, movimento, benessere, preparazione fisica e promozione di stili di vita attivi.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze Motorie",
+      "Percorsi in sport e benessere",
+      "Percorsi in attività motorie",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Scienze Motorie",
+      "Master in sport, benessere o preparazione atletica",
+      "Percorsi specialistici in attività motoria",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area sportiva",
+      "Percorsi post-laurea in benessere e movimento",
+      "Corsi di perfezionamento per professionisti dello sport",
+    ],
+    percorsiGenerici: [
+      "Scienze Motorie",
+      "Sport",
+      "Benessere",
+      "Attività motorie",
+    ],
+  },
+
+  "Sport e benessere": {
+    tipo: "SPORT",
+    titolo: "Profilo sport e benessere",
+    descrizione:
+      "Il tuo profilo sembra orientato verso fitness, benessere, movimento, salute preventiva, preparazione fisica e qualità della vita.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze Motorie",
+      "Percorsi in sport e wellness",
+      "Percorsi in benessere e attività fisica",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Scienze Motorie",
+      "Master in wellness e attività fisica",
+      "Percorsi specialistici in sport e benessere",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area sport e wellness",
+      "Percorsi post-laurea in benessere",
+      "Corsi di perfezionamento in attività fisica adattata",
+    ],
+    percorsiGenerici: [
+      "Scienze Motorie",
+      "Sport",
+      "Wellness",
+      "Attività fisica adattata",
+    ],
+  },
+
+  Comunicazione: {
+    tipo: "COMUNICAZIONE",
+    titolo: "Profilo comunicativo",
+    descrizione:
+      "Il tuo profilo sembra orientato verso linguaggi, media, relazioni, contenuti, comunicazione d’impresa e comunicazione digitale.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze della Comunicazione",
+      "Percorsi in media digitali",
+      "Percorsi in marketing e contenuti",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Comunicazione",
+      "Master in comunicazione digitale",
+      "Master in marketing e media",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in comunicazione",
+      "Percorsi executive in media e marketing",
+      "Corsi di perfezionamento in comunicazione d’impresa",
+    ],
+    percorsiGenerici: [
+      "Comunicazione",
+      "Media digitali",
+      "Marketing",
+      "Comunicazione aziendale",
+    ],
+  },
+
+  "Lettere, arte e spettacolo": {
+    tipo: "COMUNICAZIONE",
+    titolo: "Profilo umanistico e culturale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso cultura, scrittura, editoria, arte, spettacolo, contenuti e valorizzazione del patrimonio.",
+    percorsiDiploma: [
+      "Laurea triennale in Lettere",
+      "Laurea triennale in Discipline delle arti",
+      "Percorsi in comunicazione culturale",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in area umanistica",
+      "Master in editoria, cultura o storytelling",
+      "Percorsi in valorizzazione culturale",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area culturale",
+      "Percorsi post-laurea in editoria e comunicazione",
+      "Corsi di perfezionamento in discipline umanistiche",
+    ],
+    percorsiGenerici: [
+      "Lettere",
+      "Arte",
+      "Spettacolo",
+      "Comunicazione culturale",
+    ],
+  },
+
+  "Lingue e mediazione linguistica": {
+    tipo: "COMUNICAZIONE",
+    titolo: "Profilo linguistico e internazionale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso lingue, comunicazione interculturale, mediazione, traduzione, turismo e contesti internazionali.",
+    percorsiDiploma: [
+      "Laurea triennale in Lingue",
+      "Percorsi in mediazione linguistica",
+      "Percorsi in comunicazione interculturale",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Lingue",
+      "Master in mediazione, traduzione o turismo",
+      "Percorsi in relazioni internazionali",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area linguistica",
+      "Percorsi post-laurea in mediazione e comunicazione internazionale",
+      "Corsi di perfezionamento linguistico-professionale",
+    ],
+    percorsiGenerici: [
+      "Lingue",
+      "Mediazione linguistica",
+      "Comunicazione interculturale",
+      "Relazioni internazionali",
+    ],
+  },
+
+  "Turismo, cultura e territorio": {
+    tipo: "ECONOMIA",
+    titolo: "Profilo turistico-culturale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso turismo, ospitalità, promozione del territorio, beni culturali, eventi e gestione dei servizi.",
+    percorsiDiploma: [
+      "Laurea triennale in Turismo",
+      "Percorsi in beni culturali",
+      "Percorsi in management del turismo",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in turismo o valorizzazione culturale",
+      "Master in management del turismo",
+      "Master in eventi e promozione territoriale",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in turismo e cultura",
+      "Percorsi post-laurea in valorizzazione territoriale",
+      "Corsi di perfezionamento in hospitality e destination management",
+    ],
+    percorsiGenerici: [
+      "Turismo",
+      "Management del turismo",
+      "Beni culturali",
+      "Valorizzazione territoriale",
+    ],
+  },
+
+  "Informatica / tecnologia": {
+    tipo: "TECNOLOGIA",
+    titolo: "Profilo tecnologico e digitale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso informatica, software, dati, sistemi digitali, innovazione e tecnologie applicate.",
+    percorsiDiploma: [
+      "Laurea triennale in Informatica",
+      "Laurea triennale in Ingegneria Informatica",
+      "Percorsi in tecnologie digitali",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Informatica",
+      "Laurea magistrale in Ingegneria Informatica",
+      "Master in tecnologia, dati o sistemi informativi",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area tecnologica",
+      "Percorsi post-laurea in sistemi digitali",
+      "Corsi di perfezionamento in innovazione tecnologica",
+    ],
+    percorsiGenerici: [
+      "Informatica",
+      "Ingegneria informatica",
+      "Tecnologie digitali",
+      "Sistemi informativi",
+    ],
+  },
+
+  "Data, AI e innovazione digitale": {
+    tipo: "TECNOLOGIA",
+    titolo: "Profilo data, AI e innovazione",
+    descrizione:
+      "Il tuo profilo sembra orientato verso dati, intelligenza artificiale, automazione, innovazione digitale e trasformazione tecnologica.",
+    percorsiDiploma: [
+      "Laurea triennale in Informatica",
+      "Percorsi in data analysis",
+      "Percorsi in innovazione digitale",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Informatica o Data Science",
+      "Master in intelligenza artificiale",
+      "Master in innovazione digitale",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in AI e innovazione",
+      "Percorsi post-laurea in data science",
+      "Corsi di perfezionamento in automazione e digitale",
+    ],
+    percorsiGenerici: [
+      "Informatica",
+      "Data Science",
+      "AI",
+      "Innovazione digitale",
+    ],
+  },
+
+  "Ingegneria industriale": {
+    tipo: "TECNOLOGIA",
+    titolo: "Profilo ingegneristico-industriale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso industria, produzione, energia, processi tecnici, organizzazione e innovazione applicata.",
+    percorsiDiploma: [
+      "Laurea triennale in Ingegneria Industriale",
+      "Percorsi in ingegneria gestionale",
+      "Percorsi in ambito tecnico-produttivo",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Ingegneria Industriale",
+      "Laurea magistrale in Ingegneria Gestionale",
+      "Master in management industriale",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area industriale",
+      "Percorsi post-laurea in gestione tecnica e produzione",
+      "Corsi di perfezionamento in innovazione industriale",
+    ],
+    percorsiGenerici: [
+      "Ingegneria Industriale",
+      "Ingegneria Gestionale",
+      "Ingegneria Meccanica",
+      "Energia e produzione",
+    ],
+  },
+
+  "Ingegneria civile e ambientale": {
+    tipo: "TECNOLOGIA",
+    titolo: "Profilo civile e ambientale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso costruzioni, territorio, ambiente, infrastrutture, sicurezza, progettazione e sostenibilità.",
+    percorsiDiploma: [
+      "Laurea triennale in Ingegneria Civile e Ambientale",
+      "Percorsi in edilizia e territorio",
+      "Percorsi in ambiente e sostenibilità",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Ingegneria Civile",
+      "Laurea magistrale in Ingegneria Ambientale",
+      "Master in sicurezza, ambiente o territorio",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in area civile o ambientale",
+      "Percorsi post-laurea in sostenibilità e infrastrutture",
+      "Corsi di perfezionamento in sicurezza e territorio",
+    ],
+    percorsiGenerici: [
+      "Ingegneria Civile",
+      "Ingegneria Ambientale",
+      "Edilizia",
+      "Gestione del territorio",
+    ],
+  },
+
+  "Architettura, design e moda": {
+    tipo: "COMUNICAZIONE",
+    titolo: "Profilo creativo e progettuale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso creatività, estetica, progettazione, design, moda, spazi e comunicazione visiva.",
+    percorsiDiploma: [
+      "Percorsi in design",
+      "Percorsi in moda",
+      "Percorsi in comunicazione visiva",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale o master in design",
+      "Master in moda e comunicazione",
+      "Percorsi specialistici in progettazione creativa",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in design o moda",
+      "Percorsi post-laurea in comunicazione visiva",
+      "Corsi di perfezionamento in progettazione creativa",
+    ],
+    percorsiGenerici: [
+      "Design",
+      "Moda",
+      "Architettura",
+      "Comunicazione visiva",
+    ],
+  },
+
+  "Biologia e nutrizione": {
+    tipo: "TECNOLOGIA",
+    titolo: "Profilo scientifico e nutrizionale",
+    descrizione:
+      "Il tuo profilo sembra orientato verso biologia, alimentazione, nutrizione, salute, benessere, qualità e ambiente.",
+    percorsiDiploma: [
+      "Laurea triennale in Scienze Biologiche",
+      "Percorsi in alimentazione e benessere",
+      "Percorsi in area scientifica",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale in Biologia o Nutrizione",
+      "Master in alimentazione e benessere",
+      "Percorsi specialistici in qualità e ambiente",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in nutrizione",
+      "Percorsi post-laurea in biologia applicata",
+      "Corsi di perfezionamento in alimentazione e salute",
+    ],
+    percorsiGenerici: [
+      "Scienze Biologiche",
+      "Nutrizione",
+      "Alimentazione",
+      "Benessere",
+    ],
+  },
+
+  "Sanità e professioni sanitarie": {
+    tipo: "PSICOLOGIA",
+    titolo: "Profilo sanitario e servizi alla persona",
+    descrizione:
+      "Il tuo profilo sembra orientato verso salute, prevenzione, cura, benessere, organizzazione sanitaria e supporto alla persona.",
+    percorsiDiploma: [
+      "Percorsi in area sanitaria",
+      "Percorsi nei servizi alla persona",
+      "Percorsi in benessere e prevenzione",
+    ],
+    percorsiLaureaTriennale: [
+      "Master universitari in area sanitaria",
+      "Percorsi di management sanitario",
+      "Percorsi specialistici nei servizi alla persona",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in sanità",
+      "Percorsi post-laurea in management sanitario",
+      "Corsi di perfezionamento in area salute e servizi",
+    ],
+    percorsiGenerici: [
+      "Area sanitaria",
+      "Servizi alla persona",
+      "Management sanitario",
+      "Benessere",
+    ],
+  },
+
+  "Agraria, alimentazione e gastronomia": {
+    tipo: "ECONOMIA",
+    titolo: "Profilo agroalimentare e gastronomico",
+    descrizione:
+      "Il tuo profilo sembra orientato verso alimentazione, filiere agroalimentari, sostenibilità, gastronomia, qualità e valorizzazione del territorio.",
+    percorsiDiploma: [
+      "Percorsi in agraria",
+      "Percorsi in gastronomia",
+      "Percorsi in food management",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale o master in area agroalimentare",
+      "Master in food management",
+      "Percorsi in sostenibilità e qualità alimentare",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello in food e sostenibilità",
+      "Percorsi post-laurea in qualità agroalimentare",
+      "Corsi di perfezionamento in valorizzazione territoriale",
+    ],
+    percorsiGenerici: [
+      "Agraria",
+      "Gastronomia",
+      "Scienze dell’alimentazione",
+      "Food management",
+    ],
+  },
+
+  "Scuola e insegnamento": {
+    tipo: "SCUOLA",
+    titolo: "Profilo scuola e insegnamento",
+    descrizione:
+      "Il tuo profilo sembra orientato verso scuola, insegnamento, graduatorie, concorsi, aggiornamento professionale e formazione.",
+    percorsiDiploma: [
+      "Percorsi universitari utili per l’accesso all’insegnamento",
+      "Lauree coerenti con l’obiettivo scuola",
+      "Percorsi in area educativa o disciplinare",
+    ],
+    percorsiLaureaTriennale: [
+      "Laurea magistrale coerente con la classe di concorso",
+      "Master e percorsi per graduatorie",
+      "Corsi utili per aggiornamento professionale",
+    ],
+    percorsiLaureaMagistrale: [
+      "Percorsi per classi di concorso",
+      "Master e corsi per graduatorie",
+      "Corsi di perfezionamento per docenti",
+    ],
+    percorsiGenerici: [
+      "Scuola",
+      "Insegnamento",
+      "Graduatorie",
+      "Formazione docenti",
+    ],
+  },
+
+  "Pubblica amministrazione e concorsi": {
+    tipo: "GIURIDICA",
+    titolo: "Profilo pubblica amministrazione e concorsi",
+    descrizione:
+      "Il tuo profilo sembra orientato verso concorsi pubblici, graduatorie, amministrazione, avanzamenti professionali e ruoli istituzionali.",
+    percorsiDiploma: [
+      "Lauree in area giuridica",
+      "Lauree in area economica",
+      "Lauree in area politico-sociale",
+    ],
+    percorsiLaureaTriennale: [
+      "Lauree magistrali utili per concorsi e avanzamenti",
+      "Master in pubblica amministrazione",
+      "Percorsi in area giuridico-amministrativa",
+    ],
+    percorsiLaureaMagistrale: [
+      "Master universitari di secondo livello per PA",
+      "Percorsi post-laurea per concorsi",
+      "Corsi di perfezionamento in ambito amministrativo",
+    ],
+    percorsiGenerici: [
+      "Area giuridica",
+      "Area economica",
+      "Area politico-sociale",
+      "Pubblica amministrazione",
+    ],
+  },
+};
+
+const profiloGenerale: ProfiloBase = {
+  tipo: "GENERALE",
+  titolo: "Profilo da orientare",
+  descrizione:
+    "Le tue risposte mostrano che potrebbe essere utile confrontare più aree prima di scegliere.",
+  percorsiDiploma: [
+    "Laurea triennale coerente con obiettivi e tempi disponibili",
+    "Percorsi universitari con orientamento personalizzato",
+    "Valutazione delle aree più vicine al tuo profilo",
+  ],
+  percorsiLaureaTriennale: [
+    "Laurea magistrale coerente con il titolo già posseduto",
+    "Master universitari di primo livello",
+    "Percorsi di specializzazione professionale",
+  ],
+  percorsiLaureaMagistrale: [
+    "Master universitari di secondo livello",
+    "Corsi di perfezionamento",
+    "Percorsi executive o specialistici",
+  ],
+  percorsiGenerici: [
+    "Percorsi universitari da confrontare",
+    "Valutazione del titolo di partenza",
+    "Analisi degli obiettivi professionali",
+  ],
+};
+
+function getPercorsiCompatibili(
+  data: OrientamentoData,
+  profilo: ProfiloBase
+): string[] {
+  const titolo = data.titolo_studio || "";
+
+  if (titolo === "Diploma") {
+    return profilo.percorsiDiploma;
+  }
+
+  if (
+    titolo === "Laurea triennale" ||
+    titolo === "Diploma accademico di primo livello (AFAM)"
+  ) {
+    return profilo.percorsiLaureaTriennale;
+  }
+
+  if (
+    titolo === "Laurea magistrale" ||
+    titolo === "Laurea vecchio ordinamento" ||
+    titolo === "Master universitario" ||
+    titolo === "Diploma accademico di secondo livello (AFAM)" ||
+    titolo === "Diploma conservatorio (vecchio ordinamento)" ||
+    titolo === "Diploma accademia di belle arti"
+  ) {
+    return profilo.percorsiLaureaMagistrale;
+  }
+
+  if (titolo === "Ho iniziato l’università ma non ho terminato") {
+    return [
+      "Valutazione degli esami già sostenuti",
+      "Ripresa del percorso universitario",
+      "Eventuale trasferimento o riconoscimento CFU",
+    ];
+  }
+
+  return profilo.percorsiGenerici;
+}
+
+function getApprofondimento(data: OrientamentoData): string {
+  if (data.stato_iscrizione === "Sì, sono già iscritto") {
+    return "Nel tuo caso è utile capire se vuoi proseguire nel percorso attuale, migliorare l’organizzazione dello studio, valutare un cambio corso o ricevere supporto personalizzato.";
+  }
+
+  if (data.stato_iscrizione === "Sto valutando un trasferimento") {
+    return "Prima di scegliere è importante verificare eventuali esami riconoscibili, tempi di trasferimento, compatibilità del corso e sostenibilità del nuovo percorso.";
+  }
+
+  if (data.stato_iscrizione === "Ho iniziato ma ho interrotto") {
+    return "Il punto principale è capire se puoi recuperare esami già sostenuti, riprendere da dove avevi interrotto o scegliere un percorso più sostenibile.";
+  }
+
+  if (data.aspetto_da_valutare === "Esami universitari già sostenuti") {
+    return "L’aspetto più importante da verificare è il possibile riconoscimento degli esami già sostenuti e l’eventuale abbreviazione del percorso.";
+  }
+
+  if (data.aspetto_da_valutare === "Esperienze lavorative o certificazioni") {
+    return "Conviene verificare se esperienze professionali, certificazioni o percorsi precedenti possono aiutarti a scegliere un percorso più coerente.";
+  }
+
+  if (data.aspetto_da_valutare === "Possibili agevolazioni o convenzioni") {
+    return "Nel tuo caso è utile approfondire costi, agevolazioni, convenzioni disponibili e sostenibilità mensile del percorso.";
+  }
+
+  if (
+    data.aspetto_da_valutare ===
+    "Esigenze di supporto allo studio, DSA, BES o disabilità"
+  ) {
+    return "È consigliabile valutare con attenzione servizi di supporto, modalità di studio, accessibilità e strumenti disponibili per affrontare il percorso con maggiore serenità.";
+  }
+
+  if (data.tempo === "2-4 ore a settimana") {
+    return "Hai indicato poco tempo disponibile: la scelta dovrebbe tenere conto non solo del corso, ma anche del carico di studio, dell’organizzazione e della sostenibilità nel tempo.";
+  }
+
+  if (
+    data.obiettivo === "Partecipare a concorsi" ||
+    data.motivazione_studio ===
+      "Mi serve una laurea per concorsi, graduatorie o avanzamenti"
+  ) {
+    return "Per i concorsi è importante non scegliere solo per area di interesse: bisogna verificare classe di laurea, requisiti del bando e titolo effettivamente richiesto.";
+  }
+
+  if (data.obiettivo === "Insegnare") {
+    return "Per l’insegnamento è fondamentale verificare il titolo di accesso, la classe di concorso, gli eventuali CFU richiesti e il percorso più coerente con il tuo obiettivo.";
+  }
+
+  return "Prima di scegliere è utile verificare requisiti di accesso, obiettivi professionali, tempi di studio, costi, eventuali CFU riconoscibili e modalità più adatta alla tua situazione.";
+}
+
+function getProssimoPasso(data: OrientamentoData): string {
+  if (data.stato_iscrizione === "Sì, sono già iscritto") {
+    return "Il prossimo passo consigliato è richiedere supporto sul percorso attuale, così da capire come organizzare meglio lo studio o valutare eventuali alternative.";
+  }
+
+  if (data.stato_iscrizione === "Sto valutando un trasferimento") {
+    return "Il prossimo passo consigliato è richiedere una valutazione del percorso già svolto e capire se un trasferimento può essere conveniente.";
+  }
+
+  if (data.stato_iscrizione === "Ho iniziato ma ho interrotto") {
+    return "Il prossimo passo consigliato è verificare se puoi recuperare esami già sostenuti e costruire un piano di ripartenza realistico.";
+  }
+
+  if (data.aspetto_da_valutare === "Esami universitari già sostenuti") {
+    return "Il prossimo passo consigliato è richiedere una valutazione CFU prima di scegliere il corso definitivo.";
+  }
+
+  if (data.aspetto_da_valutare === "Possibili agevolazioni o convenzioni") {
+    return "Il prossimo passo consigliato è verificare costi, convenzioni e soluzioni sostenibili prima di procedere.";
+  }
+
+  if (
+    data.urgenza === "Subito / entro 1 mese" ||
+    data.urgenza === "Entro 3 mesi"
+  ) {
+    return "Il prossimo passo consigliato è confrontarti con un orientatore per verificare subito il percorso più coerente e i tempi di iscrizione.";
+  }
+
+  if (data.area === "Non so ancora") {
+    return "Il prossimo passo consigliato è generare un piano universitario personalizzato e confrontare più aree prima di scegliere.";
+  }
+
+  return "Il prossimo passo consigliato è generare il tuo piano universitario personalizzato e poi confrontarti con un orientatore per confermare la scelta.";
+}
+
+function getCtaOrientatore(data: OrientamentoData): string {
+  if (data.stato_iscrizione === "Sì, sono già iscritto") {
+    return "Richiedi supporto sul percorso";
+  }
+
+  if (data.stato_iscrizione === "Sto valutando un trasferimento") {
+    return "Valuta trasferimento e CFU";
+  }
+
+  if (data.stato_iscrizione === "Ho iniziato ma ho interrotto") {
+    return "Verifica recupero esami";
+  }
+
+  if (data.aspetto_da_valutare === "Esami universitari già sostenuti") {
+    return "Richiedi valutazione CFU";
+  }
+
+  if (data.aspetto_da_valutare === "Possibili agevolazioni o convenzioni") {
+    return "Verifica costi e agevolazioni";
+  }
+
+  if (
+    data.obiettivo === "Partecipare a concorsi" ||
+    data.obiettivo === "Insegnare"
+  ) {
+    return "Verifica il titolo richiesto";
+  }
+
+  return "Parla gratis con un orientatore";
+}
+
 function getRisultato(data: OrientamentoData): Risultato {
   const area = data.area || "";
+  const profilo = profiliPerArea[area] || profiloGenerale;
 
-  if (area === "Economia e management") {
-    return {
-      tipo: "ECONOMIA",
-      titolo: "Profilo economico-manageriale",
-      descrizione:
-        "Le tue risposte indicano un interesse verso organizzazione, gestione, amministrazione, impresa, marketing o crescita professionale.",
-      percorso:
-        "Potresti valutare percorsi in Economia, Management, Amministrazione, Marketing o ambiti affini.",
-    };
-  }
+  const percorsiCompatibili = getPercorsiCompatibili(data, profilo);
+  const percorsoPrioritario =
+    percorsiCompatibili[0] || "Percorso universitario da valutare";
 
-  if (area === "Economia e management") {
-    return {
-      tipo: "ECONOMIA",
-      titolo: "Profilo economico-manageriale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso gestione, organizzazione, amministrazione, impresa, marketing o crescita professionale.",
-      percorso:
-        "Potresti valutare percorsi in Economia, Management, Amministrazione, Marketing o ambiti aziendali affini.",
-    };
-  }
-
-  if (area === "Marketing e comunicazione digitale") {
-    return {
-      tipo: "COMUNICAZIONE",
-      titolo: "Profilo marketing e comunicazione digitale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso comunicazione, contenuti digitali, social media, pubblicità, brand e strategie online.",
-      percorso:
-        "Potresti valutare percorsi in Comunicazione, Marketing digitale, Digital media o ambiti legati alla comunicazione d’impresa.",
-    };
-  }
-
-  if (area === "Psicologia") {
-    return {
-      tipo: "PSICOLOGIA",
-      titolo: "Profilo psicologico e relazionale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso la comprensione delle persone, dei comportamenti, delle relazioni e dei contesti sociali.",
-      percorso:
-        "Potresti valutare percorsi in Scienze e Tecniche Psicologiche o aree collegate alle scienze umane.",
-    };
-  }
-
-  if (area === "Scienze dell’educazione") {
-    return {
-      tipo: "EDUCAZIONE",
-      titolo: "Profilo educativo e formativo",
-      descrizione:
-        "Il tuo profilo sembra orientato verso educazione, formazione, servizi alla persona, infanzia, comunità e contesti sociali.",
-      percorso:
-        "Potresti valutare percorsi in Scienze dell’Educazione, formazione, pedagogia o servizi socio-educativi.",
-    };
-  }
-
-  if (area === "Pedagogia e formazione") {
-    return {
-      tipo: "EDUCAZIONE",
-      titolo: "Profilo pedagogico e formativo",
-      descrizione:
-        "Il tuo profilo sembra orientato verso apprendimento, crescita personale, progettazione educativa, formazione e supporto nei percorsi di sviluppo.",
-      percorso:
-        "Potresti valutare percorsi in Pedagogia, Scienze dell’Educazione, formazione degli adulti o progettazione educativa.",
-    };
-  }
-
-  if (area === "Giurisprudenza / servizi giuridici") {
-    return {
-      tipo: "GIURIDICA",
-      titolo: "Profilo giuridico-amministrativo",
-      descrizione:
-        "Il tuo profilo sembra orientato verso diritto, norme, amministrazione, servizi giuridici, tutela, istituzioni o concorsi.",
-      percorso:
-        "Potresti valutare percorsi in Giurisprudenza, Servizi giuridici, Scienze giuridiche o aree amministrative.",
-    };
-  }
-
-  if (area === "Criminologia e sicurezza") {
-    return {
-      tipo: "GIURIDICA",
-      titolo: "Profilo criminologico e sicurezza",
-      descrizione:
-        "Il tuo profilo sembra orientato verso sicurezza, criminologia, diritto, prevenzione, analisi dei fenomeni sociali e contesti investigativi.",
-      percorso:
-        "Potresti valutare percorsi in area giuridica, criminologica, sicurezza, investigazione o discipline socio-giuridiche.",
-    };
-  }
-
-  if (area === "Scienze politiche e relazioni internazionali") {
-    return {
-      tipo: "GIURIDICA",
-      titolo: "Profilo politico-istituzionale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso istituzioni, pubblica amministrazione, politica, relazioni internazionali, società e organizzazioni.",
-      percorso:
-        "Potresti valutare percorsi in Scienze Politiche, Relazioni Internazionali, Pubblica Amministrazione o studi politico-sociali.",
-    };
-  }
-
-  if (area === "Sociologia e servizi sociali") {
-    return {
-      tipo: "EDUCAZIONE",
-      titolo: "Profilo sociale e comunitario",
-      descrizione:
-        "Il tuo profilo sembra orientato verso persone, comunità, inclusione, servizi sociali, disagio, territorio e progettazione sociale.",
-      percorso:
-        "Potresti valutare percorsi in Sociologia, Servizi Sociali, Scienze dell’Educazione o aree socio-comunitarie.",
-    };
-  }
-
-  if (area === "Scienze motorie") {
-    return {
-      tipo: "SPORT",
-      titolo: "Profilo sportivo e motorio",
-      descrizione:
-        "Il tuo profilo sembra orientato verso sport, movimento, benessere, preparazione fisica e promozione di stili di vita attivi.",
-      percorso:
-        "Potresti valutare percorsi in Scienze Motorie, sport, benessere o attività motorie.",
-    };
-  }
-
-  if (area === "Sport e benessere") {
-    return {
-      tipo: "SPORT",
-      titolo: "Profilo sport e benessere",
-      descrizione:
-        "Il tuo profilo sembra orientato verso fitness, benessere, movimento, salute preventiva, preparazione fisica e qualità della vita.",
-      percorso:
-        "Potresti valutare percorsi in Scienze Motorie, sport, benessere, wellness o attività fisica adattata.",
-    };
-  }
-
-  if (area === "Comunicazione") {
-    return {
-      tipo: "COMUNICAZIONE",
-      titolo: "Profilo comunicativo",
-      descrizione:
-        "Il tuo profilo sembra orientato verso linguaggi, media, relazioni, contenuti, comunicazione d’impresa e comunicazione digitale.",
-      percorso:
-        "Potresti valutare percorsi in Comunicazione, media digitali, marketing, contenuti o comunicazione aziendale.",
-    };
-  }
-
-  if (area === "Lettere, arte e spettacolo") {
-    return {
-      tipo: "COMUNICAZIONE",
-      titolo: "Profilo umanistico e culturale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso cultura, scrittura, editoria, arte, spettacolo, contenuti e valorizzazione del patrimonio.",
-      percorso:
-        "Potresti valutare percorsi in Lettere, Arte, Spettacolo, discipline umanistiche o comunicazione culturale.",
-    };
-  }
-
-  if (area === "Lingue e mediazione linguistica") {
-    return {
-      tipo: "COMUNICAZIONE",
-      titolo: "Profilo linguistico e internazionale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso lingue, comunicazione interculturale, mediazione, traduzione, turismo e contesti internazionali.",
-      percorso:
-        "Potresti valutare percorsi in Lingue, Mediazione linguistica, comunicazione interculturale o relazioni internazionali.",
-    };
-  }
-
-  if (area === "Turismo, cultura e territorio") {
-    return {
-      tipo: "ECONOMIA",
-      titolo: "Profilo turistico-culturale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso turismo, ospitalità, promozione del territorio, beni culturali, eventi e gestione dei servizi.",
-      percorso:
-        "Potresti valutare percorsi in Turismo, Management del turismo, Beni culturali o valorizzazione territoriale.",
-    };
-  }
-
-  if (area === "Informatica / tecnologia") {
-    return {
-      tipo: "TECNOLOGIA",
-      titolo: "Profilo tecnologico e digitale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso informatica, software, dati, sistemi digitali, innovazione e tecnologie applicate.",
-      percorso:
-        "Potresti valutare percorsi in Informatica, Ingegneria informatica, tecnologie digitali o sistemi informativi.",
-    };
-  }
-
-  if (area === "Data, AI e innovazione digitale") {
-    return {
-      tipo: "TECNOLOGIA",
-      titolo: "Profilo data, AI e innovazione",
-      descrizione:
-        "Il tuo profilo sembra orientato verso dati, intelligenza artificiale, automazione, innovazione digitale e trasformazione tecnologica.",
-      percorso:
-        "Potresti valutare percorsi in Informatica, Data Science, AI, innovazione digitale o tecnologie applicate al lavoro.",
-    };
-  }
-
-  if (area === "Ingegneria industriale") {
-    return {
-      tipo: "TECNOLOGIA",
-      titolo: "Profilo ingegneristico-industriale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso industria, produzione, energia, processi tecnici, organizzazione e innovazione applicata.",
-      percorso:
-        "Potresti valutare percorsi in Ingegneria Industriale, Gestionale, Meccanica, Energetica o ambiti tecnico-produttivi.",
-    };
-  }
-
-  if (area === "Ingegneria civile e ambientale") {
-    return {
-      tipo: "TECNOLOGIA",
-      titolo: "Profilo civile e ambientale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso costruzioni, territorio, ambiente, infrastrutture, sicurezza, progettazione e sostenibilità.",
-      percorso:
-        "Potresti valutare percorsi in Ingegneria Civile, Ambientale, Edile o ambiti collegati alla gestione del territorio.",
-    };
-  }
-
-  if (area === "Architettura, design e moda") {
-    return {
-      tipo: "COMUNICAZIONE",
-      titolo: "Profilo creativo e progettuale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso creatività, estetica, progettazione, design, moda, spazi e comunicazione visiva.",
-      percorso:
-        "Potresti valutare percorsi in Design, Moda, Architettura, comunicazione visiva o discipline creative.",
-    };
-  }
-
-  if (area === "Biologia e nutrizione") {
-    return {
-      tipo: "TECNOLOGIA",
-      titolo: "Profilo scientifico e nutrizionale",
-      descrizione:
-        "Il tuo profilo sembra orientato verso biologia, alimentazione, nutrizione, salute, benessere, qualità e ambiente.",
-      percorso:
-        "Potresti valutare percorsi in Scienze Biologiche, Nutrizione, alimentazione, benessere o aree scientifiche collegate.",
-    };
-  }
-
-  if (area === "Sanità e professioni sanitarie") {
-    return {
-      tipo: "PSICOLOGIA",
-      titolo: "Profilo sanitario e servizi alla persona",
-      descrizione:
-        "Il tuo profilo sembra orientato verso salute, prevenzione, cura, benessere, organizzazione sanitaria e supporto alla persona.",
-      percorso:
-        "Potresti valutare percorsi in area sanitaria, servizi alla persona, management sanitario o discipline collegate al benessere.",
-    };
-  }
-
-  if (area === "Agraria, alimentazione e gastronomia") {
-    return {
-      tipo: "ECONOMIA",
-      titolo: "Profilo agroalimentare e gastronomico",
-      descrizione:
-        "Il tuo profilo sembra orientato verso alimentazione, filiere agroalimentari, sostenibilità, gastronomia, qualità e valorizzazione del territorio.",
-      percorso:
-        "Potresti valutare percorsi in Agraria, Gastronomia, Scienze dell’alimentazione, food management o valorizzazione agroalimentare.",
-    };
-  }
-
-  if (area === "Scuola e insegnamento") {
-    return {
-      tipo: "SCUOLA",
-      titolo: "Profilo scuola e insegnamento",
-      descrizione:
-        "Il tuo profilo sembra orientato verso scuola, insegnamento, graduatorie, concorsi, aggiornamento professionale e formazione.",
-      percorso:
-        "Potresti valutare percorsi utili per la scuola, l’insegnamento, le graduatorie o il rafforzamento del profilo formativo.",
-    };
-  }
-
-  if (area === "Pubblica amministrazione e concorsi") {
-    return {
-      tipo: "GIURIDICA",
-      titolo: "Profilo pubblica amministrazione e concorsi",
-      descrizione:
-        "Il tuo profilo sembra orientato verso concorsi pubblici, graduatorie, amministrazione, avanzamenti professionali e ruoli istituzionali.",
-      percorso:
-        "Potresti valutare percorsi in area giuridica, economica, politico-sociale o amministrativa, in base al bando o all’obiettivo.",
-    };
-  }
-
-  if (area === "Non so ancora") {
-    return {
-      tipo: "GENERALE",
-      titolo: "Profilo da orientare",
-      descrizione:
-        "Le tue risposte mostrano che potresti avere bisogno di confrontare più aree prima di scegliere.",
-      percorso:
-        "Il passo più utile è valutare con attenzione obiettivo, tempo disponibile, titolo di partenza e sostenibilità del percorso.",
-    };
-  }
+  const percorso =
+    percorsiCompatibili.length > 1
+      ? `In base al tuo profilo potresti valutare: ${percorsiCompatibili.join(
+          ", "
+        )}. La scelta definitiva dovrebbe essere confermata valutando titolo di partenza, obiettivo, tempo disponibile e requisiti di accesso.`
+      : `In base al tuo profilo potresti valutare ${percorsoPrioritario}. La scelta definitiva dovrebbe essere confermata valutando titolo di partenza, obiettivo, tempo disponibile e requisiti di accesso.`;
 
   return {
-    tipo: "GENERALE",
-    titolo: "Profilo da orientare",
-    descrizione:
-      "Le tue risposte mostrano che potrebbe essere utile confrontare più aree prima di scegliere.",
-    percorso:
-      "Il passo più utile è valutare con attenzione obiettivo, tempo disponibile, titolo di partenza e sostenibilità del percorso.",
+    tipo: profilo.tipo,
+    titolo: profilo.titolo,
+    descrizione: profilo.descrizione,
+    percorso,
+    percorso_prioritario: percorsoPrioritario,
+    percorsi_compatibili: percorsiCompatibili,
+    approfondimento: getApprofondimento(data),
+    prossimo_passo: getProssimoPasso(data),
+    cta_orientatore: getCtaOrientatore(data),
   };
 }
 
@@ -840,6 +1461,17 @@ function saveToLocalStorage(
 
   localStorage.setItem("profilo_utente", risultato.tipo);
   localStorage.setItem("corso_suggerito", risultato.percorso);
+  localStorage.setItem("percorso_prioritario", risultato.percorso_prioritario);
+  localStorage.setItem(
+    "percorsi_compatibili",
+    JSON.stringify(risultato.percorsi_compatibili)
+  );
+  localStorage.setItem(
+    "approfondimento_orientamento",
+    risultato.approfondimento
+  );
+  localStorage.setItem("prossimo_passo_orientamento", risultato.prossimo_passo);
+  localStorage.setItem("cta_orientatore", risultato.cta_orientatore);
 
   localStorage.setItem("segmento_studente", segmenti.segmento_studente);
   localStorage.setItem("segmento_intento", segmenti.segmento_intento);
@@ -965,7 +1597,17 @@ export default function OrientamentoGratuitoTestPage() {
         risultato_tipo: risultato.tipo,
         risultato_titolo: risultato.titolo,
         risultato_descrizione: risultato.descrizione,
+
+        // Campo vecchio mantenuto per compatibilità
         corso_suggerito: risultato.percorso,
+
+        // Nuovi campi utili per CRM, email, database e segmentazione futura
+        percorso_prioritario: risultato.percorso_prioritario,
+        percorsi_compatibili: risultato.percorsi_compatibili.join(" | "),
+        approfondimento_orientamento: risultato.approfondimento,
+        prossimo_passo_orientamento: risultato.prossimo_passo,
+        cta_orientatore: risultato.cta_orientatore,
+
         source: "orientamento_gratuito",
       };
 
@@ -1435,23 +2077,22 @@ export default function OrientamentoGratuitoTestPage() {
 
           <ResultCard
             icon={<GraduationCap size={20} />}
-            title="Percorso da valutare"
+            title="Percorsi compatibili"
             text={risultato.percorso}
             tone="blue"
           />
+
           <ResultCard
             icon={<Target size={20} />}
-            title="Aspetto da approfondire"
-            text={
-              data.aspetto_da_valutare ||
-              "Costi, tempi, modalità di studio, CFU ed eventuali agevolazioni."
-            }
+            title="Cosa verificare prima di scegliere"
+            text={risultato.approfondimento}
             tone="amber"
           />
+
           <ResultCard
             icon={<ShieldCheck size={20} />}
-            title="Prossimo passo"
-            text="Puoi ora generare il tuo Piano Universitario Personalizzato oppure entrare nell’app per salvare il profilo e continuare l’orientamento."
+            title="Prossimo passo consigliato"
+            text={risultato.prossimo_passo}
             tone="teal"
           />
 
@@ -1467,7 +2108,7 @@ export default function OrientamentoGratuitoTestPage() {
             </Link>
 
             <Link href="/dashboard/contatti" style={secondaryButtonStyle}>
-              Parla gratis con un orientatore
+              {risultato.cta_orientatore}
               <MessageCircle size={17} />
             </Link>
           </div>
