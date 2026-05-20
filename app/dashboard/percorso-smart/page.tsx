@@ -1530,7 +1530,7 @@ const pageStyle: CSSProperties = {
   margin: "0 auto",
   color: "#FFFFFF",
   background:
-    "radial-gradient(circle at 18% 0%, rgba(58,160,255,0.42), transparent 34%), radial-gradient(circle at 88% 18%, rgba(120,194,255,0.18), transparent 28%), linear-gradient(180deg, #123B62 0%, #0B243D 42%, #071726 100%)",
+    "radial-gradient(circle at 16% 0%, rgba(58,160,255,0.46), transparent 32%), radial-gradient(circle at 88% 12%, rgba(120,194,255,0.24), transparent 30%), linear-gradient(180deg, #174D7C 0%, #123B62 38%, #0E2E4F 72%, #0B243D 100%)",
   fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
 };
 const heroStyle: CSSProperties = {
@@ -1606,9 +1606,10 @@ const metricsGridStyle: CSSProperties = {
 const metricCardStyle: CSSProperties = {
   borderRadius: 26,
   padding: 15,
-  background: "linear-gradient(180deg, rgba(22,53,82,0.88), rgba(12,31,53,0.84))",
-  border: "1px solid rgba(120,194,255,0.22)",
-  boxShadow: "0 16px 38px rgba(0,0,0,0.20)",
+  background:
+    "linear-gradient(180deg, rgba(42,91,132,0.76), rgba(20,59,96,0.72))",
+  border: "1px solid rgba(160,212,255,0.28)",
+  boxShadow: "0 16px 38px rgba(5,31,55,0.18)",
 };
 const metricIconStyle: CSSProperties = {
   width: 42,
@@ -1631,7 +1632,7 @@ const metricDescriptionStyle: CSSProperties = {
   margin: "4px 0 0",
   fontSize: 12.5,
   lineHeight: 1.35,
-  color: "rgba(255,255,255,0.62)",
+  color: "rgba(234,246,255,0.74)",
   fontWeight: 700,
 };
 const darkCardStyle: CSSProperties = {
@@ -1639,9 +1640,9 @@ const darkCardStyle: CSSProperties = {
   padding: 18,
   marginBottom: 14,
   background:
-    "linear-gradient(180deg, rgba(18,48,78,0.90), rgba(9,27,47,0.88))",
-  border: "1px solid rgba(120,194,255,0.22)",
-  boxShadow: "0 20px 48px rgba(0,0,0,0.24)",
+    "linear-gradient(180deg, rgba(30,78,120,0.76), rgba(18,54,88,0.72))",
+  border: "1px solid rgba(160,212,255,0.28)",
+  boxShadow: "0 20px 48px rgba(5,31,55,0.20)",
   backdropFilter: "blur(18px)",
 };
 const cardHeaderStyle: CSSProperties = {
@@ -1681,7 +1682,7 @@ const inputStyle: CSSProperties = {
   minHeight: 46,
   borderRadius: 17,
   border: "1px solid rgba(120,194,255,0.20)",
-  background: "rgba(5,19,34,0.66)",
+  background: "rgba(255,255,255,0.12)",
   color: "#FFFFFF",
   padding: "0 13px",
   fontSize: 14,
@@ -1692,14 +1693,14 @@ const inputStyle: CSSProperties = {
 const fieldStyle: CSSProperties = { display: "grid", gap: 8 };
 const labelStyle: CSSProperties = {
   fontSize: 12.5,
-  color: "rgba(255,255,255,0.68)",
+  color: "rgba(234,246,255,0.78)",
   fontWeight: 850,
 };
 const smartBoxStyle: CSSProperties = {
   borderRadius: 22,
   padding: 15,
-  background: "rgba(58,160,255,0.1)",
-  border: "1px solid rgba(120,194,255,0.18)",
+  background: "rgba(120,194,255,0.13)",
+  border: "1px solid rgba(160,212,255,0.24)",
 };
 const smartTitleStyle: CSSProperties = {
   margin: 0,
@@ -1711,13 +1712,13 @@ const mutedTextStyle: CSSProperties = {
   margin: "7px 0 0",
   fontSize: 13.5,
   lineHeight: 1.5,
-  color: "rgba(255,255,255,0.66)",
+  color: "rgba(234,246,255,0.76)",
   fontWeight: 650,
 };
 const choiceButtonStyle: CSSProperties = {
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.06)",
-  color: "rgba(255,255,255,0.78)",
+  border: "1px solid rgba(160,212,255,0.20)",
+  background: "rgba(255,255,255,0.10)",
+  color: "rgba(234,246,255,0.84)",
   borderRadius: 18,
   padding: "13px 14px",
   textAlign: "left",
@@ -1734,14 +1735,14 @@ const progressCardStyle: CSSProperties = {
   borderRadius: 24,
   padding: 15,
   marginBottom: 14,
-  background: "rgba(58,160,255,0.10)",
-  border: "1px solid rgba(120,194,255,0.18)",
+  background: "rgba(120,194,255,0.13)",
+  border: "1px solid rgba(160,212,255,0.24)",
 };
 const progressTrackStyle: CSSProperties = {
   width: "100%",
   height: 12,
   borderRadius: 999,
-  background: "rgba(255,255,255,0.11)",
+  background: "rgba(255,255,255,0.18)",
   overflow: "hidden",
 };
 const highlightBoxStyle: CSSProperties = {
@@ -1749,8 +1750,8 @@ const highlightBoxStyle: CSSProperties = {
   padding: 18,
   textAlign: "center",
   background:
-    "linear-gradient(135deg, rgba(31,111,178,0.28), rgba(58,160,255,0.12))",
-  border: "1px solid rgba(120,194,255,0.18)",
+    "linear-gradient(135deg, rgba(58,160,255,0.28), rgba(120,194,255,0.16))",
+  border: "1px solid rgba(160,212,255,0.24)",
 };
 const highlightIconStyle: CSSProperties = {
   width: 50,
@@ -1781,13 +1782,13 @@ const timelineTextStyle: CSSProperties = {
   margin: "8px 0 0",
   fontSize: 13.5,
   lineHeight: 1.5,
-  color: "rgba(255,255,255,0.68)",
+  color: "rgba(234,246,255,0.78)",
 };
 const miniBoxStyle: CSSProperties = {
   borderRadius: 20,
   padding: 13,
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.10)",
+  border: "1px solid rgba(160,212,255,0.18)",
 };
 const miniTitleStyle: CSSProperties = {
   margin: 0,
@@ -1799,7 +1800,7 @@ const miniDescriptionStyle: CSSProperties = {
   margin: "5px 0 0",
   fontSize: 12.5,
   lineHeight: 1.35,
-  color: "rgba(255,255,255,0.62)",
+  color: "rgba(234,246,255,0.74)",
   fontWeight: 700,
 };
 const primaryButtonStyle: CSSProperties = {
@@ -1831,9 +1832,10 @@ const whatsappButtonStyle: CSSProperties = {
 const examCardStyle: CSSProperties = {
   borderRadius: 24,
   padding: 15,
-  background: "rgba(17,32,51,0.78)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  boxShadow: "0 14px 36px rgba(0,0,0,0.22)",
+  background:
+    "linear-gradient(180deg, rgba(34,82,124,0.72), rgba(19,55,90,0.68))",
+  border: "1px solid rgba(160,212,255,0.18)",
+  boxShadow: "0 14px 36px rgba(5,31,55,0.18)",
 };
 const examIconStyle: CSSProperties = {
   width: 46,
@@ -1854,7 +1856,7 @@ const examTitleStyle: CSSProperties = {
 const deleteButtonStyle: CSSProperties = {
   border: "none",
   background: "rgba(255,255,255,0.07)",
-  color: "rgba(255,255,255,0.72)",
+  color: "rgba(234,246,255,0.80)",
   width: 34,
   height: 34,
   borderRadius: 13,
@@ -1870,9 +1872,9 @@ const statusGridStyle: CSSProperties = {
   flexWrap: "wrap",
 };
 const statusButtonStyle: CSSProperties = {
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.06)",
-  color: "rgba(255,255,255,0.72)",
+  border: "1px solid rgba(160,212,255,0.20)",
+  background: "rgba(255,255,255,0.10)",
+  color: "rgba(234,246,255,0.80)",
   borderRadius: 999,
   padding: "8px 10px",
   fontSize: 12.5,
@@ -1896,12 +1898,12 @@ const scoreLabelStyle: CSSProperties = {
   justifyContent: "space-between",
   gap: 10,
   fontSize: 13.5,
-  color: "rgba(255,255,255,0.78)",
+  color: "rgba(234,246,255,0.84)",
   fontWeight: 850,
 };
 const scoreTrackStyle: CSSProperties = {
   height: 12,
   borderRadius: 999,
-  background: "rgba(255,255,255,0.09)",
+  background: "rgba(255,255,255,0.16)",
   overflow: "hidden",
 };
