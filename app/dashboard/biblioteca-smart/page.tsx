@@ -88,20 +88,20 @@ const MOTIVI_SEGNALAZIONE = [
 
 const cardStyle: React.CSSProperties = {
   borderRadius: 28,
-  border: "1px solid rgba(31,111,178,0.12)",
-  background: "rgba(255,255,255,0.94)",
-  boxShadow: "0 18px 42px rgba(31,111,178,0.10)",
+  border: "1px solid rgba(120,194,255,0.18)",
+  background:
+    "linear-gradient(180deg, rgba(18,48,78,0.88), rgba(9,27,47,0.86))",
+  boxShadow: "0 22px 55px rgba(0,0,0,0.22)",
   padding: 18,
-  color: "#102033",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
   minHeight: 48,
   borderRadius: 16,
-  border: "1px solid rgba(31,111,178,0.16)",
-  background: "#FFFFFF",
-  color: "#102033",
+  border: "1px solid rgba(120,194,255,0.20)",
+  background: "rgba(7,22,38,0.68)",
+  color: "#FFFFFF",
   padding: "0 14px",
   fontSize: 14,
   outline: "none",
@@ -128,15 +128,14 @@ const primaryButtonStyle: React.CSSProperties = {
   gap: 8,
   padding: "0 16px",
   cursor: "pointer",
-  boxShadow: "0 14px 30px rgba(31,111,178,0.24)",
 };
 
 const secondaryButtonStyle: React.CSSProperties = {
   minHeight: 46,
   borderRadius: 16,
-  border: "1px solid rgba(31,111,178,0.14)",
-  background: "#F4F9FF",
-  color: "#1F3A56",
+  border: "1px solid rgba(120,194,255,0.20)",
+  background: "rgba(255,255,255,0.095)",
+  color: "white",
   fontSize: 13,
   fontWeight: 850,
   display: "inline-flex",
@@ -149,7 +148,7 @@ const secondaryButtonStyle: React.CSSProperties = {
 
 const mutedText: React.CSSProperties = {
   margin: 0,
-  color: "#5D7086",
+  color: "rgba(255,255,255,0.72)",
   fontSize: 13,
   lineHeight: 1.5,
 };
@@ -158,37 +157,8 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: 13,
   fontWeight: 850,
-  color: "#314963",
+  color: "rgba(255,255,255,0.86)",
   marginBottom: 8,
-};
-
-const libraryPageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  padding: "22px 18px 92px",
-  background:
-    "radial-gradient(circle at top left, rgba(31,111,178,0.16), transparent 34%), linear-gradient(180deg, #F4F8FF 0%, #EAF3FF 44%, #FFFFFF 100%)",
-  color: "#102033",
-};
-
-const libraryHeroStyle: React.CSSProperties = {
-  ...cardStyle,
-  color: "#FFFFFF",
-  borderColor: "rgba(31,111,178,0.18)",
-  background:
-    "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 58%, #EAF6FF 100%)",
-  boxShadow: "0 22px 48px rgba(31,111,178,0.22)",
-};
-
-const softBluePanelStyle: React.CSSProperties = {
-  ...cardStyle,
-  borderColor: "rgba(31,111,178,0.14)",
-  background: "linear-gradient(135deg, #EEF7FF, #FFFFFF)",
-};
-
-const warningPanelStyle: React.CSSProperties = {
-  ...cardStyle,
-  borderColor: "rgba(245,158,11,0.22)",
-  background: "#FFF7E6",
 };
 
 function formatBytes(size?: number) {
@@ -204,24 +174,6 @@ function getTipoMaterialeLabel(value?: string) {
     value ||
     "Materiale"
   );
-}
-
-
-function getTipoMaterialeStyle(value?: string): React.CSSProperties {
-  const base: React.CSSProperties = {
-    borderRadius: 999,
-    padding: "5px 9px",
-    fontSize: 11,
-    fontWeight: 850,
-  };
-
-  if (value === "schema") return { ...base, background: "#F3E8FF", color: "#7E22CE" };
-  if (value === "mappa_concettuale") return { ...base, background: "#DCFCE7", color: "#15803D" };
-  if (value === "appunti") return { ...base, background: "#FEF3C7", color: "#B45309" };
-  if (value === "domande_esame") return { ...base, background: "#FFE4E6", color: "#BE123C" };
-  if (value === "piano_ripasso") return { ...base, background: "#CCFBF1", color: "#0F766E" };
-  if (value === "altro") return { ...base, background: "#E5E7EB", color: "#374151" };
-  return { ...base, background: "#EAF4FF", color: "#1F6FB2" };
 }
 
 function getClasseLabel(codice?: string) {
@@ -671,14 +623,14 @@ export default function BibliotecaSmartPage() {
               width: 44,
               height: 44,
               borderRadius: 16,
-              background: "#EAF4FF",
+              background: "rgba(58,160,255,0.16)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
             }}
           >
-            <FileText size={22} color="#1F6FB2" />
+            <FileText size={22} color="#7CC7FF" />
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -691,7 +643,14 @@ export default function BibliotecaSmartPage() {
               }}
             >
               <span
-                style={getTipoMaterialeStyle(materiale.tipo_materiale)}
+                style={{
+                  borderRadius: 999,
+                  padding: "5px 9px",
+                  background: "rgba(255,255,255,0.10)",
+                  color: "rgba(255,255,255,0.82)",
+                  fontSize: 11,
+                  fontWeight: 850,
+                }}
               >
                 {getTipoMaterialeLabel(materiale.tipo_materiale)}
               </span>
@@ -699,8 +658,8 @@ export default function BibliotecaSmartPage() {
                 style={{
                   borderRadius: 999,
                   padding: "5px 9px",
-                  background: "#CCFBF1",
-                  color: "#0F766E",
+                  background: "rgba(20,184,166,0.14)",
+                  color: "#99F6E4",
                   fontSize: 11,
                   fontWeight: 850,
                 }}
@@ -714,7 +673,7 @@ export default function BibliotecaSmartPage() {
                 margin: "0 0 6px",
                 fontSize: 17,
                 lineHeight: 1.25,
-                color: "#102033",
+                color: "white",
               }}
             >
               {materiale.titolo}
@@ -727,21 +686,21 @@ export default function BibliotecaSmartPage() {
 
             <div style={{ display: "grid", gap: 5, marginBottom: 12 }}>
               <p style={{ ...mutedText, fontSize: 12 }}>
-                <strong style={{ color: "#314963" }}>
+                <strong style={{ color: "rgba(255,255,255,0.88)" }}>
                   Classe:
                 </strong>{" "}
                 {getClasseLabel(materiale.classe_laurea)}
               </p>
               {materiale.esame && (
                 <p style={{ ...mutedText, fontSize: 12 }}>
-                  <strong style={{ color: "#314963" }}>
+                  <strong style={{ color: "rgba(255,255,255,0.88)" }}>
                     Esame:
                   </strong>{" "}
                   {materiale.esame}
                 </p>
               )}
               <p style={{ ...mutedText, fontSize: 12 }}>
-                <strong style={{ color: "#314963" }}>
+                <strong style={{ color: "rgba(255,255,255,0.88)" }}>
                   Autore:
                 </strong>{" "}
                 {materiale.autore || "Studente Laurea Smart"}
@@ -771,13 +730,13 @@ export default function BibliotecaSmartPage() {
                     : secondaryButtonStyle.background,
                   borderColor: isSaved
                     ? "rgba(244,63,94,0.25)"
-                    : "rgba(31,111,178,0.14)",
+                    : "rgba(255,255,255,0.14)",
                 }}
               >
                 <Heart
                   size={17}
                   fill={isSaved ? "#FB7185" : "none"}
-                  color={isSaved ? "#FB7185" : "#52677F"}
+                  color={isSaved ? "#FB7185" : "white"}
                 />
                 {isSaved ? "Salvato" : "Salva"}
               </button>
@@ -804,8 +763,8 @@ export default function BibliotecaSmartPage() {
                   style={{
                     ...secondaryButtonStyle,
                     borderColor: "rgba(248,113,113,0.45)",
-                    background: "#FEF2F2",
-                    color: "#B91C1C",
+                    background: "rgba(127,29,29,0.28)",
+                    color: "#FCA5A5",
                   }}
                 >
                   Rimuovi
@@ -821,7 +780,13 @@ export default function BibliotecaSmartPage() {
   if (!canViewBiblioteca) {
     return (
       <main
-        style={libraryPageStyle}
+        style={{
+          minHeight: "100vh",
+          padding: "22px 18px 92px",
+          background:
+            "radial-gradient(circle at 15% 0%, rgba(58,160,255,0.38), transparent 34%), radial-gradient(circle at 88% 18%, rgba(120,194,255,0.16), transparent 28%), linear-gradient(180deg, #123B62 0%, #0B243D 46%, #071726 100%)",
+          color: "white",
+        }}
       >
         <section
           style={{
@@ -832,7 +797,11 @@ export default function BibliotecaSmartPage() {
           }}
         >
           <header
-            style={libraryHeroStyle}
+            style={{
+              ...cardStyle,
+              background:
+                "linear-gradient(135deg, rgba(31,111,178,0.98) 0%, rgba(58,160,255,0.72) 48%, rgba(12,35,64,0.96) 100%)",
+            }}
           >
             <div
               style={{
@@ -856,7 +825,7 @@ export default function BibliotecaSmartPage() {
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
                 fontWeight: 900,
-                color: "rgba(255,255,255,0.82)",
+                color: "rgba(255,255,255,0.72)",
               }}
             >
               Biblioteca Smart
@@ -866,7 +835,7 @@ export default function BibliotecaSmartPage() {
               Materiali disponibili per studenti iscritti
             </h1>
 
-            <p style={{ ...mutedText, fontSize: 15, maxWidth: 680, color: "rgba(255,255,255,0.92)" }}>
+            <p style={{ ...mutedText, fontSize: 15, maxWidth: 680 }}>
               Questa funzione è pensata per chi è già iscritto a un corso di
               laurea, per chi sta valutando un trasferimento o per chi ha
               interrotto un percorso universitario e vuole ripartire.
@@ -874,7 +843,11 @@ export default function BibliotecaSmartPage() {
           </header>
 
           <section
-            style={softBluePanelStyle}
+            style={{
+              ...cardStyle,
+              borderColor: "rgba(58,160,255,0.24)",
+              background: "rgba(58,160,255,0.10)",
+            }}
           >
             <h2 style={{ margin: "0 0 8px", fontSize: 20 }}>
               Completa il tuo stato nel profilo
@@ -916,7 +889,11 @@ export default function BibliotecaSmartPage() {
           </section>
 
           <section
-            style={warningPanelStyle}
+            style={{
+              ...cardStyle,
+              borderColor: "rgba(251,191,36,0.24)",
+              background: "rgba(251,191,36,0.10)",
+            }}
           >
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
               <AlertTriangle
@@ -947,7 +924,13 @@ export default function BibliotecaSmartPage() {
 
   return (
     <main
-      style={libraryPageStyle}
+      style={{
+        minHeight: "100vh",
+        padding: "22px 18px 92px",
+        background:
+          "radial-gradient(circle at 15% 0%, rgba(58,160,255,0.38), transparent 34%), radial-gradient(circle at 88% 18%, rgba(120,194,255,0.16), transparent 28%), linear-gradient(180deg, #123B62 0%, #0B243D 46%, #071726 100%)",
+        color: "white",
+      }}
     >
       <section
         style={{
@@ -958,7 +941,11 @@ export default function BibliotecaSmartPage() {
         }}
       >
         <header
-          style={libraryHeroStyle}
+          style={{
+            ...cardStyle,
+            background:
+              "linear-gradient(135deg, rgba(31,111,178,0.98) 0%, rgba(58,160,255,0.72) 48%, rgba(12,35,64,0.96) 100%)",
+          }}
         >
           <div
             style={{
@@ -982,7 +969,7 @@ export default function BibliotecaSmartPage() {
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               fontWeight: 900,
-              color: "rgba(255,255,255,0.82)",
+              color: "rgba(255,255,255,0.72)",
             }}
           >
             Biblioteca Smart
@@ -992,7 +979,7 @@ export default function BibliotecaSmartPage() {
             Appunti, schemi e materiali condivisi dagli studenti
           </h1>
 
-          <p style={{ ...mutedText, fontSize: 15, maxWidth: 680, color: "rgba(255,255,255,0.92)" }}>
+          <p style={{ ...mutedText, fontSize: 15, maxWidth: 680 }}>
             Trova materiali utili per la tua area di studio, salva quelli più
             importanti e condividi solo appunti o riassunti creati da te.
           </p>
@@ -1000,37 +987,10 @@ export default function BibliotecaSmartPage() {
 
         <section
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: 10,
+            ...cardStyle,
+            borderColor: "rgba(251,191,36,0.24)",
+            background: "rgba(251,191,36,0.10)",
           }}
-        >
-          {[
-            { label: "Materiali", value: materiali.length || "—", color: "#1F6FB2" },
-            { label: "Salvati", value: salvati.length || savedIds.length || "—", color: "#BE123C" },
-            { label: "Tipologie", value: TIPI_MATERIALE.length, color: "#0F766E" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              style={{
-                ...cardStyle,
-                padding: 14,
-                borderRadius: 22,
-                boxShadow: "0 12px 28px rgba(31,111,178,0.08)",
-              }}
-            >
-              <strong style={{ display: "block", fontSize: 20, color: stat.color }}>
-                {stat.value}
-              </strong>
-              <span style={{ ...mutedText, fontSize: 12, fontWeight: 800 }}>
-                {stat.label}
-              </span>
-            </div>
-          ))}
-        </section>
-
-        <section
-          style={warningPanelStyle}
         >
           <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
             <AlertTriangle
@@ -1056,7 +1016,11 @@ export default function BibliotecaSmartPage() {
 
         {isUniversitaInterrotta && (
           <section
-            style={softBluePanelStyle}
+            style={{
+              ...cardStyle,
+              borderColor: "rgba(58,160,255,0.24)",
+              background: "rgba(58,160,255,0.10)",
+            }}
           >
             <h2 style={{ margin: "0 0 8px", fontSize: 18 }}>
               Consultazione attiva
@@ -1094,13 +1058,13 @@ export default function BibliotecaSmartPage() {
                 borderRadius: 17,
                 border:
                   tab === item.id
-                    ? "1px solid rgba(31,111,178,0.44)"
-                    : "1px solid rgba(31,111,178,0.14)",
+                    ? "1px solid rgba(58,160,255,0.72)"
+                    : "1px solid rgba(255,255,255,0.12)",
                 background:
                   tab === item.id
-                    ? "linear-gradient(135deg, #1F6FB2, #3AA0FF)"
-                    : "#FFFFFF",
-                color: tab === item.id ? "white" : "#1F3A56",
+                    ? "rgba(58,160,255,0.18)"
+                    : "rgba(255,255,255,0.06)",
+                color: "white",
                 fontWeight: 900,
                 display: "flex",
                 alignItems: "center",
@@ -1120,10 +1084,10 @@ export default function BibliotecaSmartPage() {
             style={{
               ...cardStyle,
               borderColor: "rgba(248,113,113,0.26)",
-              background: "#FEF2F2",
+              background: "rgba(127,29,29,0.18)",
             }}
           >
-            <p style={{ margin: 0, color: "#B91C1C", fontWeight: 850 }}>
+            <p style={{ margin: 0, color: "#FCA5A5", fontWeight: 850 }}>
               {error}
             </p>
           </div>
@@ -1134,10 +1098,10 @@ export default function BibliotecaSmartPage() {
             style={{
               ...cardStyle,
               borderColor: "rgba(134,239,172,0.26)",
-              background: "#F0FDF4",
+              background: "rgba(22,101,52,0.18)",
             }}
           >
-            <p style={{ margin: 0, color: "#15803D", fontWeight: 850 }}>
+            <p style={{ margin: 0, color: "#86EFAC", fontWeight: 850 }}>
               {successMessage}
             </p>
           </div>
@@ -1147,7 +1111,7 @@ export default function BibliotecaSmartPage() {
           <section style={{ display: "grid", gap: 14 }}>
             <div style={{ ...cardStyle, display: "grid", gap: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Filter size={19} color="#1F6FB2" />
+                <Filter size={19} color="#7CC7FF" />
                 <h2 style={{ margin: 0, fontSize: 18 }}>Filtra i materiali</h2>
               </div>
 
@@ -1335,7 +1299,7 @@ export default function BibliotecaSmartPage() {
                   {selectedClasse && (
                     <p style={{ ...mutedText, marginTop: -2 }}>
                       Area rilevata:{" "}
-                      <strong style={{ color: "#0F766E" }}>
+                      <strong style={{ color: "#99F6E4" }}>
                         {getAreaLabel(selectedClasse.area)}
                       </strong>{" "}
                       · {getTipoClasseLabel(selectedClasse.tipo)}
@@ -1403,7 +1367,7 @@ export default function BibliotecaSmartPage() {
                     style={{ marginTop: 4 }}
                   />
                   <span
-                    style={{ ...mutedText, color: "#314963" }}
+                    style={{ ...mutedText, color: "rgba(255,255,255,0.86)" }}
                   >
                     Confermo che il materiale è stato creato da me e che ho il
                     diritto di condividerlo. Non sto caricando libri, slide
@@ -1494,7 +1458,7 @@ export default function BibliotecaSmartPage() {
               ...cardStyle,
               width: "100%",
               maxWidth: 520,
-              background: "#FFFFFF",
+              background: "#0B1D31",
             }}
           >
             <div
