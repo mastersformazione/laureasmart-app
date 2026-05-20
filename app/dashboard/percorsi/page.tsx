@@ -162,9 +162,56 @@ function getSettoreTone(settore: string): Tone {
 }
 
 function formatTipo(tipo: string) {
+  if (tipo === "laurea_triennale") return "Laurea triennale";
+  if (tipo === "laurea_magistrale") return "Laurea magistrale";
+  if (tipo === "laurea_ciclo_unico") return "Laurea a ciclo unico";
+  if (tipo === "corso_post_diploma") return "Corso post diploma";
   if (tipo === "master_primo_livello") return "Master I livello";
   if (tipo === "master_secondo_livello") return "Master II livello";
+
   return nomiTipi[tipo] || tipo.replaceAll("_", " ");
+}
+
+function formatClasseBadge(percorso: Percorso) {
+  const classe = percorso.classe || "";
+
+  if (
+    percorso.tipo === "master_primo_livello" ||
+    percorso.tipo === "master_secondo_livello"
+  ) {
+    if (classe.includes("CP")) return "CP";
+    if (classe.includes("CF")) return "CF";
+    return "MASTER";
+  }
+
+  if (percorso.tipo === "laurea_ciclo_unico") {
+    return "CU";
+  }
+
+  if (percorso.tipo === "corso_post_diploma") {
+    return "POST";
+  }
+
+  return classe.replace("L-", "L").replace("LM-", "LM");
+}
+
+function formatClasseDettaglio(percorso: Percorso) {
+  if (
+    percorso.tipo === "master_primo_livello" ||
+    percorso.tipo === "master_secondo_livello"
+  ) {
+    return percorso.classe;
+  }
+
+  if (percorso.tipo === "laurea_ciclo_unico") {
+    return `Ciclo unico - ${percorso.classe}`;
+  }
+
+  if (percorso.tipo === "corso_post_diploma") {
+    return percorso.classe;
+  }
+
+  return `Classe ${percorso.classe}`;
 }
 
 export default function PercorsiPage() {
@@ -1133,6 +1180,11 @@ function PercorsoCard({
   const tone = getSettoreTone(percorso.settore);
   const theme = toneStyles[tone];
 
+  const badgeClasse = formatClasseBadge(percorso);
+  const tipoLabel = formatTipo(percorso.tipo);
+  const settoreLabel = nomiSettori[percorso.settore] || percorso.settore;
+  const classeDettaglio = formatClasseDettaglio(percorso);
+
   return (
     <section
       style={{
@@ -1149,45 +1201,77 @@ function PercorsoCard({
         style={{
           position: "absolute",
           inset: "0 0 auto 0",
-          height: 4,
+          height: 5,
           background: `linear-gradient(90deg, ${theme.accent}, transparent)`,
         }}
       />
 
-      <div style={{ padding: 18 }}>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 13 }}>
+      <div
+        style={{
+          position: "absolute",
+          right: -46,
+          top: -46,
+          width: 138,
+          height: 138,
+          borderRadius: 999,
+          background: `radial-gradient(circle, ${theme.glow}, transparent 68%)`,
+          pointerEvents: "none",
+        }}
+      />
+
+      <div style={{ padding: 18, position: "relative", zIndex: 1 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "64px minmax(0, 1fr)",
+            gap: 13,
+            alignItems: "flex-start",
+          }}
+        >
           <div
             style={{
-              width: 58,
-              height: 58,
-              borderRadius: 22,
-              background: theme.softBg,
+              width: 64,
+              height: 64,
+              borderRadius: 24,
+              background: `linear-gradient(145deg, ${theme.softBg}, rgba(255,255,255,0.06))`,
               border: `1px solid ${theme.border}`,
               color: theme.icon,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
-              fontSize: 16,
+              fontSize: badgeClasse.length > 4 ? 11 : 15,
               fontWeight: 950,
+              letterSpacing: badgeClasse.length > 4 ? 0.3 : 0,
+              lineHeight: 1,
+              textAlign: "center",
               boxShadow: `0 14px 28px ${theme.glow}`,
+              padding: 6,
+              boxSizing: "border-box",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
             }}
           >
-            {percorso.classe.replace("L-", "L")}
+            {badgeClasse}
           </div>
 
-          <div style={{ flex: 1 }}>
+          <div style={{ minWidth: 0 }}>
             <div
               style={{
                 display: "flex",
                 gap: 7,
                 flexWrap: "wrap",
                 marginBottom: 10,
+                maxWidth: "100%",
+                overflow: "hidden",
               }}
             >
               <span
                 style={{
                   display: "inline-flex",
+                  alignItems: "center",
+                  maxWidth: "100%",
+                  minWidth: 0,
                   padding: "6px 10px",
                   borderRadius: 999,
                   background: theme.softBg,
@@ -1195,23 +1279,33 @@ function PercorsoCard({
                   color: theme.icon,
                   fontSize: 11,
                   fontWeight: 950,
+                  lineHeight: 1.15,
+                  whiteSpace: "normal",
+                  overflowWrap: "anywhere",
                 }}
               >
-                {nomiSettori[percorso.settore] || percorso.settore}
+                {settoreLabel}
               </span>
+
               <span
                 style={{
                   display: "inline-flex",
+                  alignItems: "center",
+                  maxWidth: "100%",
+                  minWidth: 0,
                   padding: "6px 10px",
                   borderRadius: 999,
-                  background: "rgba(255,255,255,0.07)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.72)",
+                  background: "rgba(255,255,255,0.075)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  color: "rgba(255,255,255,0.76)",
                   fontSize: 11,
-                  fontWeight: 850,
+                  fontWeight: 900,
+                  lineHeight: 1.15,
+                  whiteSpace: "normal",
+                  overflowWrap: "anywhere",
                 }}
               >
-                {formatTipo(percorso.tipo)}
+                {tipoLabel}
               </span>
             </div>
 
@@ -1223,27 +1317,34 @@ function PercorsoCard({
                 fontWeight: 950,
                 color: "#FFFFFF",
                 letterSpacing: "-0.45px",
+                overflowWrap: "anywhere",
               }}
             >
               {percorso.titolo}
             </h2>
 
-            <p
+            <div
               style={{
-                margin: "9px 0 0",
-                color: "rgba(255,255,255,0.66)",
-                fontSize: 13,
-                lineHeight: 1.5,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                marginTop: 11,
               }}
             >
-              Classe {percorso.classe} · Durata {percorso.durata}
-            </p>
+              <MiniInfoPill label={classeDettaglio} />
+              <MiniInfoPill label={percorso.durata} />
+            </div>
           </div>
         </div>
 
         {percorso.tags && percorso.tags.length > 0 && (
           <div
-            style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 14 }}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 7,
+              marginTop: 15,
+            }}
           >
             {percorso.tags.slice(0, 4).map((tag) => (
               <span
@@ -1256,6 +1357,9 @@ function PercorsoCard({
                   color: "rgba(255,255,255,0.64)",
                   fontSize: 11,
                   fontWeight: 800,
+                  lineHeight: 1.15,
+                  maxWidth: "100%",
+                  overflowWrap: "anywhere",
                 }}
               >
                 #{tag}
@@ -1288,6 +1392,7 @@ function PercorsoCard({
               borderRadius: 22,
               background: "rgba(255,255,255,0.06)",
               border: "1px solid rgba(255,255,255,0.08)",
+              overflow: "hidden",
             }}
           >
             <h3
@@ -1301,20 +1406,24 @@ function PercorsoCard({
               Percorsi simili
             </h3>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <div style={{ display: "grid", gap: 8 }}>
               {percorsiSimili.map((simile) => (
                 <button
                   key={simile.id}
                   onClick={() => onInteresse(simile)}
                   style={{
-                    borderRadius: 999,
+                    width: "100%",
+                    borderRadius: 16,
                     border: `1px solid ${theme.border}`,
                     background: theme.softBg,
                     color: theme.icon,
-                    padding: "8px 11px",
+                    padding: "10px 11px",
                     fontSize: 12,
                     fontWeight: 850,
+                    lineHeight: 1.25,
+                    textAlign: "left",
                     cursor: "pointer",
+                    overflowWrap: "anywhere",
                   }}
                 >
                   {simile.titolo}
@@ -1329,8 +1438,8 @@ function PercorsoCard({
           style={{
             marginTop: 18,
             width: "100%",
-            minHeight: 56,
-            borderRadius: 20,
+            minHeight: 58,
+            borderRadius: 21,
             border: "none",
             background: `linear-gradient(135deg, ${theme.accent}, #1F6FB2)`,
             color: "#FFFFFF",
@@ -1353,6 +1462,29 @@ function PercorsoCard({
   );
 }
 
+function MiniInfoPill({ label }: { label: string }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        maxWidth: "100%",
+        minWidth: 0,
+        padding: "7px 10px",
+        borderRadius: 999,
+        background: "rgba(255,255,255,0.075)",
+        border: "1px solid rgba(255,255,255,0.09)",
+        color: "rgba(255,255,255,0.72)",
+        fontSize: 11,
+        fontWeight: 850,
+        lineHeight: 1.15,
+        overflowWrap: "anywhere",
+      }}
+    >
+      {label}
+    </span>
+  );
+}
 function InfoList({
   title,
   items,
@@ -1365,10 +1497,18 @@ function InfoList({
   const theme = toneStyles[tone];
 
   return (
-    <div style={{ marginTop: 15 }}>
+    <div
+      style={{
+        marginTop: 16,
+        padding: 14,
+        borderRadius: 22,
+        background: "rgba(255,255,255,0.055)",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
       <h3
         style={{
-          margin: "0 0 9px",
+          margin: "0 0 10px",
           fontSize: 14,
           fontWeight: 950,
           color: "#FFFFFF",
@@ -1383,14 +1523,16 @@ function InfoList({
             key={item}
             style={{
               display: "flex",
-              gap: 9,
+              alignItems: "flex-start",
+              gap: 8,
+              color: "rgba(255,255,255,0.72)",
               fontSize: 13,
-              lineHeight: 1.45,
-              color: "rgba(255,255,255,0.69)",
+              lineHeight: 1.35,
+              fontWeight: 650,
             }}
           >
             <CheckCircle2
-              size={16}
+              size={15}
               color={theme.icon}
               style={{ flexShrink: 0, marginTop: 1 }}
             />
