@@ -62,16 +62,29 @@ function settoreDaAreaClasse(area: ClasseLaurea["area"]): string {
   return mappa[area] || "altro";
 }
 
-function tipoPercorsoDaClasse(tipo: ClasseLaurea["tipo"]): Percorso["tipo"] {
-  if (tipo === "laurea_magistrale") return "laurea_magistrale";
-  if (tipo === "laurea_ciclo_unico") return "laurea_ciclo_unico";
+function tipoPercorsoDaClasse(classe: ClasseLaurea): Percorso["tipo"] {
+  const codice = classe.codice.toUpperCase().replace(/\s+/g, "");
 
-  // Le sanitarie sono lauree triennali ad accesso programmato: nel filtro app
-  // devono comparire a chi parte dal diploma.
-  if (tipo === "laurea_sanitaria") return "laurea_triennale";
+  if (
+    classe.tipo === "laurea_ciclo_unico" ||
+    codice === "LMG/01" ||
+    codice === "LM-85BIS" ||
+    codice === "LM85BIS"
+  ) {
+    return "laurea_ciclo_unico";
+  }
 
-  // Le professionalizzanti restano separate perché il tipo è già previsto.
-  if (tipo === "laurea_professionalizzante") return "corso_post_diploma";
+  if (classe.tipo === "laurea_magistrale") {
+    return "laurea_magistrale";
+  }
+
+  if (classe.tipo === "laurea_sanitaria") {
+    return "laurea_triennale";
+  }
+
+  if (classe.tipo === "laurea_professionalizzante") {
+    return "corso_post_diploma";
+  }
 
   return "laurea_triennale";
 }
@@ -97,7 +110,9 @@ function durataDaClasseLaurea(classe: ClasseLaurea): string {
 }
 
 function accessoDaClasseLaurea(classe: ClasseLaurea): string[] {
-  if (classe.tipo === "laurea_magistrale") {
+  const tipo = tipoPercorsoDaClasse(classe);
+
+  if (tipo === "laurea_magistrale") {
     return ["laurea_triennale", "laurea_magistrale"];
   }
 
@@ -220,7 +235,10 @@ function sbocchiDaClasseLaurea(classe: ClasseLaurea): string[] {
 }
 
 function prosecuzioneDaClasseLaurea(classe: ClasseLaurea): string[] {
-  if (classe.tipo === "laurea_magistrale" || classe.tipo === "laurea_ciclo_unico") {
+  if (
+    classe.tipo === "laurea_magistrale" ||
+    classe.tipo === "laurea_ciclo_unico"
+  ) {
     return [
       "Master universitari coerenti con l’area disciplinare",
       "Corsi di perfezionamento",
@@ -254,7 +272,7 @@ function tagsDaClasseLaurea(classe: ClasseLaurea): string[] {
 const laureeDaClassi: Percorso[] = CLASSI_LAUREA.filter(
   (classe) => classe.tipo !== "altro"
 ).map((classe) => {
-  const tipo = tipoPercorsoDaClasse(classe.tipo);
+  const tipo = tipoPercorsoDaClasse(classe);
   const settore = settoreDaAreaClasse(classe.area);
 
   return {
