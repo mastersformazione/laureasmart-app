@@ -52,6 +52,23 @@ type EsameSmart = {
   difficolta: "bassa" | "media" | "alta";
 };
 
+type BudgetMensileValue =
+  | ""
+  | "100_200"
+  | "200_300"
+  | "oltre_300"
+  | "parla_orientatore";
+
+type PagamentoStudi = {
+  id: string;
+  nome: string;
+  importo: string;
+  scadenza: string;
+  stato: "da_pagare" | "pagato";
+  dataPagamento: string;
+  note: string;
+};
+
 const ANNI_CORSO = [
   { value: "", label: "Seleziona anno" },
   { value: "1", label: "1° anno" },
@@ -71,6 +88,45 @@ const OBIETTIVI_POST_LAUREA = [
   { value: "crescita_attuale", label: "Migliorare la posizione attuale" },
   { value: "non_so", label: "Non lo so ancora" },
 ];
+
+const BUDGET_MENSILE_OPTIONS: { value: BudgetMensileValue; label: string }[] = [
+  { value: "", label: "Seleziona budget mensile" },
+  { value: "100_200", label: "100 - 200 € al mese" },
+  { value: "200_300", label: "200 - 300 € al mese" },
+  { value: "oltre_300", label: "Oltre 300 € al mese" },
+  {
+    value: "parla_orientatore",
+    label: "Preferisco parlare con un orientatore",
+  },
+];
+
+const BUDGET_STUDI_TIPI_PERCORSO = [
+  { value: "", label: "Seleziona percorso" },
+  { value: "laurea_triennale", label: "Laurea triennale" },
+  { value: "laurea_magistrale", label: "Laurea magistrale" },
+  { value: "master", label: "Master" },
+  { value: "certificazioni", label: "Certificazioni o corsi" },
+  { value: "non_so", label: "Non lo so, voglio orientarmi" },
+];
+
+const BUDGET_STUDI_OBIETTIVI = [
+  { value: "", label: "Seleziona preferenza" },
+  { value: "mensile_leggero", label: "Budget mensile più leggero possibile" },
+  { value: "equilibrio", label: "Equilibrio tra costo mensile e tempi" },
+  { value: "inizio_rapido", label: "Vorrei iniziare il prima possibile" },
+  { value: "valutazione", label: "Preferisco una valutazione personalizzata" },
+];
+
+const BUDGET_RESPONSE_COPY: Record<Exclude<BudgetMensileValue, "">, string> = {
+  "100_200":
+    "Il budget indicato è un punto di partenza utile per una valutazione personalizzata. Alcune soluzioni potrebbero richiedere un importo mensile superiore, ma possiamo comunque verificare quali percorsi si avvicinano meglio alle tue esigenze, tutto compreso, senza finanziarie e senza interessi.",
+  "200_300":
+    "Il budget mensile indicato permette di avviare una valutazione concreta delle soluzioni disponibili. Un orientatore può aiutarti a capire quale percorso risulta più coerente con le tue esigenze, considerando ateneo, corso, eventuali convenzioni e modalità di pagamento tutto compreso.",
+  oltre_300:
+    "Il budget mensile indicato è un buon punto di partenza per valutare diverse soluzioni universitarie. Possiamo aiutarti a capire quale percorso può essere più adatto, con una formula sostenibile, tutto compreso, senza finanziarie e senza interessi.",
+  parla_orientatore:
+    "Perfetto: un orientatore può aiutarti a valutare le soluzioni più adatte senza partire da un importo rigido, chiarendo budget mensile, percorso, eventuali convenzioni e modalità di pagamento previste dall’ateneo.",
+};
 
 function getSegmentoFromStato(stato: string) {
   if (stato === "Sì, sono già iscritto" || stato === "si_iscritto") {
@@ -126,6 +182,18 @@ export default function ProfiloPage() {
     ModalitaAteneo | ""
   >("");
   const [preferitiCount, setPreferitiCount] = useState(0);
+
+  const [budgetMensile, setBudgetMensile] = useState<BudgetMensileValue>("");
+  const [budgetTipoPercorso, setBudgetTipoPercorso] = useState("");
+  const [budgetPreferenza, setBudgetPreferenza] = useState("");
+  const [budgetSaved, setBudgetSaved] = useState(false);
+
+  const [pagamentiStudi, setPagamentiStudi] = useState<PagamentoStudi[]>([]);
+  const [pagamentoNome, setPagamentoNome] = useState("");
+  const [pagamentoImporto, setPagamentoImporto] = useState("");
+  const [pagamentoScadenza, setPagamentoScadenza] = useState("");
+  const [pagamentoDataPagamento, setPagamentoDataPagamento] = useState("");
+  const [pagamentoNote, setPagamentoNote] = useState("");
 
   const [classeLaureaAttuale, setClasseLaureaAttuale] = useState("");
   const [corsoAttuale, setCorsoAttuale] = useState("");
@@ -190,6 +258,22 @@ export default function ProfiloPage() {
     setCfuConseguitiProfilo(localStorage.getItem("cfu_conseguiti") || "");
     setEsamiMancantiProfilo(localStorage.getItem("esami_mancanti") || "");
     setObiettivoPostLaurea(localStorage.getItem("obiettivo_post_laurea") || "");
+    setBudgetMensile(
+      (localStorage.getItem("budget_studi_mensile") as BudgetMensileValue) || ""
+    );
+    setBudgetTipoPercorso(
+      localStorage.getItem("budget_studi_tipo_percorso") || ""
+    );
+    setBudgetPreferenza(localStorage.getItem("budget_studi_preferenza") || "");
+
+    try {
+      const parsedPagamenti = JSON.parse(
+        localStorage.getItem("budget_studi_pagamenti") || "[]"
+      );
+      setPagamentiStudi(Array.isArray(parsedPagamenti) ? parsedPagamenti : []);
+    } catch {
+      setPagamentiStudi([]);
+    }
 
     try {
       const parsed = JSON.parse(storedPreferiti);
@@ -261,6 +345,123 @@ export default function ProfiloPage() {
   const isUniversitaInterrotta = segmentoStudente === "UNIVERSITA_INTERROTTA";
   const showProfiloUniversitario =
     isGiaIscritto || isTrasferimento || isUniversitaInterrotta;
+
+  const budgetMensileLabel = getLabel(BUDGET_MENSILE_OPTIONS, budgetMensile);
+  const budgetResponse = budgetMensile
+    ? BUDGET_RESPONSE_COPY[budgetMensile as Exclude<BudgetMensileValue, "">]
+    : "Seleziona il budget mensile che vorresti non superare per ricevere un primo orientamento, tutto compreso, senza finanziarie e senza interessi.";
+
+  const totalePagato = pagamentiStudi
+    .filter((pagamento) => pagamento.stato === "pagato")
+    .reduce(
+      (totale, pagamento) => totale + (Number(pagamento.importo) || 0),
+      0
+    );
+
+  const totaleDaPagare = pagamentiStudi
+    .filter((pagamento) => pagamento.stato === "da_pagare")
+    .reduce(
+      (totale, pagamento) => totale + (Number(pagamento.importo) || 0),
+      0
+    );
+
+  const oggiIso = new Date().toISOString().slice(0, 10);
+
+  const pagamentiInRitardo = pagamentiStudi.filter(
+    (pagamento) =>
+      pagamento.stato === "da_pagare" &&
+      pagamento.scadenza &&
+      pagamento.scadenza < oggiIso
+  ).length;
+
+  const prossimaScadenza = pagamentiStudi
+    .filter(
+      (pagamento) =>
+        pagamento.stato === "da_pagare" &&
+        pagamento.scadenza &&
+        pagamento.scadenza >= oggiIso
+    )
+    .sort((a, b) => a.scadenza.localeCompare(b.scadenza))[0];
+
+  const salvaBudgetStudiNonIscritto = () => {
+    localStorage.setItem("budget_studi_mensile", budgetMensile);
+    localStorage.setItem("budget_studi_tipo_percorso", budgetTipoPercorso);
+    localStorage.setItem("budget_studi_preferenza", budgetPreferenza);
+
+    window.dispatchEvent(
+      new CustomEvent("budget_studi_saved", {
+        detail: {
+          budget_mensile: budgetMensile,
+          tipo_percorso: budgetTipoPercorso,
+          preferenza: budgetPreferenza,
+        },
+      })
+    );
+
+    setBudgetSaved(true);
+  };
+
+  const salvaPagamentiStudi = (nuoviPagamenti: PagamentoStudi[]) => {
+    setPagamentiStudi(nuoviPagamenti);
+    localStorage.setItem(
+      "budget_studi_pagamenti",
+      JSON.stringify(nuoviPagamenti)
+    );
+  };
+
+  const aggiungiPagamentoStudi = () => {
+    if (!pagamentoNome.trim() || !pagamentoScadenza) return;
+
+    const nuovoPagamento: PagamentoStudi = {
+      id: `${Date.now()}`,
+      nome: pagamentoNome.trim(),
+      importo: pagamentoImporto,
+      scadenza: pagamentoScadenza,
+      stato: pagamentoDataPagamento ? "pagato" : "da_pagare",
+      dataPagamento: pagamentoDataPagamento,
+      note: pagamentoNote.trim(),
+    };
+
+    salvaPagamentiStudi([nuovoPagamento, ...pagamentiStudi]);
+    setPagamentoNome("");
+    setPagamentoImporto("");
+    setPagamentoScadenza("");
+    setPagamentoDataPagamento("");
+    setPagamentoNote("");
+  };
+
+  const aggiornaStatoPagamento = (
+    id: string,
+    stato: PagamentoStudi["stato"]
+  ) => {
+    const nuoviPagamenti = pagamentiStudi.map((pagamento) =>
+      pagamento.id === id
+        ? {
+            ...pagamento,
+            stato,
+            dataPagamento:
+              stato === "pagato"
+                ? pagamento.dataPagamento || oggiIso
+                : pagamento.dataPagamento,
+          }
+        : pagamento
+    );
+
+    salvaPagamentiStudi(nuoviPagamenti);
+  };
+
+  const rimuoviPagamentoStudi = (id: string) => {
+    salvaPagamentiStudi(
+      pagamentiStudi.filter((pagamento) => pagamento.id !== id)
+    );
+  };
+
+  const formatEuro = (value: number) =>
+    value.toLocaleString("it-IT", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    });
 
   const classiDisponibili = tipoCorsoAttuale
     ? getClassiByTipo(tipoCorsoAttuale as TipoClasseLaurea)
@@ -851,6 +1052,316 @@ export default function ProfiloPage() {
       <div style={{ height: 14 }} />
 
       <ProfileAccordionCard
+        tone={showProfiloUniversitario ? "green" : "amber"}
+        title="Budget Studi"
+        badge={showProfiloUniversitario ? "Scadenze" : "Mensile"}
+        subtitle={
+          showProfiloUniversitario
+            ? "Organizza versamenti, scadenze e pagamenti già effettuati."
+            : "Indica il budget mensile che vorresti non superare, tutto compreso."
+        }
+        icon={<CalendarDays size={19} />}
+        defaultOpen={false}
+      >
+        {showProfiloUniversitario ? (
+          <>
+            <InfoRow
+              icon={<CalendarDays size={20} />}
+              title="Promemoria pagamenti universitari"
+              description="Segna rate, tasse, scadenze e versamenti già effettuati. I dati restano salvati sul dispositivo e ti aiutano a non perdere di vista le prossime date."
+            />
+
+            <div style={budgetStatsGridStyle}>
+              <div style={budgetMiniStatStyle}>
+                <p style={smallLabelStyle}>Prossima scadenza</p>
+                <h3 style={budgetStatValueStyle}>
+                  {prossimaScadenza
+                    ? new Date(prossimaScadenza.scadenza).toLocaleDateString(
+                        "it-IT"
+                      )
+                    : "Da inserire"}
+                </h3>
+              </div>
+
+              <div style={budgetMiniStatStyle}>
+                <p style={smallLabelStyle}>Da pagare</p>
+                <h3 style={budgetStatValueStyle}>
+                  {formatEuro(totaleDaPagare)}
+                </h3>
+              </div>
+
+              <div style={budgetMiniStatStyle}>
+                <p style={smallLabelStyle}>Già pagato</p>
+                <h3 style={budgetStatValueStyle}>{formatEuro(totalePagato)}</h3>
+              </div>
+
+              <div style={budgetMiniStatStyle}>
+                <p style={smallLabelStyle}>In ritardo</p>
+                <h3 style={budgetStatValueStyle}>{pagamentiInRitardo}</h3>
+              </div>
+            </div>
+
+            <div style={formGridStyle}>
+              <FieldLabel label="Nome pagamento">
+                <input
+                  type="text"
+                  value={pagamentoNome}
+                  onChange={(event) => setPagamentoNome(event.target.value)}
+                  placeholder="Esempio: prima rata, tassa regionale, segreteria"
+                  style={inputStyle}
+                />
+              </FieldLabel>
+
+              <FieldLabel label="Importo">
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="decimal"
+                  value={pagamentoImporto}
+                  onChange={(event) => setPagamentoImporto(event.target.value)}
+                  placeholder="Esempio: 450"
+                  style={inputStyle}
+                />
+              </FieldLabel>
+
+              <FieldLabel label="Scadenza">
+                <input
+                  type="date"
+                  value={pagamentoScadenza}
+                  onChange={(event) => setPagamentoScadenza(event.target.value)}
+                  style={inputStyle}
+                />
+              </FieldLabel>
+
+              <FieldLabel label="Data pagamento, se già pagato">
+                <input
+                  type="date"
+                  value={pagamentoDataPagamento}
+                  onChange={(event) =>
+                    setPagamentoDataPagamento(event.target.value)
+                  }
+                  style={inputStyle}
+                />
+              </FieldLabel>
+
+              <FieldLabel label="Note">
+                <input
+                  type="text"
+                  value={pagamentoNote}
+                  onChange={(event) => setPagamentoNote(event.target.value)}
+                  placeholder="Esempio: pagato con bonifico, carta, bollettino"
+                  style={inputStyle}
+                />
+              </FieldLabel>
+            </div>
+
+            <button
+              type="button"
+              onClick={aggiungiPagamentoStudi}
+              disabled={!pagamentoNome.trim() || !pagamentoScadenza}
+              style={{
+                ...primaryButtonStyle,
+                opacity: !pagamentoNome.trim() || !pagamentoScadenza ? 0.55 : 1,
+                cursor:
+                  !pagamentoNome.trim() || !pagamentoScadenza
+                    ? "not-allowed"
+                    : "pointer",
+              }}
+            >
+              Aggiungi pagamento
+              <ArrowRight size={19} />
+            </button>
+
+            <div style={paymentListStyle}>
+              {pagamentiStudi.length === 0 ? (
+                <p style={mutedTextStyle}>
+                  Non hai ancora inserito pagamenti. Aggiungi la prossima
+                  scadenza per iniziare a usare il promemoria.
+                </p>
+              ) : (
+                pagamentiStudi.map((pagamento) => {
+                  const isInRitardo =
+                    pagamento.stato === "da_pagare" &&
+                    pagamento.scadenza &&
+                    pagamento.scadenza < oggiIso;
+
+                  return (
+                    <div key={pagamento.id} style={paymentItemStyle}>
+                      <div>
+                        <p style={paymentTitleStyle}>{pagamento.nome}</p>
+                        <p style={mutedTextStyle}>
+                          {pagamento.importo
+                            ? `${formatEuro(Number(pagamento.importo) || 0)} · `
+                            : ""}
+                          scadenza{" "}
+                          {new Date(pagamento.scadenza).toLocaleDateString(
+                            "it-IT"
+                          )}
+                          {pagamento.dataPagamento
+                            ? ` · pagato il ${new Date(
+                                pagamento.dataPagamento
+                              ).toLocaleDateString("it-IT")}`
+                            : ""}
+                        </p>
+                        {pagamento.note && (
+                          <p style={mutedTextStyle}>{pagamento.note}</p>
+                        )}
+                      </div>
+
+                      <div style={paymentActionsStyle}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            aggiornaStatoPagamento(
+                              pagamento.id,
+                              pagamento.stato === "pagato"
+                                ? "da_pagare"
+                                : "pagato"
+                            )
+                          }
+                          style={{
+                            ...miniButtonStyle,
+                            background:
+                              pagamento.stato === "pagato"
+                                ? "rgba(34,197,94,0.22)"
+                                : isInRitardo
+                                ? "rgba(248,113,113,0.22)"
+                                : "rgba(251,191,36,0.18)",
+                            borderColor:
+                              pagamento.stato === "pagato"
+                                ? "rgba(134,239,172,0.40)"
+                                : isInRitardo
+                                ? "rgba(252,165,165,0.42)"
+                                : "rgba(253,230,138,0.34)",
+                          }}
+                        >
+                          {pagamento.stato === "pagato"
+                            ? "Pagato"
+                            : isInRitardo
+                            ? "In ritardo"
+                            : "Da pagare"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => rimuoviPagamentoStudi(pagamento.id)}
+                          style={miniButtonStyle}
+                        >
+                          Elimina
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <InfoRow
+              icon={<Target size={20} />}
+              title="Budget mensile tutto compreso"
+              description="Indica il budget mensile massimo che vorresti non superare. L’obiettivo è orientare la valutazione verso soluzioni sostenibili, senza finanziarie e senza interessi."
+            />
+
+            <div style={formGridStyle}>
+              <FieldLabel label="Qual è il budget mensile massimo che vorresti non superare?">
+                <select
+                  value={budgetMensile}
+                  onChange={(event) => {
+                    setBudgetMensile(event.target.value as BudgetMensileValue);
+                    setBudgetSaved(false);
+                  }}
+                  style={inputStyle}
+                >
+                  {BUDGET_MENSILE_OPTIONS.map((option) => (
+                    <option key={option.value || "vuoto"} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldLabel>
+
+              <FieldLabel label="Che percorso vuoi valutare?">
+                <select
+                  value={budgetTipoPercorso}
+                  onChange={(event) => {
+                    setBudgetTipoPercorso(event.target.value);
+                    setBudgetSaved(false);
+                  }}
+                  style={inputStyle}
+                >
+                  {BUDGET_STUDI_TIPI_PERCORSO.map((option) => (
+                    <option key={option.value || "vuoto"} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldLabel>
+
+              <FieldLabel label="Qual è la tua preferenza?">
+                <select
+                  value={budgetPreferenza}
+                  onChange={(event) => {
+                    setBudgetPreferenza(event.target.value);
+                    setBudgetSaved(false);
+                  }}
+                  style={inputStyle}
+                >
+                  {BUDGET_STUDI_OBIETTIVI.map((option) => (
+                    <option key={option.value || "vuoto"} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldLabel>
+            </div>
+
+            <div style={budgetResultStyle}>
+              <p style={smallLabelStyle}>Valutazione orientativa</p>
+              <h3 style={{ ...metricTitleStyle, marginTop: 6 }}>
+                {budgetMensile
+                  ? `Budget selezionato: ${budgetMensileLabel}`
+                  : "Seleziona un budget mensile"}
+              </h3>
+              <p style={mutedTextStyle}>{budgetResponse}</p>
+              <p style={budgetDisclaimerStyle}>
+                Il budget mensile serve solo come riferimento per la
+                valutazione. L’importo effettivo può variare in base all’ateneo,
+                al percorso scelto, alle convenzioni disponibili e alle modalità
+                di pagamento previste.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={salvaBudgetStudiNonIscritto}
+              disabled={!budgetMensile}
+              style={{
+                ...primaryButtonStyle,
+                opacity: !budgetMensile ? 0.55 : 1,
+                cursor: !budgetMensile ? "not-allowed" : "pointer",
+              }}
+            >
+              {budgetSaved ? "Budget salvato" : "Salva Budget Studi"}
+              <ArrowRight size={19} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/contatti")}
+              style={secondaryButtonStyle}
+            >
+              Verifica il percorso più adatto al mio budget
+              <ArrowRight size={18} />
+            </button>
+          </>
+        )}
+      </ProfileAccordionCard>
+
+      <div style={{ height: 14 }} />
+
+      <ProfileAccordionCard
         tone={isTrasferimento || isUniversitaInterrotta ? "amber" : "cyan"}
         title="Stato percorso"
         badge="Segmento"
@@ -1398,4 +1909,88 @@ const bigValueStyle: React.CSSProperties = {
   lineHeight: 1.1,
   fontWeight: 950,
   textTransform: "capitalize",
+};
+
+const budgetStatsGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 10,
+  marginTop: 16,
+};
+
+const budgetMiniStatStyle: React.CSSProperties = {
+  padding: 12,
+  borderRadius: 18,
+  background:
+    "linear-gradient(135deg, rgba(255,255,255,0.10), rgba(58,160,255,0.10))",
+  border: "1px solid rgba(120,194,255,0.20)",
+};
+
+const budgetStatValueStyle: React.CSSProperties = {
+  margin: "5px 0 0",
+  fontSize: 16,
+  lineHeight: 1.15,
+  fontWeight: 950,
+};
+
+const budgetResultStyle: React.CSSProperties = {
+  marginTop: 16,
+  padding: 15,
+  borderRadius: 21,
+  background:
+    "linear-gradient(135deg, rgba(251,191,36,0.20), rgba(58,160,255,0.12))",
+  border: "1px solid rgba(253,230,138,0.28)",
+  boxShadow: "inset 4px 0 0 rgba(251,191,36,0.75)",
+};
+
+const budgetDisclaimerStyle: React.CSSProperties = {
+  margin: "10px 0 0",
+  padding: 11,
+  borderRadius: 15,
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  color: "rgba(255,255,255,0.70)",
+  fontSize: 12,
+  lineHeight: 1.45,
+  fontWeight: 750,
+};
+
+const paymentListStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 10,
+  marginTop: 16,
+};
+
+const paymentItemStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 12,
+  padding: 13,
+  borderRadius: 18,
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(120,194,255,0.18)",
+};
+
+const paymentTitleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: 15,
+  lineHeight: 1.25,
+  fontWeight: 950,
+};
+
+const paymentActionsStyle: React.CSSProperties = {
+  display: "flex",
+  gap: 8,
+  flexWrap: "wrap",
+};
+
+const miniButtonStyle: React.CSSProperties = {
+  minHeight: 36,
+  borderRadius: 999,
+  border: "1px solid rgba(120,194,255,0.22)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#FFFFFF",
+  padding: "0 12px",
+  fontSize: 12,
+  fontWeight: 900,
+  cursor: "pointer",
 };
