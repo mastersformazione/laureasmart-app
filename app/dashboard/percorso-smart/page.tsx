@@ -1528,9 +1528,9 @@ const pageStyle: CSSProperties = {
   padding: "22px 18px 120px",
   maxWidth: 500,
   margin: "0 auto",
-  color: "#FFFFFF",
+  color: "#102033",
   background:
-    "radial-gradient(circle at top, #173E68 0%, #0B1728 34%, #07111F 100%)",
+    "radial-gradient(circle at top left, rgba(31,111,178,0.16), transparent 34%), linear-gradient(180deg, #F4F8FF 0%, #EAF3FF 42%, #FFFFFF 100%)",
   fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
 };
 const heroStyle: CSSProperties = {
@@ -1539,16 +1539,17 @@ const heroStyle: CSSProperties = {
   borderRadius: 34,
   padding: 24,
   marginBottom: 14,
-  background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 52%, #155487 100%)",
-  border: "1px solid rgba(255,255,255,0.16)",
-  boxShadow: "0 24px 60px rgba(0,0,0,0.34)",
+  background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 58%, #EAF6FF 100%)",
+  color: "#FFFFFF",
+  border: "1px solid rgba(31,111,178,0.16)",
+  boxShadow: "0 22px 48px rgba(31,111,178,0.22)",
 };
 const heroIconStyle: CSSProperties = {
   width: 62,
   height: 62,
   borderRadius: 24,
-  background: "rgba(255,255,255,0.16)",
-  border: "1px solid rgba(255,255,255,0.18)",
+  background: "rgba(255,255,255,0.22)",
+  border: "1px solid rgba(255,255,255,0.32)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -1558,6 +1559,7 @@ const eyebrowStyle: CSSProperties = {
   margin: "0 0 8px",
   fontSize: 14,
   fontWeight: 850,
+  color: "rgba(255,255,255,0.88)",
 };
 const heroTitleStyle: CSSProperties = {
   margin: 0,
@@ -1570,7 +1572,7 @@ const heroTextStyle: CSSProperties = {
   margin: "12px 0 0",
   fontSize: 15,
   lineHeight: 1.55,
-  color: "rgba(255,255,255,0.9)",
+  color: "rgba(255,255,255,0.92)",
 };
 const switchStyle: CSSProperties = {
   display: "grid",
@@ -1579,22 +1581,22 @@ const switchStyle: CSSProperties = {
   marginBottom: 14,
 };
 const modeButtonStyle: CSSProperties = {
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.07)",
-  color: "rgba(255,255,255,0.76)",
+  border: "1px solid rgba(31,111,178,0.16)",
+  background: "rgba(255,255,255,0.86)",
+  color: "#35506B",
   borderRadius: 22,
   padding: "13px 12px",
   textAlign: "left",
   display: "grid",
   gap: 5,
   cursor: "pointer",
+  boxShadow: "0 12px 30px rgba(31,111,178,0.08)",
 };
 const activeModeButtonStyle: CSSProperties = {
-  background:
-    "linear-gradient(135deg, rgba(58,160,255,0.28), rgba(120,194,255,0.16))",
-  border: "1px solid rgba(120,194,255,0.58)",
+  background: "linear-gradient(135deg, #1F6FB2, #3AA0FF)",
+  border: "1px solid rgba(31,111,178,0.24)",
   color: "#FFFFFF",
-  boxShadow: "0 14px 34px rgba(31,111,178,0.24)",
+  boxShadow: "0 16px 36px rgba(31,111,178,0.24)",
 };
 const metricsGridStyle: CSSProperties = {
   display: "grid",
@@ -1605,16 +1607,16 @@ const metricsGridStyle: CSSProperties = {
 const metricCardStyle: CSSProperties = {
   borderRadius: 26,
   padding: 15,
-  background: "rgba(17,32,51,0.78)",
-  border: "1px solid rgba(120,194,255,0.16)",
-  boxShadow: "0 16px 38px rgba(0,0,0,0.22)",
+  background: "rgba(255,255,255,0.92)",
+  border: "1px solid rgba(31,111,178,0.12)",
+  boxShadow: "0 16px 34px rgba(31,111,178,0.10)",
 };
 const metricIconStyle: CSSProperties = {
   width: 42,
   height: 42,
   borderRadius: 16,
-  background: "rgba(58,160,255,0.14)",
-  color: "#78C2FF",
+  background: "#EAF4FF",
+  color: "#1F6FB2",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -1625,21 +1627,22 @@ const metricTitleStyle: CSSProperties = {
   fontSize: 22,
   fontWeight: 950,
   letterSpacing: "-0.5px",
+  color: "#102033",
 };
 const metricDescriptionStyle: CSSProperties = {
   margin: "4px 0 0",
   fontSize: 12.5,
   lineHeight: 1.35,
-  color: "rgba(255,255,255,0.62)",
+  color: "#60738A",
   fontWeight: 700,
 };
 const darkCardStyle: CSSProperties = {
   borderRadius: 30,
   padding: 18,
   marginBottom: 14,
-  background: "rgba(17,32,51,0.84)",
-  border: "1px solid rgba(120,194,255,0.18)",
-  boxShadow: "0 20px 48px rgba(0,0,0,0.28)",
+  background: "rgba(255,255,255,0.94)",
+  border: "1px solid rgba(31,111,178,0.12)",
+  boxShadow: "0 18px 42px rgba(31,111,178,0.10)",
   backdropFilter: "blur(18px)",
 };
 const cardHeaderStyle: CSSProperties = {
@@ -1654,12 +1657,13 @@ const cardTitleStyle: CSSProperties = {
   fontSize: 18,
   fontWeight: 950,
   letterSpacing: "-0.35px",
+  color: "#102033",
 };
 const badgeStyle: CSSProperties = {
   borderRadius: 999,
   padding: "7px 10px",
-  background: "rgba(120,194,255,0.14)",
-  color: "#78C2FF",
+  background: "#EAF4FF",
+  color: "#1F6FB2",
   fontSize: 12,
   fontWeight: 900,
   whiteSpace: "nowrap",
@@ -1678,9 +1682,9 @@ const inputStyle: CSSProperties = {
   width: "100%",
   minHeight: 46,
   borderRadius: 17,
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(7,17,31,0.72)",
-  color: "#FFFFFF",
+  border: "1px solid rgba(31,111,178,0.16)",
+  background: "#FFFFFF",
+  color: "#102033",
   padding: "0 13px",
   fontSize: 14,
   fontWeight: 750,
@@ -1690,73 +1694,75 @@ const inputStyle: CSSProperties = {
 const fieldStyle: CSSProperties = { display: "grid", gap: 8 };
 const labelStyle: CSSProperties = {
   fontSize: 12.5,
-  color: "rgba(255,255,255,0.68)",
+  color: "#4A6078",
   fontWeight: 850,
 };
 const smartBoxStyle: CSSProperties = {
   borderRadius: 22,
   padding: 15,
-  background: "rgba(58,160,255,0.1)",
-  border: "1px solid rgba(120,194,255,0.18)",
+  background: "linear-gradient(135deg, #EEF7FF, #FFFFFF)",
+  border: "1px solid rgba(31,111,178,0.14)",
 };
 const smartTitleStyle: CSSProperties = {
   margin: 0,
   fontSize: 15,
   fontWeight: 950,
-  color: "#FFFFFF",
+  color: "#102033",
 };
 const mutedTextStyle: CSSProperties = {
   margin: "7px 0 0",
   fontSize: 13.5,
   lineHeight: 1.5,
-  color: "rgba(255,255,255,0.66)",
+  color: "#5D7086",
   fontWeight: 650,
 };
 const choiceButtonStyle: CSSProperties = {
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.06)",
-  color: "rgba(255,255,255,0.78)",
+  border: "1px solid rgba(31,111,178,0.14)",
+  background: "#FFFFFF",
+  color: "#35506B",
   borderRadius: 18,
   padding: "13px 14px",
   textAlign: "left",
   fontSize: 14,
   fontWeight: 850,
   cursor: "pointer",
+  boxShadow: "0 10px 24px rgba(31,111,178,0.06)",
 };
 const activeChoiceStyle: CSSProperties = {
-  borderColor: "rgba(120,194,255,0.62)",
-  background: "rgba(58,160,255,0.18)",
-  color: "#FFFFFF",
+  borderColor: "rgba(31,111,178,0.46)",
+  background: "#EAF4FF",
+  color: "#1F6FB2",
 };
 const progressCardStyle: CSSProperties = {
   borderRadius: 24,
   padding: 15,
   marginBottom: 14,
-  background: "rgba(255,255,255,0.07)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  background: "#FFFFFF",
+  border: "1px solid rgba(31,111,178,0.12)",
+  boxShadow: "0 12px 28px rgba(31,111,178,0.08)",
 };
 const progressTrackStyle: CSSProperties = {
   width: "100%",
   height: 12,
   borderRadius: 999,
-  background: "rgba(255,255,255,0.11)",
+  background: "#DDEBFA",
   overflow: "hidden",
 };
 const highlightBoxStyle: CSSProperties = {
   borderRadius: 26,
   padding: 18,
   textAlign: "center",
-  background:
-    "linear-gradient(135deg, rgba(31,111,178,0.28), rgba(58,160,255,0.12))",
-  border: "1px solid rgba(120,194,255,0.18)",
+  background: "linear-gradient(135deg, #EAF4FF, #FFFFFF)",
+  border: "1px solid rgba(31,111,178,0.14)",
+  boxShadow: "0 14px 30px rgba(31,111,178,0.08)",
 };
 const highlightIconStyle: CSSProperties = {
   width: 50,
   height: 50,
   borderRadius: 20,
   margin: "0 auto 10px",
-  background: "rgba(120,194,255,0.16)",
-  color: "#78C2FF",
+  background: "#DFF0FF",
+  color: "#1F6FB2",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -1765,7 +1771,7 @@ const timelineLabelStyle: CSSProperties = {
   margin: 0,
   fontSize: 12,
   fontWeight: 900,
-  color: "#78C2FF",
+  color: "#1F6FB2",
   textTransform: "uppercase",
   letterSpacing: "0.45px",
 };
@@ -1774,30 +1780,31 @@ const timelineTitleStyle: CSSProperties = {
   fontSize: 24,
   fontWeight: 950,
   letterSpacing: "-0.5px",
+  color: "#102033",
 };
 const timelineTextStyle: CSSProperties = {
   margin: "8px 0 0",
   fontSize: 13.5,
   lineHeight: 1.5,
-  color: "rgba(255,255,255,0.68)",
+  color: "#5D7086",
 };
 const miniBoxStyle: CSSProperties = {
   borderRadius: 20,
   padding: 13,
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  background: "#F7FBFF",
+  border: "1px solid rgba(31,111,178,0.10)",
 };
 const miniTitleStyle: CSSProperties = {
   margin: 0,
   fontSize: 15,
   fontWeight: 950,
-  color: "#FFFFFF",
+  color: "#102033",
 };
 const miniDescriptionStyle: CSSProperties = {
   margin: "5px 0 0",
   fontSize: 12.5,
   lineHeight: 1.35,
-  color: "rgba(255,255,255,0.62)",
+  color: "#65778D",
   fontWeight: 700,
 };
 const primaryButtonStyle: CSSProperties = {
@@ -1815,7 +1822,7 @@ const primaryButtonStyle: CSSProperties = {
   justifyContent: "center",
   gap: 8,
   cursor: "pointer",
-  boxShadow: "0 16px 38px rgba(31,111,178,0.32)",
+  boxShadow: "0 16px 34px rgba(31,111,178,0.26)",
 };
 const saveButtonStyle: CSSProperties = {
   ...primaryButtonStyle,
@@ -1829,15 +1836,16 @@ const whatsappButtonStyle: CSSProperties = {
 const examCardStyle: CSSProperties = {
   borderRadius: 24,
   padding: 15,
-  background: "rgba(17,32,51,0.78)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  boxShadow: "0 14px 36px rgba(0,0,0,0.22)",
+  background: "#FFFFFF",
+  border: "1px solid rgba(31,111,178,0.12)",
+  boxShadow: "0 14px 32px rgba(31,111,178,0.08)",
 };
 const examIconStyle: CSSProperties = {
   width: 46,
   height: 46,
   borderRadius: 18,
-  background: "rgba(58,160,255,0.13)",
+  background: "#EAF4FF",
+  color: "#1F6FB2",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -1848,11 +1856,12 @@ const examTitleStyle: CSSProperties = {
   fontSize: 16,
   lineHeight: 1.25,
   fontWeight: 950,
+  color: "#102033",
 };
 const deleteButtonStyle: CSSProperties = {
   border: "none",
-  background: "rgba(255,255,255,0.07)",
-  color: "rgba(255,255,255,0.72)",
+  background: "#F1F6FC",
+  color: "#5D7086",
   width: 34,
   height: 34,
   borderRadius: 13,
@@ -1868,9 +1877,9 @@ const statusGridStyle: CSSProperties = {
   flexWrap: "wrap",
 };
 const statusButtonStyle: CSSProperties = {
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "rgba(255,255,255,0.06)",
-  color: "rgba(255,255,255,0.72)",
+  border: "1px solid rgba(31,111,178,0.14)",
+  background: "#FFFFFF",
+  color: "#52677F",
   borderRadius: 999,
   padding: "8px 10px",
   fontSize: 12.5,
@@ -1878,9 +1887,9 @@ const statusButtonStyle: CSSProperties = {
   cursor: "pointer",
 };
 const activeStatusStyle: CSSProperties = {
-  borderColor: "rgba(120,194,255,0.58)",
-  background: "rgba(58,160,255,0.18)",
-  color: "#FFFFFF",
+  borderColor: "rgba(31,111,178,0.40)",
+  background: "#EAF4FF",
+  color: "#1F6FB2",
 };
 const sessionGridStyle: CSSProperties = {
   display: "grid",
@@ -1894,12 +1903,12 @@ const scoreLabelStyle: CSSProperties = {
   justifyContent: "space-between",
   gap: 10,
   fontSize: 13.5,
-  color: "rgba(255,255,255,0.78)",
+  color: "#35506B",
   fontWeight: 850,
 };
 const scoreTrackStyle: CSSProperties = {
   height: 12,
   borderRadius: 999,
-  background: "rgba(255,255,255,0.09)",
+  background: "#DDEBFA",
   overflow: "hidden",
 };
