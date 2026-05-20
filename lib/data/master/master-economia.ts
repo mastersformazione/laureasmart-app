@@ -23,6 +23,24 @@ export const masterEconomia: Percorso[] = [
     tags: ["economia", "hr", "risorse_umane", "lavoro", "organizzazione"],
     prioritaCommerciale: 3,
   },
+
+  {
+    id: "ai-for-business-administration",
+    titolo: "AI for Business Administration",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "economia",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: [
+      "intelligenza artificiale",
+      "business administration",
+      "management",
+      "amministrazione aziendale",
+      "innovazione digitale",
+    ],
+    prioritaCommerciale: 3,
+  },
   {
     id: "smart-business-management",
     titolo: "Smart Business Management",

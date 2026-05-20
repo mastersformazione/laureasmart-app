@@ -12,6 +12,25 @@ export const masterIngegneria: Percorso[] = [
     tags: ["radiazioni", "sicurezza", "industria", "sanita", "tecnico"],
     prioritaCommerciale: 2,
   },
+
+  {
+    id: "ai-engineering",
+    titolo: "AI Engineering",
+    classe: "Master I livello",
+    tipo: "master_primo_livello",
+    settore: "ingegneria",
+    durata: "12 mesi",
+    accesso: ["laurea_triennale", "laurea_magistrale"],
+    tags: [
+      "intelligenza artificiale",
+      "ai engineering",
+      "ingegneria",
+      "innovazione digitale",
+      "tecnologia",
+    ],
+    prioritaCommerciale: 3,
+  },
+
   {
     id: "data-protection-officer-cyber-risk-manager",
     titolo: "Data Protection Officer Cyber & Risk Manager",
