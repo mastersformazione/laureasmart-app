@@ -13,6 +13,7 @@ import {
   CalendarCheck,
   Share2,
   GraduationCap,
+  Sparkles,
 } from "lucide-react";
 
 type GpsUser = {
@@ -395,6 +396,149 @@ export default function Dashboard() {
             </button>
           )}
         </div>
+      </section>
+
+      <section
+        style={{
+          marginBottom: 20,
+          borderRadius: 30,
+          padding: 16,
+          background:
+            "linear-gradient(135deg, rgba(124,58,237,0.24), rgba(17,32,51,0.94))",
+          border: "1px solid rgba(167,139,250,0.28)",
+          boxShadow: "0 18px 46px rgba(0,0,0,0.28)",
+          backdropFilter: "blur(16px)",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/orientamento/futuro")}
+          style={{
+            width: "100%",
+            border: "none",
+            background:
+              "linear-gradient(135deg, #6D28D9 0%, #1F6FB2 58%, #102033 100%)",
+            borderRadius: 26,
+            padding: 20,
+            textAlign: "left",
+            boxShadow: "0 20px 48px rgba(124,58,237,0.24)",
+            cursor: "pointer",
+            color: "#FFFFFF",
+            position: "relative",
+            overflow: "hidden",
+            fontFamily: "inherit",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              right: -42,
+              top: -38,
+              width: 150,
+              height: 150,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.13)",
+            }}
+          />
+
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "inline-flex",
+              padding: "6px 11px",
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.15)",
+              color: "#DBEAFE",
+              fontSize: 11,
+              fontWeight: 950,
+              marginBottom: 13,
+              letterSpacing: "0.3px",
+            }}
+          >
+            PROFILO PERSONALIZZATO
+          </div>
+
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              gap: 14,
+              alignItems: "flex-start",
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 21,
+                background: "rgba(255,255,255,0.16)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Sparkles size={28} />
+            </div>
+
+            <div style={{ minWidth: 0 }}>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 25,
+                  lineHeight: 1.04,
+                  fontWeight: 950,
+                  letterSpacing: "-0.7px",
+                }}
+              >
+                Che tipo di futuro ti somiglia?
+              </h2>
+
+              <p
+                style={{
+                  margin: "9px 0 0",
+                  fontSize: 14.5,
+                  lineHeight: 1.5,
+                  color: "rgba(255,255,255,0.83)",
+                }}
+              >
+                Scopri il profilo che descrive meglio il tuo modo di scegliere,
+                studiare e immaginare il futuro.
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+              marginTop: 16,
+            }}
+          >
+            {["domande guidate", "risultato personale", "copia via email"].map(
+              (item) => (
+                <span
+                  key={item}
+                  style={{
+                    padding: "7px 10px",
+                    borderRadius: 999,
+                    background: "rgba(255,255,255,0.12)",
+                    color: "rgba(255,255,255,0.86)",
+                    fontSize: 11.5,
+                    fontWeight: 850,
+                  }}
+                >
+                  {item}
+                </span>
+              )
+            )}
+          </div>
+        </button>
       </section>
 
       <section style={{ marginBottom: 20 }}>
