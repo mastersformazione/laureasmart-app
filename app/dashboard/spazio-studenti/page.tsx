@@ -46,6 +46,11 @@ type ApprovedCaseApi = {
   titolo?: string;
   contenuto?: string;
   foto_url?: string;
+  risposta_laurea_smart?: string;
+  prossimo_passo?: string;
+  cta_label?: string;
+  cta_href?: string;
+  cta_whatsapp?: string;
 };
 
 const casiIniziali: CasoStudente[] = [
@@ -84,7 +89,8 @@ const casiIniziali: CasoStudente[] = [
     categoria: "Scelta del percorso",
     domanda: "Non so quale percorso scegliere",
     nome_pubblico: "Chiara, 24 anni",
-    breve: "Mi interessano più aree, ma non capisco quale sia più adatta a me.",
+    breve:
+      "Mi interessano più aree, ma non capisco quale sia più adatta a me.",
     risposta:
       "Quando hai dubbi tra più direzioni, conviene partire dal profilo: obiettivi, interessi, vincoli, modo di studiare e prospettive future.",
     prossimoPasso:
@@ -185,8 +191,7 @@ function categoriaToIcon(categoria: string): CasoStudente["icon"] {
   if (lower.includes("cfu") || lower.includes("esami")) return "cfu";
   if (lower.includes("lavoro")) return "lavoro";
   if (lower.includes("concorsi")) return "concorsi";
-  if (lower.includes("cambiare") || lower.includes("università"))
-    return "cambio";
+  if (lower.includes("cambiare") || lower.includes("università")) return "cambio";
   if (lower.includes("paura")) return "paura";
   if (lower.includes("costo") || lower.includes("costa")) return "costi";
 
@@ -204,11 +209,14 @@ function normalizzaCasoApprovato(caso: ApprovedCaseApi): CasoStudente {
     foto_url: caso.foto_url,
     breve: caso.contenuto || "",
     risposta:
+      caso.risposta_laurea_smart ||
       "Questo caso è stato inviato da un utente e approvato da Laurea Smart. Può aiutarti a riconoscere una situazione simile alla tua e capire quale passaggio fare.",
     prossimoPasso:
+      caso.prossimo_passo ||
       "Se questo caso somiglia al tuo, puoi chiedere un confronto personalizzato oppure usare una delle funzioni guidate dell’app.",
-    ctaLabel: "Voglio confrontare le mie possibilità",
-    whatsapp: true,
+    ctaLabel: caso.cta_label || "Voglio confrontare le mie possibilità",
+    href: caso.cta_href || undefined,
+    whatsapp: caso.cta_whatsapp === "1" || !caso.cta_href,
     icon: categoriaToIcon(categoria),
     fonte: "utente",
   };

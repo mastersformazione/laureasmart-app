@@ -17,6 +17,56 @@ type SpazioStudentiCase = {
   foto_url?: string;
 };
 
+type CasoEdit = {
+  risposta: string;
+  prossimoPasso: string;
+  cta: "valuta" | "prima" | "test" | "confronto";
+};
+
+const ctaOptions: Record<
+  CasoEdit["cta"],
+  { label: string; href?: string; whatsapp?: boolean }
+> = {
+  valuta: {
+    label: "Valuta quello che hai già fatto",
+    href: "/dashboard/valuta-quello-che-hai-fatto",
+  },
+  prima: {
+    label: "Prima di scegliere",
+    href: "/dashboard/prima-di-scegliere",
+  },
+  test: {
+    label: "Fai il test sul futuro",
+    href: "/dashboard/orientamento/futuro",
+  },
+  confronto: {
+    label: "Voglio confrontare le mie possibilità",
+    whatsapp: true,
+  },
+};
+
+function creaEditDefault(caso: SpazioStudentiCase): CasoEdit {
+  const categoria = caso.categoria.toLowerCase();
+
+  let cta: CasoEdit["cta"] = "confronto";
+
+  if (categoria.includes("esami") || categoria.includes("cfu") || categoria.includes("cambiare")) {
+    cta = "valuta";
+  } else if (categoria.includes("lavoro") || categoria.includes("paura") || categoria.includes("costa")) {
+    cta = "prima";
+  } else if (categoria.includes("percorso")) {
+    cta = "test";
+  }
+
+  return {
+    risposta:
+      "Grazie per aver condiviso il tuo caso. Prima di scegliere, è utile valutare la situazione in modo completo e confrontare più possibilità, perché percorso, tempi, costi, supporto e riconoscimenti possono cambiare da un ateneo all’altro.",
+    prossimoPasso:
+      "Il prossimo passo consigliato è approfondire il caso con Laurea Smart e confrontare le opzioni più adatte alla situazione descritta.",
+    cta,
+  };
+}
+
 export default function AdminPage() {
   const [form, setForm] = useState({
     titolo: "",
@@ -30,6 +80,7 @@ export default function AdminPage() {
   const [casiLoading, setCasiLoading] = useState(false);
   const [casiInAttesa, setCasiInAttesa] = useState<SpazioStudentiCase[]>([]);
   const [spazioStudentiAdminKey, setSpazioStudentiAdminKey] = useState("");
+  const [caseEdits, setCaseEdits] = useState<Record<string, CasoEdit>>({});
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -103,8 +154,20 @@ export default function AdminPage() {
       const data = await res.json();
 
       if (data.success) {
-        setCasiInAttesa(data.cases || []);
-        setCasiStatus(`Casi in attesa: ${(data.cases || []).length}`);
+        const cases = (data.cases || []) as SpazioStudentiCase[];
+        setCasiInAttesa(cases);
+        setCaseEdits((current) => {
+          const next = { ...current };
+
+          cases.forEach((caso) => {
+            if (!next[caso.id]) {
+              next[caso.id] = creaEditDefault(caso);
+            }
+          });
+
+          return next;
+        });
+        setCasiStatus(`Casi in attesa: ${cases.length}`);
       } else {
         setCasiStatus(
           "Errore: " +
@@ -117,6 +180,25 @@ export default function AdminPage() {
     } finally {
       setCasiLoading(false);
     }
+  };
+
+
+  const aggiornaCasoEdit = (
+    id: string,
+    field: keyof CasoEdit,
+    value: string
+  ) => {
+    setCaseEdits((current) => ({
+      ...current,
+      [id]: {
+        ...(current[id] || {
+          risposta: "",
+          prossimoPasso: "",
+          cta: "confronto",
+        }),
+        [field]: value,
+      } as CasoEdit,
+    }));
   };
 
   const moderaCaso = async (id: string, action: "approve" | "reject") => {
@@ -141,7 +223,15 @@ export default function AdminPage() {
             "Content-Type": "application/json",
             "X-Admin-Key": adminKey,
           },
-          body: JSON.stringify({ id, action }),
+          body: JSON.stringify({
+            id,
+            action,
+            risposta_laurea_smart: caseEdits[id]?.risposta || "",
+            prossimo_passo: caseEdits[id]?.prossimoPasso || "",
+            cta_label: ctaOptions[caseEdits[id]?.cta || "confronto"].label,
+            cta_href: ctaOptions[caseEdits[id]?.cta || "confronto"].href || "",
+            cta_whatsapp: ctaOptions[caseEdits[id]?.cta || "confronto"].whatsapp ? "1" : "0",
+          }),
         }
       );
 
@@ -457,9 +547,125 @@ export default function AdminPage() {
 
               <div
                 style={{
+                  marginTop: 14,
+                  padding: 12,
+                  borderRadius: 18,
+                  background: "#FFFFFF",
+                  border: "1px solid #D7E7F5",
+                }}
+              >
+                <label style={{ display: "block", marginBottom: 12 }}>
+                  <span
+                    style={{
+                      display: "block",
+                      marginBottom: 6,
+                      fontSize: 13,
+                      fontWeight: 900,
+                      color: "#243244",
+                    }}
+                  >
+                    Risposta Laurea Smart
+                  </span>
+
+                  <textarea
+                    value={caseEdits[caso.id]?.risposta || ""}
+                    onChange={(e) =>
+                      aggiornaCasoEdit(caso.id, "risposta", e.target.value)
+                    }
+                    rows={5}
+                    placeholder="Scrivi la risposta che verrà mostrata pubblicamente sotto il caso."
+                    style={{
+                      width: "100%",
+                      border: "1px solid #D7E7F5",
+                      borderRadius: 14,
+                      padding: 12,
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                      resize: "vertical",
+                      outline: "none",
+                    }}
+                  />
+                </label>
+
+                <label style={{ display: "block", marginBottom: 12 }}>
+                  <span
+                    style={{
+                      display: "block",
+                      marginBottom: 6,
+                      fontSize: 13,
+                      fontWeight: 900,
+                      color: "#243244",
+                    }}
+                  >
+                    Prossimo passo consigliato
+                  </span>
+
+                  <textarea
+                    value={caseEdits[caso.id]?.prossimoPasso || ""}
+                    onChange={(e) =>
+                      aggiornaCasoEdit(
+                        caso.id,
+                        "prossimoPasso",
+                        e.target.value
+                      )
+                    }
+                    rows={3}
+                    placeholder="Indica cosa dovrebbe fare l’utente dopo aver letto il caso."
+                    style={{
+                      width: "100%",
+                      border: "1px solid #D7E7F5",
+                      borderRadius: 14,
+                      padding: 12,
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                      resize: "vertical",
+                      outline: "none",
+                    }}
+                  />
+                </label>
+
+                <label style={{ display: "block" }}>
+                  <span
+                    style={{
+                      display: "block",
+                      marginBottom: 6,
+                      fontSize: 13,
+                      fontWeight: 900,
+                      color: "#243244",
+                    }}
+                  >
+                    CTA consigliata
+                  </span>
+
+                  <select
+                    value={caseEdits[caso.id]?.cta || "confronto"}
+                    onChange={(e) =>
+                      aggiornaCasoEdit(caso.id, "cta", e.target.value)
+                    }
+                    style={{
+                      width: "100%",
+                      border: "1px solid #D7E7F5",
+                      borderRadius: 14,
+                      padding: 12,
+                      fontSize: 14,
+                      background: "#FFFFFF",
+                      outline: "none",
+                    }}
+                  >
+                    <option value="valuta">Valuta quello che hai già fatto</option>
+                    <option value="prima">Prima di scegliere</option>
+                    <option value="test">Fai il test sul futuro</option>
+                    <option value="confronto">Voglio confrontare le mie possibilità</option>
+                  </select>
+                </label>
+              </div>
+
+              <div
+                style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
                   gap: 10,
+                  marginTop: 12,
                 }}
               >
                 <button
@@ -476,7 +682,7 @@ export default function AdminPage() {
                     cursor: "pointer",
                   }}
                 >
-                  Approva
+                  Approva e pubblica
                 </button>
 
                 <button
