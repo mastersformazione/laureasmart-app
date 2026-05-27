@@ -35,6 +35,7 @@ export default function Home() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [iphoneHelpOpen, setIphoneHelpOpen] = useState(false);
+  const [isStandaloneMode, setIsStandaloneMode] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("gps_user");
@@ -42,7 +43,10 @@ export default function Home() {
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone ===
-        true;
+        true ||
+      document.referrer.startsWith("android-app://");
+
+    setIsStandaloneMode(isStandalone);
 
     if (storedUser && isStandalone) {
       router.replace("/dashboard");
@@ -315,75 +319,101 @@ export default function Home() {
           style={{
             padding: 16,
             borderRadius: 30,
-            background: "rgba(255,255,255,0.97)",
-            color: "#102033",
-            boxShadow: "0 24px 70px rgba(0,0,0,0.28)",
+            background:
+              "linear-gradient(145deg, rgba(6,17,31,0.94), rgba(13,48,82,0.84))",
+            color: "#FFFFFF",
+            border: "1px solid rgba(186,230,253,0.18)",
+            boxShadow: "0 24px 70px rgba(0,0,0,0.34)",
+            backdropFilter: "blur(14px)",
           }}
         >
           <div style={{ display: "grid", gap: 10 }}>
-            <InstallButton />
+            {!isStandaloneMode && (
+              <>
+                <InstallButton />
 
-            <button
-              type="button"
-              onClick={handleIphoneHelpOpen}
-              style={{
-                width: "100%",
-                border: "1px solid rgba(58,160,255,0.22)",
-                background:
-                  "linear-gradient(135deg, #2F86D1 0%, #1F6FB2 55%, #155487 100%)",
-                borderRadius: 22,
-                padding: "18px 18px",
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                textAlign: "left",
-                boxShadow: "0 14px 34px rgba(31,111,178,0.22)",
-                cursor: "pointer",
-              }}
-            >
+                <button
+                  type="button"
+                  onClick={handleIphoneHelpOpen}
+                  style={{
+                    width: "100%",
+                    border: "1px solid rgba(186,230,253,0.18)",
+                    background:
+                      "linear-gradient(135deg, #2F86D1 0%, #1F6FB2 55%, #123B63 100%)",
+                    borderRadius: 22,
+                    padding: "18px 18px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    textAlign: "left",
+                    boxShadow: "0 14px 34px rgba(31,111,178,0.24)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 18,
+                      background: "rgba(255,255,255,0.12)",
+                      border: "1px solid rgba(255,255,255,0.10)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      backdropFilter: "blur(8px)",
+                    }}
+                  >
+                    <AppleShareIcon size={29} color="#FFFFFF" />
+                  </div>
+
+                  <div>
+                    <strong
+                      style={{
+                        display: "block",
+                        fontSize: 19,
+                        fontWeight: 850,
+                        color: "#FFFFFF",
+                        marginBottom: 5,
+                        letterSpacing: "-0.3px",
+                      }}
+                    >
+                      Scarica su iPhone
+                    </strong>
+
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: 14,
+                        lineHeight: 1.45,
+                        color: "rgba(255,255,255,0.82)",
+                      }}
+                    >
+                      Premi Condividi e scegli “Aggiungi alla schermata Home”.
+                    </span>
+                  </div>
+                </button>
+              </>
+            )}
+
+            {isStandaloneMode && (
               <div
                 style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 18,
-                  background: "rgba(255,255,255,0.12)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  backdropFilter: "blur(8px)",
+                  padding: 14,
+                  borderRadius: 22,
+                  background: "rgba(125,211,252,0.10)",
+                  border: "1px solid rgba(186,230,253,0.16)",
+                  color: "rgba(255,255,255,0.82)",
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                  fontWeight: 700,
+                  textAlign: "center",
                 }}
               >
-                <AppleShareIcon size={29} color="#FFFFFF" />
+                App già installata. Accedi o crea il tuo profilo gratuito per
+                iniziare.
               </div>
-
-              <div>
-                <strong
-                  style={{
-                    display: "block",
-                    fontSize: 19,
-                    fontWeight: 850,
-                    color: "#FFFFFF",
-                    marginBottom: 5,
-                    letterSpacing: "-0.3px",
-                  }}
-                >
-                  Scarica su iPhone
-                </strong>
-
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: 14,
-                    lineHeight: 1.45,
-                    color: "rgba(255,255,255,0.82)",
-                  }}
-                >
-                  Premi Condividi e scegli “Aggiungi alla schermata Home”.
-                </span>
-              </div>
-            </button>
+            )}
 
             <button
               type="button"
@@ -391,21 +421,22 @@ export default function Home() {
               style={{
                 width: "100%",
                 minHeight: 64,
-                border: "1px solid #E4EAF1",
+                border: "1px solid rgba(186,230,253,0.28)",
                 borderRadius: 22,
-                background: "rgba(255,255,255,0.72)",
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.98), rgba(224,242,254,0.92))",
                 color: "#102033",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 11,
                 fontSize: 18,
-                fontWeight: 800,
+                fontWeight: 900,
                 cursor: "pointer",
-                boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
+                boxShadow: "0 14px 32px rgba(15,23,42,0.18)",
               }}
             >
-              <UserCircle2 size={26} color="#5F6B7A" />
+              <UserCircle2 size={26} color="#1F6FB2" />
               <span>Accedi o Registrati</span>
             </button>
           </div>
