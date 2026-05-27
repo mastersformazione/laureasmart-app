@@ -210,7 +210,6 @@ export default function RaccontaCasoSpazioStudentiPage() {
               <input
                 type="file"
                 accept="image/*"
-                capture="user"
                 onChange={(event) => setFoto(event.target.files?.[0] || null)}
                 className="hidden"
               />
