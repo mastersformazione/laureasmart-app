@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PrimaDiScegliereCard from "@/components/PrimaDiScegliereCard";
 import StudentiComeTeCard from "@/components/StudentiComeTeCard";
 import { useRouter } from "next/navigation";
 import ConfrontoPossibilitaCard from "@/components/ConfrontoPossibilitaCard";
@@ -638,6 +639,8 @@ export default function Dashboard() {
       </section>
 
       {!isGiaIscritto && <CompatibilitaPercorsoCard />}
+
+      <PrimaDiScegliereCard />
 
       <FeatureCard
         icon={<CalendarCheck size={30} />}
