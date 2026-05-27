@@ -9,12 +9,17 @@ type SpazioStudentiCase = {
   id: string;
   created_at: string;
   nome_pubblico: string;
-  email: string;
+  email?: string;
   telefono?: string;
   categoria: string;
   titolo: string;
   contenuto: string;
   foto_url?: string;
+  risposta_laurea_smart?: string;
+  prossimo_passo?: string;
+  cta_label?: string;
+  cta_href?: string;
+  cta_whatsapp?: string;
 };
 
 type CasoEdit = {
@@ -79,6 +84,8 @@ export default function AdminPage() {
   const [casiStatus, setCasiStatus] = useState("");
   const [casiLoading, setCasiLoading] = useState(false);
   const [casiInAttesa, setCasiInAttesa] = useState<SpazioStudentiCase[]>([]);
+  const [casiPubblicati, setCasiPubblicati] = useState<SpazioStudentiCase[]>([]);
+  const [casiEliminati, setCasiEliminati] = useState<SpazioStudentiCase[]>([]);
   const [spazioStudentiAdminKey, setSpazioStudentiAdminKey] = useState("");
   const [caseEdits, setCaseEdits] = useState<Record<string, CasoEdit>>({});
 
@@ -130,7 +137,7 @@ export default function AdminPage() {
   };
 
   const caricaCasiInAttesa = async () => {
-    const adminKey = spazioStudentiAdminKey.trim() || form.adminKey.trim();
+    const adminKey = getSpazioStudentiAdminKey();
 
     if (!adminKey) {
       setCasiStatus("Inserisci la chiave admin prima di caricare i casi.");
@@ -201,8 +208,165 @@ export default function AdminPage() {
     }));
   };
 
+  const getSpazioStudentiAdminKey = () =>
+    spazioStudentiAdminKey.trim() || form.adminKey.trim();
+
+  const caricaCasiPubblicati = async () => {
+    const adminKey = getSpazioStudentiAdminKey();
+
+    if (!adminKey) {
+      setCasiStatus("Inserisci la chiave admin prima di caricare i casi pubblicati.");
+      return;
+    }
+
+    setCasiLoading(true);
+    setCasiStatus("Caricamento casi pubblicati...");
+
+    try {
+      const res = await fetch(
+        "https://laureasmart.it/api/spazio-studenti-admin.php?action=list_approved",
+        {
+          method: "GET",
+          headers: {
+            "X-Admin-Key": adminKey,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        const cases = (data.cases || []) as SpazioStudentiCase[];
+        setCasiPubblicati(cases);
+        setCasiStatus(`Casi pubblicati: ${cases.length}`);
+      } else {
+        setCasiStatus(
+          "Errore: " +
+            (data.message || data.error || "impossibile caricare i casi pubblicati.")
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setCasiStatus("Errore di connessione durante il caricamento dei casi pubblicati.");
+    } finally {
+      setCasiLoading(false);
+    }
+  };
+
+  const caricaCasiEliminati = async () => {
+    const adminKey = getSpazioStudentiAdminKey();
+
+    if (!adminKey) {
+      setCasiStatus("Inserisci la chiave admin prima di caricare i casi eliminati.");
+      return;
+    }
+
+    setCasiLoading(true);
+    setCasiStatus("Caricamento casi eliminati...");
+
+    try {
+      const res = await fetch(
+        "https://laureasmart.it/api/spazio-studenti-admin.php?action=list_deleted",
+        {
+          method: "GET",
+          headers: {
+            "X-Admin-Key": adminKey,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        const cases = (data.cases || []) as SpazioStudentiCase[];
+        setCasiEliminati(cases);
+        setCasiStatus(`Casi eliminati: ${cases.length}`);
+      } else {
+        setCasiStatus(
+          "Errore: " +
+            (data.message || data.error || "impossibile caricare i casi eliminati.")
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setCasiStatus("Errore di connessione durante il caricamento dei casi eliminati.");
+    } finally {
+      setCasiLoading(false);
+    }
+  };
+
+  const aggiornaStatoCasoPubblicato = async (
+    id: string,
+    action: "delete_approved" | "restore_deleted"
+  ) => {
+    const adminKey = getSpazioStudentiAdminKey();
+
+    if (!adminKey) {
+      setCasiStatus("Inserisci la chiave admin prima di continuare.");
+      return;
+    }
+
+    const conferma =
+      action === "delete_approved"
+        ? window.confirm("Vuoi spostare questo caso tra gli eliminati? Non sarà più visibile nello Spazio Studenti.")
+        : window.confirm("Vuoi ripristinare questo caso tra i casi pubblicati?");
+
+    if (!conferma) return;
+
+    setCasiLoading(true);
+    setCasiStatus(
+      action === "delete_approved"
+        ? "Spostamento tra eliminati in corso..."
+        : "Ripristino in corso..."
+    );
+
+    try {
+      const res = await fetch(
+        "https://laureasmart.it/api/spazio-studenti-admin.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-Key": adminKey,
+          },
+          body: JSON.stringify({ id, action }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        if (action === "delete_approved") {
+          const moved = casiPubblicati.find((item) => item.id === id);
+          setCasiPubblicati((current) => current.filter((item) => item.id !== id));
+          if (moved) {
+            setCasiEliminati((current) => [moved, ...current]);
+          }
+          setCasiStatus("Caso spostato tra gli eliminati.");
+        } else {
+          const moved = casiEliminati.find((item) => item.id === id);
+          setCasiEliminati((current) => current.filter((item) => item.id !== id));
+          if (moved) {
+            setCasiPubblicati((current) => [moved, ...current]);
+          }
+          setCasiStatus("Caso ripristinato tra i pubblicati.");
+        }
+      } else {
+        setCasiStatus(
+          "Errore: " +
+            (data.message || data.error || "operazione non riuscita.")
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setCasiStatus("Errore di connessione durante l’operazione.");
+    } finally {
+      setCasiLoading(false);
+    }
+  };
+
   const moderaCaso = async (id: string, action: "approve" | "reject") => {
-    const adminKey = spazioStudentiAdminKey.trim() || form.adminKey.trim();
+    const adminKey = getSpazioStudentiAdminKey();
 
     if (!adminKey) {
       setCasiStatus("Inserisci la chiave admin prima di moderare.");
@@ -705,6 +869,241 @@ export default function AdminPage() {
             </article>
           ))}
         </div>
+
+        <div
+          style={{
+            marginTop: 24,
+            paddingTop: 18,
+            borderTop: "1px solid #E4EEF8",
+          }}
+        >
+          <h3 style={{ margin: "0 0 8px", fontSize: 19 }}>
+            Casi pubblicati
+          </h3>
+
+          <p style={{ margin: "0 0 12px", color: "#555", lineHeight: 1.5 }}>
+            Qui trovi i casi già visibili nello Spazio Studenti. Puoi spostarli
+            tra gli eliminati senza cancellarli definitivamente.
+          </p>
+
+          <Button
+            label={casiLoading ? "Caricamento..." : "Carica casi pubblicati"}
+            variant="secondary"
+            type="button"
+            onClick={caricaCasiPubblicati}
+          />
+
+          <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
+            {casiPubblicati.map((caso) => (
+              <article
+                key={caso.id}
+                style={{
+                  borderRadius: 20,
+                  border: "1px solid #D7E7F5",
+                  background: "#F8FBFF",
+                  padding: 14,
+                }}
+              >
+                <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  {caso.foto_url ? (
+                    <img
+                      src={caso.foto_url}
+                      alt={caso.nome_pubblico}
+                      style={{
+                        width: 50,
+                        height: 50,
+                        objectFit: "cover",
+                        borderRadius: 16,
+                        border: "1px solid #D7E7F5",
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 16,
+                        background: "#1F6FB2",
+                        color: "#FFFFFF",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 900,
+                        fontSize: 20,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {(caso.nome_pubblico || "S").slice(0, 1).toUpperCase()}
+                    </div>
+                  )}
+
+                  <div style={{ minWidth: 0 }}>
+                    <p
+                      style={{
+                        margin: "0 0 3px",
+                        fontSize: 12,
+                        color: "#16A34A",
+                        fontWeight: 900,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      Pubblicato · {caso.categoria}
+                    </p>
+
+                    <h4 style={{ margin: "0 0 5px", fontSize: 16 }}>
+                      {caso.titolo}
+                    </h4>
+
+                    <p style={{ margin: 0, fontSize: 13, color: "#555" }}>
+                      {caso.nome_pubblico}
+                    </p>
+                  </div>
+                </div>
+
+                <p
+                  style={{
+                    marginTop: 10,
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.5,
+                    color: "#243244",
+                    fontSize: 13,
+                  }}
+                >
+                  {caso.contenuto}
+                </p>
+
+                {caso.risposta_laurea_smart && (
+                  <div
+                    style={{
+                      marginTop: 10,
+                      borderRadius: 16,
+                      background: "#FFFFFF",
+                      border: "1px solid #D7E7F5",
+                      padding: 12,
+                    }}
+                  >
+                    <strong style={{ fontSize: 13 }}>Risposta Laurea Smart</strong>
+                    <p style={{ margin: "6px 0 0", fontSize: 13, lineHeight: 1.5 }}>
+                      {caso.risposta_laurea_smart}
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => aggiornaStatoCasoPubblicato(caso.id, "delete_approved")}
+                  disabled={casiLoading}
+                  style={{
+                    marginTop: 12,
+                    width: "100%",
+                    minHeight: 44,
+                    border: "0",
+                    borderRadius: 15,
+                    background: "#DC2626",
+                    color: "#FFFFFF",
+                    fontWeight: 900,
+                    cursor: "pointer",
+                  }}
+                >
+                  Elimina dai pubblicati
+                </button>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 24,
+            paddingTop: 18,
+            borderTop: "1px solid #E4EEF8",
+          }}
+        >
+          <h3 style={{ margin: "0 0 8px", fontSize: 19 }}>
+            Casi eliminati
+          </h3>
+
+          <p style={{ margin: "0 0 12px", color: "#555", lineHeight: 1.5 }}>
+            I casi eliminati non sono visibili nella app, ma restano archiviati
+            e possono essere ripristinati.
+          </p>
+
+          <Button
+            label={casiLoading ? "Caricamento..." : "Carica casi eliminati"}
+            variant="secondary"
+            type="button"
+            onClick={caricaCasiEliminati}
+          />
+
+          <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
+            {casiEliminati.map((caso) => (
+              <article
+                key={caso.id}
+                style={{
+                  borderRadius: 20,
+                  border: "1px solid #FECACA",
+                  background: "#FFF7F7",
+                  padding: 14,
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 3px",
+                    fontSize: 12,
+                    color: "#DC2626",
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  Eliminato · {caso.categoria}
+                </p>
+
+                <h4 style={{ margin: "0 0 5px", fontSize: 16 }}>
+                  {caso.titolo}
+                </h4>
+
+                <p style={{ margin: 0, fontSize: 13, color: "#555" }}>
+                  {caso.nome_pubblico}
+                </p>
+
+                <p
+                  style={{
+                    marginTop: 10,
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.5,
+                    color: "#243244",
+                    fontSize: 13,
+                  }}
+                >
+                  {caso.contenuto}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => aggiornaStatoCasoPubblicato(caso.id, "restore_deleted")}
+                  disabled={casiLoading}
+                  style={{
+                    marginTop: 12,
+                    width: "100%",
+                    minHeight: 44,
+                    border: "0",
+                    borderRadius: 15,
+                    background: "#16A34A",
+                    color: "#FFFFFF",
+                    fontWeight: 900,
+                    cursor: "pointer",
+                  }}
+                >
+                  Ripristina tra i pubblicati
+                </button>
+              </article>
+            ))}
+          </div>
+        </div>
+
       </section>
 
       <BottomNav />
