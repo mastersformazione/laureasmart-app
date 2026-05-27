@@ -5,6 +5,8 @@ import {
   ArrowRight,
   CheckCircle2,
   GitCompareArrows,
+  MessageCircle,
+  RotateCcw,
   ShieldCheck,
   Sparkles,
   Zap,
@@ -12,25 +14,64 @@ import {
 
 const WHATSAPP_NUMBER = "393793673257";
 
+type StatoConfronto =
+  | "non_richiesto"
+  | "whatsapp_aperto"
+  | "messaggio_inviato"
+  | "da_completare";
+
+const STORAGE_KEY = "confronto_possibilita_stato";
+
 export default function ConfrontoPossibilitaCard() {
-  const [confrontoRichiesto, setConfrontoRichiesto] = useState(false);
+  const [statoConfronto, setStatoConfronto] =
+    useState<StatoConfronto>("non_richiesto");
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("confronto_possibilita_richiesto");
-      setConfrontoRichiesto(saved === "si");
+      const saved = localStorage.getItem(STORAGE_KEY) as StatoConfronto | null;
+
+      // Compatibilità con la vecchia chiave usata nelle versioni precedenti.
+      const oldSaved = localStorage.getItem("confronto_possibilita_richiesto");
+
+      if (
+        saved === "non_richiesto" ||
+        saved === "whatsapp_aperto" ||
+        saved === "messaggio_inviato" ||
+        saved === "da_completare"
+      ) {
+        setStatoConfronto(saved);
+        return;
+      }
+
+      if (oldSaved === "si") {
+        setStatoConfronto("whatsapp_aperto");
+        localStorage.setItem(STORAGE_KEY, "whatsapp_aperto");
+      }
     } catch {
-      setConfrontoRichiesto(false);
+      setStatoConfronto("non_richiesto");
     }
   }, []);
 
-  const apriWhatsApp = () => {
+  const salvaStato = (stato: StatoConfronto) => {
+    setStatoConfronto(stato);
+
     try {
-      localStorage.setItem("confronto_possibilita_richiesto", "si");
-      setConfrontoRichiesto(true);
+      localStorage.setItem(STORAGE_KEY, stato);
+
+      // Manteniamo anche la vecchia chiave per non rompere nulla nel caso
+      // venisse letta altrove in futuro.
+      if (stato === "non_richiesto") {
+        localStorage.removeItem("confronto_possibilita_richiesto");
+      } else {
+        localStorage.setItem("confronto_possibilita_richiesto", "si");
+      }
     } catch {
-      // Non blocca l'apertura di WhatsApp se localStorage non è disponibile.
+      // Lo stato visivo resta aggiornato anche se localStorage non è disponibile.
     }
+  };
+
+  const apriWhatsApp = () => {
+    salvaStato("whatsapp_aperto");
 
     const messaggio =
       "Ciao, vorrei confrontare le mie possibilità su Laurea Smart. Vorrei capire quali percorsi e quali atenei potrebbero essere più adatti alla mia situazione.";
@@ -42,9 +83,43 @@ export default function ConfrontoPossibilitaCard() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const statoLabel = confrontoRichiesto
-    ? "Stato: confronto richiesto"
-    : "Stato: confronto non ancora richiesto";
+  const statoUI = {
+    non_richiesto: {
+      label: "Stato: confronto non ancora richiesto",
+      title: "Avvia il confronto personalizzato",
+      text: "Apri WhatsApp e invia la richiesta: il messaggio è già pronto.",
+      button: "Voglio confrontare le mie possibilità",
+      tone:
+        "bg-white/10 text-slate-100 ring-white/15 border-white/15",
+    },
+    whatsapp_aperto: {
+      label: "Stato: richiesta avviata",
+      title: "Hai aperto il contatto con Laurea Smart",
+      text: "Se non hai ancora inviato il messaggio su WhatsApp, puoi riprenderlo da qui.",
+      button: "Riprendi il contatto",
+      tone:
+        "bg-amber-300/16 text-amber-100 ring-amber-200/30 border-amber-200/20",
+    },
+    messaggio_inviato: {
+      label: "Stato: messaggio inviato",
+      title: "Messaggio inviato",
+      text: "Perfetto. Ora attendi il riscontro dell’orientatore. Puoi comunque riaprire WhatsApp quando vuoi.",
+      button: "Apri di nuovo WhatsApp",
+      tone:
+        "bg-emerald-400/16 text-emerald-100 ring-emerald-300/30 border-emerald-300/20",
+    },
+    da_completare: {
+      label: "Stato: contatto da completare",
+      title: "Contatto da completare",
+      text: "Hai già aperto WhatsApp, ma potresti non aver inviato il messaggio. Puoi completare la richiesta quando vuoi.",
+      button: "Completa il contatto",
+      tone:
+        "bg-orange-300/16 text-orange-100 ring-orange-200/30 border-orange-200/20",
+    },
+  }[statoConfronto];
+
+  const mostraFeedback =
+    statoConfronto === "whatsapp_aperto" || statoConfronto === "da_completare";
 
   return (
     <section className="relative mb-5 overflow-hidden rounded-[34px] bg-gradient-to-br from-sky-300/55 via-blue-500/35 to-indigo-500/35 p-[1px] shadow-[0_30px_90px_rgba(14,165,233,0.25)]">
@@ -73,13 +148,9 @@ export default function ConfrontoPossibilitaCard() {
               </span>
 
               <span
-                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold ring-1 ${
-                  confrontoRichiesto
-                    ? "bg-emerald-400/16 text-emerald-100 ring-emerald-300/30"
-                    : "bg-white/10 text-slate-100 ring-white/15"
-                }`}
+                className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-bold ring-1 ${statoUI.tone}`}
               >
-                {statoLabel}
+                {statoUI.label}
               </span>
             </div>
 
@@ -159,14 +230,20 @@ export default function ConfrontoPossibilitaCard() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cyan-200/15 text-cyan-100 ring-1 ring-cyan-100/20">
-                <Zap className="h-5 w-5" />
+                {statoConfronto === "messaggio_inviato" ? (
+                  <MessageCircle className="h-5 w-5" />
+                ) : statoConfronto === "da_completare" ? (
+                  <RotateCcw className="h-5 w-5" />
+                ) : (
+                  <Zap className="h-5 w-5" />
+                )}
               </div>
               <div>
                 <p className="text-sm font-black text-white">
-                  Avvia il confronto personalizzato
+                  {statoUI.title}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-200/78">
-                  Apri WhatsApp e invia la richiesta: il messaggio è già pronto.
+                  {statoUI.text}
                 </p>
               </div>
             </div>
@@ -176,10 +253,38 @@ export default function ConfrontoPossibilitaCard() {
               onClick={apriWhatsApp}
               className="group inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-300 via-cyan-200 to-blue-200 px-5 py-3 text-center text-[15px] font-black leading-tight text-slate-950 shadow-[0_18px_42px_rgba(56,189,248,0.28)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(56,189,248,0.42)] active:translate-y-0 lg:w-auto"
             >
-              <span>Voglio confrontare le mie possibilità</span>
+              <span>{statoUI.button}</span>
               <ArrowRight className="h-5 w-5 shrink-0 transition duration-300 group-hover:translate-x-1" />
             </button>
           </div>
+
+          {mostraFeedback && (
+            <div className="mt-4 rounded-2xl border border-white/10 bg-[#061827]/55 p-4">
+              <p className="mb-3 text-sm font-black text-white">
+                Com’è andato il contatto?
+              </p>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => salvaStato("messaggio_inviato")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-300/25 bg-emerald-300/12 px-4 py-3 text-sm font-extrabold text-emerald-100 transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300/18"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Ho inviato il messaggio
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => salvaStato("da_completare")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-300/25 bg-orange-300/12 px-4 py-3 text-sm font-extrabold text-orange-100 transition duration-300 hover:-translate-y-0.5 hover:bg-orange-300/18"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Non l’ho ancora inviato
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
