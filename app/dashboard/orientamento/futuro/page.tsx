@@ -48,13 +48,13 @@ const STORAGE_KEY = "test_futuro_somiglia_risultato";
 const EMAIL_ENDPOINT = "https://laureasmart.it/api/invia-test-futuro.php";
 
 const pageBackground =
-  "radial-gradient(circle at top left, rgba(31,111,178,0.42) 0%, rgba(11,23,40,0.98) 38%, #07111F 100%)";
+  "radial-gradient(circle at top left, rgba(96,194,255,0.24) 0%, transparent 30%), radial-gradient(circle at 88% 12%, rgba(31,111,178,0.38) 0%, transparent 28%), radial-gradient(circle at 18% 82%, rgba(56,189,248,0.14) 0%, transparent 34%), linear-gradient(160deg, #07111F 0%, #0B1728 42%, #102B47 100%)";
 const cardBackground =
-  "linear-gradient(145deg, rgba(255,255,255,0.095), rgba(18,38,64,0.92))";
+  "linear-gradient(145deg, rgba(255,255,255,0.11), rgba(31,111,178,0.16) 42%, rgba(11,23,40,0.92))";
 const primaryGradient =
-  "linear-gradient(135deg, #1F6FB2 0%, #2F8ED8 52%, #0B1728 100%)";
+  "linear-gradient(135deg, #1F6FB2 0%, #2F8ED8 45%, #60C2FF 100%)";
 const softBlueGradient =
-  "linear-gradient(135deg, rgba(31,111,178,0.26), rgba(17,32,51,0.96))";
+  "linear-gradient(145deg, rgba(31,111,178,0.34), rgba(11,23,40,0.92) 62%, rgba(96,194,255,0.15))";
 
 const profileResults: Record<ProfileKey, ProfileResult> = {
   STRATEGICO_PROFESSIONALE: {
@@ -649,7 +649,130 @@ export default function TestFuturoPage() {
         background: pageBackground,
       }}
     >
+
+      <style jsx global>{`
+        .futuro-back-button,
+        .futuro-hero,
+        .futuro-start-button,
+        .futuro-question-card,
+        .futuro-option,
+        .futuro-ghost-button,
+        .futuro-email-card,
+        .futuro-input,
+        .futuro-primary-button,
+        .futuro-result-hero,
+        .futuro-result-card,
+        .futuro-pillline,
+        .futuro-area,
+        .futuro-reset,
+        .futuro-chip {
+          transition:
+            transform 180ms ease,
+            border-color 180ms ease,
+            background 180ms ease,
+            box-shadow 180ms ease,
+            opacity 180ms ease,
+            filter 180ms ease;
+        }
+
+        .futuro-hero,
+        .futuro-email-card,
+        .futuro-result-hero,
+        .futuro-question-card,
+        .futuro-result-card {
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+        }
+
+        .futuro-hero::after,
+        .futuro-result-hero::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.18) 38%, transparent 58%),
+            radial-gradient(circle at 18% 15%, rgba(255,255,255,0.20), transparent 32%);
+          opacity: 0.45;
+        }
+
+        .futuro-input::placeholder {
+          color: rgba(224,242,254,0.46);
+        }
+
+        .futuro-input:focus {
+          border-color: rgba(96,194,255,0.78) !important;
+          background: rgba(255,255,255,0.12) !important;
+          box-shadow: 0 0 0 4px rgba(96,194,255,0.14), 0 16px 32px rgba(0,0,0,0.20);
+        }
+
+        @media (hover: hover) {
+          .futuro-back-button:hover,
+          .futuro-ghost-button:hover,
+          .futuro-reset:hover {
+            transform: translateY(-2px);
+            border-color: rgba(96,194,255,0.34) !important;
+            background: rgba(96,194,255,0.12) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 14px 32px rgba(0,0,0,0.22);
+          }
+
+          .futuro-hero:hover,
+          .futuro-email-card:hover,
+          .futuro-result-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 28px 72px rgba(0,0,0,0.42), 0 0 0 1px rgba(96,194,255,0.18) inset !important;
+          }
+
+          .futuro-question-card:hover,
+          .futuro-result-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(96,194,255,0.24) !important;
+            box-shadow: 0 22px 56px rgba(0,0,0,0.34), 0 0 0 1px rgba(96,194,255,0.08) inset !important;
+          }
+
+          .futuro-option:hover {
+            transform: translateY(-3px);
+            border-color: rgba(96,194,255,0.52) !important;
+            background: linear-gradient(135deg, rgba(31,111,178,0.36), rgba(96,194,255,0.14)) !important;
+            box-shadow: 0 18px 38px rgba(31,111,178,0.24), 0 0 0 1px rgba(255,255,255,0.08) inset !important;
+          }
+
+          .futuro-start-button:hover,
+          .futuro-primary-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 46px rgba(31,111,178,0.36), 0 0 0 1px rgba(255,255,255,0.14) inset !important;
+            filter: saturate(1.08);
+          }
+
+          .futuro-chip:hover,
+          .futuro-pillline:hover,
+          .futuro-area:hover {
+            transform: translateY(-2px);
+            border-color: rgba(96,194,255,0.34) !important;
+            background: linear-gradient(135deg, rgba(96,194,255,0.18), rgba(255,255,255,0.08)) !important;
+          }
+        }
+
+        .futuro-option:active,
+        .futuro-start-button:active,
+        .futuro-primary-button:active,
+        .futuro-reset:active {
+          transform: scale(0.985);
+        }
+
+        @keyframes futuroPulse {
+          0%, 100% { opacity: 0.55; transform: scale(1); }
+          50% { opacity: 0.92; transform: scale(1.05); }
+        }
+
+        .futuro-orb {
+          animation: futuroPulse 5.2s ease-in-out infinite;
+        }
+      `}</style>
+
       <button
+        className="futuro-back-button"
         type="button"
         onClick={() => router.push("/dashboard")}
         style={{
@@ -673,6 +796,7 @@ export default function TestFuturoPage() {
 
       {!started && (
         <section
+          className="futuro-hero"
           style={{
             borderRadius: 32,
             padding: 24,
@@ -684,6 +808,7 @@ export default function TestFuturoPage() {
           }}
         >
           <div
+            className="futuro-orb"
             style={{
               position: "absolute",
               right: -48,
@@ -772,6 +897,7 @@ export default function TestFuturoPage() {
               (item) => (
                 <span
                   key={item}
+                  className="futuro-chip"
                   style={{
                     borderRadius: 999,
                     padding: "8px 11px",
@@ -788,6 +914,7 @@ export default function TestFuturoPage() {
           </div>
 
           <button
+            className="futuro-start-button"
             type="button"
             onClick={() => setStarted(true)}
             style={{
@@ -797,8 +924,8 @@ export default function TestFuturoPage() {
               minHeight: 58,
               borderRadius: 22,
               border: "none",
-              background: "#FFFFFF",
-              color: "#1F2937",
+              background: "linear-gradient(135deg, #FFFFFF, #E0F2FE)",
+              color: "#0B1728",
               fontSize: 16,
               fontWeight: 950,
               marginTop: 24,
@@ -843,7 +970,7 @@ export default function TestFuturoPage() {
                   width: `${progress}%`,
                   height: "100%",
                   borderRadius: 999,
-                  background: "linear-gradient(90deg, #1F6FB2, #60C2FF)",
+                  background: "linear-gradient(90deg, #1F6FB2 0%, #2F8ED8 45%, #60C2FF 100%)",
                   transition: "width .25s ease",
                 }}
               />
@@ -851,6 +978,7 @@ export default function TestFuturoPage() {
           </div>
 
           <section
+            className="futuro-question-card"
             style={{
               borderRadius: 30,
               padding: 20,
@@ -888,13 +1016,14 @@ export default function TestFuturoPage() {
               {currentQuestion.options.map((option, optionIndex) => (
                 <button
                   key={option.label}
+                  className="futuro-option"
                   type="button"
                   onClick={() => handleAnswer(optionIndex)}
                   style={{
                     width: "100%",
                     borderRadius: 22,
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    background: "rgba(255,255,255,0.075)",
+                    border: "1px solid rgba(148,210,255,0.16)",
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.09), rgba(31,111,178,0.11))",
                     color: "#FFFFFF",
                     padding: "16px 15px",
                     textAlign: "left",
@@ -913,6 +1042,7 @@ export default function TestFuturoPage() {
 
             {currentIndex > 0 && (
               <button
+                className="futuro-ghost-button"
                 type="button"
                 onClick={() => setCurrentIndex((value) => Math.max(value - 1, 0))}
                 style={{
@@ -936,6 +1066,7 @@ export default function TestFuturoPage() {
 
       {started && completed && !emailConfirmed && (
         <section
+          className="futuro-email-card"
           style={{
             borderRadius: 30,
             padding: 22,
@@ -989,8 +1120,8 @@ export default function TestFuturoPage() {
               marginTop: 20,
               borderRadius: 24,
               padding: 16,
-              background: "rgba(255,255,255,0.07)",
-              border: "1px solid rgba(255,255,255,0.10)",
+              background: "linear-gradient(145deg, rgba(255,255,255,0.09), rgba(31,111,178,0.12))",
+              border: "1px solid rgba(148,210,255,0.16)",
             }}
           >
             <label
@@ -1005,6 +1136,7 @@ export default function TestFuturoPage() {
               La tua email
             </label>
             <input
+              className="futuro-input"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="nome@email.it"
@@ -1014,7 +1146,7 @@ export default function TestFuturoPage() {
                 minHeight: 56,
                 borderRadius: 18,
                 border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.10)",
                 color: "#FFFFFF",
                 fontSize: 16,
                 fontWeight: 850,
@@ -1061,6 +1193,7 @@ export default function TestFuturoPage() {
             )}
 
             <button
+              className="futuro-primary-button"
               type="button"
               onClick={handleEmailSubmit}
               disabled={emailSending}
@@ -1069,7 +1202,7 @@ export default function TestFuturoPage() {
                 minHeight: 56,
                 borderRadius: 20,
                 border: "none",
-                background: "linear-gradient(135deg, #1F6FB2, #60C2FF)",
+                background: "linear-gradient(135deg, #1F6FB2 0%, #2F8ED8 48%, #60C2FF 100%)",
                 color: "#FFFFFF",
                 fontSize: 15,
                 fontWeight: 950,
@@ -1088,6 +1221,7 @@ export default function TestFuturoPage() {
       {started && completed && emailConfirmed && (
         <section>
           <section
+            className="futuro-result-hero"
             style={{
               borderRadius: 32,
               padding: 22,
@@ -1161,7 +1295,7 @@ export default function TestFuturoPage() {
           <ResultCard title="Punti di forza">
             <div style={{ display: "grid", gap: 10 }}>
               {primaryResult.puntiForza.map((item) => (
-                <div key={item} style={pillLineStyle}>
+                <div key={item} className="futuro-pillline" style={pillLineStyle}>
                   <CheckCircle2 size={17} color="#A7F3D0" />
                   <span>{item}</span>
                 </div>
@@ -1202,7 +1336,7 @@ export default function TestFuturoPage() {
                           width: `${Math.round((value / maxScore) * 100)}%`,
                           height: "100%",
                           borderRadius: 999,
-                          background: "linear-gradient(90deg, #1F6FB2, #60C2FF)",
+                          background: "linear-gradient(90deg, #1F6FB2 0%, #2F8ED8 45%, #60C2FF 100%)",
                         }}
                       />
                     </div>
@@ -1214,7 +1348,7 @@ export default function TestFuturoPage() {
           <ResultCard title="Aree che potrebbero valorizzarti">
             <div style={{ display: "grid", gap: 10 }}>
               {primaryResult.aree.map((area) => (
-                <div key={area} style={areaStyle}>
+                <div key={area} className="futuro-area" style={areaStyle}>
                   {area}
                 </div>
               ))}
@@ -1226,6 +1360,7 @@ export default function TestFuturoPage() {
           </ResultCard>
 
           <button
+            className="futuro-reset"
             type="button"
             onClick={resetTest}
             style={{
@@ -1268,8 +1403,8 @@ const pillLineStyle: React.CSSProperties = {
   gap: 9,
   borderRadius: 18,
   padding: 12,
-  background: "rgba(255,255,255,0.07)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "linear-gradient(135deg, rgba(255,255,255,0.085), rgba(31,111,178,0.13))",
+  border: "1px solid rgba(148,210,255,0.14)",
   color: "rgba(255,255,255,0.82)",
   fontSize: 13.5,
   lineHeight: 1.45,
@@ -1279,8 +1414,8 @@ const pillLineStyle: React.CSSProperties = {
 const areaStyle: React.CSSProperties = {
   borderRadius: 18,
   padding: "12px 13px",
-  background: "rgba(58,160,255,0.12)",
-  border: "1px solid rgba(120,194,255,0.16)",
+  background: "linear-gradient(135deg, rgba(58,160,255,0.17), rgba(255,255,255,0.07))",
+  border: "1px solid rgba(120,194,255,0.22)",
   color: "#E0F2FE",
   fontSize: 13.5,
   fontWeight: 900,
@@ -1295,6 +1430,7 @@ function ResultCard({
 }) {
   return (
     <section
+      className="futuro-result-card"
       style={{
         borderRadius: 26,
         padding: 18,
