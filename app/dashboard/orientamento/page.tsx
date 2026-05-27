@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/ui/BottomNav";
+import ConfrontoPossibilitaCard from "@/components/ConfrontoPossibilitaCard";
 import {
   ArrowRight,
   BookOpen,
@@ -585,6 +586,8 @@ export default function OrientamentoPage() {
           />
         </div>
       </section>
+
+      <ConfrontoPossibilitaCard />
 
       <FeatureCard
         icon={<Sparkles size={27} />}

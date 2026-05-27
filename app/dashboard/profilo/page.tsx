@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import ConfrontoPossibilitaCard from "@/components/ConfrontoPossibilitaCard";
 import {
   ArrowRight,
   BookOpen,
@@ -710,6 +711,8 @@ export default function ProfiloPage() {
           description="Preferiti"
         />
       </section>
+
+      <ConfrontoPossibilitaCard />
 
       {showProfiloUniversitario && (
         <>
