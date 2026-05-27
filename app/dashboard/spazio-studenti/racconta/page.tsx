@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import BottomNav from "@/components/ui/BottomNav";
 import {
   ArrowLeft,
   Camera,
@@ -104,7 +105,7 @@ export default function RaccontaCasoSpazioStudentiPage() {
 
   if (successo) {
     return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#1F6FB2_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 text-white">
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#1F6FB2_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 pb-28 text-white">
         <div className="mx-auto max-w-3xl">
           <section className="overflow-hidden rounded-[34px] border border-emerald-300/25 bg-gradient-to-br from-emerald-300/16 via-sky-300/12 to-white/6 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.35)]">
             <div className="rounded-[28px] bg-[#061827]/70 p-6 backdrop-blur">
@@ -136,12 +137,14 @@ export default function RaccontaCasoSpazioStudentiPage() {
             </div>
           </section>
         </div>
+
+        <BottomNav />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#1F6FB2_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 text-white">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#1F6FB2_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 pb-28 text-white">
       <div className="mx-auto max-w-3xl">
         <button
           type="button"
@@ -356,6 +359,8 @@ export default function RaccontaCasoSpazioStudentiPage() {
           </section>
         </form>
       </div>
+
+      <BottomNav />
     </main>
   );
 }
