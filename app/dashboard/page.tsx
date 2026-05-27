@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import PrimaDiScegliereCard from "@/components/PrimaDiScegliereCard";
 import StudentiComeTeCard from "@/components/StudentiComeTeCard";
 import { useRouter } from "next/navigation";
+import SpazioStudentiCard from "@/components/SpazioStudentiCard";
 import ConfrontoPossibilitaCard from "@/components/ConfrontoPossibilitaCard";
 import CompatibilitaPercorsoCard from "@/components/CompatibilitaPercorsoCard";
 import BottomNav from "@/components/ui/BottomNav";
@@ -639,7 +640,7 @@ export default function Dashboard() {
       </section>
 
       {!isGiaIscritto && <CompatibilitaPercorsoCard />}
-
+      <SpazioStudentiCard />
       <PrimaDiScegliereCard />
 
       <FeatureCard
