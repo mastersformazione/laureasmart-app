@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import StudentiComeTeCard from "@/components/StudentiComeTeCard";
 import { useRouter } from "next/navigation";
+import ConfrontoPossibilitaCard from "@/components/ConfrontoPossibilitaCard";
 import CompatibilitaPercorsoCard from "@/components/CompatibilitaPercorsoCard";
 import BottomNav from "@/components/ui/BottomNav";
 import {
@@ -397,6 +398,10 @@ export default function Dashboard() {
           )}
         </div>
       </section>
+
+      <div style={{ marginBottom: 20 }}>
+        <ConfrontoPossibilitaCard />
+      </div>
 
       <section
         style={{
