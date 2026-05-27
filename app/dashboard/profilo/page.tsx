@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import ValutaGiaFattoCard from "@/components/ValutaGiaFattoCard";
 import ConfrontoPossibilitaCard from "@/components/ConfrontoPossibilitaCard";
 import {
   ArrowRight,
@@ -711,6 +712,8 @@ export default function ProfiloPage() {
           description="Preferiti"
         />
       </section>
+
+      <ValutaGiaFattoCard />
 
       <ConfrontoPossibilitaCard />
 

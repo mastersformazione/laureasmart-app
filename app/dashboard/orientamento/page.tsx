@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import ValutaGiaFattoCard from "@/components/ValutaGiaFattoCard";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/ui/BottomNav";
@@ -607,16 +608,8 @@ export default function OrientamentoPage() {
         onClick={() => router.push("/dashboard/percorsi")}
       />
 
-      <FeatureCard
-        icon={<Route size={27} />}
-        title="Percorso abbreviato"
-        description="Scopri se puoi accedere a un percorso più rapido, sostenibile o personalizzato in base al tuo profilo."
-        tone="teal"
-        badge="Consigliato"
-        onClick={() =>
-          router.push("/dashboard/orientamento/percorso-agevolato")
-        }
-      />
+      <ValutaGiaFattoCard />
+
       <FeatureCard
         icon={<FileText size={27} />}
         title="Piano Universitario Personalizzato"
