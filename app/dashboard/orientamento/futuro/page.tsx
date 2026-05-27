@@ -45,6 +45,16 @@ type ProfileResult = {
 };
 
 const STORAGE_KEY = "test_futuro_somiglia_risultato";
+const EMAIL_ENDPOINT = "https://laureasmart.it/api/invia-test-futuro.php";
+
+const pageBackground =
+  "radial-gradient(circle at top left, rgba(31,111,178,0.42) 0%, rgba(11,23,40,0.98) 38%, #07111F 100%)";
+const cardBackground =
+  "linear-gradient(145deg, rgba(255,255,255,0.095), rgba(18,38,64,0.92))";
+const primaryGradient =
+  "linear-gradient(135deg, #1F6FB2 0%, #2F8ED8 52%, #0B1728 100%)";
+const softBlueGradient =
+  "linear-gradient(135deg, rgba(31,111,178,0.26), rgba(17,32,51,0.96))";
 
 const profileResults: Record<ProfileKey, ProfileResult> = {
   STRATEGICO_PROFESSIONALE: {
@@ -523,6 +533,7 @@ export default function TestFuturoPage() {
   const [privacy, setPrivacy] = useState(false);
   const [emailConfirmed, setEmailConfirmed] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
 
   const completed = Object.keys(answers).length === questions.length;
   const currentQuestion = questions[currentIndex];
@@ -549,7 +560,7 @@ export default function TestFuturoPage() {
     }
   };
 
-  const handleEmailSubmit = () => {
+  const handleEmailSubmit = async () => {
     setEmailError("");
 
     if (!isValidEmail(email)) {
@@ -569,12 +580,47 @@ export default function TestFuturoPage() {
       scores: result.scores,
       answers,
       completedAt: new Date().toISOString(),
+      result: {
+        primaryName: primaryResult.nome,
+        primaryPhrase: primaryResult.frase,
+        primaryDescription: primaryResult.descrizione,
+        secondaryName: secondaryResult.nome,
+        strengths: primaryResult.puntiForza,
+        attention: primaryResult.attenzione,
+        areas: primaryResult.aree,
+      },
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    localStorage.setItem("test_futuro_somiglia_completato", "si");
-    localStorage.setItem("test_futuro_somiglia_email", email.trim());
-    setEmailConfirmed(true);
+    try {
+      setEmailSending(true);
+
+      const response = await fetch(EMAIL_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.message || "Invio email non riuscito.");
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      localStorage.setItem("test_futuro_somiglia_completato", "si");
+      localStorage.setItem("test_futuro_somiglia_email", email.trim());
+      setEmailConfirmed(true);
+    } catch (error) {
+      setEmailError(
+        error instanceof Error
+          ? error.message
+          : "Non siamo riusciti a inviare la copia del profilo. Riprova tra poco."
+      );
+    } finally {
+      setEmailSending(false);
+    }
   };
 
   const resetTest = () => {
@@ -585,6 +631,7 @@ export default function TestFuturoPage() {
     setPrivacy(false);
     setEmailConfirmed(false);
     setEmailError("");
+    setEmailSending(false);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem("test_futuro_somiglia_completato");
     localStorage.removeItem("test_futuro_somiglia_email");
@@ -599,8 +646,7 @@ export default function TestFuturoPage() {
         maxWidth: 430,
         margin: "0 auto",
         color: "#FFFFFF",
-        background:
-          "radial-gradient(circle at top, #241244 0%, #0B1728 38%, #07111F 100%)",
+        background: pageBackground,
       }}
     >
       <button
@@ -630,8 +676,7 @@ export default function TestFuturoPage() {
           style={{
             borderRadius: 32,
             padding: 24,
-            background:
-              "linear-gradient(135deg, rgba(124,58,237,0.96) 0%, rgba(31,111,178,0.94) 58%, rgba(15,23,42,0.96) 100%)",
+            background: primaryGradient,
             boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
             border: "1px solid rgba(255,255,255,0.12)",
             overflow: "hidden",
@@ -646,7 +691,7 @@ export default function TestFuturoPage() {
               width: 170,
               height: 170,
               borderRadius: 999,
-              background: "rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.10)",
             }}
           />
 
@@ -676,7 +721,7 @@ export default function TestFuturoPage() {
               padding: "7px 12px",
               borderRadius: 999,
               background: "rgba(255,255,255,0.14)",
-              color: "#DBEAFE",
+              color: "#E0F2FE",
               fontSize: 12,
               fontWeight: 900,
               marginBottom: 14,
@@ -798,7 +843,7 @@ export default function TestFuturoPage() {
                   width: `${progress}%`,
                   height: "100%",
                   borderRadius: 999,
-                  background: "linear-gradient(90deg, #A78BFA, #3AA0FF)",
+                  background: "linear-gradient(90deg, #1F6FB2, #60C2FF)",
                   transition: "width .25s ease",
                 }}
               />
@@ -809,8 +854,7 @@ export default function TestFuturoPage() {
             style={{
               borderRadius: 30,
               padding: 20,
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.10), rgba(17,32,51,0.92))",
+              background: cardBackground,
               border: "1px solid rgba(255,255,255,0.10)",
               boxShadow: "0 20px 52px rgba(0,0,0,0.30)",
             }}
@@ -895,9 +939,8 @@ export default function TestFuturoPage() {
           style={{
             borderRadius: 30,
             padding: 22,
-            background:
-              "linear-gradient(135deg, rgba(124,58,237,0.26), rgba(17,32,51,0.94))",
-            border: "1px solid rgba(167,139,250,0.28)",
+            background: softBlueGradient,
+            border: "1px solid rgba(96,194,255,0.24)",
             boxShadow: "0 22px 54px rgba(0,0,0,0.34)",
           }}
         >
@@ -906,12 +949,12 @@ export default function TestFuturoPage() {
               width: 58,
               height: 58,
               borderRadius: 22,
-              background: "rgba(167,139,250,0.16)",
+              background: "rgba(31,111,178,0.22)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: 16,
-              color: "#C4B5FD",
+              color: "#BAE6FD",
             }}
           >
             <Mail size={28} />
@@ -938,7 +981,7 @@ export default function TestFuturoPage() {
             }}
           >
             Abbiamo elaborato le tue risposte. Inserisci la tua email per vedere
-            il risultato completo e conservare una copia del profilo.
+            il risultato completo e ricevere una copia del profilo da info@laureasmart.it.
           </p>
 
           <div
@@ -955,7 +998,7 @@ export default function TestFuturoPage() {
                 display: "block",
                 fontSize: 13,
                 fontWeight: 900,
-                color: "#DBEAFE",
+                color: "#E0F2FE",
                 marginBottom: 8,
               }}
             >
@@ -1020,21 +1063,23 @@ export default function TestFuturoPage() {
             <button
               type="button"
               onClick={handleEmailSubmit}
+              disabled={emailSending}
               style={{
                 width: "100%",
                 minHeight: 56,
                 borderRadius: 20,
                 border: "none",
-                background: "linear-gradient(135deg, #8B5CF6, #3AA0FF)",
+                background: "linear-gradient(135deg, #1F6FB2, #60C2FF)",
                 color: "#FFFFFF",
                 fontSize: 15,
                 fontWeight: 950,
                 marginTop: 16,
-                cursor: "pointer",
-                boxShadow: "0 16px 34px rgba(58,160,255,0.22)",
+                cursor: emailSending ? "not-allowed" : "pointer",
+                opacity: emailSending ? 0.78 : 1,
+                boxShadow: "0 16px 34px rgba(31,111,178,0.28)",
               }}
             >
-              Mostra il mio profilo
+              {emailSending ? "Invio della copia in corso..." : "Mostra il mio profilo"}
             </button>
           </div>
         </section>
@@ -1046,8 +1091,7 @@ export default function TestFuturoPage() {
             style={{
               borderRadius: 32,
               padding: 22,
-              background:
-                "linear-gradient(135deg, rgba(124,58,237,0.94) 0%, rgba(31,111,178,0.94) 100%)",
+              background: primaryGradient,
               border: "1px solid rgba(255,255,255,0.12)",
               boxShadow: "0 24px 60px rgba(0,0,0,0.36)",
               marginBottom: 18,
@@ -1158,7 +1202,7 @@ export default function TestFuturoPage() {
                           width: `${Math.round((value / maxScore) * 100)}%`,
                           height: "100%",
                           borderRadius: 999,
-                          background: "linear-gradient(90deg, #A78BFA, #3AA0FF)",
+                          background: "linear-gradient(90deg, #1F6FB2, #60C2FF)",
                         }}
                       />
                     </div>
@@ -1237,7 +1281,7 @@ const areaStyle: React.CSSProperties = {
   padding: "12px 13px",
   background: "rgba(58,160,255,0.12)",
   border: "1px solid rgba(120,194,255,0.16)",
-  color: "#DBEAFE",
+  color: "#E0F2FE",
   fontSize: 13.5,
   fontWeight: 900,
 };
@@ -1254,8 +1298,7 @@ function ResultCard({
       style={{
         borderRadius: 26,
         padding: 18,
-        background:
-          "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(17,32,51,0.92))",
+        background: cardBackground,
         border: "1px solid rgba(255,255,255,0.09)",
         boxShadow: "0 16px 42px rgba(0,0,0,0.25)",
         marginBottom: 14,
