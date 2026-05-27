@@ -605,23 +605,22 @@ export default function OrientamentoPage() {
       />
 
       <FeatureCard
-        icon={<FileText size={27} />}
-        title="Piano Universitario Personalizzato"
-        description="Trasforma test, profilo e percorso in una prima analisi orientativa da inviare all’orientatore."
-        tone="cyan"
-        badge="Nuovo"
-        onClick={() => router.push("/dashboard/piano-personale")}
-      />
-
-      <FeatureCard
         icon={<Route size={27} />}
-        title="Percorso agevolato"
+        title="Percorso abbreviato"
         description="Scopri se puoi accedere a un percorso più rapido, sostenibile o personalizzato in base al tuo profilo."
         tone="teal"
         badge="Consigliato"
         onClick={() =>
           router.push("/dashboard/orientamento/percorso-agevolato")
         }
+      />
+      <FeatureCard
+        icon={<FileText size={27} />}
+        title="Piano Universitario Personalizzato"
+        description="Trasforma test, profilo e percorso in una prima analisi orientativa da inviare all’orientatore."
+        tone="cyan"
+        badge="Nuovo"
+        onClick={() => router.push("/dashboard/piano-personale")}
       />
 
       <FeatureCard
