@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -12,51 +12,11 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-type CategoriaDocumento =
-  | "esami_cfu"
-  | "titoli"
-  | "certificazioni"
-  | "cv_esperienze"
-  | "non_so";
-
-const categorie: Array<{
-  value: CategoriaDocumento;
-  title: string;
-  description: string;
-}> = [
-  {
-    value: "esami_cfu",
-    title: "Esami e CFU",
-    description: "Libretto, certificato esami, piano di studi o screenshot.",
-  },
-  {
-    value: "titoli",
-    title: "Titoli di studio",
-    description: "Diploma, laurea, master, titoli AFAM o altri percorsi.",
-  },
-  {
-    value: "certificazioni",
-    title: "Certificazioni",
-    description: "Certificazioni informatiche, linguistiche o professionali.",
-  },
-  {
-    value: "cv_esperienze",
-    title: "CV ed esperienze",
-    description: "Curriculum, esperienze lavorative o formative coerenti.",
-  },
-  {
-    value: "non_so",
-    title: "Non sono sicuro",
-    description: "Carica ciò che hai: ti aiutiamo a capire se può servire.",
-  },
-];
-
 const endpoint = "https://laureasmart.it/api/invia-documenti-valutazione.php";
 
 export default function ValutaQuelloCheHaiGiaFattoPage() {
   const router = useRouter();
 
-  const [categoria, setCategoria] = useState<CategoriaDocumento>("esami_cfu");
   const [nome, setNome] = useState("");
   const [cognome, setCognome] = useState("");
   const [email, setEmail] = useState("");
@@ -67,11 +27,6 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
   const [loading, setLoading] = useState(false);
   const [errore, setErrore] = useState("");
   const [successo, setSuccesso] = useState(false);
-
-  const categoriaScelta = useMemo(
-    () => categorie.find((item) => item.value === categoria),
-    [categoria]
-  );
 
   const numeroFile = files?.length ?? 0;
 
@@ -89,8 +44,10 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
       return;
     }
 
-    if (!files || files.length === 0) {
-      setErrore("Carica almeno una foto, uno screenshot o un documento.");
+    if ((!files || files.length === 0) && !nota.trim()) {
+      setErrore(
+        "Carica almeno una foto o un documento, oppure scrivi nelle note cosa vorresti farti riconoscere."
+      );
       return;
     }
 
@@ -99,13 +56,18 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
     formData.append("cognome", cognome.trim());
     formData.append("email", email.trim());
     formData.append("telefono", telefono.trim());
-    formData.append("categoria", categoria);
-    formData.append("categoria_label", categoriaScelta?.title ?? categoria);
+    formData.append("categoria", "valutazione_libera");
+    formData.append(
+      "categoria_label",
+      "Valutazione libera documenti e percorso pregresso"
+    );
     formData.append("nota", nota.trim());
 
-    Array.from(files).forEach((file) => {
-      formData.append("documenti[]", file);
-    });
+    if (files && files.length > 0) {
+      Array.from(files).forEach((file) => {
+        formData.append("documenti[]", file);
+      });
+    }
 
     setLoading(true);
 
@@ -243,9 +205,10 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
             </h1>
 
             <p className="mt-4 text-[16px] leading-7 text-slate-100/88">
-              Carica foto, screenshot o documenti: Laurea Smart ti aiuta a
-              capire se esami, titoli, certificazioni o esperienze possono
-              essere utili per confrontare più possibilità di riconoscimento.
+              Carica quello che pensi possa avere valore: foto, screenshot,
+              documenti, certificazioni, CV o anche semplici informazioni sul
+              tuo percorso. Laurea Smart ti aiuta a capire se ci sono elementi
+              utili da far valutare agli atenei.
             </p>
 
             <div className="mt-5 rounded-3xl border border-cyan-200/18 bg-cyan-200/10 p-4">
@@ -268,48 +231,40 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
                 <FileUp className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-xl font-black">Cosa vuoi far valutare?</h2>
-                <p className="text-sm text-slate-200/78">
-                  Se non sei sicuro, scegli “Non sono sicuro”.
+                <h2 className="text-xl font-black">
+                  Carica quello che pensi possa avere valore
+                </h2>
+                <p className="text-sm leading-6 text-slate-200/78">
+                  Non devi sapere già cosa può essere riconosciuto. Carica ciò
+                  che hai oppure spiegalo nelle note: penseremo noi a fare una
+                  prima lettura e a confrontare il percorso con almeno due
+                  atenei.
                 </p>
               </div>
             </div>
 
-            <div className="grid gap-3">
-              {categorie.map((item) => {
-                const active = categoria === item.value;
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-sky-200/18 bg-[#061827]/62 p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-black text-white">
+                  <CheckCircle2 className="h-4 w-4 text-sky-200" />
+                  Puoi caricare
+                </div>
+                <p className="text-sm leading-6 text-slate-200/78">
+                  esami, libretto, screenshot, certificazioni, titoli, CV,
+                  attestati o altri documenti che ritieni utili.
+                </p>
+              </div>
 
-                return (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => setCategoria(item.value)}
-                    className={`rounded-2xl border p-4 text-left transition duration-300 hover:-translate-y-0.5 ${
-                      active
-                        ? "border-sky-200/45 bg-sky-300/15 shadow-[0_16px_38px_rgba(56,189,248,0.16)]"
-                        : "border-white/10 bg-[#061827]/55 hover:border-sky-200/25 hover:bg-[#0A2237]"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                          active
-                            ? "bg-sky-200 text-slate-950"
-                            : "bg-white/10 text-slate-200"
-                        }`}
-                      >
-                        <CheckCircle2 className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="font-black text-white">{item.title}</p>
-                        <p className="mt-1 text-sm leading-5 text-slate-200/74">
-                          {item.description}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+              <div className="rounded-2xl border border-cyan-200/18 bg-cyan-200/10 p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-black text-white">
+                  <CheckCircle2 className="h-4 w-4 text-cyan-100" />
+                  Puoi anche solo scrivere
+                </div>
+                <p className="text-sm leading-6 text-slate-200/78">
+                  cosa vorresti farti riconoscere, anche se non hai ancora il
+                  documento pronto o non sai quale file allegare.
+                </p>
+              </div>
             </div>
           </section>
 
@@ -380,9 +335,10 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
           <section className="rounded-[30px] border border-white/10 bg-white/[0.07] p-5 backdrop-blur">
             <h2 className="text-xl font-black">Carica foto o documenti</h2>
             <p className="mt-1 text-sm leading-6 text-slate-200/78">
-              Puoi caricare foto, screenshot, PDF o documenti. Non serve avere
-              tutto: anche un solo elemento può essere utile per una prima
-              verifica.
+              Carica liberamente ciò che pensi possa avere valore. Non serve
+              scegliere una categoria e non serve avere tutto pronto: anche una
+              foto, uno screenshot o una spiegazione possono bastare per
+              iniziare.
             </p>
 
             <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-sky-200/35 bg-[#061827]/60 px-4 py-8 text-center transition hover:border-sky-100/60 hover:bg-[#0A2237]">
@@ -396,7 +352,6 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
                 PDF, JPG, PNG, HEIC, DOC, DOCX. Max consigliato: 8 MB per file.
               </span>
               <input
-                required
                 type="file"
                 multiple
                 accept=".pdf,.jpg,.jpeg,.png,.heic,.doc,.docx,application/pdf,image/jpeg,image/png,image/heic,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -405,18 +360,26 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
               />
             </label>
 
-            <label className="mt-4 block">
-              <span className="mb-1.5 block text-sm font-bold text-slate-100">
-                Nota opzionale
-              </span>
-              <textarea
-                value={nota}
-                onChange={(event) => setNota(event.target.value)}
-                rows={4}
-                className="w-full rounded-2xl border border-white/10 bg-[#061827]/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-400 focus:border-sky-200/55 focus:ring-4 focus:ring-sky-300/12"
-                placeholder="Esempio: ho sostenuto alcuni esami in Psicologia, vorrei capire se possono essere riconosciuti."
-              />
-            </label>
+            <div className="mt-4 rounded-3xl border border-amber-200/22 bg-amber-200/10 p-4">
+              <label className="block">
+                <span className="mb-2 block text-sm font-black text-amber-100">
+                  Non hai documenti pronti? Scrivi qui cosa vorresti farti
+                  riconoscere
+                </span>
+                <p className="mb-3 text-xs leading-5 text-slate-200/78">
+                  Puoi descrivere esami sostenuti, anni di università già fatti,
+                  certificazioni, esperienze lavorative, corsi frequentati o
+                  qualsiasi elemento che secondo te potrebbe avere valore.
+                </p>
+                <textarea
+                  value={nota}
+                  onChange={(event) => setNota(event.target.value)}
+                  rows={5}
+                  className="w-full rounded-2xl border border-amber-100/20 bg-[#061827]/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-400 focus:border-amber-100/55 focus:ring-4 focus:ring-amber-200/12"
+                  placeholder="Esempio: ho sostenuto 6 esami in Psicologia ma non ho ancora il certificato; vorrei capire se possono essere valutati. Oppure: ho esperienza lavorativa nel settore educativo e vorrei sapere se può essere utile."
+                />
+              </label>
+            </div>
           </section>
 
           <section className="rounded-[30px] border border-white/10 bg-white/[0.07] p-5 backdrop-blur">
@@ -459,7 +422,7 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
                   Invio in corso...
                 </>
               ) : (
-                "Invia per la valutazione"
+                "Invia per far valutare il percorso"
               )}
             </button>
           </section>
