@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [casiStatus, setCasiStatus] = useState("");
   const [casiLoading, setCasiLoading] = useState(false);
   const [casiInAttesa, setCasiInAttesa] = useState<SpazioStudentiCase[]>([]);
+  const [spazioStudentiAdminKey, setSpazioStudentiAdminKey] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,9 +78,10 @@ export default function AdminPage() {
     }
   };
 
-
   const caricaCasiInAttesa = async () => {
-    if (!form.adminKey.trim()) {
+    const adminKey = spazioStudentiAdminKey.trim() || form.adminKey.trim();
+
+    if (!adminKey) {
       setCasiStatus("Inserisci la chiave admin prima di caricare i casi.");
       return;
     }
@@ -93,7 +95,7 @@ export default function AdminPage() {
         {
           method: "GET",
           headers: {
-            "X-Admin-Key": form.adminKey.trim(),
+            "X-Admin-Key": adminKey,
           },
         }
       );
@@ -102,11 +104,12 @@ export default function AdminPage() {
 
       if (data.success) {
         setCasiInAttesa(data.cases || []);
-        setCasiStatus(
-          `Casi in attesa: ${(data.cases || []).length}`
-        );
+        setCasiStatus(`Casi in attesa: ${(data.cases || []).length}`);
       } else {
-        setCasiStatus("Errore: " + (data.message || data.error || "impossibile caricare i casi."));
+        setCasiStatus(
+          "Errore: " +
+            (data.message || data.error || "impossibile caricare i casi.")
+        );
       }
     } catch (error) {
       console.error(error);
@@ -117,13 +120,17 @@ export default function AdminPage() {
   };
 
   const moderaCaso = async (id: string, action: "approve" | "reject") => {
-    if (!form.adminKey.trim()) {
+    const adminKey = spazioStudentiAdminKey.trim() || form.adminKey.trim();
+
+    if (!adminKey) {
       setCasiStatus("Inserisci la chiave admin prima di moderare.");
       return;
     }
 
     setCasiLoading(true);
-    setCasiStatus(action === "approve" ? "Approvazione in corso..." : "Rifiuto in corso...");
+    setCasiStatus(
+      action === "approve" ? "Approvazione in corso..." : "Rifiuto in corso..."
+    );
 
     try {
       const res = await fetch(
@@ -132,7 +139,7 @@ export default function AdminPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Admin-Key": form.adminKey.trim(),
+            "X-Admin-Key": adminKey,
           },
           body: JSON.stringify({ id, action }),
         }
@@ -148,7 +155,10 @@ export default function AdminPage() {
             : "Caso rifiutato."
         );
       } else {
-        setCasiStatus("Errore: " + (data.message || data.error || "operazione non riuscita."));
+        setCasiStatus(
+          "Errore: " +
+            (data.message || data.error || "operazione non riuscita.")
+        );
       }
     } catch (error) {
       console.error(error);
@@ -157,7 +167,6 @@ export default function AdminPage() {
       setCasiLoading(false);
     }
   };
-
 
   return (
     <main
@@ -296,7 +305,6 @@ export default function AdminPage() {
         <p style={{ marginTop: 20, fontSize: 14, color: "#333" }}>{status}</p>
       )}
 
-
       <section
         style={{
           marginTop: 28,
@@ -307,14 +315,48 @@ export default function AdminPage() {
           boxShadow: "0 12px 30px rgba(15,23,42,0.06)",
         }}
       >
-        <h2 style={{ margin: "0 0 8px", fontSize: 22 }}>
-          Spazio Studenti
-        </h2>
+        <h2 style={{ margin: "0 0 8px", fontSize: 22 }}>Spazio Studenti</h2>
 
         <p style={{ color: "#555", lineHeight: 1.5, marginTop: 0 }}>
           Qui trovi i casi inviati dagli utenti. Puoi approvarli o rifiutarli
           prima che vengano usati nello Spazio Studenti.
         </p>
+
+        <label
+          style={{
+            display: "block",
+            marginTop: 14,
+            marginBottom: 12,
+          }}
+        >
+          <span
+            style={{
+              display: "block",
+              marginBottom: 6,
+              fontSize: 14,
+              fontWeight: 800,
+              color: "#243244",
+            }}
+          >
+            Chiave admin Spazio Studenti
+          </span>
+
+          <input
+            type="password"
+            placeholder="Inserisci la chiave admin"
+            value={spazioStudentiAdminKey}
+            onChange={(e) => setSpazioStudentiAdminKey(e.target.value)}
+            style={{
+              width: "100%",
+              border: "1px solid #D7E7F5",
+              borderRadius: 16,
+              padding: "13px 14px",
+              fontSize: 15,
+              outline: "none",
+              background: "#FFFFFF",
+            }}
+          />
+        </label>
 
         <Button
           label={casiLoading ? "Caricamento..." : "Carica casi in attesa"}
@@ -340,7 +382,9 @@ export default function AdminPage() {
                 padding: 14,
               }}
             >
-              <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <div
+                style={{ display: "flex", gap: 12, alignItems: "flex-start" }}
+              >
                 {caso.foto_url ? (
                   <img
                     src={caso.foto_url}
@@ -411,7 +455,13 @@ export default function AdminPage() {
                 {caso.contenuto}
               </p>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => moderaCaso(caso.id, "approve")}
