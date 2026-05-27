@@ -587,13 +587,21 @@ export default function OrientamentoPage() {
       </section>
 
       <FeatureCard
-        icon={<ClipboardCheck size={27} />}
-        title="Aggiorna il tuo test"
-        description="Rivedi obiettivi, tempo disponibile, area di interesse e aspetti da valutare prima dell’iscrizione."
+        icon={<Sparkles size={27} />}
+        title="Che tipo di futuro ti somiglia?"
+        description="Rispondi ad alcune domande e scopri il profilo che descrive meglio il tuo modo di scegliere, studiare e immaginare il futuro."
         tone="purple"
-        badge="Punto di partenza"
+        badge="Test consigliato"
         primary
-        onClick={() => router.push("/dashboard/orientamento/test")}
+        onClick={() => router.push("/dashboard/orientamento/futuro")}
+      />
+
+      <FeatureCard
+        icon={<BookOpen size={27} />}
+        title="Esplora i percorsi"
+        description="Consulta lauree, magistrali e master disponibili e continua dai corsi più coerenti con i tuoi obiettivi."
+        tone="blue"
+        onClick={() => router.push("/dashboard/percorsi")}
       />
 
       <FeatureCard
@@ -617,13 +625,13 @@ export default function OrientamentoPage() {
       />
 
       <FeatureCard
-        icon={<BookOpen size={27} />}
-        title="Esplora i percorsi"
-        description="Consulta lauree, magistrali e master disponibili e continua dai corsi più coerenti con i tuoi obiettivi."
+        icon={<ClipboardCheck size={27} />}
+        title="Aggiorna i tuoi dati di orientamento"
+        description="Modifica obiettivo, tempo disponibile, area di interesse e preferenze utili per ricevere suggerimenti più precisi."
         tone="blue"
-        onClick={() => router.push("/dashboard/percorsi")}
+        badge="Profilo"
+        onClick={() => router.push("/dashboard/orientamento/test")}
       />
-
       <section
         style={{
           borderRadius: 28,
