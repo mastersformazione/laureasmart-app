@@ -11,6 +11,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import BottomNav from "@/components/ui/BottomNav";
 
 const endpoint = "https://laureasmart.it/api/invia-documenti-valutazione.php";
 
@@ -110,7 +111,7 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
 
   if (successo) {
     return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#1F6FB2_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 text-white">
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#2F86D1_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 pb-28 text-white">
         <div className="mx-auto max-w-3xl">
           <button
             type="button"
@@ -179,7 +180,7 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#1F6FB2_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 text-white">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#2F86D1_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 pb-28 text-white">
       <div className="mx-auto max-w-3xl">
         <button
           type="button"
@@ -428,6 +429,7 @@ export default function ValutaQuelloCheHaiGiaFattoPage() {
           </section>
         </form>
       </div>
+      <BottomNav />
     </main>
   );
 }
