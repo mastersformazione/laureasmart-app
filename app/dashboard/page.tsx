@@ -683,9 +683,7 @@ export default function Dashboard() {
       <FeatureCard
         icon={<BookOpen size={30} />}
         title={
-          isGiaIscritto
-            ? "Valuta prossimi step"
-            : "Esplora i percorsi consigliati"
+          isGiaIscritto ? "Valuta prossimi step" : "Esplora i Corsi Consigliati"
         }
         description={
           isGiaIscritto

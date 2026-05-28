@@ -38,6 +38,36 @@ export default function Register() {
         localStorage.setItem("ha_fatto_test", "no");
         localStorage.setItem("registered_at", new Date().toISOString());
 
+        const emailBenvenutoKey = `email_benvenuto_inviata_${form.email
+          .trim()
+          .toLowerCase()}`;
+
+        if (localStorage.getItem(emailBenvenutoKey) !== "si") {
+          try {
+            const benvenutoRes = await fetch(
+              "https://laureasmart.it/api/invia-benvenuto-laurea-smart.php",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  nome: form.nome,
+                  email: form.email,
+                }),
+              }
+            );
+
+            const benvenutoData = await benvenutoRes.json().catch(() => null);
+
+            if (benvenutoRes.ok && benvenutoData?.success) {
+              localStorage.setItem(emailBenvenutoKey, "si");
+            }
+          } catch (emailError) {
+            console.error("Errore invio email benvenuto", emailError);
+          }
+        }
+
         setForm({
           nome: "",
           cognome: "",
