@@ -1,21 +1,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import Link from "next/link";
 import {
   ArrowLeft,
+  CalendarPlus,
+  CheckCircle2,
+  ClipboardList,
+  Clock3,
+  Filter,
+  Flame,
+  GraduationCap,
+  Mail,
+  MessageCircle,
+  Phone,
   RefreshCw,
   Search,
   ShieldCheck,
   UserRound,
-  Phone,
-  Mail,
-  Flame,
-  Clock3,
-  GraduationCap,
-  MessageCircle,
-  Filter,
+  XCircle,
 } from "lucide-react";
-import Link from "next/link";
 
 type Lead = {
   id: number;
@@ -53,6 +58,21 @@ type Lead = {
   updated_at?: string | null;
 };
 
+type LeadTask = {
+  id: number;
+  user_email: string;
+  lead_nome?: string | null;
+  lead_telefono?: string | null;
+  orientatore?: string | null;
+  titolo: string;
+  descrizione?: string | null;
+  due_at: string;
+  status: "aperto" | "completato" | "annullato" | string;
+  created_by?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
 type ApiResponse = {
   success: boolean;
   message?: string;
@@ -60,7 +80,21 @@ type ApiResponse = {
   leads?: Lead[];
 };
 
+type TasksApiResponse = {
+  success: boolean;
+  message?: string;
+  count?: number;
+  tasks?: LeadTask[];
+};
+
 const API_URL = "https://laureasmart.it/api/ls-admin-leads-list.php";
+
+const TASKS_LIST_API_URL = "https://laureasmart.it/api/ls-admin-tasks-list.php";
+
+const TASK_SAVE_API_URL = "https://laureasmart.it/api/ls-admin-task-save.php";
+
+const TASK_UPDATE_API_URL =
+  "https://laureasmart.it/api/ls-admin-task-update-status.php";
 
 const statiLead = [
   { value: "", label: "Tutti gli stati" },
@@ -145,7 +179,182 @@ export default function AdminLeadsPage() {
   const [leadStatus, setLeadStatus] = useState("");
   const [orientatore, setOrientatore] = useState("");
 
+  const [tasks, setTasks] = useState<LeadTask[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(false);
+  const [messaggioTask, setMessaggioTask] = useState("");
+
+  const [taskLead, setTaskLead] = useState<Lead | null>(null);
+  const [taskTitolo, setTaskTitolo] = useState("");
+  const [taskDescrizione, setTaskDescrizione] = useState("");
+  const [taskData, setTaskData] = useState("");
+  const [taskOra, setTaskOra] = useState("");
+
   const keyAttiva = adminKeySaved || adminKey;
+
+  async function caricaTasks() {
+    setMessaggioTask("");
+
+    if (!keyAttiva.trim()) {
+      return;
+    }
+
+    try {
+      setLoadingTasks(true);
+
+      const response = await fetch(TASKS_LIST_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          admin_key: keyAttiva.trim(),
+          status: "aperto",
+          limit: 100,
+        }),
+      });
+
+      const result = (await response.json()) as TasksApiResponse;
+
+      if (!response.ok || !result.success) {
+        setMessaggioTask(result.message || "Errore nel caricamento dei task.");
+        return;
+      }
+
+      setTasks(result.tasks || []);
+    } catch (error) {
+      console.error(error);
+      setMessaggioTask(
+        "Errore di connessione durante il caricamento dei task."
+      );
+    } finally {
+      setLoadingTasks(false);
+    }
+  }
+
+  function apriTaskForm(lead: Lead) {
+    setTaskLead(lead);
+    setTaskTitolo(`Ricontattare ${getLeadName(lead)}`);
+    setTaskDescrizione(
+      lead.corso_suggerito
+        ? `Verificare interesse per: ${lead.corso_suggerito}`
+        : ""
+    );
+    setTaskData("");
+    setTaskOra("");
+    setMessaggioTask("");
+  }
+
+  function chiudiTaskForm() {
+    setTaskLead(null);
+    setTaskTitolo("");
+    setTaskDescrizione("");
+    setTaskData("");
+    setTaskOra("");
+  }
+
+  async function salvaTask() {
+    setMessaggioTask("");
+
+    if (!keyAttiva.trim()) {
+      setMessaggioTask("Chiave admin mancante.");
+      return;
+    }
+
+    if (!taskLead) {
+      setMessaggioTask("Lead non selezionato.");
+      return;
+    }
+
+    if (!taskTitolo.trim()) {
+      setMessaggioTask("Inserisci il titolo del task.");
+      return;
+    }
+
+    if (!taskData || !taskOra) {
+      setMessaggioTask("Inserisci data e ora del promemoria.");
+      return;
+    }
+
+    const dueAt = `${taskData} ${taskOra}:00`;
+
+    try {
+      const response = await fetch(TASK_SAVE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          admin_key: keyAttiva.trim(),
+          user_email: taskLead.email,
+          lead_nome: getLeadName(taskLead),
+          lead_telefono: taskLead.telefono || "",
+          orientatore: taskLead.orientatore_assegnato || "Giulia",
+          titolo: taskTitolo.trim(),
+          descrizione: taskDescrizione.trim(),
+          due_at: dueAt,
+          created_by: "Admin Laurea Smart",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessaggioTask(
+          result.message || "Errore durante il salvataggio task."
+        );
+        return;
+      }
+
+      setMessaggioTask("Task creato correttamente.");
+      chiudiTaskForm();
+      await caricaTasks();
+    } catch (error) {
+      console.error(error);
+      setMessaggioTask("Errore di connessione durante il salvataggio task.");
+    }
+  }
+
+  async function aggiornaStatusTask(
+    taskId: number,
+    status: "completato" | "annullato"
+  ) {
+    setMessaggioTask("");
+
+    if (!keyAttiva.trim()) {
+      setMessaggioTask("Chiave admin mancante.");
+      return;
+    }
+
+    try {
+      const response = await fetch(TASK_UPDATE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          admin_key: keyAttiva.trim(),
+          task_id: taskId,
+          status,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessaggioTask(result.message || "Errore aggiornamento task.");
+        return;
+      }
+
+      setMessaggioTask(
+        status === "completato" ? "Task completato." : "Task annullato."
+      );
+
+      await caricaTasks();
+    } catch (error) {
+      console.error(error);
+      setMessaggioTask("Errore di connessione durante l'aggiornamento task.");
+    }
+  }
 
   async function caricaLeads() {
     setErrore("");
@@ -181,6 +390,7 @@ export default function AdminLeadsPage() {
 
       setLeads(result.leads || []);
       setUltimoAggiornamento(new Date().toLocaleString("it-IT"));
+      await caricaTasks();
     } catch (error) {
       console.error(error);
       setErrore("Errore di connessione durante il caricamento dei lead.");
@@ -208,6 +418,7 @@ export default function AdminLeadsPage() {
     setAdminKeySaved("");
     setAdminKey("");
     setLeads([]);
+    setTasks([]);
   }
 
   const statistiche = useMemo(() => {
@@ -241,6 +452,162 @@ export default function AdminLeadsPage() {
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
       }}
     >
+      {taskLead && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(2,6,23,0.72)",
+            display: "grid",
+            placeItems: "center",
+            padding: 18,
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 520,
+              borderRadius: 28,
+              background: "#FFFFFF",
+              color: "#0F172A",
+              padding: 22,
+              boxShadow: "0 24px 70px rgba(0,0,0,0.38)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                alignItems: "flex-start",
+                marginBottom: 16,
+              }}
+            >
+              <div>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: 24,
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  Nuovo task
+                </h2>
+                <p
+                  style={{
+                    margin: "6px 0 0",
+                    color: "#64748B",
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Lead: <strong>{getLeadName(taskLead)}</strong>
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={chiudiTaskForm}
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 14,
+                  border: "1px solid #E2E8F0",
+                  background: "#F8FAFC",
+                  color: "#0F172A",
+                  cursor: "pointer",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <XCircle size={20} />
+              </button>
+            </div>
+
+            <div style={{ display: "grid", gap: 12 }}>
+              <label>
+                <span style={modalLabelStyle}>Titolo task</span>
+                <input
+                  value={taskTitolo}
+                  onChange={(event) => setTaskTitolo(event.target.value)}
+                  placeholder="Es. Richiamare per informazioni"
+                  style={modalInputStyle}
+                />
+              </label>
+
+              <label>
+                <span style={modalLabelStyle}>Descrizione</span>
+                <textarea
+                  value={taskDescrizione}
+                  onChange={(event) => setTaskDescrizione(event.target.value)}
+                  placeholder="Note operative per l'orientatore"
+                  rows={4}
+                  style={{
+                    ...modalInputStyle,
+                    height: "auto",
+                    paddingTop: 12,
+                    resize: "vertical",
+                  }}
+                />
+              </label>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                }}
+              >
+                <label>
+                  <span style={modalLabelStyle}>Data</span>
+                  <input
+                    type="date"
+                    value={taskData}
+                    onChange={(event) => setTaskData(event.target.value)}
+                    style={modalInputStyle}
+                  />
+                </label>
+
+                <label>
+                  <span style={modalLabelStyle}>Ora</span>
+                  <input
+                    type="time"
+                    value={taskOra}
+                    onChange={(event) => setTaskOra(event.target.value)}
+                    style={modalInputStyle}
+                  />
+                </label>
+              </div>
+
+              <div
+                style={{
+                  padding: 12,
+                  borderRadius: 18,
+                  background: "#F8FAFC",
+                  border: "1px solid #E2E8F0",
+                  fontSize: 13,
+                  color: "#334155",
+                  lineHeight: 1.5,
+                }}
+              >
+                <strong>Orientatore:</strong>{" "}
+                {taskLead.orientatore_assegnato || "Giulia"}
+              </div>
+
+              <button
+                type="button"
+                onClick={salvaTask}
+                style={primaryButtonStyle}
+              >
+                <CalendarPlus size={17} />
+                Salva task
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div
         style={{
           maxWidth: 1120,
@@ -472,6 +839,106 @@ export default function AdminLeadsPage() {
           <StatCard label="Con telefono" value={statistiche.conTelefono} />
         </section>
 
+        <section
+          style={{
+            borderRadius: 28,
+            padding: 18,
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            marginBottom: 18,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 14,
+            }}
+          >
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 22,
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                Task aperti
+              </h2>
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  color: "rgba(255,255,255,0.62)",
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                }}
+              >
+                Promemoria operativi per richiamare o seguire i lead.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={caricaTasks}
+              disabled={loadingTasks}
+              style={secondaryButtonStyle}
+            >
+              <RefreshCw size={17} />
+              {loadingTasks ? "Carico..." : "Aggiorna task"}
+            </button>
+          </div>
+
+          {messaggioTask && (
+            <div
+              style={{
+                marginBottom: 12,
+                padding: 12,
+                borderRadius: 16,
+                background: "rgba(31,111,178,0.18)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "#DBEAFE",
+                fontSize: 13,
+                fontWeight: 750,
+              }}
+            >
+              {messaggioTask}
+            </div>
+          )}
+
+          {tasks.length === 0 ? (
+            <div
+              style={{
+                borderRadius: 20,
+                padding: 18,
+                background: "rgba(255,255,255,0.06)",
+                color: "rgba(255,255,255,0.68)",
+                fontSize: 14,
+                lineHeight: 1.5,
+              }}
+            >
+              Nessun task aperto. Puoi crearne uno dalla scheda di un lead.
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gap: 10,
+              }}
+            >
+              {tasks.map((task) => (
+                <TaskRow
+                  key={task.id}
+                  task={task}
+                  onComplete={() => aggiornaStatusTask(task.id, "completato")}
+                  onCancel={() => aggiornaStatusTask(task.id, "annullato")}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
         {ultimoAggiornamento && (
           <p
             style={{
@@ -513,7 +980,11 @@ export default function AdminLeadsPage() {
             }}
           >
             {leads.map((lead) => (
-              <LeadCard key={`${lead.email}-${lead.id}`} lead={lead} />
+              <LeadCard
+                key={`${lead.email}-${lead.id}`}
+                lead={lead}
+                onCreateTask={() => apriTaskForm(lead)}
+              />
             ))}
           </div>
         )}
@@ -522,7 +993,13 @@ export default function AdminLeadsPage() {
   );
 }
 
-function LeadCard({ lead }: { lead: Lead }) {
+function LeadCard({
+  lead,
+  onCreateTask,
+}: {
+  lead: Lead;
+  onCreateTask: () => void;
+}) {
   const score = Number(lead.lead_score || 0);
   const scoreLabel = getScoreLabel(score);
   const whatsappUrl = getWhatsAppUrl(lead);
@@ -706,8 +1183,137 @@ function LeadCard({ lead }: { lead: Lead }) {
           <Mail size={17} />
           Email
         </a>
+
+        <button
+          type="button"
+          onClick={onCreateTask}
+          style={{
+            ...secondaryButtonStyle,
+            color: "#1F6FB2",
+            borderColor: "rgba(31,111,178,0.18)",
+            background: "#F8FAFC",
+          }}
+        >
+          <CalendarPlus size={17} />
+          Crea task
+        </button>
       </div>
     </article>
+  );
+}
+
+function TaskRow({
+  task,
+  onComplete,
+  onCancel,
+}: {
+  task: LeadTask;
+  onComplete: () => void;
+  onCancel: () => void;
+}) {
+  const parsedDueAt = new Date(task.due_at.replace(" ", "T"));
+  const isOverdue =
+    !Number.isNaN(parsedDueAt.getTime()) && parsedDueAt.getTime() < Date.now();
+
+  return (
+    <div
+      style={{
+        borderRadius: 22,
+        padding: 14,
+        background: isOverdue
+          ? "rgba(220,38,38,0.14)"
+          : "rgba(255,255,255,0.07)",
+        border: isOverdue
+          ? "1px solid rgba(248,113,113,0.24)"
+          : "1px solid rgba(255,255,255,0.10)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 12,
+          alignItems: "flex-start",
+        }}
+      >
+        <div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 6,
+              color: "#FFFFFF",
+              fontWeight: 900,
+            }}
+          >
+            <ClipboardList size={17} />
+            {task.titolo}
+          </div>
+
+          <div
+            style={{
+              color: "rgba(255,255,255,0.68)",
+              fontSize: 13,
+              lineHeight: 1.45,
+            }}
+          >
+            <strong>{task.lead_nome || task.user_email}</strong>
+            {" · "}
+            {formatDate(task.due_at)}
+            {" · "}
+            {task.orientatore || "Orientatore"}
+          </div>
+
+          {task.descrizione && (
+            <div
+              style={{
+                marginTop: 7,
+                color: "rgba(255,255,255,0.58)",
+                fontSize: 13,
+                lineHeight: 1.45,
+              }}
+            >
+              {task.descrizione}
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+          }}
+        >
+          <button
+            type="button"
+            onClick={onComplete}
+            style={{
+              ...smallTaskButtonStyle,
+              background: "rgba(22,163,74,0.18)",
+              color: "#BBF7D0",
+            }}
+          >
+            <CheckCircle2 size={15} />
+            Fatto
+          </button>
+
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{
+              ...smallTaskButtonStyle,
+              background: "rgba(255,255,255,0.08)",
+              color: "rgba(255,255,255,0.72)",
+            }}
+          >
+            Annulla
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -744,7 +1350,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Badge({ children }: { children: React.ReactNode }) {
+function Badge({ children }: { children: ReactNode }) {
   return (
     <span
       style={{
@@ -768,7 +1374,7 @@ function InfoRow({
   label,
   value,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
 }) {
@@ -825,7 +1431,7 @@ function InfoRow({
   );
 }
 
-const labelStyle: React.CSSProperties = {
+const labelStyle: CSSProperties = {
   display: "block",
   marginBottom: 8,
   fontSize: 12,
@@ -833,7 +1439,7 @@ const labelStyle: React.CSSProperties = {
   color: "rgba(255,255,255,0.74)",
 };
 
-const inputStyle: React.CSSProperties = {
+const inputStyle: CSSProperties = {
   width: "100%",
   height: 46,
   borderRadius: 16,
@@ -846,7 +1452,7 @@ const inputStyle: React.CSSProperties = {
   fontWeight: 700,
 };
 
-const primaryButtonStyle: React.CSSProperties = {
+const primaryButtonStyle: CSSProperties = {
   minHeight: 46,
   border: 0,
   borderRadius: 16,
@@ -862,7 +1468,7 @@ const primaryButtonStyle: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const secondaryButtonStyle: React.CSSProperties = {
+const secondaryButtonStyle: CSSProperties = {
   minHeight: 46,
   borderRadius: 16,
   border: "1px solid rgba(255,255,255,0.14)",
@@ -878,7 +1484,7 @@ const secondaryButtonStyle: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const ghostButtonStyle: React.CSSProperties = {
+const ghostButtonStyle: CSSProperties = {
   minHeight: 46,
   borderRadius: 16,
   border: "1px solid rgba(255,255,255,0.10)",
@@ -890,7 +1496,7 @@ const ghostButtonStyle: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const disabledButtonStyle: React.CSSProperties = {
+const disabledButtonStyle: CSSProperties = {
   minHeight: 46,
   borderRadius: 16,
   border: "1px solid #E2E8F0",
@@ -904,4 +1510,39 @@ const disabledButtonStyle: React.CSSProperties = {
   justifyContent: "center",
   gap: 8,
   cursor: "not-allowed",
+};
+
+const modalLabelStyle: CSSProperties = {
+  display: "block",
+  marginBottom: 7,
+  fontSize: 12,
+  fontWeight: 850,
+  color: "#334155",
+};
+
+const modalInputStyle: CSSProperties = {
+  width: "100%",
+  height: 46,
+  borderRadius: 16,
+  border: "1px solid #CBD5E1",
+  background: "#FFFFFF",
+  color: "#0F172A",
+  padding: "0 14px",
+  outline: "none",
+  fontSize: 14,
+  fontWeight: 700,
+};
+
+const smallTaskButtonStyle: CSSProperties = {
+  minHeight: 34,
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.12)",
+  padding: "0 10px",
+  fontSize: 12,
+  fontWeight: 850,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 6,
+  cursor: "pointer",
 };
