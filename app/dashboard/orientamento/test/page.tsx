@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import OneSignal from "react-onesignal";
 import { trackEvent } from "../../../lib/trackEvent";
 import {
+  calcolaLeadScoreOrientamento,
+  calcolaRisultatoOrientamento,
+  calcolaSegmentiOrientamento,
+} from "@/lib/orientamento";
+import {
   Sparkles,
   GraduationCap,
   Clock,
@@ -39,6 +44,14 @@ type StepItem = {
   opzioni: string[];
 };
 
+type PercorsoConsigliato = {
+  classe: string;
+  nome: string;
+  area: string;
+  motivo: string;
+  priorita: "alta" | "media" | "bassa";
+};
+
 type Risultato = {
   tipo: string;
   percorso: string;
@@ -49,6 +62,9 @@ type Risultato = {
   motivazioni: string[];
   prossimoPasso: string;
   ctaSecondaria: string;
+  percorsiConsigliati: PercorsoConsigliato[];
+  motivoModalitaOnline: string;
+  testoRispostaFinale: string;
 };
 
 type Segmenti = {
@@ -305,6 +321,8 @@ export default function OrientamentoPage() {
   ];
 
   const getRisultato = (data: OrientamentoData = formData): Risultato => {
+    const risultatoCentrale = calcolaRisultatoOrientamento(data);
+
     const situazione = data.situazione || "";
     const titolo = data.titolo_studio || "";
     const obiettivo = data.obiettivo || "";
@@ -313,11 +331,6 @@ export default function OrientamentoPage() {
     const tempo = data.tempo || "";
     const area = data.area || "";
 
-    let tipo = "GENERALE";
-    let corsoSuggerito = "Percorso universitario online personalizzato";
-    let percorso = "Percorso consigliato da definire con un orientatore";
-    let descrizione =
-      "Le tue risposte indicano che hai bisogno di un orientamento personalizzato per scegliere il percorso universitario più adatto al tuo obiettivo.";
     let tempoStimato = "Da valutare";
     let difficolta = "Sostenibile";
     let prossimoPasso = "Ricevere una valutazione personalizzata";
@@ -345,7 +358,7 @@ export default function OrientamentoPage() {
 
     if (titolo === "Laurea triennale") {
       motivazioni.push(
-        "Avendo già una laurea triennale, potresti completare il profilo con una magistrale online."
+        "Avendo già una laurea triennale, potresti completare il profilo con una magistrale online o con un master coerente."
       );
     }
 
@@ -464,71 +477,6 @@ export default function OrientamentoPage() {
       );
     }
 
-    if (area === "Economia e management") {
-      tipo = "ECONOMIA";
-      corsoSuggerito = "Laurea online in area Economia e Management";
-      percorso = "Percorso consigliato: crescita professionale e aziendale";
-      descrizione =
-        "Questo percorso è indicato se vuoi migliorare il tuo profilo nel lavoro, crescere in azienda, gestire attività o aprirti nuove opportunità professionali.";
-    }
-
-    if (area === "Psicologia") {
-      tipo = "PSICOLOGIA";
-      corsoSuggerito = "Laurea online in area Psicologia";
-      percorso = "Percorso consigliato: persone, relazioni e organizzazioni";
-      descrizione =
-        "Questo percorso è indicato se ti interessa lavorare con le persone, comprendere comportamenti, dinamiche relazionali, formazione o contesti organizzativi.";
-    }
-
-    if (area === "Scienze dell’educazione") {
-      tipo = "EDUCAZIONE";
-      corsoSuggerito = "Laurea online in Scienze dell’Educazione";
-      percorso =
-        "Percorso consigliato: educazione, formazione e servizi alla persona";
-      descrizione =
-        "Questo percorso è adatto se vuoi lavorare in ambito educativo, sociale, formativo o nei servizi rivolti a bambini, ragazzi, famiglie e comunità.";
-    }
-
-    if (area === "Giurisprudenza / servizi giuridici") {
-      tipo = "GIURIDICA";
-      corsoSuggerito = "Laurea online in area Giuridica";
-      percorso = "Percorso consigliato: diritto, amministrazione e concorsi";
-      descrizione =
-        "Questo percorso può essere utile se vuoi rafforzare il tuo profilo in ambito amministrativo, legale, aziendale, pubblico o concorsuale.";
-    }
-
-    if (area === "Scienze motorie") {
-      tipo = "SPORT";
-      corsoSuggerito = "Laurea online in Scienze Motorie";
-      percorso = "Percorso consigliato: sport, benessere e attività motoria";
-      descrizione =
-        "Questo percorso è adatto se vuoi lavorare nel mondo dello sport, del benessere, della preparazione fisica o dell’attività motoria.";
-    }
-
-    if (area === "Comunicazione") {
-      tipo = "COMUNICAZIONE";
-      corsoSuggerito = "Laurea online in Comunicazione";
-      percorso = "Percorso consigliato: comunicazione, marketing e digitale";
-      descrizione =
-        "Questo percorso è indicato se vuoi lavorare nella comunicazione, nel marketing, nei media, nei contenuti digitali o migliorare il tuo profilo creativo.";
-    }
-
-    if (area === "Informatica / tecnologia") {
-      tipo = "TECNOLOGIA";
-      corsoSuggerito = "Laurea online in Informatica o area Tecnologica";
-      percorso = "Percorso consigliato: competenze digitali e tecnologia";
-      descrizione =
-        "Questo percorso è utile se vuoi sviluppare competenze tecniche e digitali, oggi molto richieste nel lavoro e nelle aziende.";
-    }
-
-    if (area === "Scuola e insegnamento" || obiettivo === "Insegnare") {
-      tipo = "SCUOLA";
-      corsoSuggerito = "Percorso online collegato a scuola e insegnamento";
-      percorso = "Percorso consigliato: scuola, titoli e graduatorie";
-      descrizione =
-        "Questo percorso è indicato se vuoi lavorare nella scuola, migliorare il tuo profilo per graduatorie, concorsi o percorsi collegati all’insegnamento.";
-    }
-
     if (obiettivo === "Aumentare lo stipendio") {
       motivazioni.push(
         "Il tuo obiettivo è economico: serve un percorso spendibile e coerente con il mercato del lavoro."
@@ -554,11 +502,6 @@ export default function OrientamentoPage() {
     }
 
     if (area === "Non so ancora" || obiettivo === "Non sono sicuro") {
-      tipo = "ORIENTAMENTO";
-      corsoSuggerito = "Percorso di orientamento universitario";
-      percorso = "Percorso consigliato: chiarire la scelta prima di iscriversi";
-      descrizione =
-        "Le tue risposte indicano che prima di scegliere un corso è utile fare una valutazione guidata. La cosa più importante è evitare una scelta casuale.";
       prossimoPasso = "Parlare con un orientatore prima di scegliere";
       ctaSecondaria = "Ricevi una consulenza orientativa gratuita";
     }
@@ -569,26 +512,30 @@ export default function OrientamentoPage() {
       );
     }
 
+    motivazioni.push(risultatoCentrale.motivoModalitaOnline);
+
     return {
-      tipo,
-      percorso,
-      corsoSuggerito,
+      tipo: risultatoCentrale.tipo,
+      percorso: `Percorso consigliato: ${risultatoCentrale.corsoSuggerito}`,
+      corsoSuggerito: risultatoCentrale.corsoSuggerito,
       tempoStimato,
       difficolta,
-      descrizione,
+      descrizione: risultatoCentrale.descrizione,
       motivazioni,
       prossimoPasso,
       ctaSecondaria,
+      percorsiConsigliati: risultatoCentrale.percorsiConsigliati,
+      motivoModalitaOnline: risultatoCentrale.motivoModalitaOnline,
+      testoRispostaFinale: risultatoCentrale.testoRispostaFinale,
     };
   };
 
   const getSegmenti = (data: OrientamentoData): Segmenti => {
-    let segmento_studente = "NON_ISCRITTO";
-    let segmento_intento = "INDECISO";
-    let segmento_motivazione = "INDECISO";
-    let segmento_ingresso = "ALTRO";
-    let segmento_urgenza = "NON_DEFINITA";
-    let segmento_aspetto = "NESSUNO";
+    const segmentiCentrali = calcolaSegmentiOrientamento(data);
+
+    let segmento_studente = segmentiCentrali.segmento_studente;
+    let segmento_motivazione = segmentiCentrali.segmento_motivazione;
+    let segmento_aspetto = segmentiCentrali.segmento_aspetto;
 
     if (data.stato_iscrizione === "Sì, sono già iscritto") {
       segmento_studente = "GIA_ISCRITTO";
@@ -596,111 +543,72 @@ export default function OrientamentoPage() {
       segmento_studente = "UNIVERSITA_INTERROTTA";
     } else if (data.stato_iscrizione === "Sto valutando un trasferimento") {
       segmento_studente = "TRASFERIMENTO";
+    } else if (data.stato_iscrizione === "No, non sono ancora iscritto") {
+      segmento_studente = "NON_ISCRITTO";
     }
-
-    if (data.obiettivo === "Cambiare lavoro")
-      segmento_intento = "CAMBIO_LAVORO";
-    else if (data.obiettivo === "Aumentare lo stipendio")
-      segmento_intento = "AUMENTO_STIPENDIO";
-    else if (data.obiettivo === "Partecipare a concorsi")
-      segmento_intento = "CONCORSI";
-    else if (data.obiettivo === "Insegnare") segmento_intento = "SCUOLA";
-    else if (data.obiettivo === "Crescita personale")
-      segmento_intento = "CRESCITA_PERSONALE";
-    else if (data.obiettivo === "Completare il mio profilo professionale")
-      segmento_intento = "COMPLETAMENTO_PROFILO";
-    else if (data.obiettivo === "Non sono sicuro")
-      segmento_intento = "INDECISO";
 
     if (
       data.motivazione_studio === "Voglio imparare e acquisire nuove conoscenze"
-    )
+    ) {
       segmento_motivazione = "CONOSCENZA";
-    else if (
+    } else if (
       data.motivazione_studio ===
       "Mi serve un titolo per migliorare lavoro o carriera"
-    )
+    ) {
       segmento_motivazione = "CARRIERA";
-    else if (
+    } else if (
       data.motivazione_studio ===
       "Voglio ottenere il titolo nel modo più rapido e organizzato possibile"
-    )
+    ) {
       segmento_motivazione = "TITOLO_RAPIDO";
-    else if (
+    } else if (
       data.motivazione_studio ===
       "Mi serve una laurea per concorsi, graduatorie o avanzamenti"
-    )
+    ) {
       segmento_motivazione = "CONCORSI";
-    else if (
+    } else if (
       data.motivazione_studio === "Voglio cambiare settore professionale"
-    )
+    ) {
       segmento_motivazione = "CAMBIO_SETTORE";
-    else if (
+    } else if (
       data.motivazione_studio ===
       "Voglio completare un percorso universitario iniziato in passato"
-    )
+    ) {
       segmento_motivazione = "COMPLETAMENTO";
-    else if (
+    } else if (
       data.motivazione_studio ===
       "Non lo so ancora, vorrei essere guidato nella scelta"
-    )
+    ) {
       segmento_motivazione = "INDECISO";
+    }
 
-    if (data.titolo_studio === "Diploma") segmento_ingresso = "DIPLOMA";
-    else if (data.titolo_studio === "Laurea triennale")
-      segmento_ingresso = "LAUREA_TRIENNALE";
-    else if (data.titolo_studio === "Laurea magistrale")
-      segmento_ingresso = "LAUREA_MAGISTRALE";
-    else if (data.titolo_studio === "Laurea vecchio ordinamento")
-      segmento_ingresso = "LAUREA_VECCHIO_ORDINAMENTO";
-    else if (data.titolo_studio === "Master universitario")
-      segmento_ingresso = "MASTER";
-    else if (
-      data.titolo_studio?.includes("AFAM") ||
-      data.titolo_studio?.includes("conservatorio") ||
-      data.titolo_studio?.includes("accademia")
-    )
-      segmento_ingresso = "AFAM";
-    else if (data.titolo_studio?.includes("università"))
-      segmento_ingresso = "UNIVERSITA_INCOMPLETA";
-
-    const urgenza = (data.urgenza || "").trim();
-
-    if (urgenza === "Subito / entro 1 mese") segmento_urgenza = "ALTA";
-    else if (urgenza === "Entro 3 mesi") segmento_urgenza = "MEDIO_ALTA";
-    else if (urgenza === "Entro 6 mesi") segmento_urgenza = "MEDIA";
-    else if (urgenza === "Entro 12 mesi") segmento_urgenza = "BASSA";
-    else if (urgenza === "Non ho una scadenza precisa")
-      segmento_urgenza = "FREDDA";
-
-    if (data.aspetto_da_valutare === "Esami universitari già sostenuti")
+    if (data.aspetto_da_valutare === "Esami universitari già sostenuti") {
       segmento_aspetto = "CFU_INTERESSE";
-    else if (
+    } else if (
       data.aspetto_da_valutare === "Esperienze lavorative o certificazioni"
-    )
+    ) {
       segmento_aspetto = "VALUTAZIONE_CARRIERA";
-    else if (
+    } else if (
       data.aspetto_da_valutare === "Possibili agevolazioni o convenzioni"
-    )
+    ) {
       segmento_aspetto = "AGEVOLAZIONI_INTERESSE";
-    else if (
+    } else if (
       data.aspetto_da_valutare ===
       "Esigenze di supporto allo studio, DSA, BES o disabilità"
-    )
+    ) {
       segmento_aspetto = "SUPPORTO_STUDIO_AGEVOLAZIONI";
-    else if (data.aspetto_da_valutare === "Non saprei")
+    } else if (data.aspetto_da_valutare === "Non saprei") {
       segmento_aspetto = "DA_ORIENTARE";
-    else if (
+    } else if (
       data.aspetto_da_valutare === "Preferisco parlarne con un orientatore"
-    )
+    ) {
       segmento_aspetto = "CONTATTO_RISERVATO";
+    }
 
     return {
+      ...segmentiCentrali,
       segmento_studente,
-      segmento_intento,
       segmento_motivazione,
-      segmento_ingresso,
-      segmento_urgenza,
       segmento_aspetto,
     };
   };
@@ -853,33 +761,25 @@ export default function OrientamentoPage() {
         area: data.area || "",
         aspetto_da_valutare: data.aspetto_da_valutare || "",
         segmento_aspetto: segmenti.segmento_aspetto,
+        percorsi_consigliati: risultato.percorsiConsigliati.map(
+          (percorso) => `${percorso.classe} ${percorso.nome}`
+        ),
+        modalita_preferibile: "online",
       },
     });
     try {
       if (!user?.email) {
         console.log("Salvataggio profilo persistente saltato: email mancante");
       } else {
-        let leadScore = 20;
+        const leadScoreResult = calcolaLeadScoreOrientamento({
+          telefono: user.telefono,
+          area: data.area,
+          aspetto_da_valutare: data.aspetto_da_valutare,
+          segmenti,
+        });
 
-        if (user.telefono) leadScore += 20;
-        if (segmenti.segmento_urgenza === "ALTA") leadScore += 30;
-        if (segmenti.segmento_urgenza === "MEDIO_ALTA") leadScore += 20;
-        if (segmenti.segmento_intento === "CAMBIO_LAVORO") leadScore += 15;
-        if (segmenti.segmento_intento === "CONCORSI") leadScore += 15;
-        if (segmenti.segmento_studente === "GIA_ISCRITTO") leadScore += 10;
-        if (data.area) leadScore += 10;
-        if (data.aspetto_da_valutare) leadScore += 10;
-
-        leadScore = Math.min(leadScore, 100);
-
-        const leadStatus =
-          leadScore >= 80
-            ? "caldo"
-            : leadScore >= 50
-            ? "tiepido"
-            : leadScore >= 25
-            ? "freddo"
-            : "nuovo";
+        const leadScore = leadScoreResult.score;
+        const leadStatus = leadScoreResult.status;
 
         const profileResponse = await fetch(
           "https://laureasmart.it/api/ls-user-profile-save.php",
@@ -953,9 +853,11 @@ export default function OrientamentoPage() {
 
               result: {
                 tipo: risultato.tipo,
-
                 descrizione: risultato.descrizione,
                 corso_suggerito: risultato.corsoSuggerito,
+                percorsi_consigliati: risultato.percorsiConsigliati,
+                motivo_modalita_online: risultato.motivoModalitaOnline,
+                testo_risposta_finale: risultato.testoRispostaFinale,
               },
 
               segments: {
@@ -1171,7 +1073,10 @@ Area di interesse: ${formData.area || ""}
 Aspetto da valutare: ${formData.aspetto_da_valutare || ""}
 
 Risultato: ${risultato.percorso}
-Corso suggerito: ${risultato.corsoSuggerito}`
+Corso suggerito: ${risultato.corsoSuggerito}
+Percorsi consigliati: ${risultato.percorsiConsigliati
+            .map((percorso) => `${percorso.classe} ${percorso.nome}`)
+            .join(", ")}`
         )}`
       : "";
 
@@ -1198,6 +1103,8 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             description={risultato.corsoSuggerito}
           />
 
+          <PercorsiConsigliatiCard risultato={risultato} />
+
           <ResultMetric
             icon={<Clock size={22} />}
             title="Tempo stimato"
@@ -1208,6 +1115,12 @@ Corso suggerito: ${risultato.corsoSuggerito}`
             icon={<Target size={22} />}
             title="Difficoltà percepita"
             description={risultato.difficolta}
+          />
+
+          <DarkCard
+            title="Perché valutare una laurea online"
+            description={risultato.motivoModalitaOnline}
+            badge="Modalità"
           />
 
           <DarkCard title="Perché è adatto al tuo profilo" badge="Motivi">
@@ -2226,6 +2139,105 @@ function DarkCard({
 
       {children}
     </section>
+  );
+}
+
+function PercorsiConsigliatiCard({ risultato }: { risultato: Risultato }) {
+  if (!risultato.percorsiConsigliati.length) {
+    return null;
+  }
+
+  return (
+    <DarkCard
+      title="Corsi di laurea consigliati"
+      description="In base alle tue risposte, questi sono i percorsi universitari più coerenti da valutare."
+      badge="Corsi"
+    >
+      <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
+        {risultato.percorsiConsigliati.map((percorso) => (
+          <div
+            key={`${percorso.classe}-${percorso.nome}`}
+            style={{
+              padding: 14,
+              borderRadius: 20,
+              background:
+                percorso.priorita === "alta"
+                  ? "rgba(120,194,255,0.14)"
+                  : "rgba(255,255,255,0.06)",
+              border:
+                percorso.priorita === "alta"
+                  ? "1px solid rgba(120,194,255,0.26)"
+                  : "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    padding: "5px 9px",
+                    borderRadius: 999,
+                    background: "rgba(58,160,255,0.18)",
+                    color: "#A7D8FF",
+                    fontSize: 11,
+                    fontWeight: 900,
+                    marginBottom: 8,
+                  }}
+                >
+                  {percorso.classe}
+                </div>
+
+                <h3
+                  style={{
+                    margin: 0,
+                    color: "#FFFFFF",
+                    fontSize: 17,
+                    lineHeight: 1.2,
+                    fontWeight: 900,
+                  }}
+                >
+                  {percorso.nome}
+                </h3>
+
+                <p
+                  style={{
+                    margin: "7px 0 0",
+                    color: "rgba(255,255,255,0.66)",
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {percorso.motivo}
+                </p>
+              </div>
+
+              {percorso.priorita === "alta" && (
+                <span
+                  style={{
+                    flexShrink: 0,
+                    padding: "5px 8px",
+                    borderRadius: 999,
+                    background: "rgba(34,197,94,0.16)",
+                    color: "#BBF7D0",
+                    fontSize: 11,
+                    fontWeight: 900,
+                  }}
+                >
+                  Priorità alta
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </DarkCard>
   );
 }
 
