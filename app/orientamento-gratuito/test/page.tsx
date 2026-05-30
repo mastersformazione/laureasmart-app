@@ -21,6 +21,11 @@ import {
   Timer,
   UserRound,
 } from "lucide-react";
+import {
+  calcolaRisultatoOrientamento,
+  calcolaSegmentiOrientamento,
+} from "@/lib/orientamento";
+import type { PercorsoConsigliatoOrientamento } from "@/lib/orientamento";
 
 type OrientamentoData = {
   stato_iscrizione?: string;
@@ -59,6 +64,12 @@ type Risultato = {
   approfondimento: string;
   prossimo_passo: string;
   cta_orientatore: string;
+
+  // Campi centralizzati del nuovo motore orientamento
+  percorsiConsigliati: PercorsoConsigliatoOrientamento[];
+  modalitaPreferibile: "online" | "valutazione_orientatore";
+  motivoModalitaOnline: string;
+  testoRispostaFinale: string;
 };
 type LeadForm = {
   nome: string;
@@ -400,118 +411,7 @@ function getStepIcon(id: keyof OrientamentoData) {
 }
 
 function getSegmenti(data: OrientamentoData): Segmenti {
-  let segmento_studente = "NON_ISCRITTO";
-
-  if (data.stato_iscrizione === "Sì, sono già iscritto")
-    segmento_studente = "GIA_ISCRITTO";
-  else if (data.stato_iscrizione === "Ho iniziato ma ho interrotto")
-    segmento_studente = "UNIVERSITA_INTERROTTA";
-  else if (data.stato_iscrizione === "Sto valutando un trasferimento")
-    segmento_studente = "TRASFERIMENTO";
-
-  let segmento_intento = "INDECISO";
-
-  if (data.obiettivo === "Cambiare lavoro") segmento_intento = "CAMBIO_LAVORO";
-  else if (data.obiettivo === "Aumentare lo stipendio")
-    segmento_intento = "AUMENTO_STIPENDIO";
-  else if (data.obiettivo === "Partecipare a concorsi")
-    segmento_intento = "CONCORSI";
-  else if (data.obiettivo === "Insegnare") segmento_intento = "SCUOLA";
-  else if (data.obiettivo === "Crescita personale")
-    segmento_intento = "CRESCITA_PERSONALE";
-  else if (data.obiettivo === "Completare il mio profilo professionale")
-    segmento_intento = "COMPLETAMENTO_PROFILO";
-
-  let segmento_motivazione = "INDECISO";
-
-  if (
-    data.motivazione_studio === "Voglio imparare e acquisire nuove conoscenze"
-  )
-    segmento_motivazione = "CONOSCENZA";
-  else if (
-    data.motivazione_studio ===
-    "Mi serve un titolo per migliorare lavoro o carriera"
-  )
-    segmento_motivazione = "CARRIERA";
-  else if (
-    data.motivazione_studio ===
-    "Voglio ottenere il titolo nel modo più rapido e organizzato possibile"
-  )
-    segmento_motivazione = "TITOLO_RAPIDO";
-  else if (
-    data.motivazione_studio ===
-    "Mi serve una laurea per concorsi, graduatorie o avanzamenti"
-  )
-    segmento_motivazione = "CONCORSI";
-  else if (data.motivazione_studio === "Voglio cambiare settore professionale")
-    segmento_motivazione = "CAMBIO_SETTORE";
-  else if (
-    data.motivazione_studio ===
-    "Voglio completare un percorso universitario iniziato in passato"
-  )
-    segmento_motivazione = "COMPLETAMENTO";
-
-  let segmento_ingresso = "ALTRO";
-
-  if (data.titolo_studio === "Diploma") segmento_ingresso = "DIPLOMA";
-  else if (data.titolo_studio === "Laurea triennale")
-    segmento_ingresso = "LAUREA_TRIENNALE";
-  else if (data.titolo_studio === "Laurea magistrale")
-    segmento_ingresso = "LAUREA_MAGISTRALE";
-  else if (data.titolo_studio === "Laurea vecchio ordinamento")
-    segmento_ingresso = "LAUREA_VECCHIO_ORDINAMENTO";
-  else if (data.titolo_studio === "Master universitario")
-    segmento_ingresso = "MASTER";
-  else if (
-    data.titolo_studio?.includes("AFAM") ||
-    data.titolo_studio?.includes("conservatorio") ||
-    data.titolo_studio?.includes("accademia")
-  )
-    segmento_ingresso = "AFAM";
-  else if (
-    data.titolo_studio === "Ho iniziato l’università ma non ho terminato"
-  )
-    segmento_ingresso = "UNIVERSITA_INCOMPLETA";
-
-  let segmento_urgenza = "NON_DEFINITA";
-
-  if (data.urgenza === "Subito / entro 1 mese") segmento_urgenza = "ALTA";
-  else if (data.urgenza === "Entro 3 mesi") segmento_urgenza = "MEDIO_ALTA";
-  else if (data.urgenza === "Entro 6 mesi") segmento_urgenza = "MEDIA";
-  else if (data.urgenza === "Entro 12 mesi") segmento_urgenza = "BASSA";
-  else if (data.urgenza === "Non ho una scadenza precisa")
-    segmento_urgenza = "FREDDA";
-
-  let segmento_aspetto = "NESSUNO";
-
-  if (data.aspetto_da_valutare === "Esami universitari già sostenuti")
-    segmento_aspetto = "CFU_INTERESSE";
-  else if (
-    data.aspetto_da_valutare === "Esperienze lavorative o certificazioni"
-  )
-    segmento_aspetto = "VALUTAZIONE_CARRIERA";
-  else if (data.aspetto_da_valutare === "Possibili agevolazioni o convenzioni")
-    segmento_aspetto = "AGEVOLAZIONI_INTERESSE";
-  else if (
-    data.aspetto_da_valutare ===
-    "Esigenze di supporto allo studio, DSA, BES o disabilità"
-  )
-    segmento_aspetto = "SUPPORTO_STUDIO_AGEVOLAZIONI";
-  else if (data.aspetto_da_valutare === "Non saprei")
-    segmento_aspetto = "DA_ORIENTARE";
-  else if (
-    data.aspetto_da_valutare === "Preferisco parlarne con un orientatore"
-  )
-    segmento_aspetto = "CONTATTO_RISERVATO";
-
-  return {
-    segmento_studente,
-    segmento_intento,
-    segmento_motivazione,
-    segmento_ingresso,
-    segmento_urgenza,
-    segmento_aspetto,
-  };
+  return calcolaSegmentiOrientamento(data);
 }
 
 type ProfiloBase = {
@@ -1412,28 +1312,34 @@ function getCtaOrientatore(data: OrientamentoData): string {
 function getRisultato(data: OrientamentoData): Risultato {
   const area = data.area || "";
   const profilo = profiliPerArea[area] || profiloGenerale;
+  const risultatoCentrale = calcolaRisultatoOrientamento(data);
 
-  const percorsiCompatibili = getPercorsiCompatibili(data, profilo);
+  const percorsiCompatibili =
+    risultatoCentrale.percorsiConsigliati.length > 0
+      ? risultatoCentrale.percorsiConsigliati.map(
+          (percorso) => `${percorso.classe} ${percorso.nome}`
+        )
+      : getPercorsiCompatibili(data, profilo);
+
   const percorsoPrioritario =
-    percorsiCompatibili[0] || "Percorso universitario da valutare";
-
-  const percorso =
-    percorsiCompatibili.length > 1
-      ? `In base al tuo profilo potresti valutare: ${percorsiCompatibili.join(
-          ", "
-        )}. La scelta definitiva dovrebbe essere confermata valutando titolo di partenza, obiettivo, tempo disponibile e requisiti di accesso.`
-      : `In base al tuo profilo potresti valutare ${percorsoPrioritario}. La scelta definitiva dovrebbe essere confermata valutando titolo di partenza, obiettivo, tempo disponibile e requisiti di accesso.`;
+    percorsiCompatibili[0] ||
+    risultatoCentrale.corsoSuggerito ||
+    "Percorso universitario da valutare";
 
   return {
-    tipo: profilo.tipo,
+    tipo: risultatoCentrale.tipo,
     titolo: profilo.titolo,
-    descrizione: profilo.descrizione,
-    percorso,
+    descrizione: risultatoCentrale.descrizione,
+    percorso: risultatoCentrale.testoRispostaFinale,
     percorso_prioritario: percorsoPrioritario,
     percorsi_compatibili: percorsiCompatibili,
     approfondimento: getApprofondimento(data),
     prossimo_passo: getProssimoPasso(data),
     cta_orientatore: getCtaOrientatore(data),
+    percorsiConsigliati: risultatoCentrale.percorsiConsigliati,
+    modalitaPreferibile: risultatoCentrale.modalitaPreferibile,
+    motivoModalitaOnline: risultatoCentrale.motivoModalitaOnline,
+    testoRispostaFinale: risultatoCentrale.testoRispostaFinale,
   };
 }
 
@@ -1472,6 +1378,19 @@ function saveToLocalStorage(
   );
   localStorage.setItem("prossimo_passo_orientamento", risultato.prossimo_passo);
   localStorage.setItem("cta_orientatore", risultato.cta_orientatore);
+  localStorage.setItem(
+    "percorsi_consigliati_orientamento",
+    JSON.stringify(risultato.percorsiConsigliati)
+  );
+  localStorage.setItem("modalita_preferibile", risultato.modalitaPreferibile);
+  localStorage.setItem(
+    "motivo_modalita_online",
+    risultato.motivoModalitaOnline
+  );
+  localStorage.setItem(
+    "testo_risposta_finale_orientamento",
+    risultato.testoRispostaFinale
+  );
 
   localStorage.setItem("segmento_studente", segmenti.segmento_studente);
   localStorage.setItem("segmento_intento", segmenti.segmento_intento);
@@ -1606,7 +1525,10 @@ export default function OrientamentoGratuitoTestPage() {
         percorsi_compatibili: risultato.percorsi_compatibili.join(" | "),
         approfondimento_orientamento: risultato.approfondimento,
         prossimo_passo_orientamento: risultato.prossimo_passo,
-        cta_orientatore: risultato.cta_orientatore,
+        percorsi_consigliati: JSON.stringify(risultato.percorsiConsigliati),
+        modalita_preferibile: risultato.modalitaPreferibile,
+        motivo_modalita_online: risultato.motivoModalitaOnline,
+        testo_risposta_finale: risultato.testoRispostaFinale,
 
         source: "orientamento_gratuito",
       };
@@ -2075,11 +1997,109 @@ export default function OrientamentoGratuitoTestPage() {
             </p>
           </div>
 
+          <section
+            style={{
+              ...glassCard,
+              padding: 16,
+              borderRadius: 24,
+              border: `1px solid ${tones.blue.border}`,
+              background: tones.blue.bg,
+              boxShadow: `0 20px 42px ${tones.blue.glow}`,
+            }}
+          >
+            <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
+              <div
+                style={{
+                  width: 42,
+                  minWidth: 42,
+                  height: 42,
+                  borderRadius: 16,
+                  background: tones.blue.softBg,
+                  border: `1px solid ${tones.blue.border}`,
+                  color: tones.blue.icon,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <GraduationCap size={20} />
+              </div>
+
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <h2 style={{ margin: 0, fontSize: 15 }}>
+                  Corsi di laurea consigliati
+                </h2>
+
+                <p
+                  style={{
+                    margin: "7px 0 12px",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.72)",
+                  }}
+                >
+                  In base alle risposte del test, questi sono i percorsi più
+                  coerenti da valutare con un orientatore.
+                </p>
+
+                <div style={{ display: "grid", gap: 10 }}>
+                  {risultato.percorsiConsigliati.map((percorso) => (
+                    <div
+                      key={`${percorso.classe}-${percorso.nome}`}
+                      style={{
+                        borderRadius: 18,
+                        padding: 13,
+                        background: "rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span
+                          style={{
+                            borderRadius: 999,
+                            padding: "5px 9px",
+                            background: "rgba(96,165,250,0.18)",
+                            color: "#BFDBFE",
+                            fontSize: 11,
+                            fontWeight: 950,
+                          }}
+                        >
+                          {percorso.classe}
+                        </span>
+                        <strong style={{ fontSize: 14 }}>
+                          {percorso.nome}
+                        </strong>
+                      </div>
+
+                      <p
+                        style={{
+                          margin: "8px 0 0",
+                          fontSize: 12,
+                          lineHeight: 1.55,
+                          color: "rgba(255,255,255,0.68)",
+                        }}
+                      >
+                        {percorso.motivo}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
           <ResultCard
-            icon={<GraduationCap size={20} />}
-            title="Percorsi compatibili"
-            text={risultato.percorso}
-            tone="blue"
+            icon={<ShieldCheck size={20} />}
+            title="Perché valutare una laurea online"
+            text={risultato.motivoModalitaOnline}
+            tone="cyan"
           />
 
           <ResultCard

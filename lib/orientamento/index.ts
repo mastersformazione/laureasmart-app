@@ -2,6 +2,7 @@ export type {
   LeadScoreInput,
   LeadScoreResult,
   OrientamentoData,
+  PercorsoConsigliatoOrientamento,
   RisultatoOrientamento,
   SegmentiOrientamento,
 } from "./types";
