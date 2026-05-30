@@ -431,6 +431,42 @@ export default function PercorsiPage() {
     }
   }
 
+  async function salvaPreferitoPersistente(percorso: Percorso) {
+    try {
+      const profiloSalvato = localStorage.getItem("gps_user");
+      const profilo = profiloSalvato ? JSON.parse(profiloSalvato) : null;
+
+      if (!profilo?.email) {
+        console.log(
+          "Salvataggio preferito persistente saltato: email mancante"
+        );
+        return;
+      }
+
+      const response = await fetch(
+        "https://laureasmart.it/api/ls-user-favorite-save.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_email: profilo.email,
+            percorso_id: percorso.id,
+            percorso_titolo: percorso.titolo,
+            percorso_tipo: percorso.tipo,
+            percorso_settore: percorso.settore,
+          }),
+        }
+      );
+
+      const result = await response.json();
+      console.log("SALVATAGGIO PREFERITO PERSISTENTE:", result);
+    } catch (error) {
+      console.error("Errore salvataggio preferito persistente:", error);
+    }
+  }
+
   function registraInteresse(percorso: Percorso) {
     const nuoviInteressi: InteresseStorage = {
       settori: { ...interessi.settori },
@@ -461,11 +497,16 @@ export default function PercorsiPage() {
     if (!giaPresente) {
       preferiti.push(percorso);
       localStorage.setItem("percorsi_preferiti", JSON.stringify(preferiti));
+
+      void salvaPreferitoPersistente(percorso);
+
       trackMetaEvent("AggiuntoPreferiti", {
         corso: percorso.titolo,
         categoria: percorso.settore,
         tipo: percorso.tipo,
       });
+    } else {
+      void salvaPreferitoPersistente(percorso);
     }
 
     setInteressi(nuoviInteressi);

@@ -417,11 +417,46 @@ export default function PreferitiPage() {
     setProfilo(getProfiloUtente());
   }, []);
 
+  async function eliminaPreferitoPersistente(percorsoId: string) {
+    try {
+      const profiloSalvato = localStorage.getItem("gps_user");
+      const profilo = profiloSalvato ? JSON.parse(profiloSalvato) : null;
+
+      if (!profilo?.email) {
+        console.log(
+          "Eliminazione preferito persistente saltata: email mancante"
+        );
+        return;
+      }
+
+      const response = await fetch(
+        "https://laureasmart.it/api/ls-user-favorite-delete.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_email: profilo.email,
+            percorso_id: percorsoId,
+          }),
+        }
+      );
+
+      const result = await response.json();
+      console.log("ELIMINAZIONE PREFERITO PERSISTENTE:", result);
+    } catch (error) {
+      console.error("Errore eliminazione preferito persistente:", error);
+    }
+  }
+
   function rimuoviPreferito(id: string) {
     const nuoviPreferiti = preferiti.filter((item) => item.id !== id);
 
     setPreferiti(nuoviPreferiti);
     localStorage.setItem("percorsi_preferiti", JSON.stringify(nuoviPreferiti));
+
+    void eliminaPreferitoPersistente(id);
 
     if (nuoviPreferiti.length < 2) {
       setMostraConfronto(false);
