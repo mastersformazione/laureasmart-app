@@ -106,6 +106,9 @@ const TASK_SAVE_API_URL = "https://laureasmart.it/api/ls-admin-task-save.php";
 const TASK_UPDATE_API_URL =
   "https://laureasmart.it/api/ls-admin-task-update-status.php";
 
+const LEAD_STATUS_UPDATE_API_URL =
+  "https://laureasmart.it/api/ls-admin-lead-update-status.php";
+
 const USERS_LIST_API_URL = "https://laureasmart.it/api/ls-admin-users-list.php";
 
 const statiLead = [
@@ -185,6 +188,8 @@ export default function AdminLeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(false);
   const [errore, setErrore] = useState("");
+  const [messaggioLeadStatus, setMessaggioLeadStatus] = useState("");
+  const [aggiornamentoLeadInCorso, setAggiornamentoLeadInCorso] = useState("");
   const [ultimoAggiornamento, setUltimoAggiornamento] = useState("");
 
   const [search, setSearch] = useState("");
@@ -416,6 +421,84 @@ export default function AdminLeadsPage() {
     } catch (error) {
       console.error(error);
       setMessaggioTask("Errore di connessione durante l'aggiornamento task.");
+    }
+  }
+
+  async function aggiornaStatusLead(lead: Lead, nuovoStatus: string) {
+    const email = lead.email;
+
+    setErrore("");
+    setMessaggioLeadStatus("");
+
+    if (!keyAttiva.trim()) {
+      setErrore("Chiave admin mancante.");
+      return;
+    }
+
+    if (!email) {
+      setErrore("Email lead mancante.");
+      return;
+    }
+
+    if (!nuovoStatus) {
+      setErrore("Seleziona uno stato valido.");
+      return;
+    }
+
+    const oldStatus = lead.lead_status || "nuovo";
+
+    if (oldStatus === nuovoStatus) {
+      return;
+    }
+
+    try {
+      setAggiornamentoLeadInCorso(email);
+
+      const response = await fetch(LEAD_STATUS_UPDATE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          admin_key: keyAttiva.trim(),
+          user_email: email,
+          old_status: oldStatus,
+          new_status: nuovoStatus,
+          operatore: "Admin Laurea Smart",
+          nota: `Cambio stato da ${oldStatus} a ${nuovoStatus}`,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setErrore(result.message || "Errore aggiornamento stato lead.");
+        return;
+      }
+
+      const nowIso = new Date().toISOString();
+      const updateLead = (item: Lead) =>
+        item.email === email
+          ? {
+              ...item,
+              lead_status: nuovoStatus,
+              ultimo_evento: "lead_status_aggiornato",
+              ultima_attivita_at: nowIso,
+              updated_at: nowIso,
+            }
+          : item;
+
+      setLeads((current) => current.map(updateLead));
+      setUtentiRegistrati((current) => current.map(updateLead));
+
+      setMessaggioLeadStatus(
+        `${getLeadName(lead)} aggiornato a: ${nuovoStatus}`
+      );
+    } catch (error) {
+      console.error(error);
+      setErrore("Errore di connessione durante l'aggiornamento stato lead.");
+    } finally {
+      setAggiornamentoLeadInCorso("");
     }
   }
 
@@ -891,6 +974,23 @@ export default function AdminLeadsPage() {
               {errore}
             </div>
           )}
+
+          {messaggioLeadStatus && (
+            <div
+              style={{
+                marginTop: 14,
+                padding: 12,
+                borderRadius: 16,
+                background: "rgba(22,163,74,0.16)",
+                border: "1px solid rgba(74,222,128,0.24)",
+                color: "#BBF7D0",
+                fontSize: 13,
+                fontWeight: 750,
+              }}
+            >
+              {messaggioLeadStatus}
+            </div>
+          )}
         </section>
 
         <section
@@ -1052,6 +1152,10 @@ export default function AdminLeadsPage() {
                 key={`${lead.email}-${lead.id}`}
                 lead={lead}
                 onCreateTask={() => apriTaskForm(lead)}
+                onUpdateStatus={(nuovoStatus) =>
+                  aggiornaStatusLead(lead, nuovoStatus)
+                }
+                statusUpdating={aggiornamentoLeadInCorso === lead.email}
               />
             ))}
           </div>
@@ -1319,9 +1423,13 @@ export default function AdminLeadsPage() {
 function LeadCard({
   lead,
   onCreateTask,
+  onUpdateStatus,
+  statusUpdating,
 }: {
   lead: Lead;
   onCreateTask: () => void;
+  onUpdateStatus: (nuovoStatus: string) => void;
+  statusUpdating: boolean;
 }) {
   const score = Number(lead.lead_score || 0);
   const scoreLabel = getScoreLabel(score);
@@ -1462,6 +1570,75 @@ function LeadCard({
           <div>
             <strong>Aspetto critico:</strong> {lead.aspetto_da_valutare || "—"}
           </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 16,
+          padding: 14,
+          borderRadius: 20,
+          background: "#EFF6FF",
+          border: "1px solid rgba(31,111,178,0.16)",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 12,
+          alignItems: "end",
+        }}
+      >
+        <label>
+          <span
+            style={{
+              display: "block",
+              marginBottom: 7,
+              fontSize: 12,
+              fontWeight: 900,
+              color: "#1E3A8A",
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Stato lead
+          </span>
+          <select
+            value={lead.lead_status || "nuovo"}
+            disabled={statusUpdating}
+            onChange={(event) => onUpdateStatus(event.target.value)}
+            style={{
+              width: "100%",
+              height: 44,
+              borderRadius: 15,
+              border: "1px solid rgba(31,111,178,0.22)",
+              background: "#FFFFFF",
+              color: "#0F172A",
+              padding: "0 12px",
+              fontSize: 14,
+              fontWeight: 800,
+              outline: "none",
+              cursor: statusUpdating ? "wait" : "pointer",
+            }}
+          >
+            {statiLead
+              .filter((item) => item.value !== "")
+              .map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+          </select>
+        </label>
+
+        <div
+          style={{
+            color: "#1E40AF",
+            fontSize: 12,
+            lineHeight: 1.45,
+            fontWeight: 700,
+          }}
+        >
+          {statusUpdating
+            ? "Aggiornamento stato in corso..."
+            : "Il cambio stato viene salvato nello storico lead."}
         </div>
       </div>
 
