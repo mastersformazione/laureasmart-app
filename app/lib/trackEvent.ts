@@ -1,7 +1,7 @@
 type TrackEventPayload = {
   event_name: string;
   event_category?: string;
-  event_value?: number;
+  event_value?: number | string | null;
   metadata?: Record<string, unknown>;
 };
 
@@ -12,7 +12,9 @@ type StoredUser = {
   telefono?: string;
 };
 
-const TRACK_ENDPOINT = "https://laureasmart.it/api/track-event.php";
+const LEGACY_TRACK_ENDPOINT = "https://laureasmart.it/api/track-event.php";
+const LS_USER_EVENT_ENDPOINT =
+  "https://laureasmart.it/api/ls-user-event-save.php";
 
 const getOrCreateSessionId = () => {
   if (typeof window === "undefined") return "";
@@ -45,35 +47,13 @@ const getStoredUser = (): StoredUser | null => {
   }
 };
 
-export const trackEvent = async ({
-  event_name,
-  event_category = "generale",
-  event_value,
-  metadata = {},
-}: TrackEventPayload): Promise<void> => {
-  if (typeof window === "undefined") return;
-
-  const user = getStoredUser();
-  const sessionId = getOrCreateSessionId();
-
-  const payload = {
-    user_email: user?.email || "",
-    user_nome: [user?.nome, user?.cognome].filter(Boolean).join(" "),
-    session_id: sessionId,
-    event_name,
-    event_category,
-    event_value: event_value ?? null,
-    page_url: window.location.href,
-    metadata: {
-      ...metadata,
-      user_agent: navigator.userAgent,
-      app_source: "laurea_smart_pwa",
-      created_client_at: new Date().toISOString(),
-    },
-  };
-
+async function sendTrackEvent(
+  endpoint: string,
+  payload: Record<string, unknown>,
+  label: string
+) {
   try {
-    const response = await fetch(TRACK_ENDPOINT, {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -85,12 +65,91 @@ export const trackEvent = async ({
     const result = await response.json().catch(() => null);
 
     if (!response.ok) {
-      console.error("Errore trackEvent:", result);
-      return;
+      console.error(`Errore ${label}:`, result);
+      return {
+        success: false,
+        endpoint,
+        result,
+      };
     }
 
-    console.log("trackEvent OK:", result);
+    console.log(`${label} OK:`, result);
+
+    return {
+      success: true,
+      endpoint,
+      result,
+    };
   } catch (error) {
-    console.error("Errore invio trackEvent:", error);
+    console.error(`Errore invio ${label}:`, error);
+
+    return {
+      success: false,
+      endpoint,
+      error,
+    };
   }
+}
+
+export const trackEvent = async ({
+  event_name,
+  event_category = "generale",
+  event_value,
+  metadata = {},
+}: TrackEventPayload): Promise<void> => {
+  if (typeof window === "undefined") return;
+
+  const user = getStoredUser();
+  const sessionId = getOrCreateSessionId();
+
+  const userFullName = [user?.nome, user?.cognome].filter(Boolean).join(" ");
+
+  const commonMetadata = {
+    ...metadata,
+    user_agent: navigator.userAgent,
+    app_source: "laurea_smart_pwa",
+    created_client_at: new Date().toISOString(),
+  };
+
+  /**
+   * Payload vecchio: mantiene la struttura già usata da track-event.php.
+   * Non lo modifichiamo troppo per evitare di rompere dati già esistenti.
+   */
+  const legacyPayload = {
+    user_email: user?.email || "",
+    user_nome: userFullName,
+    session_id: sessionId,
+    event_name,
+    event_category,
+    event_value: event_value ?? null,
+    page_url: window.location.href,
+    metadata: commonMetadata,
+  };
+
+  /**
+   * Payload nuovo: pensato per ls_user_events.
+   * L'endpoint PHP accetta metadata e lo salva in metadata_json.
+   */
+  const lsUserEventPayload = {
+    user_email: user?.email || "",
+    user_nome: userFullName,
+    session_id: sessionId,
+    event_name,
+    event_category,
+    event_value: event_value ?? null,
+    page_url: window.location.href,
+    metadata: commonMetadata,
+    user_agent: navigator.userAgent,
+    app_source: "laurea_smart_pwa",
+    created_client_at: new Date().toISOString(),
+  };
+
+  await Promise.allSettled([
+    sendTrackEvent(LEGACY_TRACK_ENDPOINT, legacyPayload, "trackEvent legacy"),
+    sendTrackEvent(
+      LS_USER_EVENT_ENDPOINT,
+      lsUserEventPayload,
+      "trackEvent ls_user_events"
+    ),
+  ]);
 };
