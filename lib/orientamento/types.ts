@@ -9,6 +9,7 @@ export type OrientamentoData = {
   tempo?: string;
   area?: string;
   aspetto_da_valutare?: string;
+  budget_mensile?: string;
 };
 
 export type SegmentiOrientamento = {

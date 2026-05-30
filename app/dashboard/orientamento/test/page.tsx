@@ -36,6 +36,7 @@ type OrientamentoData = {
   tempo?: string;
   area?: string;
   aspetto_da_valutare?: string;
+  budget_mensile?: string;
 };
 
 type StepItem = {
@@ -316,6 +317,17 @@ export default function OrientamentoPage() {
         "Esigenze di supporto allo studio, DSA, BES o disabilità",
         "Non saprei",
         "Preferisco parlarne con un orientatore",
+      ],
+    },
+
+    {
+      id: "budget_mensile",
+      domanda: "Qual è il budget mensile massimo che vorresti non superare?",
+      opzioni: [
+        "100 - 200 € al mese",
+        "200 - 300 € al mese",
+        "Oltre 300 € al mese",
+        "Preferisco parlare con un orientatore",
       ],
     },
   ];
@@ -736,6 +748,7 @@ export default function OrientamentoPage() {
     localStorage.setItem("tempo_studio", tempoStudioTag);
     localStorage.setItem("area_interesse", data.area || "");
     localStorage.setItem("aspetto_da_valutare", data.aspetto_da_valutare || "");
+    localStorage.setItem("budget_studi_mensile", data.budget_mensile || "");
     localStorage.setItem("segmento_intento", segmenti.segmento_intento);
     localStorage.setItem("segmento_ingresso", segmenti.segmento_ingresso);
     localStorage.setItem("segmento_urgenza", segmenti.segmento_urgenza);
@@ -761,6 +774,7 @@ export default function OrientamentoPage() {
         area: data.area || "",
         aspetto_da_valutare: data.aspetto_da_valutare || "",
         segmento_aspetto: segmenti.segmento_aspetto,
+        budget_mensile: data.budget_mensile || "",
         percorsi_consigliati: risultato.percorsiConsigliati.map(
           (percorso) => `${percorso.classe} ${percorso.nome}`
         ),
@@ -806,6 +820,7 @@ export default function OrientamentoPage() {
               tempo_disponibile: data.tempo || "",
               area_interesse: data.area || "",
               aspetto_da_valutare: data.aspetto_da_valutare || "",
+              budget_mensile: data.budget_mensile || "",
 
               profilo_utente: risultato.tipo,
               corso_suggerito: risultato.corsoSuggerito,
@@ -849,6 +864,7 @@ export default function OrientamentoPage() {
                 tempo: data.tempo || "",
                 area: data.area || "",
                 aspetto_da_valutare: data.aspetto_da_valutare || "",
+                budget_mensile: data.budget_mensile || "",
               },
 
               result: {
@@ -957,6 +973,7 @@ export default function OrientamentoPage() {
           risultato_tipo: risultato.tipo,
           corso_suggerito: risultato.corsoSuggerito,
           aspetto_da_valutare: data.aspetto_da_valutare || "",
+          budget_mensile: data.budget_mensile || "",
           segmento_intento: segmenti.segmento_intento,
           segmento_ingresso: segmenti.segmento_ingresso,
           segmento_urgenza: segmenti.segmento_urgenza,
