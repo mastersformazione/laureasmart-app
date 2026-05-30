@@ -8,6 +8,7 @@ import SpazioStudentiCard from "@/components/SpazioStudentiCard";
 import ConfrontoPossibilitaCard from "@/components/ConfrontoPossibilitaCard";
 import CompatibilitaPercorsoCard from "@/components/CompatibilitaPercorsoCard";
 import BottomNav from "@/components/ui/BottomNav";
+import AppCard from "@/components/ui/AppCard";
 import {
   BookOpen,
   Bell,
@@ -59,7 +60,7 @@ function FeatureCard({
         border: highlight
           ? "1px solid rgba(255,201,64,0.48)"
           : "1px solid rgba(120,194,255,0.18)",
-        padding: 16,
+        padding: 18,
         boxShadow: highlight
           ? "inset 0 4px 0 rgba(255,201,64,0.92), 0 20px 52px rgba(255,196,64,0.18)"
           : "inset 0 4px 0 rgba(120,194,255,0.42), 0 18px 46px rgba(0,0,0,0.28)",
@@ -72,10 +73,10 @@ function FeatureCard({
     >
       <div
         style={{
-          minHeight: 150,
+          minHeight: 158,
           borderRadius: 28,
           background: gradient,
-          padding: 20,
+          padding: 22,
           color: "#FFFFFF",
           position: "relative",
           overflow: "hidden",
@@ -139,8 +140,8 @@ function FeatureCard({
 
         <div
           style={{
-            width: 58,
-            height: 58,
+            width: 60,
+            height: 60,
             borderRadius: 20,
             background: "rgba(255,255,255,0.16)",
             border: "1px solid rgba(255,255,255,0.18)",
@@ -158,8 +159,8 @@ function FeatureCard({
         <h2
           style={{
             margin: "0 80px 8px 0",
-            fontSize: 24,
-            lineHeight: 1.04,
+            fontSize: 25,
+            lineHeight: 1.06,
             fontWeight: 850,
             letterSpacing: "-0.8px",
           }}
@@ -170,8 +171,8 @@ function FeatureCard({
         <p
           style={{
             margin: 0,
-            fontSize: 15,
-            lineHeight: 1.55,
+            fontSize: 16,
+            lineHeight: 1.58,
             opacity: 0.96,
             maxWidth: 290,
           }}
@@ -285,7 +286,7 @@ export default function Dashboard() {
         minHeight: "100vh",
         padding: "22px 18px 120px",
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
-        maxWidth: 430,
+        maxWidth: 460,
         margin: "0 auto",
         color: "#FFFFFF",
         background:
@@ -336,8 +337,8 @@ export default function Dashboard() {
         <p
           style={{
             margin: "14px 0 0",
-            fontSize: 15,
-            lineHeight: 1.6,
+            fontSize: 16,
+            lineHeight: 1.62,
             opacity: 0.95,
           }}
         >
@@ -378,7 +379,7 @@ export default function Dashboard() {
               outline: "none",
               background: "transparent",
               color: "#FFFFFF",
-              fontSize: 14,
+              fontSize: 15,
               fontFamily: "inherit",
             }}
           />
@@ -506,8 +507,8 @@ export default function Dashboard() {
               <p
                 style={{
                   margin: "9px 0 0",
-                  fontSize: 14.5,
-                  lineHeight: 1.5,
+                  fontSize: 15.5,
+                  lineHeight: 1.55,
                   color: "rgba(255,255,255,0.83)",
                 }}
               >
@@ -625,9 +626,9 @@ export default function Dashboard() {
               <p
                 style={{
                   margin: "7px 0 0",
-                  fontSize: 14,
-                  lineHeight: 1.45,
-                  color: "rgba(255,255,255,0.86)",
+                  fontSize: 15,
+                  lineHeight: 1.52,
+                  color: "rgba(255,255,255,0.88)",
                 }}
               >
                 {isGiaIscritto
@@ -943,70 +944,15 @@ function DarkCard({
   onClick?: () => void;
 }) {
   return (
-    <section
+    <AppCard
+      variant="dark"
+      title={title}
+      description={description}
+      badge={badge}
       onClick={onClick}
-      style={{
-        padding: 18,
-        borderRadius: 24,
-        background:
-          "linear-gradient(135deg, rgba(58,160,255,0.14), rgba(17,32,51,0.92))",
-        border: "1px solid rgba(120,194,255,0.20)",
-        boxShadow:
-          "inset 4px 0 0 rgba(58,160,255,0.72), 0 16px 38px rgba(0,0,0,0.26)",
-        cursor: onClick ? "pointer" : "default",
-        backdropFilter: "blur(16px)",
-      }}
+      className="ls-card-readable"
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
-      >
-        <h3
-          style={{
-            margin: 0,
-            fontSize: 17,
-            lineHeight: 1.25,
-            color: "#FFFFFF",
-            fontWeight: 850,
-          }}
-        >
-          {title}
-        </h3>
-
-        {badge && (
-          <span
-            style={{
-              padding: "6px 10px",
-              borderRadius: 999,
-              background: "rgba(58,160,255,0.26)",
-              border: "1px solid rgba(120,194,255,0.28)",
-              color: "#BFDBFE",
-              fontSize: 11,
-              fontWeight: 850,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {badge}
-          </span>
-        )}
-      </div>
-
-      <p
-        style={{
-          margin: "10px 0 0",
-          fontSize: 14,
-          lineHeight: 1.5,
-          color: "rgba(255,255,255,0.68)",
-        }}
-      >
-        {description}
-      </p>
-
       {children}
-    </section>
+    </AppCard>
   );
 }
