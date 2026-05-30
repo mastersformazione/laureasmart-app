@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BottomNav from "@/components/ui/BottomNav";
-import type { Percorso } from "@/lib/data/percorsi";
+import { percorsi, type Percorso } from "@/lib/data/percorsi";
 import {
   Heart,
   Search,
@@ -418,6 +418,70 @@ export default function PreferitiPage() {
     setProfilo(getProfiloUtente());
   }, []);
 
+  async function caricaPreferitiPersistenti() {
+    try {
+      const profiloSalvato = localStorage.getItem("gps_user");
+      const profiloUtente = profiloSalvato ? JSON.parse(profiloSalvato) : null;
+
+      if (!profiloUtente?.email) {
+        console.log(
+          "Caricamento preferiti persistenti saltato: email mancante"
+        );
+        return;
+      }
+
+      const response = await fetch(
+        "https://laureasmart.it/api/ls-user-favorites-list.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_email: profiloUtente.email,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!result?.success || !Array.isArray(result.favorites)) {
+        console.warn("Preferiti persistenti non disponibili:", result);
+        return;
+      }
+
+      const idsPreferitiDb = result.favorites
+        .map((item: { percorso_id?: string }) => item.percorso_id)
+        .filter(Boolean);
+
+      if (idsPreferitiDb.length === 0) {
+        return;
+      }
+
+      const preferitiCompleti = percorsi.filter((percorso) =>
+        idsPreferitiDb.includes(percorso.id)
+      );
+
+      if (preferitiCompleti.length === 0) {
+        console.warn(
+          "Preferiti presenti nel database ma non trovati nel catalogo locale:",
+          idsPreferitiDb
+        );
+        return;
+      }
+
+      setPreferiti(preferitiCompleti);
+      localStorage.setItem(
+        "percorsi_preferiti",
+        JSON.stringify(preferitiCompleti)
+      );
+
+      console.log("PREFERITI PERSISTENTI CARICATI:", preferitiCompleti);
+    } catch (error) {
+      console.error("Errore caricamento preferiti persistenti:", error);
+    }
+  }
+
   async function eliminaPreferitoPersistente(percorsoId: string) {
     try {
       const profiloSalvato = localStorage.getItem("gps_user");
@@ -496,6 +560,12 @@ export default function PreferitiPage() {
 
   const migliorePercorso = percorsiConScore[0];
   const whatsappConfrontoUrl = creaWhatsAppConfrontoUrl(percorsiConScore);
+
+  useEffect(() => {
+    void caricaPreferitiPersistenti();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main
