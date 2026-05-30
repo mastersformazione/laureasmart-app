@@ -383,6 +383,7 @@ export default function PreferitiPage() {
   const [queryRicerca, setQueryRicerca] = useState("");
   const [profilo, setProfilo] = useState<ProfiloUtente | null>(null);
   const [mostraConfronto, setMostraConfronto] = useState(false);
+  const [messaggioPreferito, setMessaggioPreferito] = useState("");
 
   const handleShareApp = async () => {
     const shareData = {
@@ -451,12 +452,23 @@ export default function PreferitiPage() {
   }
 
   function rimuoviPreferito(id: string) {
+    const percorsoRimosso = preferiti.find((item) => item.id === id);
     const nuoviPreferiti = preferiti.filter((item) => item.id !== id);
 
     setPreferiti(nuoviPreferiti);
     localStorage.setItem("percorsi_preferiti", JSON.stringify(nuoviPreferiti));
 
     void eliminaPreferitoPersistente(id);
+
+    setMessaggioPreferito(
+      percorsoRimosso?.titolo
+        ? `${percorsoRimosso.titolo} rimosso dai preferiti`
+        : "Percorso rimosso dai preferiti"
+    );
+
+    window.setTimeout(() => {
+      setMessaggioPreferito("");
+    }, 2600);
 
     if (nuoviPreferiti.length < 2) {
       setMostraConfronto(false);
@@ -499,6 +511,34 @@ export default function PreferitiPage() {
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
       }}
     >
+      {messaggioPreferito && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: "fixed",
+            left: "50%",
+            bottom: 92,
+            transform: "translateX(-50%)",
+            zIndex: 9999,
+            width: "calc(100% - 32px)",
+            maxWidth: 420,
+            padding: "14px 16px",
+            borderRadius: 18,
+            background: "#0F172A",
+            color: "#FFFFFF",
+            fontSize: 14,
+            fontWeight: 850,
+            lineHeight: 1.35,
+            textAlign: "center",
+            boxShadow: "0 18px 40px rgba(0,0,0,0.34)",
+            border: "1px solid rgba(255,255,255,0.10)",
+          }}
+        >
+          {messaggioPreferito}
+        </div>
+      )}
+
       <section
         style={{
           position: "relative",
@@ -603,7 +643,6 @@ export default function PreferitiPage() {
           Percorsi salvati: {preferiti.length}
         </div>
       </section>
-
       <section
         style={{
           marginBottom: 18,
@@ -654,7 +693,6 @@ export default function PreferitiPage() {
           </button>
         )}
       </section>
-
       {preferiti.length >= 2 && migliorePercorso && profilo && (
         <section
           style={{
@@ -758,7 +796,6 @@ export default function PreferitiPage() {
           </div>
         </section>
       )}
-
       {mostraConfronto && preferiti.length >= 2 && profilo && (
         <ConfrontoPercorsi
           percorsi={percorsiConScore}
@@ -766,7 +803,6 @@ export default function PreferitiPage() {
           whatsappUrl={whatsappConfrontoUrl}
         />
       )}
-
       {preferiti.length > 0 && (
         <section style={{ marginBottom: 18 }}>
           <div
@@ -874,7 +910,6 @@ export default function PreferitiPage() {
           </div>
         </section>
       )}
-
       {preferiti.length === 0 ? (
         <DarkEmptyCard />
       ) : preferitiFiltrati.length === 0 ? (
@@ -1154,7 +1189,7 @@ export default function PreferitiPage() {
                   }}
                 >
                   <MessageCircle size={18} />
-                  Ricevi il piano di studio spiegato
+                  Ricevi il piano di studi spiegato
                   <ArrowRight size={18} />
                 </a>
 
@@ -1185,7 +1220,6 @@ export default function PreferitiPage() {
           })}
         </div>
       )}
-
       <BottomNav />
     </main>
   );
@@ -1508,8 +1542,8 @@ function DarkEmptyCard() {
           color: "rgba(255,255,255,0.66)",
         }}
       >
-        Quando trovi un corso interessante, clicca su “Mi interessa” per
-        salvarlo qui.
+        Quando trovi un corso interessante, clicca su Mi interessa per salvarlo
+        qui.
       </p>
     </section>
   );
