@@ -50,6 +50,7 @@ type Lead = {
 
   lead_score?: number | null;
   lead_status?: string | null;
+  crm_status?: string | null;
   orientatore_assegnato?: string | null;
   ultimo_evento?: string | null;
   ultima_attivita_at?: string | null;
@@ -445,7 +446,7 @@ export default function AdminLeadsPage() {
       return;
     }
 
-    const oldStatus = lead.lead_status || "nuovo";
+    const oldStatus = lead.crm_status || "nuovo";
 
     if (oldStatus === nuovoStatus) {
       return;
@@ -463,6 +464,7 @@ export default function AdminLeadsPage() {
           admin_key: keyAttiva.trim(),
           user_email: email,
           old_status: oldStatus,
+          crm_status: nuovoStatus,
           new_status: nuovoStatus,
           operatore: "Admin Laurea Smart",
           nota: `Cambio stato da ${oldStatus} a ${nuovoStatus}`,
@@ -481,8 +483,8 @@ export default function AdminLeadsPage() {
         item.email === email
           ? {
               ...item,
-              lead_status: nuovoStatus,
-              ultimo_evento: "lead_status_aggiornato",
+              crm_status: nuovoStatus,
+              ultimo_evento: "crm_status_aggiornato",
               ultima_attivita_at: nowIso,
               updated_at: nowIso,
             }
@@ -521,7 +523,7 @@ export default function AdminLeadsPage() {
         body: JSON.stringify({
           admin_key: keyAttiva.trim(),
           search: search.trim(),
-          lead_status: leadStatus,
+          crm_status: leadStatus,
           orientatore_assegnato: orientatore,
           limit: 150,
         }),
@@ -579,7 +581,8 @@ export default function AdminLeadsPage() {
     ).length;
     const daChiamare = leads.filter(
       (lead) =>
-        lead.lead_status === "da_chiamare" || lead.lead_status === "nuovo"
+        lead.crm_status === "da_chiamare" ||
+        (lead.crm_status || "nuovo") === "nuovo"
     ).length;
     const conTelefono = leads.filter((lead) => Boolean(lead.telefono)).length;
 
@@ -887,7 +890,7 @@ export default function AdminLeadsPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Stato lead</label>
+              <label style={labelStyle}>Stato CRM</label>
               <select
                 value={leadStatus}
                 onChange={(event) => setLeadStatus(event.target.value)}
@@ -1360,7 +1363,7 @@ export default function AdminLeadsPage() {
                       </td>
                       <td style={tableCellStyle}>{utente.lead_score ?? 0}</td>
                       <td style={tableCellStyle}>
-                        {utente.lead_status || "nuovo"}
+                        {utente.crm_status || "nuovo"}
                       </td>
                       <td style={tableCellStyle}>
                         {utente.orientatore_assegnato || "—"}
@@ -1475,7 +1478,8 @@ function LeadCard({
               marginTop: 10,
             }}
           >
-            <Badge>{lead.lead_status || "nuovo"}</Badge>
+            <Badge>Temp: {lead.lead_status || "nuovo"}</Badge>
+            <Badge>CRM: {lead.crm_status || "nuovo"}</Badge>
             <Badge>{lead.orientatore_assegnato || "Non assegnato"}</Badge>
             <Badge>{lead.area_interesse || "Area non indicata"}</Badge>
           </div>
@@ -1598,10 +1602,10 @@ function LeadCard({
               letterSpacing: "0.04em",
             }}
           >
-            Stato lead
+            Stato CRM
           </span>
           <select
-            value={lead.lead_status || "nuovo"}
+            value={lead.crm_status || "nuovo"}
             disabled={statusUpdating}
             onChange={(event) => onUpdateStatus(event.target.value)}
             style={{
