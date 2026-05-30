@@ -855,7 +855,133 @@ export default function OrientamentoPage() {
         segmento_aspetto: segmenti.segmento_aspetto,
       },
     });
+    try {
+      if (!user?.email) {
+        console.log("Salvataggio profilo persistente saltato: email mancante");
+      } else {
+        let leadScore = 20;
 
+        if (user.telefono) leadScore += 20;
+        if (segmenti.segmento_urgenza === "ALTA") leadScore += 30;
+        if (segmenti.segmento_urgenza === "MEDIO_ALTA") leadScore += 20;
+        if (segmenti.segmento_intento === "CAMBIO_LAVORO") leadScore += 15;
+        if (segmenti.segmento_intento === "CONCORSI") leadScore += 15;
+        if (segmenti.segmento_studente === "GIA_ISCRITTO") leadScore += 10;
+        if (data.area) leadScore += 10;
+        if (data.aspetto_da_valutare) leadScore += 10;
+
+        leadScore = Math.min(leadScore, 100);
+
+        const leadStatus =
+          leadScore >= 80
+            ? "caldo"
+            : leadScore >= 50
+            ? "tiepido"
+            : leadScore >= 25
+            ? "freddo"
+            : "nuovo";
+
+        const profileResponse = await fetch(
+          "https://laureasmart.it/api/ls-user-profile-save.php",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: user.email,
+              nome: user.nome || "",
+              cognome: user.cognome || "",
+              telefono: user.telefono || "",
+
+              stato_iscrizione: data.stato_iscrizione || "",
+              segmento_studente: segmenti.segmento_studente,
+
+              eta: data.eta || "",
+              situazione: data.situazione || "",
+              titolo_studio: data.titolo_studio || "",
+              obiettivo: data.obiettivo || "",
+              motivazione_studio: data.motivazione_studio || "",
+              urgenza: data.urgenza || "",
+              tempo_disponibile: data.tempo || "",
+              area_interesse: data.area || "",
+              aspetto_da_valutare: data.aspetto_da_valutare || "",
+
+              profilo_utente: risultato.tipo,
+              corso_suggerito: risultato.corsoSuggerito,
+
+              segmento_intento: segmenti.segmento_intento,
+              segmento_ingresso: segmenti.segmento_ingresso,
+              segmento_urgenza: segmenti.segmento_urgenza,
+              segmento_motivazione: segmenti.segmento_motivazione,
+              segmento_aspetto: segmenti.segmento_aspetto,
+
+              lead_score: leadScore,
+              lead_status: leadStatus,
+              orientatore_assegnato: "Giulia C.",
+              ultimo_evento: "test_completato",
+            }),
+          }
+        );
+
+        const profileResult = await profileResponse.json();
+        console.log("SALVATAGGIO PROFILO PERSISTENTE:", profileResult);
+
+        const testResponse = await fetch(
+          "https://laureasmart.it/api/ls-orientation-test-save.php",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_email: user.email,
+              test_source: "dashboard_app",
+
+              answers: {
+                stato_iscrizione: data.stato_iscrizione || "",
+                eta: data.eta || "",
+                situazione: data.situazione || "",
+                titolo_studio: data.titolo_studio || "",
+                obiettivo: data.obiettivo || "",
+                motivazione_studio: data.motivazione_studio || "",
+                urgenza: data.urgenza || "",
+                tempo: data.tempo || "",
+                area: data.area || "",
+                aspetto_da_valutare: data.aspetto_da_valutare || "",
+              },
+
+              result: {
+                tipo: risultato.tipo,
+
+                descrizione: risultato.descrizione,
+                corso_suggerito: risultato.corsoSuggerito,
+              },
+
+              segments: {
+                segmento_studente: segmenti.segmento_studente,
+                segmento_intento: segmenti.segmento_intento,
+                segmento_ingresso: segmenti.segmento_ingresso,
+                segmento_urgenza: segmenti.segmento_urgenza,
+                segmento_motivazione: segmenti.segmento_motivazione,
+                segmento_aspetto: segmenti.segmento_aspetto,
+              },
+
+              risultato_tipo: risultato.tipo,
+              corso_suggerito: risultato.corsoSuggerito,
+            }),
+          }
+        );
+
+        const testResult = await testResponse.json();
+        console.log("SALVATAGGIO SNAPSHOT TEST:", testResult);
+      }
+    } catch (persistentSaveError) {
+      console.error(
+        "Errore salvataggio persistente profilo/test:",
+        persistentSaveError
+      );
+    }
     try {
       if (!user?.email) {
         console.log("Email utente mancante");
