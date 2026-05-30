@@ -87,6 +87,16 @@ type TasksApiResponse = {
   tasks?: LeadTask[];
 };
 
+type UsersApiResponse = {
+  success: boolean;
+  message?: string;
+  page?: number;
+  per_page?: number;
+  total?: number;
+  total_pages?: number;
+  users?: Lead[];
+};
+
 const API_URL = "https://laureasmart.it/api/ls-admin-leads-list.php";
 
 const TASKS_LIST_API_URL = "https://laureasmart.it/api/ls-admin-tasks-list.php";
@@ -95,6 +105,8 @@ const TASK_SAVE_API_URL = "https://laureasmart.it/api/ls-admin-task-save.php";
 
 const TASK_UPDATE_API_URL =
   "https://laureasmart.it/api/ls-admin-task-update-status.php";
+
+const USERS_LIST_API_URL = "https://laureasmart.it/api/ls-admin-users-list.php";
 
 const statiLead = [
   { value: "", label: "Tutti gli stati" },
@@ -183,6 +195,14 @@ export default function AdminLeadsPage() {
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [messaggioTask, setMessaggioTask] = useState("");
 
+  const [utentiRegistrati, setUtentiRegistrati] = useState<Lead[]>([]);
+  const [loadingUtenti, setLoadingUtenti] = useState(false);
+  const [paginaUtenti, setPaginaUtenti] = useState(1);
+  const [totaleUtenti, setTotaleUtenti] = useState(0);
+  const [totalePagineUtenti, setTotalePagineUtenti] = useState(1);
+  const [searchUtenti, setSearchUtenti] = useState("");
+  const [erroreUtenti, setErroreUtenti] = useState("");
+
   const [taskLead, setTaskLead] = useState<Lead | null>(null);
   const [taskTitolo, setTaskTitolo] = useState("");
   const [taskDescrizione, setTaskDescrizione] = useState("");
@@ -228,6 +248,48 @@ export default function AdminLeadsPage() {
       );
     } finally {
       setLoadingTasks(false);
+    }
+  }
+
+  async function caricaUtentiRegistrati(pageToLoad = paginaUtenti) {
+    setErroreUtenti("");
+
+    if (!keyAttiva.trim()) {
+      return;
+    }
+
+    try {
+      setLoadingUtenti(true);
+
+      const response = await fetch(USERS_LIST_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          admin_key: keyAttiva.trim(),
+          page: pageToLoad,
+          per_page: 50,
+          search: searchUtenti.trim(),
+        }),
+      });
+
+      const result = (await response.json()) as UsersApiResponse;
+
+      if (!response.ok || !result.success) {
+        setErroreUtenti(result.message || "Errore nel caricamento utenti.");
+        return;
+      }
+
+      setUtentiRegistrati(result.users || []);
+      setPaginaUtenti(result.page || pageToLoad);
+      setTotaleUtenti(result.total || 0);
+      setTotalePagineUtenti(result.total_pages || 1);
+    } catch (error) {
+      console.error(error);
+      setErroreUtenti("Errore di connessione durante il caricamento utenti.");
+    } finally {
+      setLoadingUtenti(false);
     }
   }
 
@@ -308,6 +370,7 @@ export default function AdminLeadsPage() {
       setMessaggioTask("Task creato correttamente.");
       chiudiTaskForm();
       await caricaTasks();
+      await caricaUtentiRegistrati(1);
     } catch (error) {
       console.error(error);
       setMessaggioTask("Errore di connessione durante il salvataggio task.");
@@ -419,6 +482,11 @@ export default function AdminLeadsPage() {
     setAdminKey("");
     setLeads([]);
     setTasks([]);
+    setUtentiRegistrati([]);
+    setPaginaUtenti(1);
+    setTotaleUtenti(0);
+    setTotalePagineUtenti(1);
+    setErroreUtenti("");
   }
 
   const statistiche = useMemo(() => {
@@ -988,6 +1056,261 @@ export default function AdminLeadsPage() {
             ))}
           </div>
         )}
+
+        <section
+          style={{
+            marginTop: 28,
+            borderRadius: 28,
+            padding: 18,
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: 16,
+              marginBottom: 16,
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 24,
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                Utenti registrati in app
+              </h2>
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  color: "rgba(255,255,255,0.62)",
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                }}
+              >
+                Elenco cronologico dal più recente al meno recente, 50 contatti
+                per pagina.
+              </p>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ position: "relative" }}>
+                <Search
+                  size={17}
+                  style={{
+                    position: "absolute",
+                    left: 14,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "rgba(255,255,255,0.46)",
+                  }}
+                />
+                <input
+                  value={searchUtenti}
+                  onChange={(event) => setSearchUtenti(event.target.value)}
+                  placeholder="Cerca contatto..."
+                  style={{
+                    ...inputStyle,
+                    width: 260,
+                    paddingLeft: 42,
+                  }}
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => caricaUtentiRegistrati(1)}
+                disabled={loadingUtenti}
+                style={secondaryButtonStyle}
+              >
+                <RefreshCw size={17} />
+                {loadingUtenti ? "Carico..." : "Carica utenti"}
+              </button>
+            </div>
+          </div>
+
+          {erroreUtenti && (
+            <div
+              style={{
+                marginBottom: 12,
+                padding: 12,
+                borderRadius: 16,
+                background: "rgba(220,38,38,0.14)",
+                border: "1px solid rgba(248,113,113,0.24)",
+                color: "#fecaca",
+                fontSize: 13,
+                fontWeight: 700,
+              }}
+            >
+              {erroreUtenti}
+            </div>
+          )}
+
+          <div
+            style={{
+              marginBottom: 12,
+              color: "rgba(255,255,255,0.62)",
+              fontSize: 13,
+              fontWeight: 750,
+            }}
+          >
+            Totale contatti: {totaleUtenti} · Pagina {paginaUtenti} di{" "}
+            {totalePagineUtenti}
+          </div>
+
+          <div
+            style={{
+              overflowX: "auto",
+              borderRadius: 20,
+              border: "1px solid rgba(255,255,255,0.10)",
+            }}
+          >
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                minWidth: 980,
+                background: "rgba(255,255,255,0.04)",
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.74)",
+                    fontSize: 12,
+                    textAlign: "left",
+                  }}
+                >
+                  <th style={tableHeaderStyle}>Arrivo</th>
+                  <th style={tableHeaderStyle}>Contatto</th>
+                  <th style={tableHeaderStyle}>Telefono</th>
+                  <th style={tableHeaderStyle}>Area</th>
+                  <th style={tableHeaderStyle}>Corso suggerito</th>
+                  <th style={tableHeaderStyle}>Score</th>
+                  <th style={tableHeaderStyle}>Stato</th>
+                  <th style={tableHeaderStyle}>Orientatore</th>
+                  <th style={tableHeaderStyle}>Ultimo evento</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {utentiRegistrati.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={9}
+                      style={{
+                        padding: 18,
+                        color: "rgba(255,255,255,0.62)",
+                        fontSize: 14,
+                        textAlign: "center",
+                      }}
+                    >
+                      Nessun contatto caricato.
+                    </td>
+                  </tr>
+                ) : (
+                  utentiRegistrati.map((utente) => (
+                    <tr
+                      key={`${utente.email}-${utente.id}`}
+                      style={{
+                        borderTop: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      <td style={tableCellStyle}>
+                        {formatDate(utente.created_at)}
+                      </td>
+                      <td style={tableCellStyle}>
+                        <div style={{ fontWeight: 900, color: "#FFFFFF" }}>
+                          {getLeadName(utente)}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 3,
+                            color: "rgba(255,255,255,0.58)",
+                            fontSize: 12,
+                          }}
+                        >
+                          {utente.email}
+                        </div>
+                      </td>
+                      <td style={tableCellStyle}>{utente.telefono || "—"}</td>
+                      <td style={tableCellStyle}>
+                        {utente.area_interesse || "—"}
+                      </td>
+                      <td style={tableCellStyle}>
+                        {utente.corso_suggerito || "—"}
+                      </td>
+                      <td style={tableCellStyle}>{utente.lead_score ?? 0}</td>
+                      <td style={tableCellStyle}>
+                        {utente.lead_status || "nuovo"}
+                      </td>
+                      <td style={tableCellStyle}>
+                        {utente.orientatore_assegnato || "—"}
+                      </td>
+                      <td style={tableCellStyle}>
+                        {utente.ultimo_evento || "—"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+              marginTop: 14,
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() =>
+                caricaUtentiRegistrati(Math.max(1, paginaUtenti - 1))
+              }
+              disabled={loadingUtenti || paginaUtenti <= 1}
+              style={{
+                ...secondaryButtonStyle,
+                opacity: paginaUtenti <= 1 ? 0.45 : 1,
+              }}
+            >
+              Pagina precedente
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                caricaUtentiRegistrati(
+                  Math.min(totalePagineUtenti, paginaUtenti + 1)
+                )
+              }
+              disabled={loadingUtenti || paginaUtenti >= totalePagineUtenti}
+              style={{
+                ...secondaryButtonStyle,
+                opacity: paginaUtenti >= totalePagineUtenti ? 0.45 : 1,
+              }}
+            >
+              Pagina successiva
+            </button>
+          </div>
+        </section>
       </div>
     </main>
   );
@@ -1545,4 +1868,18 @@ const smallTaskButtonStyle: CSSProperties = {
   justifyContent: "center",
   gap: 6,
   cursor: "pointer",
+};
+
+const tableHeaderStyle: CSSProperties = {
+  padding: "12px 14px",
+  fontWeight: 900,
+  whiteSpace: "nowrap",
+};
+
+const tableCellStyle: CSSProperties = {
+  padding: "13px 14px",
+  color: "rgba(255,255,255,0.76)",
+  fontSize: 13,
+  lineHeight: 1.35,
+  verticalAlign: "top",
 };
