@@ -20,10 +20,25 @@ export type SegmentiOrientamento = {
   segmento_aspetto: string;
 };
 
+export type PercorsoConsigliatoOrientamento = {
+  classe: string;
+  nome: string;
+  area: string;
+  motivo: string;
+  priorita: "alta" | "media" | "bassa";
+};
+
 export type RisultatoOrientamento = {
   tipo: string;
   descrizione: string;
   corsoSuggerito: string;
+
+  percorsiConsigliati: PercorsoConsigliatoOrientamento[];
+
+  modalitaPreferibile: "online" | "valutazione_orientatore";
+  motivoModalitaOnline: string;
+
+  testoRispostaFinale: string;
 };
 
 export type LeadScoreInput = {
