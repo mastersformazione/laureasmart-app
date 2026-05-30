@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import BottomNav from "@/components/ui/BottomNav";
+import AppBadge from "@/components/ui/AppBadge";
+import AppButton from "@/components/ui/AppButton";
+import AppCard from "@/components/ui/AppCard";
 import {
   ArrowLeft,
   ArrowRight,
@@ -227,6 +230,21 @@ function normalizzaCasoApprovato(caso: ApprovedCaseApi): CasoStudente {
   };
 }
 
+function getCaseVariant(index: number, caso: CasoStudente) {
+  if (caso.fonte === "utente") return "purple" as const;
+
+  const variants = ["white", "blue", "cyan", "green", "amber"] as const;
+  return variants[index % variants.length];
+}
+
+function getBadgeVariant(caso: CasoStudente) {
+  if (caso.fonte === "utente") return "purple" as const;
+  if (caso.icon === "costi") return "amber" as const;
+  if (caso.icon === "paura") return "red" as const;
+  if (caso.icon === "cfu") return "green" as const;
+  return "blue" as const;
+}
+
 export default function SpazioStudentiPage() {
   const router = useRouter();
   const [categoriaAttiva, setCategoriaAttiva] = useState("Tutti");
@@ -295,8 +313,8 @@ export default function SpazioStudentiPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#1F6FB2_0%,#0B1728_42%,#07111F_100%)] px-4 py-6 pb-28 text-white">
-      <div className="mx-auto max-w-3xl">
+    <main className="ls-dark-page">
+      <div className="ls-page-container max-w-3xl">
         <button
           type="button"
           onClick={() => router.back()}
@@ -306,43 +324,53 @@ export default function SpazioStudentiPage() {
           Torna indietro
         </button>
 
-        <section className="relative overflow-hidden rounded-[34px] border border-sky-300/25 bg-gradient-to-br from-sky-300/18 via-white/8 to-white/[0.03] p-5 shadow-[0_30px_90px_rgba(15,23,42,0.35)]">
-          <div className="relative">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200/25 bg-sky-100/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-sky-100">
-              <Sparkles className="h-3.5 w-3.5" />
-              Casi e dubbi reali
-            </div>
-
-            <h1 className="text-[34px] font-black leading-[0.98] tracking-tight sm:text-5xl">
-              Spazio Studenti
-            </h1>
-
-            <p className="mt-4 text-[16px] leading-7 text-slate-100/88">
-              Trova domande e situazioni simili alla tua. I casi sono guidati da
-              Laurea Smart e ti aiutano a capire quale prossimo passo può essere
-              più utile prima di scegliere.
-            </p>
-
-            <button
+        <AppCard
+          variant="dark"
+          badge="Casi e dubbi reali"
+          icon={<Sparkles className="h-6 w-6" />}
+          title="Spazio Studenti"
+          description="Trova domande e situazioni simili alla tua. I casi sono guidati da Laurea Smart e ti aiutano a capire quale prossimo passo può essere più utile prima di scegliere."
+        >
+          <div style={{ display: "grid", gap: 14 }}>
+            <AppButton
               type="button"
               onClick={() => router.push("/dashboard/spazio-studenti/racconta")}
-              className="mt-5 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-300 via-cyan-200 to-blue-200 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_18px_42px_rgba(56,189,248,0.25)] transition hover:-translate-y-0.5"
             >
               <PenLine className="h-5 w-5" />
               Racconta il tuo caso
-            </button>
+            </AppButton>
 
-            <div className="mt-5 rounded-3xl border border-cyan-200/18 bg-cyan-200/10 p-4">
-              <div className="flex items-start gap-3">
-                <UsersRound className="mt-0.5 h-5 w-5 shrink-0 text-cyan-100" />
-                <p className="text-sm leading-6 text-slate-100/86">
+            <div
+              style={{
+                borderRadius: 22,
+                border: "1px solid rgba(125,211,252,0.22)",
+                background: "rgba(232,247,251,0.12)",
+                padding: 16,
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "flex-start", gap: 12 }}
+              >
+                <UsersRound
+                  className="mt-0.5 h-5 w-5 shrink-0"
+                  style={{ color: "#BAE6FD" }}
+                />
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 15,
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.86)",
+                    fontWeight: 550,
+                  }}
+                >
                   Non è un forum libero: è uno spazio ordinato con problemi
                   frequenti, risposte brevi e casi approvati da Laurea Smart.
                 </p>
               </div>
             </div>
           </div>
-        </section>
+        </AppCard>
 
         <section className="mt-5">
           <div className="flex gap-2 overflow-x-auto pb-2">
@@ -367,21 +395,20 @@ export default function SpazioStudentiPage() {
           </div>
 
           {loadingApproved && (
-            <p className="mt-2 text-sm text-slate-300">
+            <p className="mt-2 text-sm font-bold text-slate-300">
               Caricamento casi approvati...
             </p>
           )}
         </section>
 
         <section className="mt-4 grid gap-4">
-          {casiFiltrati.map((caso) => {
+          {casiFiltrati.map((caso, index) => {
             const Icon = iconMap[caso.icon];
+            const variant = getCaseVariant(index, caso);
+            const badgeVariant = getBadgeVariant(caso);
 
             return (
-              <article
-                key={caso.id}
-                className="overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.07] p-5 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-sky-200/25 hover:bg-white/[0.09]"
-              >
+              <AppCard key={caso.id} variant={variant}>
                 <div className="mb-4 flex items-start gap-3">
                   {caso.foto_url ? (
                     <img
@@ -390,59 +417,152 @@ export default function SpazioStudentiPage() {
                       className="h-12 w-12 shrink-0 rounded-2xl border border-sky-200/20 object-cover"
                     />
                   ) : (
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-300/15 text-sky-100 ring-1 ring-sky-200/20">
+                    <div
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 18,
+                        background: "rgba(31,111,178,0.12)",
+                        color: "var(--ls-primary)",
+                        display: "grid",
+                        placeItems: "center",
+                        flexShrink: 0,
+                      }}
+                    >
                       <Icon className="h-6 w-6" />
                     </div>
                   )}
 
-                  <div>
-                    <p className="mb-1 text-[11px] font-black uppercase tracking-[0.16em] text-sky-100">
-                      {caso.categoria}
-                    </p>
-                    <h2 className="text-xl font-black leading-tight text-white">
+                  <div style={{ minWidth: 0 }}>
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <AppBadge variant={badgeVariant}>
+                        {caso.categoria}
+                      </AppBadge>
+                      <AppBadge
+                        variant={caso.fonte === "utente" ? "purple" : "gray"}
+                      >
+                        {caso.fonte === "utente"
+                          ? "Caso approvato"
+                          : "Caso frequente"}
+                      </AppBadge>
+                    </div>
+
+                    <h2
+                      style={{
+                        margin: 0,
+                        fontSize: 22,
+                        lineHeight: 1.18,
+                        letterSpacing: "-0.035em",
+                        fontWeight: 900,
+                        color: "var(--ls-text)",
+                      }}
+                    >
                       {caso.domanda}
                     </h2>
-                    <p className="mt-1 text-xs font-bold text-slate-300/80">
+
+                    <p
+                      style={{
+                        margin: "7px 0 0",
+                        fontSize: 13,
+                        lineHeight: 1.4,
+                        fontWeight: 800,
+                        color: "var(--ls-muted)",
+                      }}
+                    >
                       {caso.nome_pubblico || "Studente Laurea Smart"}
-                      {caso.fonte === "utente"
-                        ? " · caso approvato"
-                        : " · caso frequente"}
                     </p>
-                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-200/76">
+
+                    <p
+                      style={{
+                        margin: "10px 0 0",
+                        whiteSpace: "pre-wrap",
+                        fontSize: 15,
+                        lineHeight: 1.62,
+                        color: "var(--ls-text-soft)",
+                        fontWeight: 520,
+                      }}
+                    >
                       {caso.breve}
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-white/10 bg-[#061827]/60 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-black text-white">
-                    <CircleHelp className="h-4 w-4 text-sky-100" />
+                <div
+                  style={{
+                    borderRadius: 22,
+                    border: "1px solid rgba(31,111,178,0.12)",
+                    background: "#FFFFFF",
+                    padding: 16,
+                    boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+                  }}
+                >
+                  <div
+                    style={{
+                      marginBottom: 8,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      fontSize: 14,
+                      fontWeight: 900,
+                      color: "var(--ls-primary)",
+                    }}
+                  >
+                    <CircleHelp className="h-4 w-4" />
                     Risposta Laurea Smart
                   </div>
-                  <p className="text-sm leading-6 text-slate-200/82">
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 15,
+                      lineHeight: 1.62,
+                      color: "var(--ls-text-soft)",
+                      fontWeight: 520,
+                    }}
+                  >
                     {caso.risposta}
                   </p>
                 </div>
 
-                <div className="mt-3 rounded-3xl border border-cyan-200/18 bg-cyan-200/10 p-4">
-                  <p className="text-sm font-black text-cyan-100">
+                <div
+                  style={{
+                    marginTop: 12,
+                    borderRadius: 22,
+                    border: "1px solid var(--ls-cyan-border)",
+                    background: "var(--ls-cyan-soft)",
+                    padding: 16,
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 14,
+                      fontWeight: 900,
+                      color: "var(--ls-cyan-text)",
+                    }}
+                  >
                     Prossimo passo consigliato
                   </p>
-                  <p className="mt-1 text-sm leading-6 text-slate-200/82">
+                  <p
+                    style={{
+                      margin: "6px 0 0",
+                      fontSize: 15,
+                      lineHeight: 1.62,
+                      color: "var(--ls-text-soft)",
+                      fontWeight: 520,
+                    }}
+                  >
                     {caso.prossimoPasso}
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleCta(caso)}
-                  className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-300 via-cyan-200 to-blue-200 px-5 py-3 text-center text-sm font-black text-slate-950 shadow-[0_16px_34px_rgba(56,189,248,0.22)] transition hover:-translate-y-0.5"
-                >
-                  {caso.whatsapp && <MessageCircle className="h-5 w-5" />}
-                  {caso.ctaLabel}
-                  <ArrowRight className="h-5 w-5" />
-                </button>
-              </article>
+                <div className="mt-4">
+                  <AppButton type="button" onClick={() => handleCta(caso)}>
+                    {caso.whatsapp && <MessageCircle className="h-5 w-5" />}
+                    {caso.ctaLabel}
+                    <ArrowRight className="h-5 w-5" />
+                  </AppButton>
+                </div>
+              </AppCard>
             );
           })}
         </section>
