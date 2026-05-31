@@ -327,9 +327,14 @@ export default function OrientamentoGratuitoLandingPage() {
     setTestHref(tracking.href);
   }, []);
 
-  function handleStartTest() {
+  async function handleStartTest(event: React.MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+
     startOnboarding();
-    void trackTestStarted();
+
+    await trackTestStarted();
+
+    window.location.href = testHref;
   }
 
   return (
