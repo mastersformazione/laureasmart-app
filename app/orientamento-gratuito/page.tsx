@@ -44,7 +44,7 @@ function getOrCreateTrackingData() {
 
     let clickId = fromUrl || localStorage.getItem("ls_download_click_id") || "";
 
-    let source =
+    const source =
       sourceFromUrl ||
       localStorage.getItem("ls_download_source") ||
       "orientation_intro";
