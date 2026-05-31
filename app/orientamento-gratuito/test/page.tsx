@@ -1460,7 +1460,7 @@ function getStoredDownloadSource() {
 }
 
 async function trackDownloadFunnelEvent(payload: {
-  event_name: "test_form_reached" | "test_lead_submitted";
+  event_name: "test_started" | "test_form_reached" | "test_lead_submitted";
   lead_email?: string;
   lead_nome?: string;
   lead_telefono?: string;
@@ -1502,6 +1502,7 @@ export default function OrientamentoGratuitoTestPage() {
   });
   const [loading, setLoading] = useState(false);
   const [errore, setErrore] = useState("");
+  const [testStartedTracked, setTestStartedTracked] = useState(false);
 
   const activeSteps = useMemo(
     () =>
@@ -1523,6 +1524,13 @@ export default function OrientamentoGratuitoTestPage() {
   const risultato = useMemo(() => getRisultato(data), [data]);
 
   function handleAnswer(value: string) {
+    if (!testStartedTracked) {
+      setTestStartedTracked(true);
+      void trackDownloadFunnelEvent({
+        event_name: "test_started",
+      });
+    }
+
     const nextData = {
       ...data,
       [currentStep.id]: value,
