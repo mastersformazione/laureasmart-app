@@ -9,7 +9,9 @@ import {
   Download,
   Loader2,
   MousePointerClick,
+  PlayCircle,
   RefreshCcw,
+  TrendingUp,
   Search,
   Target,
   UserCheck,
@@ -28,13 +30,22 @@ const ADMIN_KEY = "Fra29Sus03";
 
 type FunnelSummary = {
   click_totali: number;
+  test_iniziati?: number;
   arrivati_al_form: number;
   lead_inviati: number;
   solo_click: number;
+  arrivati_form_senza_dati?: number;
+  persi_prima_del_form?: number;
   persi_sul_form: number;
+  conversione_click_test?: number;
   conversione_click_form: number;
   conversione_click_lead: number;
   conversione_form_lead: number;
+  percentuale_solo_click?: number;
+  percentuale_arrivati_form_senza_dati?: number;
+  percentuale_lead_finali?: number;
+  perdita_click_form?: number;
+  perdita_form_lead?: number;
 };
 
 type FunnelRow = {
@@ -50,6 +61,7 @@ type FunnelRow = {
   utm_content?: string;
   utm_term?: string;
   funnel_status?: string | null;
+  test_started_at?: string | null;
   form_reached_at?: string | null;
   lead_submitted_at?: string | null;
   lead_email?: string | null;
@@ -57,7 +69,7 @@ type FunnelRow = {
   lead_telefono?: string | null;
   created_at?: string;
   stato_label: string;
-  stato_key: "solo_click" | "arrivato_form" | "lead_inviato";
+  stato_key: "solo_click" | "test_iniziato" | "arrivato_form" | "lead_inviato";
 };
 
 type ApiResponse = {
@@ -139,6 +151,14 @@ function statusStyle(status: FunnelRow["stato_key"]): React.CSSProperties {
     };
   }
 
+  if (status === "test_iniziato") {
+    return {
+      background: "#F3E8FF",
+      color: "#7E22CE",
+      border: "1px solid rgba(126,34,206,0.18)",
+    };
+  }
+
   return {
     background: "#EAF3FB",
     color: "#1F6FB2",
@@ -162,6 +182,14 @@ function formatDate(value?: string | null) {
   }
 }
 
+function formatPercent(value?: number | null) {
+  const numberValue = Number(value ?? 0);
+
+  if (!Number.isFinite(numberValue)) return "0%";
+
+  return `${numberValue.toFixed(2).replace(".", ",")}%`;
+}
+
 function StatCard({
   title,
   value,
@@ -173,7 +201,7 @@ function StatCard({
   value: string | number;
   subtitle: string;
   icon: React.ReactNode;
-  tone: "blue" | "green" | "amber" | "purple" | "red";
+  tone: "blue" | "green" | "amber" | "purple" | "red" | "cyan";
 }) {
   const tones = {
     blue: {
@@ -195,6 +223,10 @@ function StatCard({
     red: {
       bg: "#FEF2F2",
       color: "#DC2626",
+    },
+    cyan: {
+      bg: "#E8F7FB",
+      color: "#0E7490",
     },
   };
 
@@ -260,6 +292,81 @@ function StatCard({
       >
         {subtitle}
       </p>
+    </section>
+  );
+}
+
+function FunnelInsight({ summary }: { summary: FunnelSummary }) {
+  return (
+    <section
+      style={{
+        ...cardStyle,
+        padding: 18,
+        marginBottom: 18,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+        }}
+      >
+        <div>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "7px 11px",
+              borderRadius: 999,
+              background: "rgba(34,211,238,0.12)",
+              border: "1px solid rgba(34,211,238,0.22)",
+              color: "#A5F3FC",
+              fontSize: 12,
+              fontWeight: 950,
+              marginBottom: 10,
+            }}
+          >
+            <TrendingUp size={15} />
+            Sintesi conversione
+          </div>
+
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 24,
+              lineHeight: 1.08,
+              letterSpacing: -0.8,
+            }}
+          >
+            Su {summary.click_totali} click, {summary.arrivati_al_form} arrivano
+            al form e {summary.lead_inviati} diventano lead.
+          </h2>
+
+          <p
+            style={{
+              margin: "10px 0 0",
+              color: "rgba(255,255,255,0.70)",
+              fontSize: 14,
+              lineHeight: 1.55,
+              fontWeight: 650,
+              maxWidth: 760,
+            }}
+          >
+            Conversione click → form:{" "}
+            <strong>{formatPercent(summary.conversione_click_form)}</strong>.
+            Conversione click → lead:{" "}
+            <strong>{formatPercent(summary.conversione_click_lead)}</strong>.
+            Perdita prima del form:{" "}
+            <strong>{formatPercent(summary.perdita_click_form)}</strong>.
+            Perdita sul form:{" "}
+            <strong>{formatPercent(summary.perdita_form_lead)}</strong>.
+          </p>
+        </div>
+      </div>
     </section>
   );
 }
@@ -426,46 +533,76 @@ export default function AdminDownloadFunnelPage() {
         </header>
 
         {summary && (
-          <section
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-              gap: 14,
-              marginBottom: 18,
-            }}
-          >
-            <StatCard
-              title="Click landing"
-              value={summary.click_totali}
-              subtitle="Tutti i click sui pulsanti download/test."
-              icon={<MousePointerClick size={22} />}
-              tone="blue"
-            />
+          <>
+            <section
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+                gap: 14,
+                marginBottom: 18,
+              }}
+            >
+              <StatCard
+                title="Click landing"
+                value={summary.click_totali}
+                subtitle="Tutti i click sui pulsanti download/test."
+                icon={<MousePointerClick size={22} />}
+                tone="blue"
+              />
 
-            <StatCard
-              title="Arrivati al form"
-              value={summary.arrivati_al_form}
-              subtitle={`${summary.conversione_click_form}% dei click arrivano alla scheda dati.`}
-              icon={<Target size={22} />}
-              tone="amber"
-            />
+              <StatCard
+                title="Test iniziati"
+                value={summary.test_iniziati ?? 0}
+                subtitle={`${formatPercent(
+                  summary.conversione_click_test
+                )} dei click iniziano il test.`}
+                icon={<PlayCircle size={22} />}
+                tone="purple"
+              />
 
-            <StatCard
-              title="Lead inviati"
-              value={summary.lead_inviati}
-              subtitle={`${summary.conversione_click_lead}% dei click diventano lead.`}
-              icon={<UserCheck size={22} />}
-              tone="green"
-            />
+              <StatCard
+                title="Arrivati al form"
+                value={summary.arrivati_al_form}
+                subtitle={`${formatPercent(
+                  summary.conversione_click_form
+                )} dei click arrivano alla scheda dati.`}
+                icon={<Target size={22} />}
+                tone="amber"
+              />
 
-            <StatCard
-              title="Persi sul form"
-              value={summary.persi_sul_form}
-              subtitle={`${summary.conversione_form_lead}% di conversione form → lead.`}
-              icon={<XCircle size={22} />}
-              tone="red"
-            />
-          </section>
+              <StatCard
+                title="Lead inviati"
+                value={summary.lead_inviati}
+                subtitle={`${formatPercent(
+                  summary.conversione_click_lead
+                )} dei click diventano lead.`}
+                icon={<UserCheck size={22} />}
+                tone="green"
+              />
+
+              <StatCard
+                title="Solo click"
+                value={summary.solo_click}
+                subtitle={`${formatPercent(
+                  summary.percentuale_solo_click
+                )} cliccano ma non arrivano al form.`}
+                icon={<MousePointerClick size={22} />}
+                tone="cyan"
+              />
+
+              <StatCard
+                title="Persi sul form"
+                value={summary.persi_sul_form}
+                subtitle={`${formatPercent(
+                  summary.perdita_form_lead
+                )} arrivano al form ma non inviano i dati.`}
+                icon={<XCircle size={22} />}
+                tone="red"
+              />
+            </section>
+
+            <FunnelInsight summary={summary} />
+          </>
         )}
 
         <section
@@ -603,6 +740,7 @@ export default function AdminDownloadFunnelPage() {
                   <th style={thStyle}>Lead</th>
                   <th style={thStyle}>Telefono</th>
                   <th style={thStyle}>Click</th>
+                  <th style={thStyle}>Test</th>
                   <th style={thStyle}>Form</th>
                   <th style={thStyle}>Invio dati</th>
                   <th style={thStyle}>Campagna</th>
@@ -613,7 +751,7 @@ export default function AdminDownloadFunnelPage() {
               <tbody>
                 {loading && (
                   <tr>
-                    <td colSpan={8} style={emptyStyle}>
+                    <td colSpan={9} style={emptyStyle}>
                       <Loader2 size={18} /> Caricamento dati...
                     </td>
                   </tr>
@@ -621,7 +759,7 @@ export default function AdminDownloadFunnelPage() {
 
                 {!loading && !hasData && (
                   <tr>
-                    <td colSpan={8} style={emptyStyle}>
+                    <td colSpan={9} style={emptyStyle}>
                       Nessun dato trovato.
                     </td>
                   </tr>
@@ -655,6 +793,9 @@ export default function AdminDownloadFunnelPage() {
                           {row.stato_key === "arrivato_form" && (
                             <Clock size={14} />
                           )}
+                          {row.stato_key === "test_iniziato" && (
+                            <PlayCircle size={14} />
+                          )}
                           {row.stato_key === "solo_click" && (
                             <MousePointerClick size={14} />
                           )}
@@ -672,6 +813,8 @@ export default function AdminDownloadFunnelPage() {
                       <td style={tdStyle}>{row.lead_telefono || "-"}</td>
 
                       <td style={tdStyle}>{formatDate(row.created_at)}</td>
+
+                      <td style={tdStyle}>{formatDate(row.test_started_at)}</td>
 
                       <td style={tdStyle}>{formatDate(row.form_reached_at)}</td>
 
