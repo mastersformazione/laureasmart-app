@@ -9,6 +9,7 @@ import {
   BookOpenCheck,
   ExternalLink,
   LayoutDashboard,
+  Mail,
   ShieldCheck,
   UsersRound,
 } from "lucide-react";
@@ -165,6 +166,15 @@ const adminLinkCards = [
     bg: "#ECFDF3",
     color: "#15803D",
   },
+  {
+    title: "Email nurturing",
+    description:
+      "Monitora sequenze email, aperture, click, WhatsApp, disiscrizioni e lead caldi.",
+    href: "/admin/email-nurturing",
+    icon: <Mail size={23} />,
+    bg: "#F3E8FF",
+    color: "#7E22CE",
+  },
 ];
 
 function AdminQuickLinkCard({
@@ -249,7 +259,13 @@ function AdminQuickLinkCard({
   );
 }
 
+const ADMIN_PAGE_PASSWORD = "LaureaSmart2026@";
+
 export default function AdminPage() {
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminAccessError, setAdminAccessError] = useState("");
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+
   const [form, setForm] = useState({
     titolo: "",
     messaggio: "",
@@ -267,6 +283,18 @@ export default function AdminPage() {
   const [casiEliminati, setCasiEliminati] = useState<SpazioStudentiCase[]>([]);
   const [spazioStudentiAdminKey, setSpazioStudentiAdminKey] = useState("");
   const [caseEdits, setCaseEdits] = useState<Record<string, CasoEdit>>({});
+
+  const handleAdminAccess = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (adminPassword.trim() === ADMIN_PAGE_PASSWORD) {
+      setAdminUnlocked(true);
+      setAdminAccessError("");
+      return;
+    }
+
+    setAdminAccessError("Password non corretta.");
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -621,6 +649,126 @@ export default function AdminPage() {
       setCasiLoading(false);
     }
   };
+
+  if (!adminUnlocked) {
+    return (
+      <main style={pageStyle}>
+        <div
+          style={{
+            ...containerStyle,
+            minHeight: "calc(100vh - 160px)",
+            display: "grid",
+            placeItems: "center",
+          }}
+        >
+          <section
+            style={{
+              ...heroStyle,
+              width: "100%",
+              maxWidth: 520,
+              padding: 24,
+            }}
+          >
+            <div
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 20,
+                display: "grid",
+                placeItems: "center",
+                background: "rgba(255,255,255,0.12)",
+                color: "#BFDBFE",
+                marginBottom: 16,
+              }}
+            >
+              <ShieldCheck size={27} />
+            </div>
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 34,
+                lineHeight: 1,
+                letterSpacing: -1.3,
+                fontWeight: 950,
+              }}
+            >
+              Accesso area admin
+            </h1>
+
+            <p
+              style={{
+                margin: "12px 0 0",
+                color: "rgba(255,255,255,0.72)",
+                lineHeight: 1.58,
+                fontSize: 15,
+                fontWeight: 600,
+              }}
+            >
+              Inserisci la password per accedere alla dashboard tecnica di
+              Laurea Smart.
+            </p>
+
+            <form
+              onSubmit={handleAdminAccess}
+              style={{
+                display: "grid",
+                gap: 12,
+                marginTop: 20,
+              }}
+            >
+              <input
+                type="password"
+                placeholder="Password admin"
+                value={adminPassword}
+                onChange={(event) => setAdminPassword(event.target.value)}
+                autoFocus
+                style={{
+                  ...inputStyle,
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "rgba(255,255,255,0.96)",
+                }}
+              />
+
+              <button
+                type="submit"
+                style={{
+                  minHeight: 50,
+                  border: 0,
+                  borderRadius: 17,
+                  background: "#FFFFFF",
+                  color: "#1F6FB2",
+                  fontWeight: 950,
+                  fontSize: 15,
+                  cursor: "pointer",
+                  boxShadow: "0 14px 34px rgba(0,0,0,0.18)",
+                }}
+              >
+                Entra nella dashboard
+              </button>
+            </form>
+
+            {adminAccessError && (
+              <p
+                style={{
+                  margin: "14px 0 0",
+                  borderRadius: 14,
+                  background: "rgba(220,38,38,0.16)",
+                  border: "1px solid rgba(248,113,113,0.28)",
+                  color: "#FECACA",
+                  padding: 12,
+                  fontSize: 14,
+                  fontWeight: 750,
+                }}
+              >
+                {adminAccessError}
+              </p>
+            )}
+          </section>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main style={pageStyle}>
@@ -1533,6 +1681,25 @@ export default function AdminPage() {
             >
               <BarChart3 size={18} />
               Apri download funnel
+            </Link>
+
+            <Link
+              href="/admin/email-nurturing"
+              style={{
+                minHeight: 52,
+                borderRadius: 18,
+                background: "#F3E8FF",
+                color: "#7E22CE",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 9,
+                textDecoration: "none",
+                fontWeight: 950,
+              }}
+            >
+              <Mail size={18} />
+              Apri email nurturing
             </Link>
           </div>
         </section>
