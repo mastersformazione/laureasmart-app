@@ -2,6 +2,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -15,6 +16,105 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
+
+const DOWNLOAD_FUNNEL_ENDPOINT =
+  "https://laureasmart.it/api/track-download-funnel.php";
+
+const TEST_PATH = "/orientamento-gratuito/test";
+
+function createClientClickId(prefix = "intro") {
+  return `${prefix}_${Date.now().toString(36)}_${Math.random()
+    .toString(36)
+    .slice(2, 12)}`;
+}
+
+function getOrCreateTrackingData() {
+  if (typeof window === "undefined") {
+    return {
+      clickId: "",
+      source: "",
+      href: TEST_PATH,
+    };
+  }
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("ls_click_id");
+    const sourceFromUrl = params.get("ls_source");
+
+    let clickId = fromUrl || localStorage.getItem("ls_download_click_id") || "";
+
+    let source =
+      sourceFromUrl ||
+      localStorage.getItem("ls_download_source") ||
+      "orientation_intro";
+
+    if (!clickId) {
+      clickId = createClientClickId("intro");
+    }
+
+    localStorage.setItem("ls_download_click_id", clickId);
+    localStorage.setItem("ls_download_source", source);
+
+    const href = new URL(TEST_PATH, window.location.origin);
+    href.searchParams.set("ls_click_id", clickId);
+    href.searchParams.set("ls_source", source);
+
+    const utmFields = [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "utm_term",
+    ];
+
+    utmFields.forEach((field) => {
+      const value = params.get(field);
+      if (value) {
+        localStorage.setItem(field, value);
+        href.searchParams.set(field, value);
+      }
+    });
+
+    return {
+      clickId,
+      source,
+      href: `${href.pathname}${href.search}`,
+    };
+  } catch {
+    return {
+      clickId: "",
+      source: "",
+      href: TEST_PATH,
+    };
+  }
+}
+
+async function trackTestStarted() {
+  if (typeof window === "undefined") return;
+
+  const tracking = getOrCreateTrackingData();
+
+  if (!tracking.clickId) return;
+
+  try {
+    await fetch(DOWNLOAD_FUNNEL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      keepalive: true,
+      body: JSON.stringify({
+        click_id: tracking.clickId,
+        event_name: "test_started",
+        source_page: window.location.href,
+        ls_source: tracking.source,
+      }),
+    });
+  } catch (error) {
+    console.warn("Tracking avvio test non riuscito", error);
+  }
+}
 
 type Tone = "blue" | "purple" | "teal" | "amber";
 
@@ -220,6 +320,18 @@ function StepRow({
 }
 
 export default function OrientamentoGratuitoLandingPage() {
+  const [testHref, setTestHref] = useState(TEST_PATH);
+
+  useEffect(() => {
+    const tracking = getOrCreateTrackingData();
+    setTestHref(tracking.href);
+  }, []);
+
+  function handleStartTest() {
+    startOnboarding();
+    void trackTestStarted();
+  }
+
   return (
     <main style={pageStyle}>
       <header
@@ -392,8 +504,8 @@ export default function OrientamentoGratuitoLandingPage() {
           }}
         >
           <Link
-            href="/orientamento-gratuito/test"
-            onClick={startOnboarding}
+            href={testHref}
+            onClick={handleStartTest}
             style={primaryButtonStyle}
           >
             Inizia il test gratuito
