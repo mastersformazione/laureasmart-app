@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 
 const API_URL = "https://laureasmart.it/api/admin-email-nurturing.php";
-const ADMIN_KEY = "CAMBIA_QUESTA_ADMIN_KEY";
+const ADMIN_KEY = "Fra29Sus03";
 
 type Summary = {
   lead_totali: number;
