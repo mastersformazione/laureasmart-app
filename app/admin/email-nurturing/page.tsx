@@ -434,6 +434,9 @@ export default function EmailNurturingAdminPage() {
   );
   const [templateStatus, setTemplateStatus] = useState("");
   const [templateLoading, setTemplateLoading] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [testEmailStatus, setTestEmailStatus] = useState("");
+  const [testEmailSending, setTestEmailSending] = useState(false);
   const [cronStatus, setCronStatus] = useState("");
   const [cronRunning, setCronRunning] = useState(false);
   const [search, setSearch] = useState("");
@@ -588,6 +591,53 @@ export default function EmailNurturingAdminPage() {
       );
     } finally {
       setTemplateLoading(false);
+    }
+  };
+
+  const sendTestTemplateEmail = async () => {
+    if (!emailTemplate) {
+      setTestEmailStatus("Carica prima un template.");
+      return;
+    }
+
+    const cleanEmail = testEmail.trim();
+
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      setTestEmailStatus("Inserisci una email valida per la prova.");
+      return;
+    }
+
+    setTestEmailSending(true);
+    setTestEmailStatus("Invio email di prova...");
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+        body: JSON.stringify({
+          admin_key: ADMIN_KEY,
+          action: "send_test_template",
+          test_email: cleanEmail,
+          template: emailTemplate,
+        }),
+      });
+
+      const json = (await response.json()) as ApiResponse;
+
+      if (!response.ok || !json.success) {
+        throw new Error(json.message || "Errore invio email di prova");
+      }
+
+      setTestEmailStatus(json.message || "Email di prova inviata.");
+    } catch (error) {
+      setTestEmailStatus(
+        error instanceof Error ? error.message : "Errore invio email di prova"
+      );
+    } finally {
+      setTestEmailSending(false);
     }
   };
 
@@ -1272,6 +1322,68 @@ export default function EmailNurturingAdminPage() {
               >
                 {templateLoading ? "Salvataggio..." : "Salva template"}
               </button>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(220px, 1fr) 190px",
+                  gap: 10,
+                  borderRadius: 18,
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  padding: 14,
+                }}
+              >
+                <input
+                  type="email"
+                  placeholder="Email per test, es. tua@email.it"
+                  value={testEmail}
+                  onChange={(event) => setTestEmail(event.target.value)}
+                  style={{
+                    width: "100%",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    background: "rgba(255,255,255,0.95)",
+                    color: "#0F172A",
+                    borderRadius: 15,
+                    padding: "12px 13px",
+                    fontSize: 14,
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => void sendTestTemplateEmail()}
+                  disabled={testEmailSending}
+                  style={{
+                    border: 0,
+                    borderRadius: 15,
+                    minHeight: 46,
+                    background: "#16A34A",
+                    color: "#FFFFFF",
+                    fontWeight: 950,
+                    cursor: "pointer",
+                  }}
+                >
+                  {testEmailSending ? "Invio..." : "Invia test email"}
+                </button>
+
+                {testEmailStatus && (
+                  <p
+                    style={{
+                      gridColumn: "1 / -1",
+                      margin: 0,
+                      color: "rgba(255,255,255,0.76)",
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      fontWeight: 750,
+                    }}
+                  >
+                    {testEmailStatus}
+                  </p>
+                )}
+              </div>
             </div>
           )}
 
