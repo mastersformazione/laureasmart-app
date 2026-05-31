@@ -75,10 +75,7 @@ type Risultato = {
   testoRispostaFinale: string;
 };
 type LeadForm = {
-  nome: string;
-  cognome: string;
   email: string;
-  telefono: string;
   privacy: boolean;
 };
 
@@ -1500,10 +1497,7 @@ export default function OrientamentoGratuitoTestPage() {
   const [data, setData] = useState<OrientamentoData>({});
   const [fase, setFase] = useState<"test" | "form" | "risultato">("test");
   const [lead, setLead] = useState<LeadForm>({
-    nome: "",
-    cognome: "",
     email: "",
-    telefono: "",
     privacy: false,
   });
   const [loading, setLoading] = useState(false);
@@ -1568,10 +1562,15 @@ export default function OrientamentoGratuitoTestPage() {
   async function submitLead() {
     setErrore("");
 
-    if (!lead.nome || !lead.cognome || !lead.email || !lead.telefono) {
-      setErrore(
-        "Compila nome, cognome, email e telefono per vedere il risultato."
-      );
+    const emailPulita = lead.email.trim();
+
+    if (!emailPulita) {
+      setErrore("Inserisci la tua email per ricevere il risultato del test.");
+      return;
+    }
+
+    if (!emailPulita.includes("@") || !emailPulita.includes(".")) {
+      setErrore("Inserisci un indirizzo email valido.");
       return;
     }
 
@@ -1587,10 +1586,12 @@ export default function OrientamentoGratuitoTestPage() {
       const downloadSource = getStoredDownloadSource();
 
       const payload = {
-        nome: lead.nome,
-        cognome: lead.cognome,
-        email: lead.email,
-        telefono: lead.telefono,
+        nome: "Lead Email",
+        cognome: "",
+        email: emailPulita,
+        telefono: "",
+        canale_preferito: "email",
+        richiesta_risultato_email: "SI",
         ...data,
         ...segmenti,
         risultato_tipo: risultato.tipo,
@@ -1635,20 +1636,20 @@ export default function OrientamentoGratuitoTestPage() {
 
       void trackDownloadFunnelEvent({
         event_name: "test_lead_submitted",
-        lead_email: lead.email,
-        lead_nome: `${lead.nome} ${lead.cognome}`.trim(),
-        lead_telefono: lead.telefono,
+        lead_email: emailPulita,
+        lead_nome: "Lead Email",
+        lead_telefono: "",
       });
 
       const gpsUser = {
-        nome: lead.nome,
-        cognome: lead.cognome,
-        email: lead.email,
-        telefono: lead.telefono,
+        nome: "Lead",
+        cognome: "Email",
+        email: emailPulita,
+        telefono: "",
       };
 
       localStorage.setItem("gps_user", JSON.stringify(gpsUser));
-      localStorage.setItem("user_email", lead.email);
+      localStorage.setItem("user_email", emailPulita);
       localStorage.setItem("onboarding_lead_salvato", "SI");
       localStorage.setItem("onboarding_lead_data", new Date().toISOString());
 
@@ -1904,7 +1905,7 @@ export default function OrientamentoGratuitoTestPage() {
               letterSpacing: -0.9,
             }}
           >
-            Salva il risultato e visualizza il profilo completo
+            Ricevi il risultato via email
           </h1>
 
           <p
@@ -1915,26 +1916,11 @@ export default function OrientamentoGratuitoTestPage() {
               color: "rgba(255,255,255,0.72)",
             }}
           >
-            Inserisci i tuoi dati per vedere il risultato completo, conservarlo
-            nel profilo Laurea Smart e generare il Piano Universitario
-            Personalizzato.
+            Inserisci la tua email: ti invieremo il riepilogo del test e potrai
+            visualizzare subito il risultato completo anche in questa pagina.
           </p>
 
           <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
-            <InputField
-              label="Nome"
-              value={lead.nome}
-              onChange={(value) =>
-                setLead((prev) => ({ ...prev, nome: value }))
-              }
-            />
-            <InputField
-              label="Cognome"
-              value={lead.cognome}
-              onChange={(value) =>
-                setLead((prev) => ({ ...prev, cognome: value }))
-              }
-            />
             <InputField
               label="Email"
               type="email"
@@ -1942,15 +1928,29 @@ export default function OrientamentoGratuitoTestPage() {
               onChange={(value) =>
                 setLead((prev) => ({ ...prev, email: value }))
               }
+              placeholder="esempio@email.it"
             />
-            <InputField
-              label="Telefono"
-              type="tel"
-              value={lead.telefono}
-              onChange={(value) =>
-                setLead((prev) => ({ ...prev, telefono: value }))
-              }
-            />
+
+            <div
+              style={{
+                borderRadius: 18,
+                background: "rgba(59,130,246,0.12)",
+                border: "1px solid rgba(96,165,250,0.22)",
+                padding: 13,
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  lineHeight: 1.55,
+                  color: "rgba(255,255,255,0.74)",
+                }}
+              >
+                Ti invieremo il risultato all’indirizzo indicato. Potrai anche
+                consultarlo subito nella schermata successiva.
+              </p>
+            </div>
 
             <label
               style={{
@@ -1982,8 +1982,8 @@ export default function OrientamentoGratuitoTestPage() {
                   color: "rgba(255,255,255,0.68)",
                 }}
               >
-                Accetto l’informativa privacy e autorizzo il trattamento dei
-                dati per ricevere il risultato del test e informazioni di
+                Accetto l’informativa privacy e autorizzo il trattamento della
+                mia email per ricevere il risultato del test e informazioni di
                 orientamento universitario.
               </span>
             </label>
@@ -2012,7 +2012,7 @@ export default function OrientamentoGratuitoTestPage() {
               }}
             >
               {loading ? <Loader2 size={18} /> : <CheckCircle2 size={18} />}
-              {loading ? "Salvataggio..." : "Vedi il mio risultato"}
+              {loading ? "Invio in corso..." : "Ricevi il risultato via email"}
             </button>
 
             <button
@@ -2233,11 +2233,13 @@ function InputField({
   value,
   onChange,
   type = "text",
+  placeholder = "",
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  placeholder?: string;
 }) {
   return (
     <label style={{ display: "grid", gap: 6 }}>
@@ -2253,6 +2255,7 @@ function InputField({
       <input
         type={type}
         value={value}
+        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         style={{
           width: "100%",
