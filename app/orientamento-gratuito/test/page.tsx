@@ -75,7 +75,10 @@ type Risultato = {
   testoRispostaFinale: string;
 };
 type LeadForm = {
+  nome: string;
+  cognome: string;
   email: string;
+  telefono: string;
   privacy: boolean;
 };
 
@@ -1497,7 +1500,10 @@ export default function OrientamentoGratuitoTestPage() {
   const [data, setData] = useState<OrientamentoData>({});
   const [fase, setFase] = useState<"test" | "form" | "risultato">("test");
   const [lead, setLead] = useState<LeadForm>({
+    nome: "",
+    cognome: "",
     email: "",
+    telefono: "",
     privacy: false,
   });
   const [loading, setLoading] = useState(false);
@@ -1562,15 +1568,10 @@ export default function OrientamentoGratuitoTestPage() {
   async function submitLead() {
     setErrore("");
 
-    const emailPulita = lead.email.trim();
-
-    if (!emailPulita) {
-      setErrore("Inserisci la tua email per ricevere il risultato del test.");
-      return;
-    }
-
-    if (!emailPulita.includes("@") || !emailPulita.includes(".")) {
-      setErrore("Inserisci un indirizzo email valido.");
+    if (!lead.nome || !lead.cognome || !lead.email || !lead.telefono) {
+      setErrore(
+        "Compila nome, cognome, email e telefono per vedere il risultato."
+      );
       return;
     }
 
@@ -1586,12 +1587,10 @@ export default function OrientamentoGratuitoTestPage() {
       const downloadSource = getStoredDownloadSource();
 
       const payload = {
-        nome: "Lead Email",
-        cognome: "",
-        email: emailPulita,
-        telefono: "",
-        canale_preferito: "email",
-        richiesta_risultato_email: "SI",
+        nome: lead.nome,
+        cognome: lead.cognome,
+        email: lead.email,
+        telefono: lead.telefono,
         ...data,
         ...segmenti,
         risultato_tipo: risultato.tipo,
@@ -1636,20 +1635,20 @@ export default function OrientamentoGratuitoTestPage() {
 
       void trackDownloadFunnelEvent({
         event_name: "test_lead_submitted",
-        lead_email: emailPulita,
-        lead_nome: "Lead Email",
-        lead_telefono: "",
+        lead_email: lead.email,
+        lead_nome: `${lead.nome} ${lead.cognome}`.trim(),
+        lead_telefono: lead.telefono,
       });
 
       const gpsUser = {
-        nome: "Lead",
-        cognome: "Email",
-        email: emailPulita,
-        telefono: "",
+        nome: lead.nome,
+        cognome: lead.cognome,
+        email: lead.email,
+        telefono: lead.telefono,
       };
 
       localStorage.setItem("gps_user", JSON.stringify(gpsUser));
-      localStorage.setItem("user_email", emailPulita);
+      localStorage.setItem("user_email", lead.email);
       localStorage.setItem("onboarding_lead_salvato", "SI");
       localStorage.setItem("onboarding_lead_data", new Date().toISOString());
 
@@ -1905,7 +1904,7 @@ export default function OrientamentoGratuitoTestPage() {
               letterSpacing: -0.9,
             }}
           >
-            Ricevi il risultato via email
+            Salva il risultato e visualizza il profilo completo
           </h1>
 
           <p
@@ -1916,11 +1915,26 @@ export default function OrientamentoGratuitoTestPage() {
               color: "rgba(255,255,255,0.72)",
             }}
           >
-            Inserisci la tua email: ti invieremo il riepilogo del test e potrai
-            visualizzare subito il risultato completo anche in questa pagina.
+            Inserisci i tuoi dati per vedere il risultato completo, conservarlo
+            nel profilo Laurea Smart e generare il Piano Universitario
+            Personalizzato.
           </p>
 
           <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
+            <InputField
+              label="Nome"
+              value={lead.nome}
+              onChange={(value) =>
+                setLead((prev) => ({ ...prev, nome: value }))
+              }
+            />
+            <InputField
+              label="Cognome"
+              value={lead.cognome}
+              onChange={(value) =>
+                setLead((prev) => ({ ...prev, cognome: value }))
+              }
+            />
             <InputField
               label="Email"
               type="email"
@@ -1928,29 +1942,15 @@ export default function OrientamentoGratuitoTestPage() {
               onChange={(value) =>
                 setLead((prev) => ({ ...prev, email: value }))
               }
-              placeholder="esempio@email.it"
             />
-
-            <div
-              style={{
-                borderRadius: 18,
-                background: "rgba(59,130,246,0.12)",
-                border: "1px solid rgba(96,165,250,0.22)",
-                padding: 13,
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 12,
-                  lineHeight: 1.55,
-                  color: "rgba(255,255,255,0.74)",
-                }}
-              >
-                Ti invieremo il risultato all’indirizzo indicato. Potrai anche
-                consultarlo subito nella schermata successiva.
-              </p>
-            </div>
+            <InputField
+              label="Telefono"
+              type="tel"
+              value={lead.telefono}
+              onChange={(value) =>
+                setLead((prev) => ({ ...prev, telefono: value }))
+              }
+            />
 
             <label
               style={{
@@ -1982,8 +1982,8 @@ export default function OrientamentoGratuitoTestPage() {
                   color: "rgba(255,255,255,0.68)",
                 }}
               >
-                Accetto l’informativa privacy e autorizzo il trattamento della
-                mia email per ricevere il risultato del test e informazioni di
+                Accetto l’informativa privacy e autorizzo il trattamento dei
+                dati per ricevere il risultato del test e informazioni di
                 orientamento universitario.
               </span>
             </label>
@@ -2012,7 +2012,7 @@ export default function OrientamentoGratuitoTestPage() {
               }}
             >
               {loading ? <Loader2 size={18} /> : <CheckCircle2 size={18} />}
-              {loading ? "Invio in corso..." : "Ricevi il risultato via email"}
+              {loading ? "Salvataggio..." : "Vedi il mio risultato"}
             </button>
 
             <button
@@ -2033,35 +2033,36 @@ export default function OrientamentoGratuitoTestPage() {
               ...glassCard,
               padding: 20,
               background:
-                "linear-gradient(145deg, rgba(31,111,178,0.32), rgba(139,92,246,0.18), rgba(255,255,255,0.06))",
+                "linear-gradient(145deg, rgba(31,111,178,0.32), rgba(20,184,166,0.18), rgba(255,255,255,0.06))",
             }}
           >
             <div
               style={{
-                width: 58,
-                height: 58,
-                borderRadius: 22,
-                background: "linear-gradient(135deg, #1F6FB2 0%, #8B5CF6 100%)",
+                width: 62,
+                height: 62,
+                borderRadius: 23,
+                background: "linear-gradient(135deg, #16A34A 0%, #1F6FB2 100%)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: 16,
+                boxShadow: "0 18px 38px rgba(22,163,74,0.26)",
               }}
             >
-              <ClipboardCheck size={28} />
+              <CheckCircle2 size={30} />
             </div>
 
             <p
               style={{
                 margin: "0 0 8px",
                 fontSize: 12,
-                color: "#BFDBFE",
+                color: "#BBF7D0",
                 fontWeight: 950,
                 letterSpacing: 0.8,
                 textTransform: "uppercase",
               }}
             >
-              Risultato orientativo
+              Risultato inviato
             </p>
 
             <h1
@@ -2072,7 +2073,7 @@ export default function OrientamentoGratuitoTestPage() {
                 letterSpacing: -0.9,
               }}
             >
-              {risultato.titolo}
+              Controlla la tua email
             </h1>
 
             <p
@@ -2080,10 +2081,12 @@ export default function OrientamentoGratuitoTestPage() {
                 margin: "12px 0 0",
                 fontSize: 14,
                 lineHeight: 1.65,
-                color: "rgba(255,255,255,0.74)",
+                color: "rgba(255,255,255,0.76)",
               }}
             >
-              {risultato.descrizione}
+              Abbiamo inviato il riepilogo completo del test all’indirizzo email
+              indicato. Nel messaggio troverai il tuo profilo orientativo, il
+              percorso prioritario da valutare e il prossimo passo consigliato.
             </p>
           </div>
 
@@ -2112,115 +2115,148 @@ export default function OrientamentoGratuitoTestPage() {
                   justifyContent: "center",
                 }}
               >
-                <GraduationCap size={20} />
+                <ClipboardCheck size={20} />
               </div>
 
-              <div style={{ minWidth: 0, flex: 1 }}>
+              <div>
                 <h2 style={{ margin: 0, fontSize: 15 }}>
-                  Corsi di laurea consigliati
+                  Cosa troverai nella mail
+                </h2>
+
+                <ul
+                  style={{
+                    margin: "9px 0 0",
+                    paddingLeft: 18,
+                    fontSize: 13,
+                    lineHeight: 1.7,
+                    color: "rgba(255,255,255,0.72)",
+                  }}
+                >
+                  <li>il profilo emerso dalle tue risposte;</li>
+                  <li>il percorso prioritario da valutare;</li>
+                  <li>gli aspetti da approfondire prima di scegliere;</li>
+                  <li>il prossimo passo consigliato.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section
+            style={{
+              ...glassCard,
+              padding: 16,
+              borderRadius: 24,
+              border: `1px solid ${tones.amber.border}`,
+              background: tones.amber.bg,
+              boxShadow: `0 20px 42px ${tones.amber.glow}`,
+            }}
+          >
+            <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
+              <div
+                style={{
+                  width: 42,
+                  minWidth: 42,
+                  height: 42,
+                  borderRadius: 16,
+                  background: tones.amber.softBg,
+                  border: `1px solid ${tones.amber.border}`,
+                  color: tones.amber.icon,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ShieldCheck size={20} />
+              </div>
+
+              <div>
+                <h2 style={{ margin: 0, fontSize: 15 }}>
+                  Non trovi il messaggio?
                 </h2>
 
                 <p
                   style={{
-                    margin: "7px 0 12px",
+                    margin: "7px 0 0",
                     fontSize: 13,
                     lineHeight: 1.6,
                     color: "rgba(255,255,255,0.72)",
                   }}
                 >
-                  In base alle risposte del test, questi sono i percorsi più
-                  coerenti da valutare con un orientatore.
+                  Controlla anche le cartelle spam, promozioni o posta
+                  indesiderata. Se hai inserito per errore un indirizzo non
+                  corretto, puoi correggere l’email e richiedere un nuovo invio.
                 </p>
-
-                <div style={{ display: "grid", gap: 10 }}>
-                  {risultato.percorsiConsigliati.map((percorso) => (
-                    <div
-                      key={`${percorso.classe}-${percorso.nome}`}
-                      style={{
-                        borderRadius: 18,
-                        padding: 13,
-                        background: "rgba(255,255,255,0.08)",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <span
-                          style={{
-                            borderRadius: 999,
-                            padding: "5px 9px",
-                            background: "rgba(96,165,250,0.18)",
-                            color: "#BFDBFE",
-                            fontSize: 11,
-                            fontWeight: 950,
-                          }}
-                        >
-                          {percorso.classe}
-                        </span>
-                        <strong style={{ fontSize: 14 }}>
-                          {percorso.nome}
-                        </strong>
-                      </div>
-
-                      <p
-                        style={{
-                          margin: "8px 0 0",
-                          fontSize: 12,
-                          lineHeight: 1.55,
-                          color: "rgba(255,255,255,0.68)",
-                        }}
-                      >
-                        {percorso.motivo}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </section>
 
-          <ResultCard
-            icon={<ShieldCheck size={20} />}
-            title="Perché valutare una laurea online"
-            text={risultato.motivoModalitaOnline}
-            tone="cyan"
-          />
+          <section
+            style={{
+              ...glassCard,
+              padding: 16,
+              borderRadius: 24,
+              border: `1px solid ${tones.teal.border}`,
+              background: tones.teal.bg,
+              boxShadow: `0 20px 42px ${tones.teal.glow}`,
+            }}
+          >
+            <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
+              <div
+                style={{
+                  width: 42,
+                  minWidth: 42,
+                  height: 42,
+                  borderRadius: 16,
+                  background: tones.teal.softBg,
+                  border: `1px solid ${tones.teal.border}`,
+                  color: tones.teal.icon,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MessageCircle size={20} />
+              </div>
 
-          <ResultCard
-            icon={<Target size={20} />}
-            title="Cosa verificare prima di scegliere"
-            text={risultato.approfondimento}
-            tone="amber"
-          />
+              <div>
+                <h2 style={{ margin: 0, fontSize: 15 }}>
+                  Siamo a tua disposizione
+                </h2>
 
-          <ResultCard
-            icon={<ShieldCheck size={20} />}
-            title="Prossimo passo consigliato"
-            text={risultato.prossimo_passo}
-            tone="teal"
-          />
+                <p
+                  style={{
+                    margin: "7px 0 0",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.72)",
+                  }}
+                >
+                  Se vuoi chiarire dubbi su requisiti, costi, riconoscimento CFU
+                  o scelta del percorso, puoi usare Laurea Smart o contattare un
+                  orientatore.
+                </p>
+              </div>
+            </div>
+          </section>
 
           <div style={{ display: "grid", gap: 10 }}>
-            <Link href="/dashboard/piano-personale" style={primaryButtonStyle}>
-              Genera Piano Universitario
-              <ArrowRight size={18} />
-            </Link>
-
-            <Link href="/register" style={secondaryButtonStyle}>
+            <Link href="/register" style={primaryButtonStyle}>
               Scarica / accedi all’app
               <UserRound size={17} />
             </Link>
 
             <Link href="/dashboard/contatti" style={secondaryButtonStyle}>
-              {risultato.cta_orientatore}
+              Parla con un orientatore
               <MessageCircle size={17} />
             </Link>
+
+            <button
+              type="button"
+              onClick={() => setFase("form")}
+              style={{ ...secondaryButtonStyle, width: "100%" }}
+            >
+              Correggi email e reinvia
+            </button>
           </div>
         </section>
       )}
@@ -2233,13 +2269,11 @@ function InputField({
   value,
   onChange,
   type = "text",
-  placeholder = "",
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
-  placeholder?: string;
 }) {
   return (
     <label style={{ display: "grid", gap: 6 }}>
@@ -2255,7 +2289,6 @@ function InputField({
       <input
         type={type}
         value={value}
-        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         style={{
           width: "100%",
@@ -2272,64 +2305,5 @@ function InputField({
         }}
       />
     </label>
-  );
-}
-
-function ResultCard({
-  icon,
-  title,
-  text,
-  tone,
-}: {
-  icon: ReactNode;
-  title: string;
-  text: string;
-  tone: Tone;
-}) {
-  const theme = tones[tone];
-
-  return (
-    <section
-      style={{
-        ...glassCard,
-        padding: 16,
-        borderRadius: 24,
-        border: `1px solid ${theme.border}`,
-        background: theme.bg,
-        boxShadow: `0 20px 42px ${theme.glow}`,
-      }}
-    >
-      <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
-        <div
-          style={{
-            width: 42,
-            minWidth: 42,
-            height: 42,
-            borderRadius: 16,
-            background: theme.softBg,
-            border: `1px solid ${theme.border}`,
-            color: theme.icon,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {icon}
-        </div>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 15 }}>{title}</h2>
-          <p
-            style={{
-              margin: "7px 0 0",
-              fontSize: 13,
-              lineHeight: 1.6,
-              color: "rgba(255,255,255,0.72)",
-            }}
-          >
-            {text}
-          </p>
-        </div>
-      </div>
-    </section>
   );
 }
