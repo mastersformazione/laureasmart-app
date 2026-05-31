@@ -27,6 +27,9 @@ import {
 } from "@/lib/orientamento";
 import type { PercorsoConsigliatoOrientamento } from "@/lib/orientamento";
 
+const DOWNLOAD_FUNNEL_ENDPOINT =
+  "https://laureasmart.it/api/track-download-funnel.php";
+
 type OrientamentoData = {
   stato_iscrizione?: string;
   eta?: string;
@@ -1423,6 +1426,75 @@ function InfoPill({ children, tone }: { children: ReactNode; tone: Tone }) {
   );
 }
 
+function getStoredDownloadClickId() {
+  if (typeof window === "undefined") return "";
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("ls_click_id");
+
+    if (fromUrl) {
+      localStorage.setItem("ls_download_click_id", fromUrl);
+      return fromUrl;
+    }
+
+    return localStorage.getItem("ls_download_click_id") || "";
+  } catch {
+    return "";
+  }
+}
+
+function getStoredDownloadSource() {
+  if (typeof window === "undefined") return "";
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("ls_source");
+
+    if (fromUrl) {
+      localStorage.setItem("ls_download_source", fromUrl);
+      return fromUrl;
+    }
+
+    return localStorage.getItem("ls_download_source") || "";
+  } catch {
+    return "";
+  }
+}
+
+async function trackDownloadFunnelEvent(payload: {
+  event_name: "test_form_reached" | "test_lead_submitted";
+  lead_email?: string;
+  lead_nome?: string;
+  lead_telefono?: string;
+}) {
+  if (typeof window === "undefined") return;
+
+  const clickId = getStoredDownloadClickId();
+
+  if (!clickId) return;
+
+  try {
+    await fetch(DOWNLOAD_FUNNEL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      keepalive: true,
+      body: JSON.stringify({
+        click_id: clickId,
+        event_name: payload.event_name,
+        source_page: window.location.href,
+        lead_email: payload.lead_email || "",
+        lead_nome: payload.lead_nome || "",
+        lead_telefono: payload.lead_telefono || "",
+      }),
+    });
+  } catch (error) {
+    console.warn("Tracking funnel download non riuscito", error);
+  }
+}
+
 export default function OrientamentoGratuitoTestPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<OrientamentoData>({});
@@ -1473,6 +1545,11 @@ export default function OrientamentoGratuitoTestPage() {
     const finalRisultato = getRisultato(nextData);
 
     saveToLocalStorage(nextData, finalSegmenti, finalRisultato);
+
+    void trackDownloadFunnelEvent({
+      event_name: "test_form_reached",
+    });
+
     setFase("form");
   }
 
@@ -1506,6 +1583,9 @@ export default function OrientamentoGratuitoTestPage() {
     setLoading(true);
 
     try {
+      const downloadClickId = getStoredDownloadClickId();
+      const downloadSource = getStoredDownloadSource();
+
       const payload = {
         nome: lead.nome,
         cognome: lead.cognome,
@@ -1531,6 +1611,9 @@ export default function OrientamentoGratuitoTestPage() {
         testo_risposta_finale: risultato.testoRispostaFinale,
 
         source: "orientamento_gratuito",
+        ls_click_id: downloadClickId,
+        ls_source: downloadSource,
+        download_funnel_source: "download_page",
       };
 
       const response = await fetch(
@@ -1549,6 +1632,13 @@ export default function OrientamentoGratuitoTestPage() {
       if (!response.ok || !result.success) {
         throw new Error(result.error || "Salvataggio non riuscito");
       }
+
+      void trackDownloadFunnelEvent({
+        event_name: "test_lead_submitted",
+        lead_email: lead.email,
+        lead_nome: `${lead.nome} ${lead.cognome}`.trim(),
+        lead_telefono: lead.telefono,
+      });
 
       const gpsUser = {
         nome: lead.nome,
