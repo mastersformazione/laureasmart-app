@@ -20,6 +20,8 @@ import Link from "next/link";
 
 const API_URL = "https://laureasmart.it/api/admin-email-nurturing.php";
 const ADMIN_KEY = "Fra29Sus03";
+const CRON_URL =
+  "https://laureasmart.it/api/cron-email-nurturing.php?key=Fra29Sus03";
 
 type Summary = {
   lead_totali: number;
@@ -432,6 +434,8 @@ export default function EmailNurturingAdminPage() {
   );
   const [templateStatus, setTemplateStatus] = useState("");
   const [templateLoading, setTemplateLoading] = useState(false);
+  const [cronStatus, setCronStatus] = useState("");
+  const [cronRunning, setCronRunning] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [sequenceKey, setSequenceKey] = useState("");
@@ -485,6 +489,25 @@ export default function EmailNurturingAdminPage() {
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
+
+  const runManualCron = () => {
+    setCronRunning(true);
+    setCronStatus(
+      "Cron manuale aperto in una nuova scheda. Dopo l’esecuzione, torna qui e clicca Aggiorna."
+    );
+
+    const cronWindow = window.open(CRON_URL, "_blank", "noopener,noreferrer");
+
+    if (!cronWindow) {
+      setCronStatus(
+        "Il browser ha bloccato l’apertura della nuova scheda. Apri manualmente il cron o consenti i popup per questa pagina."
+      );
+    }
+
+    window.setTimeout(() => {
+      setCronRunning(false);
+    }, 1200);
+  };
 
   const loadTemplate = useCallback(async () => {
     if (!selectedTemplateKey || !selectedTemplateStep) {
@@ -647,28 +670,74 @@ export default function EmailNurturingAdminPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => void fetchData()}
-            disabled={loading}
+          <div
             style={{
-              border: 0,
-              borderRadius: 16,
-              padding: "12px 16px",
-              background: "#ffffff",
-              color: "#0F172A",
-              fontWeight: 900,
-              display: "inline-flex",
-              gap: 8,
+              display: "flex",
+              gap: 10,
               alignItems: "center",
-              cursor: "pointer",
-              boxShadow: "0 12px 28px rgba(0,0,0,0.20)",
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
             }}
           >
-            <RefreshCcw size={17} />
-            {loading ? "Aggiorno..." : "Aggiorna"}
-          </button>
+            <button
+              type="button"
+              onClick={runManualCron}
+              disabled={cronRunning}
+              style={{
+                border: 0,
+                borderRadius: 16,
+                padding: "12px 16px",
+                background: "#ECFDF3",
+                color: "#15803D",
+                fontWeight: 900,
+                display: "inline-flex",
+                gap: 8,
+                alignItems: "center",
+                cursor: "pointer",
+                boxShadow: "0 12px 28px rgba(0,0,0,0.20)",
+              }}
+            >
+              <Send size={17} />
+              {cronRunning ? "Apro cron..." : "Esegui cron manuale"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => void fetchData()}
+              disabled={loading}
+              style={{
+                border: 0,
+                borderRadius: 16,
+                padding: "12px 16px",
+                background: "#ffffff",
+                color: "#0F172A",
+                fontWeight: 900,
+                display: "inline-flex",
+                gap: 8,
+                alignItems: "center",
+                cursor: "pointer",
+                boxShadow: "0 12px 28px rgba(0,0,0,0.20)",
+              }}
+            >
+              <RefreshCcw size={17} />
+              {loading ? "Aggiorno..." : "Aggiorna"}
+            </button>
+          </div>
         </header>
+
+        {cronStatus && (
+          <section
+            style={{
+              ...cardStyle,
+              padding: 16,
+              marginBottom: 18,
+              background: "rgba(22,163,74,0.14)",
+              color: "#BBF7D0",
+            }}
+          >
+            <strong>Cron manuale:</strong> {cronStatus}
+          </section>
+        )}
 
         {errore && (
           <section
