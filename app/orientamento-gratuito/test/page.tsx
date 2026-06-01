@@ -2493,7 +2493,7 @@ export default function OrientamentoGratuitoTestPage() {
                 onClick={handleActivateNotifications}
                 style={{ ...primaryButtonStyle, width: "100%" }}
               >
-                Attiva notifiche
+                Salva il Test
                 <ArrowRight size={18} />
               </button>
 
