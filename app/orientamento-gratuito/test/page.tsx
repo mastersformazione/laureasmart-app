@@ -1,8 +1,9 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import OneSignal from "react-onesignal";
 import {
   ArrowLeft,
   ArrowRight,
@@ -1459,6 +1460,63 @@ function getStoredDownloadSource() {
   }
 }
 
+function getTempoStudioTag(tempo?: string): string {
+  const value = (tempo || "").trim();
+
+  if (value === "2-4 ore a settimana") return "POCO_TEMPO";
+  if (value === "5-7 ore a settimana") return "TEMPO_MEDIO";
+  if (value === "8-10 ore a settimana") return "TEMPO_ALTO";
+  if (value === "Più di 10 ore a settimana") return "TEMPO_ALTO";
+  if (value === "Non lo so ancora") return "NON_SO";
+
+  return "NON_DEFINITO";
+}
+
+async function showImmediateLaureaSmartNotification() {
+  if (typeof window === "undefined") return;
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  const notificationTitle = "Laurea Smart";
+  const notificationOptions: NotificationOptions = {
+    body: "Hai iniziato il test di orientamento. Tocca qui per tornare su Laurea Smart.",
+    icon: "/icon-192x192.png",
+    badge: "/icon-192x192.png",
+    tag: "laurea-smart-orientamento",
+    requireInteraction: true,
+    data: {
+      url: "https://app.laureasmart.it",
+    },
+  };
+
+  try {
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+
+      if (registration?.showNotification) {
+        await registration.showNotification(
+          notificationTitle,
+          notificationOptions
+        );
+        return;
+      }
+    }
+
+    const notification = new Notification(
+      notificationTitle,
+      notificationOptions
+    );
+
+    notification.onclick = () => {
+      window.focus();
+      window.location.href = "https://app.laureasmart.it";
+      notification.close();
+    };
+  } catch (error) {
+    console.warn("Notifica immediata Laurea Smart non mostrata", error);
+  }
+}
+
 async function trackDownloadFunnelEvent(payload: {
   event_name: "test_started" | "test_form_reached" | "test_lead_submitted";
   lead_email?: string;
@@ -1503,6 +1561,7 @@ export default function OrientamentoGratuitoTestPage() {
   const [loading, setLoading] = useState(false);
   const [errore, setErrore] = useState("");
   const [testStartedTracked, setTestStartedTracked] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
 
   const activeSteps = useMemo(
     () =>
@@ -1522,6 +1581,91 @@ export default function OrientamentoGratuitoTestPage() {
 
   const segmenti = useMemo(() => getSegmenti(data), [data]);
   const risultato = useMemo(() => getRisultato(data), [data]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const giaMostrato = localStorage.getItem(
+      "notifica_orientamento_esterno_mostrata"
+    );
+
+    if (!giaMostrato) {
+      setShowNotificationModal(true);
+      localStorage.setItem("notifica_orientamento_esterno_mostrata", "si");
+    }
+  }, []);
+
+  const handleActivateNotifications = async () => {
+    setShowNotificationModal(false);
+
+    try {
+      await OneSignal.Notifications.requestPermission();
+      await new Promise((resolve) => setTimeout(resolve, 1800));
+
+      if (OneSignal.Notifications.permission === true) {
+        await showImmediateLaureaSmartNotification();
+        console.log("OneSignal: consenso notifiche acquisito nel test esterno");
+      } else {
+        console.log("OneSignal: notifiche non concesse nel test esterno");
+      }
+    } catch (error) {
+      console.error("Errore attivazione notifiche test esterno:", error);
+    }
+  };
+
+  const handleSkipNotifications = () => {
+    setShowNotificationModal(false);
+  };
+
+  const syncOneSignalExternalLead = async (email: string) => {
+    const emailPulita = email.toLowerCase().trim();
+
+    if (!emailPulita) return;
+
+    try {
+      if (OneSignal.Notifications.permission === true) {
+        await OneSignal.login(emailPulita);
+        await new Promise((resolve) => setTimeout(resolve, 1600));
+      }
+
+      const tempoStudioTag = getTempoStudioTag(data.tempo);
+
+      const response = await fetch(
+        "https://laureasmart.it/api/sync-onesignal-tags.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: emailPulita,
+            nome: "Lead",
+            cognome: "Email",
+            telefono: "",
+            profilo: risultato.tipo,
+            stato_iscrizione: data.stato_iscrizione || "",
+            segmento_studente: segmenti.segmento_studente,
+            titolo_studio: data.titolo_studio || "",
+            obiettivo: data.obiettivo || "",
+            motivazione_studio: data.motivazione_studio || "",
+            area_interesse: data.area || "",
+            segmento_intento: segmenti.segmento_intento,
+            segmento_motivazione: segmenti.segmento_motivazione,
+            tempo_studio: tempoStudioTag,
+            segmento_urgenza: segmenti.segmento_urgenza,
+            segmento_aspetto: segmenti.segmento_aspetto,
+            aspetto_extra:
+              segmenti.segmento_aspetto !== "NESSUNO" ? "SI" : "NO",
+          }),
+        }
+      );
+
+      const result = await response.json();
+      console.log("SYNC ONESIGNAL TEST ESTERNO:", result);
+    } catch (error) {
+      console.error("Errore sync OneSignal test esterno:", error);
+    }
+  };
 
   function handleAnswer(value: string) {
     if (!testStartedTracked) {
@@ -1660,6 +1804,8 @@ export default function OrientamentoGratuitoTestPage() {
       localStorage.setItem("user_email", emailPulita);
       localStorage.setItem("onboarding_lead_salvato", "SI");
       localStorage.setItem("onboarding_lead_data", new Date().toISOString());
+
+      void syncOneSignalExternalLead(emailPulita);
 
       saveToLocalStorage(data, segmenti, risultato);
       setFase("risultato");
@@ -2269,6 +2415,106 @@ export default function OrientamentoGratuitoTestPage() {
             </button>
           </div>
         </section>
+      )}
+      {showNotificationModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(2,7,18,0.82)",
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 22,
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 390,
+              borderRadius: 32,
+              background:
+                "linear-gradient(135deg, rgba(17,32,51,0.98) 0%, rgba(11,23,40,0.98) 100%)",
+              padding: 26,
+              textAlign: "center",
+              boxShadow: "0 30px 90px rgba(0,0,0,0.45)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              color: "#FFFFFF",
+            }}
+          >
+            <div
+              style={{
+                width: 76,
+                height: 76,
+                borderRadius: 26,
+                background: "rgba(58,160,255,0.26)",
+                border: "1px solid rgba(120,194,255,0.28)",
+                color: "#BFDBFE",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 18px",
+                boxShadow: "0 12px 28px rgba(0,0,0,0.22)",
+              }}
+            >
+              <Sparkles size={34} />
+            </div>
+
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 28,
+                lineHeight: 1.08,
+                fontWeight: 900,
+                color: "#FFFFFF",
+                letterSpacing: "-0.8px",
+              }}
+            >
+              Vuoi salvare il test e ricevere il promemoria su Laurea Smart?
+            </h2>
+
+            <p
+              style={{
+                margin: "14px 0 22px",
+                fontSize: 15,
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.68)",
+              }}
+            >
+              Attiva le notifiche: potremo ricordarti di leggere il risultato,
+              completare il percorso e tornare rapidamente su Laurea Smart.
+            </p>
+
+            <div style={{ display: "grid", gap: 10 }}>
+              <button
+                type="button"
+                onClick={handleActivateNotifications}
+                style={{ ...primaryButtonStyle, width: "100%" }}
+              >
+                Attiva notifiche
+                <ArrowRight size={18} />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSkipNotifications}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  color: "rgba(255,255,255,0.42)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: 6,
+                  cursor: "pointer",
+                }}
+              >
+                Non ora
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
