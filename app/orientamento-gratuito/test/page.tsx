@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import OneSignal from "react-onesignal";
 import {
@@ -59,22 +59,20 @@ type Risultato = {
   titolo: string;
   descrizione: string;
 
-  // Manteniamo percorso per compatibilità con PHP, localStorage e vecchie logiche
   percorso: string;
 
-  // Nuovi campi per risposta più intelligente
   percorso_prioritario: string;
   percorsi_compatibili: string[];
   approfondimento: string;
   prossimo_passo: string;
   cta_orientatore: string;
 
-  // Campi centralizzati del nuovo motore orientamento
   percorsiConsigliati: PercorsoConsigliatoOrientamento[];
   modalitaPreferibile: "online" | "valutazione_orientatore";
   motivoModalitaOnline: string;
   testoRispostaFinale: string;
 };
+
 type LeadForm = {
   email: string;
   privacy: boolean;
@@ -1479,7 +1477,7 @@ async function showImmediateLaureaSmartNotification() {
 
   const notificationTitle = "Laurea Smart";
   const notificationOptions: NotificationOptions = {
-    body: "Hai iniziato il test di orientamento. Tocca qui per tornare su Laurea Smart.",
+    body: "Hai completato il test di orientamento. Tocca qui per tornare su Laurea Smart.",
     icon: "/icon-192x192.png",
     badge: "/icon-192x192.png",
     tag: "laurea-smart-orientamento",
@@ -1582,22 +1580,17 @@ export default function OrientamentoGratuitoTestPage() {
   const segmenti = useMemo(() => getSegmenti(data), [data]);
   const risultato = useMemo(() => getRisultato(data), [data]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const giaMostrato = localStorage.getItem(
-      "notifica_orientamento_esterno_mostrata"
-    );
-
-    if (!giaMostrato) {
-      setShowNotificationModal(true);
-      localStorage.setItem("notifica_orientamento_esterno_mostrata", "si");
-    }
-  }, []);
-
-  const handleActivateNotifications = async () => {
+  const goToLeadForm = () => {
     setShowNotificationModal(false);
 
+    void trackDownloadFunnelEvent({
+      event_name: "test_form_reached",
+    });
+
+    setFase("form");
+  };
+
+  const handleActivateNotifications = async () => {
     try {
       await OneSignal.Notifications.requestPermission();
       await new Promise((resolve) => setTimeout(resolve, 1800));
@@ -1610,11 +1603,15 @@ export default function OrientamentoGratuitoTestPage() {
       }
     } catch (error) {
       console.error("Errore attivazione notifiche test esterno:", error);
+    } finally {
+      localStorage.setItem("notifica_orientamento_esterno_mostrata", "si");
+      goToLeadForm();
     }
   };
 
   const handleSkipNotifications = () => {
-    setShowNotificationModal(false);
+    localStorage.setItem("notifica_orientamento_esterno_mostrata", "si");
+    goToLeadForm();
   };
 
   const syncOneSignalExternalLead = async (email: string) => {
@@ -1692,11 +1689,20 @@ export default function OrientamentoGratuitoTestPage() {
 
     saveToLocalStorage(nextData, finalSegmenti, finalRisultato);
 
-    void trackDownloadFunnelEvent({
-      event_name: "test_form_reached",
-    });
+    const notificaGiaGestita =
+      localStorage.getItem("notifica_orientamento_esterno_mostrata") === "si";
 
-    setFase("form");
+    const puoChiedereNotifiche =
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission === "default";
+
+    if (!notificaGiaGestita && puoChiedereNotifiche) {
+      setShowNotificationModal(true);
+      return;
+    }
+
+    goToLeadForm();
   }
 
   function goBack() {
@@ -1750,10 +1756,8 @@ export default function OrientamentoGratuitoTestPage() {
         risultato_titolo: risultato.titolo,
         risultato_descrizione: risultato.descrizione,
 
-        // Campo vecchio mantenuto per compatibilità
         corso_suggerito: risultato.percorso,
 
-        // Nuovi campi utili per CRM, email, database e segmentazione futura
         percorso_prioritario: risultato.percorso_prioritario,
         percorsi_compatibili: risultato.percorsi_compatibili.join(" | "),
         approfondimento_orientamento: risultato.approfondimento,
@@ -2416,6 +2420,7 @@ export default function OrientamentoGratuitoTestPage() {
           </div>
         </section>
       )}
+
       {showNotificationModal && (
         <div
           style={{
@@ -2472,7 +2477,7 @@ export default function OrientamentoGratuitoTestPage() {
                 letterSpacing: "-0.8px",
               }}
             >
-              Vuoi salvare il test e ricevere il promemoria su Laurea Smart?
+              Vuoi salvare il test e ricevere un promemoria?
             </h2>
 
             <p
@@ -2483,8 +2488,8 @@ export default function OrientamentoGratuitoTestPage() {
                 color: "rgba(255,255,255,0.68)",
               }}
             >
-              Attiva le notifiche: potremo ricordarti di leggere il risultato,
-              completare il percorso e tornare rapidamente su Laurea Smart.
+              Attiva le notifiche solo se vuoi ricevere promemoria utili sul
+              risultato, sui prossimi passi e sul tuo percorso di orientamento.
             </p>
 
             <div style={{ display: "grid", gap: 10 }}>
@@ -2493,7 +2498,7 @@ export default function OrientamentoGratuitoTestPage() {
                 onClick={handleActivateNotifications}
                 style={{ ...primaryButtonStyle, width: "100%" }}
               >
-                Salva il Test
+                Attiva promemoria
                 <ArrowRight size={18} />
               </button>
 
