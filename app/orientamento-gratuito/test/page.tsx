@@ -2400,14 +2400,9 @@ export default function OrientamentoGratuitoTestPage() {
           </section>
 
           <div style={{ display: "grid", gap: 10 }}>
-            <Link href="/register" style={primaryButtonStyle}>
-              Scarica / accedi all’app
-              <UserRound size={17} />
-            </Link>
-
-            <Link href="/dashboard/contatti" style={secondaryButtonStyle}>
-              Parla con un orientatore
-              <MessageCircle size={17} />
+            <Link href="/dashboard" style={primaryButtonStyle}>
+              Vai alla dashboard
+              <ArrowRight size={17} />
             </Link>
 
             <button
