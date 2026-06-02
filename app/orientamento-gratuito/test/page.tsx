@@ -1472,23 +1472,10 @@ function getTempoStudioTag(tempo?: string): string {
   return "NON_DEFINITO";
 }
 
-function getNotificationApi(): typeof Notification | null {
-  if (typeof window === "undefined") return null;
-  if (typeof Notification === "undefined") return null;
-
-  return Notification;
-}
-
-function getNotificationPermission(): NotificationPermission | "unsupported" {
-  const notificationApi = getNotificationApi();
-
-  if (!notificationApi) return "unsupported";
-
-  return notificationApi.permission;
-}
-
 async function showImmediateLaureaSmartNotification() {
-  if (getNotificationPermission() !== "granted") return;
+  if (typeof window === "undefined") return;
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
 
   const notificationTitle = "Laurea Smart";
   const notificationOptions: NotificationOptions = {
@@ -1503,7 +1490,7 @@ async function showImmediateLaureaSmartNotification() {
   };
 
   try {
-    if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+    if ("serviceWorker" in navigator) {
       const registration = await navigator.serviceWorker.ready;
 
       if (registration?.showNotification) {
@@ -1515,11 +1502,7 @@ async function showImmediateLaureaSmartNotification() {
       }
     }
 
-    const notificationApi = getNotificationApi();
-
-    if (!notificationApi) return;
-
-    const notification = new notificationApi(
+    const notification = new Notification(
       notificationTitle,
       notificationOptions
     );
@@ -1531,109 +1514,6 @@ async function showImmediateLaureaSmartNotification() {
     };
   } catch (error) {
     console.warn("Notifica immediata Laurea Smart non mostrata", error);
-  }
-}
-
-function sleep(ms: number) {
-  return new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-async function requestLaureaSmartPushPermission() {
-  if (typeof window === "undefined") return false;
-
-  const permission = getNotificationPermission();
-
-  if (permission === "unsupported") {
-    console.log("OneSignal: browser senza supporto notifiche web.");
-    return false;
-  }
-
-  const oneSignalInstance = OneSignal as unknown as {
-    Notifications?: {
-      permission?: boolean;
-      requestPermission?: (options?: {
-        fallbackToSettings?: boolean;
-      }) => Promise<void>;
-      showNativePrompt?: () => Promise<void>;
-    };
-    User?: {
-      PushSubscription?: {
-        optIn?: () => Promise<void>;
-      };
-    };
-  };
-
-  if (!oneSignalInstance.Notifications) {
-    console.log("OneSignal: SDK non ancora disponibile nel test esterno.");
-    return false;
-  }
-
-  if (permission === "denied") {
-    console.log(
-      "OneSignal: notifiche bloccate nelle impostazioni del browser."
-    );
-    return false;
-  }
-
-  try {
-    if (permission === "granted") {
-      if (
-        typeof oneSignalInstance.User?.PushSubscription?.optIn === "function"
-      ) {
-        await oneSignalInstance.User.PushSubscription.optIn();
-      }
-
-      await sleep(900);
-      return true;
-    }
-
-    if (
-      typeof oneSignalInstance.Notifications.requestPermission === "function"
-    ) {
-      try {
-        await oneSignalInstance.Notifications.requestPermission({
-          fallbackToSettings: true,
-        });
-      } catch {
-        await oneSignalInstance.Notifications.requestPermission();
-      }
-    } else if (
-      typeof oneSignalInstance.User?.PushSubscription?.optIn === "function"
-    ) {
-      await oneSignalInstance.User.PushSubscription.optIn();
-    } else if (
-      typeof oneSignalInstance.Notifications.showNativePrompt === "function"
-    ) {
-      await oneSignalInstance.Notifications.showNativePrompt();
-    } else {
-      console.log(
-        "OneSignal: metodo di attivazione notifiche non disponibile."
-      );
-      return false;
-    }
-
-    await sleep(1800);
-
-    if (getNotificationPermission() === "granted") {
-      if (
-        typeof oneSignalInstance.User?.PushSubscription?.optIn === "function"
-      ) {
-        await oneSignalInstance.User.PushSubscription.optIn();
-      }
-
-      await sleep(1200);
-      return true;
-    }
-
-    console.log(
-      "OneSignal: autorizzazione notifiche non concessa nel test esterno."
-    );
-    return false;
-  } catch (error) {
-    console.error("Errore richiesta permesso notifiche test esterno:", error);
-    return false;
   }
 }
 
@@ -1718,15 +1598,19 @@ export default function OrientamentoGratuitoTestPage() {
   const handleActivateNotifications = async () => {
     setShowNotificationModal(false);
 
-    const activated = await requestLaureaSmartPushPermission();
+    try {
+      await OneSignal.Notifications.requestPermission();
+      await new Promise((resolve) => setTimeout(resolve, 1800));
 
-    if (activated) {
-      await showImmediateLaureaSmartNotification();
-      console.log("OneSignal: consenso notifiche acquisito nel test esterno");
-      return;
+      if (OneSignal.Notifications.permission === true) {
+        await showImmediateLaureaSmartNotification();
+        console.log("OneSignal: consenso notifiche acquisito nel test esterno");
+      } else {
+        console.log("OneSignal: notifiche non concesse nel test esterno");
+      }
+    } catch (error) {
+      console.error("Errore attivazione notifiche test esterno:", error);
     }
-
-    console.log("OneSignal: notifiche non concesse nel test esterno");
   };
 
   const handleSkipNotifications = () => {
@@ -1739,35 +1623,9 @@ export default function OrientamentoGratuitoTestPage() {
     if (!emailPulita) return;
 
     try {
-      const oneSignalInstance = OneSignal as unknown as {
-        login?: (externalId: string) => Promise<void>;
-        Notifications?: {
-          permission?: boolean;
-        };
-        User?: {
-          PushSubscription?: {
-            optIn?: () => Promise<void>;
-          };
-        };
-      };
-
-      try {
-        if (typeof oneSignalInstance.login === "function") {
-          await oneSignalInstance.login(emailPulita);
-          await sleep(1600);
-          console.log("OneSignal login eseguito per:", emailPulita);
-        }
-
-        if (
-          getNotificationPermission() === "granted" &&
-          typeof oneSignalInstance.User?.PushSubscription?.optIn === "function"
-        ) {
-          await oneSignalInstance.User.PushSubscription.optIn();
-          await sleep(1200);
-          console.log("OneSignal optIn eseguito dopo login");
-        }
-      } catch (oneSignalError) {
-        console.warn("Login/optIn OneSignal non completato:", oneSignalError);
+      if (OneSignal.Notifications.permission === true) {
+        await OneSignal.login(emailPulita);
+        await new Promise((resolve) => setTimeout(resolve, 1600));
       }
 
       const tempoStudioTag = getTempoStudioTag(data.tempo);
