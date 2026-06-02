@@ -1517,6 +1517,107 @@ async function showImmediateLaureaSmartNotification() {
   }
 }
 
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function requestLaureaSmartPushPermission() {
+  if (typeof window === "undefined") return false;
+
+  if (!("Notification" in window)) {
+    console.log("OneSignal: browser senza supporto notifiche web.");
+    return false;
+  }
+
+  const oneSignalInstance = OneSignal as unknown as {
+    Notifications?: {
+      permission?: boolean;
+      requestPermission?: (options?: {
+        fallbackToSettings?: boolean;
+      }) => Promise<void>;
+      showNativePrompt?: () => Promise<void>;
+    };
+    User?: {
+      PushSubscription?: {
+        optIn?: () => Promise<void>;
+      };
+    };
+  };
+
+  if (!oneSignalInstance.Notifications) {
+    console.log("OneSignal: SDK non ancora disponibile nel test esterno.");
+    return false;
+  }
+
+  if (Notification.permission === "denied") {
+    console.log(
+      "OneSignal: notifiche bloccate nelle impostazioni del browser."
+    );
+    return false;
+  }
+
+  try {
+    if (Notification.permission === "granted") {
+      if (
+        typeof oneSignalInstance.User?.PushSubscription?.optIn === "function"
+      ) {
+        await oneSignalInstance.User.PushSubscription.optIn();
+      }
+
+      await sleep(600);
+      return true;
+    }
+
+    if (
+      typeof oneSignalInstance.Notifications.requestPermission === "function"
+    ) {
+      try {
+        await oneSignalInstance.Notifications.requestPermission({
+          fallbackToSettings: true,
+        });
+      } catch {
+        await oneSignalInstance.Notifications.requestPermission();
+      }
+    } else if (
+      typeof oneSignalInstance.User?.PushSubscription?.optIn === "function"
+    ) {
+      await oneSignalInstance.User.PushSubscription.optIn();
+    } else if (
+      typeof oneSignalInstance.Notifications.showNativePrompt === "function"
+    ) {
+      await oneSignalInstance.Notifications.showNativePrompt();
+    } else {
+      console.log(
+        "OneSignal: metodo di attivazione notifiche non disponibile."
+      );
+      return false;
+    }
+
+    await sleep(1400);
+
+    if (window.Notification.permission === "granted") {
+      if (
+        typeof oneSignalInstance.User?.PushSubscription?.optIn === "function"
+      ) {
+        await oneSignalInstance.User.PushSubscription.optIn();
+      }
+
+      await sleep(600);
+      return true;
+    }
+
+    console.log(
+      "OneSignal: autorizzazione notifiche non concessa nel test esterno."
+    );
+    return false;
+  } catch (error) {
+    console.error("Errore richiesta permesso notifiche test esterno:", error);
+    return false;
+  }
+}
+
 async function trackDownloadFunnelEvent(payload: {
   event_name: "test_started" | "test_form_reached" | "test_lead_submitted";
   lead_email?: string;
@@ -1598,19 +1699,15 @@ export default function OrientamentoGratuitoTestPage() {
   const handleActivateNotifications = async () => {
     setShowNotificationModal(false);
 
-    try {
-      await OneSignal.Notifications.requestPermission();
-      await new Promise((resolve) => setTimeout(resolve, 1800));
+    const activated = await requestLaureaSmartPushPermission();
 
-      if (OneSignal.Notifications.permission === true) {
-        await showImmediateLaureaSmartNotification();
-        console.log("OneSignal: consenso notifiche acquisito nel test esterno");
-      } else {
-        console.log("OneSignal: notifiche non concesse nel test esterno");
-      }
-    } catch (error) {
-      console.error("Errore attivazione notifiche test esterno:", error);
+    if (activated) {
+      await showImmediateLaureaSmartNotification();
+      console.log("OneSignal: consenso notifiche acquisito nel test esterno");
+      return;
     }
+
+    console.log("OneSignal: notifiche non concesse nel test esterno");
   };
 
   const handleSkipNotifications = () => {
