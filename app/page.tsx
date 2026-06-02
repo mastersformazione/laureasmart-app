@@ -46,13 +46,13 @@ export default function Home() {
   }, [router]);
 
   const handleStart = () => {
-    trackMetaEvent("ClickIniziaGratis", {
-      button_text: "Inizia",
+    trackMetaEvent("ClickIniziaOrientamento", {
+      button_text: "Inizia Ora",
       position: "home_main_cta",
-      destination: "/dashboard",
+      destination: "/orientamento-gratuito/test",
     });
 
-    router.push("/dashboard");
+    router.push("/orientamento-gratuito/test");
   };
 
   return (
@@ -182,8 +182,9 @@ export default function Home() {
                 color: "rgba(255,255,255,0.78)",
               }}
             >
-              Puoi iniziare subito. Ti verrà chiesto solo di indicare se devi
-              ancora scegliere il tuo percorso o se sei già iscritto.
+              Puoi iniziare subito dal test di orientamento gratuito. Alla fine
+              del percorso, l’app potrà mostrarti contenuti più coerenti con le
+              tue esigenze.
             </p>
 
             <div style={{ display: "grid", gap: 10 }}>
@@ -235,7 +236,7 @@ export default function Home() {
               }}
             >
               <UserCircle2 size={26} color="#1F6FB2" />
-              <span>Inizia gratis</span>
+              <span>Inizia Ora</span>
             </button>
 
             <p
@@ -247,9 +248,8 @@ export default function Home() {
                 color: "rgba(255,255,255,0.70)",
               }}
             >
-              Nessun accesso obbligatorio all’avvio. Il profilo ti verrà
-              richiesto solo quando servirà salvare o personalizzare il
-              percorso.
+              Nessun accesso obbligatorio all’avvio. Il primo passo è il test di
+              orientamento gratuito.
             </p>
           </div>
         </div>
