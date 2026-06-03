@@ -43,5 +43,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>La fotocamera può essere utilizzata per caricare foto di documenti utili alla valutazione orientativa del percorso universitario.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>La libreria foto può essere utilizzata per selezionare immagini o documenti utili alla valutazione orientativa del percorso universitario.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>L’app può salvare o gestire immagini solo quando necessario per funzioni legate ai documenti caricati dall’utente.</string>
 </dict>
 </plist>
