@@ -624,7 +624,7 @@ export default function OrientamentoPage() {
         description="Modifica obiettivo, tempo disponibile, area di interesse e preferenze utili per ricevere suggerimenti più precisi."
         tone="blue"
         badge="Profilo"
-        onClick={() => router.push("orientamento-gratuito/test")}
+        onClick={() => router.push("/orientamento-gratuito/test")}
       />
       <section
         style={{
