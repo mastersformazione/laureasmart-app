@@ -1438,7 +1438,7 @@ export default function ProfiloPage() {
 
         <button
           type="button"
-          onClick={() => router.push("/dashboard/orientamento/test")}
+          onClick={() => router.push("/orientamento-gratuito/test")}
           style={secondaryButtonStyle}
         >
           Aggiorna orientamento
