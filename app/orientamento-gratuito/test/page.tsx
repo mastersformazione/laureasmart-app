@@ -3,7 +3,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import OneSignal from "react-onesignal";
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,9 +12,6 @@ import {
   GraduationCap,
   HeartHandshake,
   HelpCircle,
-  Loader2,
-  LockKeyhole,
-  MessageCircle,
   ShieldCheck,
   Sparkles,
   Target,
@@ -58,24 +54,16 @@ type Risultato = {
   tipo: string;
   titolo: string;
   descrizione: string;
-
   percorso: string;
-
   percorso_prioritario: string;
   percorsi_compatibili: string[];
   approfondimento: string;
   prossimo_passo: string;
   cta_orientatore: string;
-
   percorsiConsigliati: PercorsoConsigliatoOrientamento[];
   modalitaPreferibile: "online" | "valutazione_orientatore";
   motivoModalitaOnline: string;
   testoRispostaFinale: string;
-};
-
-type LeadForm = {
-  email: string;
-  privacy: boolean;
 };
 
 type StepItem = {
@@ -85,7 +73,7 @@ type StepItem = {
   opzioni: string[];
 };
 
-type Tone = "blue" | "purple" | "teal" | "amber" | "rose" | "cyan";
+type Tone = "blue" | "purple" | "teal" | "amber" | "cyan";
 
 const tones: Record<
   Tone,
@@ -129,14 +117,6 @@ const tones: Record<
     softBg: "rgba(245,158,11,0.13)",
     border: "rgba(251,191,36,0.28)",
     glow: "rgba(245,158,11,0.20)",
-  },
-  rose: {
-    accent: "#FB7185",
-    icon: "#FECDD3",
-    bg: "linear-gradient(135deg, rgba(244,63,94,0.22), rgba(12,25,42,0.96))",
-    softBg: "rgba(244,63,94,0.12)",
-    border: "rgba(251,113,133,0.26)",
-    glow: "rgba(244,63,94,0.18)",
   },
   cyan: {
     accent: "#22D3EE",
@@ -413,760 +393,27 @@ function getSegmenti(data: OrientamentoData): Segmenti {
   return calcolaSegmentiOrientamento(data);
 }
 
-type ProfiloBase = {
-  tipo: string;
-  titolo: string;
-  descrizione: string;
-  percorsiDiploma: string[];
-  percorsiLaureaTriennale: string[];
-  percorsiLaureaMagistrale: string[];
-  percorsiGenerici: string[];
-};
-
-const profiliPerArea: Record<string, ProfiloBase> = {
-  "Economia e management": {
-    tipo: "ECONOMIA",
-    titolo: "Profilo economico-manageriale",
-    descrizione:
-      "Le tue risposte indicano un interesse verso organizzazione, gestione, amministrazione, impresa, marketing o crescita professionale.",
-    percorsiDiploma: [
-      "Laurea triennale in Economia",
-      "Laurea triennale in Scienze dell’Amministrazione",
-      "Laurea triennale in ambito manageriale",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Economia",
-      "Laurea magistrale in Management",
-      "Master universitari in area economico-aziendale",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello",
-      "Percorsi executive in management",
-      "Corsi di perfezionamento in area aziendale",
-    ],
-    percorsiGenerici: [
-      "Economia",
-      "Management",
-      "Amministrazione",
-      "Marketing",
-    ],
-  },
-
-  "Marketing e comunicazione digitale": {
-    tipo: "COMUNICAZIONE",
-    titolo: "Profilo marketing e comunicazione digitale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso comunicazione, contenuti digitali, social media, pubblicità, brand e strategie online.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze della Comunicazione",
-      "Laurea triennale in ambito marketing e comunicazione",
-      "Percorsi digitali e comunicazione d’impresa",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Comunicazione",
-      "Master in marketing digitale",
-      "Master in comunicazione d’impresa",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master specialistici in digital marketing",
-      "Percorsi executive in comunicazione",
-      "Corsi di perfezionamento in strategia digitale",
-    ],
-    percorsiGenerici: [
-      "Comunicazione",
-      "Marketing digitale",
-      "Digital media",
-      "Comunicazione d’impresa",
-    ],
-  },
-
-  Psicologia: {
-    tipo: "PSICOLOGIA",
-    titolo: "Profilo psicologico e relazionale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso la comprensione delle persone, dei comportamenti, delle relazioni e dei contesti sociali.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze e Tecniche Psicologiche",
-      "Laurea triennale in Scienze dell’Educazione",
-      "Percorsi introduttivi nelle scienze umane e sociali",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Psicologia",
-      "Master universitari in area psicologica, educativa o relazionale",
-      "Percorsi di specializzazione nelle scienze umane",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area psicologica",
-      "Percorsi post-laurea in ambito clinico, educativo o organizzativo",
-      "Corsi di perfezionamento per professionisti",
-    ],
-    percorsiGenerici: [
-      "Scienze e Tecniche Psicologiche",
-      "Psicologia",
-      "Scienze dell’Educazione",
-      "Area relazionale e sociale",
-    ],
-  },
-
-  "Scienze dell’educazione": {
-    tipo: "EDUCAZIONE",
-    titolo: "Profilo educativo e formativo",
-    descrizione:
-      "Il tuo profilo sembra orientato verso educazione, formazione, servizi alla persona, infanzia, comunità e contesti sociali.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze dell’Educazione",
-      "Percorsi per educatore socio-pedagogico",
-      "Percorsi in area infanzia, comunità e formazione",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Pedagogia",
-      "Laurea magistrale in Scienze Pedagogiche",
-      "Master universitari in area educativa",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area pedagogica",
-      "Percorsi di coordinamento educativo",
-      "Corsi di perfezionamento per la formazione",
-    ],
-    percorsiGenerici: [
-      "Scienze dell’Educazione",
-      "Pedagogia",
-      "Formazione",
-      "Servizi socio-educativi",
-    ],
-  },
-
-  "Pedagogia e formazione": {
-    tipo: "EDUCAZIONE",
-    titolo: "Profilo pedagogico e formativo",
-    descrizione:
-      "Il tuo profilo sembra orientato verso apprendimento, crescita personale, progettazione educativa, formazione e supporto nei percorsi di sviluppo.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze dell’Educazione",
-      "Percorsi in area educativa e formativa",
-      "Percorsi per servizi alla persona",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Pedagogia",
-      "Laurea magistrale in Scienze Pedagogiche",
-      "Master in progettazione educativa",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area pedagogica",
-      "Percorsi per coordinamento e progettazione formativa",
-      "Corsi di perfezionamento in formazione",
-    ],
-    percorsiGenerici: [
-      "Pedagogia",
-      "Scienze dell’Educazione",
-      "Formazione degli adulti",
-      "Progettazione educativa",
-    ],
-  },
-
-  "Giurisprudenza / servizi giuridici": {
-    tipo: "GIURIDICA",
-    titolo: "Profilo giuridico-amministrativo",
-    descrizione:
-      "Il tuo profilo sembra orientato verso diritto, norme, amministrazione, servizi giuridici, tutela, istituzioni o concorsi.",
-    percorsiDiploma: [
-      "Laurea in Servizi Giuridici",
-      "Laurea magistrale a ciclo unico in Giurisprudenza",
-      "Percorsi in area amministrativa e giuridica",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale coerente con l’area giuridico-amministrativa",
-      "Master in area legale, amministrativa o compliance",
-      "Percorsi per pubblica amministrazione e concorsi",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area giuridica",
-      "Percorsi specialistici per pubblica amministrazione",
-      "Corsi di perfezionamento in ambito legale",
-    ],
-    percorsiGenerici: [
-      "Giurisprudenza",
-      "Servizi Giuridici",
-      "Scienze giuridiche",
-      "Area amministrativa",
-    ],
-  },
-
-  "Criminologia e sicurezza": {
-    tipo: "GIURIDICA",
-    titolo: "Profilo criminologico e sicurezza",
-    descrizione:
-      "Il tuo profilo sembra orientato verso sicurezza, criminologia, diritto, prevenzione, analisi dei fenomeni sociali e contesti investigativi.",
-    percorsiDiploma: [
-      "Laurea in Servizi Giuridici",
-      "Percorsi in area criminologica e sicurezza",
-      "Percorsi in scienze sociali e giuridiche",
-    ],
-    percorsiLaureaTriennale: [
-      "Master in criminologia e sicurezza",
-      "Laurea magistrale in area giuridica o sociale",
-      "Percorsi specialistici per sicurezza e investigazione",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in criminologia",
-      "Percorsi post-laurea in sicurezza e prevenzione",
-      "Corsi di perfezionamento in ambito socio-giuridico",
-    ],
-    percorsiGenerici: [
-      "Criminologia",
-      "Sicurezza",
-      "Area giuridica",
-      "Discipline socio-giuridiche",
-    ],
-  },
-
-  "Scienze politiche e relazioni internazionali": {
-    tipo: "GIURIDICA",
-    titolo: "Profilo politico-istituzionale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso istituzioni, pubblica amministrazione, politica, relazioni internazionali, società e organizzazioni.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze Politiche",
-      "Laurea triennale in Relazioni Internazionali",
-      "Percorsi in pubblica amministrazione",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Scienze Politiche",
-      "Laurea magistrale in Relazioni Internazionali",
-      "Master in pubblica amministrazione o politiche pubbliche",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello",
-      "Percorsi specialistici per PA e istituzioni",
-      "Corsi di perfezionamento in relazioni internazionali",
-    ],
-    percorsiGenerici: [
-      "Scienze Politiche",
-      "Relazioni Internazionali",
-      "Pubblica Amministrazione",
-      "Studi politico-sociali",
-    ],
-  },
-
-  "Sociologia e servizi sociali": {
-    tipo: "EDUCAZIONE",
-    titolo: "Profilo sociale e comunitario",
-    descrizione:
-      "Il tuo profilo sembra orientato verso persone, comunità, inclusione, servizi sociali, disagio, territorio e progettazione sociale.",
-    percorsiDiploma: [
-      "Laurea triennale in Sociologia",
-      "Laurea triennale in Scienze dell’Educazione",
-      "Percorsi in area sociale e comunitaria",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in area sociale",
-      "Master in progettazione sociale",
-      "Percorsi in servizi alla persona",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area sociale",
-      "Percorsi post-laurea in inclusione e comunità",
-      "Corsi di perfezionamento in progettazione sociale",
-    ],
-    percorsiGenerici: [
-      "Sociologia",
-      "Servizi sociali",
-      "Scienze dell’Educazione",
-      "Area socio-comunitaria",
-    ],
-  },
-
-  "Scienze motorie": {
-    tipo: "SPORT",
-    titolo: "Profilo sportivo e motorio",
-    descrizione:
-      "Il tuo profilo sembra orientato verso sport, movimento, benessere, preparazione fisica e promozione di stili di vita attivi.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze Motorie",
-      "Percorsi in sport e benessere",
-      "Percorsi in attività motorie",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Scienze Motorie",
-      "Master in sport, benessere o preparazione atletica",
-      "Percorsi specialistici in attività motoria",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area sportiva",
-      "Percorsi post-laurea in benessere e movimento",
-      "Corsi di perfezionamento per professionisti dello sport",
-    ],
-    percorsiGenerici: [
-      "Scienze Motorie",
-      "Sport",
-      "Benessere",
-      "Attività motorie",
-    ],
-  },
-
-  "Sport e benessere": {
-    tipo: "SPORT",
-    titolo: "Profilo sport e benessere",
-    descrizione:
-      "Il tuo profilo sembra orientato verso fitness, benessere, movimento, salute preventiva, preparazione fisica e qualità della vita.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze Motorie",
-      "Percorsi in sport e wellness",
-      "Percorsi in benessere e attività fisica",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Scienze Motorie",
-      "Master in wellness e attività fisica",
-      "Percorsi specialistici in sport e benessere",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area sport e wellness",
-      "Percorsi post-laurea in benessere",
-      "Corsi di perfezionamento in attività fisica adattata",
-    ],
-    percorsiGenerici: [
-      "Scienze Motorie",
-      "Sport",
-      "Wellness",
-      "Attività fisica adattata",
-    ],
-  },
-
-  Comunicazione: {
-    tipo: "COMUNICAZIONE",
-    titolo: "Profilo comunicativo",
-    descrizione:
-      "Il tuo profilo sembra orientato verso linguaggi, media, relazioni, contenuti, comunicazione d’impresa e comunicazione digitale.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze della Comunicazione",
-      "Percorsi in media digitali",
-      "Percorsi in marketing e contenuti",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Comunicazione",
-      "Master in comunicazione digitale",
-      "Master in marketing e media",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in comunicazione",
-      "Percorsi executive in media e marketing",
-      "Corsi di perfezionamento in comunicazione d’impresa",
-    ],
-    percorsiGenerici: [
-      "Comunicazione",
-      "Media digitali",
-      "Marketing",
-      "Comunicazione aziendale",
-    ],
-  },
-
-  "Lettere, arte e spettacolo": {
-    tipo: "COMUNICAZIONE",
-    titolo: "Profilo umanistico e culturale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso cultura, scrittura, editoria, arte, spettacolo, contenuti e valorizzazione del patrimonio.",
-    percorsiDiploma: [
-      "Laurea triennale in Lettere",
-      "Laurea triennale in Discipline delle arti",
-      "Percorsi in comunicazione culturale",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in area umanistica",
-      "Master in editoria, cultura o storytelling",
-      "Percorsi in valorizzazione culturale",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area culturale",
-      "Percorsi post-laurea in editoria e comunicazione",
-      "Corsi di perfezionamento in discipline umanistiche",
-    ],
-    percorsiGenerici: [
-      "Lettere",
-      "Arte",
-      "Spettacolo",
-      "Comunicazione culturale",
-    ],
-  },
-
-  "Lingue e mediazione linguistica": {
-    tipo: "COMUNICAZIONE",
-    titolo: "Profilo linguistico e internazionale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso lingue, comunicazione interculturale, mediazione, traduzione, turismo e contesti internazionali.",
-    percorsiDiploma: [
-      "Laurea triennale in Lingue",
-      "Percorsi in mediazione linguistica",
-      "Percorsi in comunicazione interculturale",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Lingue",
-      "Master in mediazione, traduzione o turismo",
-      "Percorsi in relazioni internazionali",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area linguistica",
-      "Percorsi post-laurea in mediazione e comunicazione internazionale",
-      "Corsi di perfezionamento linguistico-professionale",
-    ],
-    percorsiGenerici: [
-      "Lingue",
-      "Mediazione linguistica",
-      "Comunicazione interculturale",
-      "Relazioni internazionali",
-    ],
-  },
-
-  "Turismo, cultura e territorio": {
-    tipo: "ECONOMIA",
-    titolo: "Profilo turistico-culturale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso turismo, ospitalità, promozione del territorio, beni culturali, eventi e gestione dei servizi.",
-    percorsiDiploma: [
-      "Laurea triennale in Turismo",
-      "Percorsi in beni culturali",
-      "Percorsi in management del turismo",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in turismo o valorizzazione culturale",
-      "Master in management del turismo",
-      "Master in eventi e promozione territoriale",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in turismo e cultura",
-      "Percorsi post-laurea in valorizzazione territoriale",
-      "Corsi di perfezionamento in hospitality e destination management",
-    ],
-    percorsiGenerici: [
-      "Turismo",
-      "Management del turismo",
-      "Beni culturali",
-      "Valorizzazione territoriale",
-    ],
-  },
-
-  "Informatica / tecnologia": {
-    tipo: "TECNOLOGIA",
-    titolo: "Profilo tecnologico e digitale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso informatica, software, dati, sistemi digitali, innovazione e tecnologie applicate.",
-    percorsiDiploma: [
-      "Laurea triennale in Informatica",
-      "Laurea triennale in Ingegneria Informatica",
-      "Percorsi in tecnologie digitali",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Informatica",
-      "Laurea magistrale in Ingegneria Informatica",
-      "Master in tecnologia, dati o sistemi informativi",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area tecnologica",
-      "Percorsi post-laurea in sistemi digitali",
-      "Corsi di perfezionamento in innovazione tecnologica",
-    ],
-    percorsiGenerici: [
-      "Informatica",
-      "Ingegneria informatica",
-      "Tecnologie digitali",
-      "Sistemi informativi",
-    ],
-  },
-
-  "Data, AI e innovazione digitale": {
-    tipo: "TECNOLOGIA",
-    titolo: "Profilo data, AI e innovazione",
-    descrizione:
-      "Il tuo profilo sembra orientato verso dati, intelligenza artificiale, automazione, innovazione digitale e trasformazione tecnologica.",
-    percorsiDiploma: [
-      "Laurea triennale in Informatica",
-      "Percorsi in data analysis",
-      "Percorsi in innovazione digitale",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Informatica o Data Science",
-      "Master in intelligenza artificiale",
-      "Master in innovazione digitale",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in AI e innovazione",
-      "Percorsi post-laurea in data science",
-      "Corsi di perfezionamento in automazione e digitale",
-    ],
-    percorsiGenerici: [
-      "Informatica",
-      "Data Science",
-      "AI",
-      "Innovazione digitale",
-    ],
-  },
-
-  "Ingegneria industriale": {
-    tipo: "TECNOLOGIA",
-    titolo: "Profilo ingegneristico-industriale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso industria, produzione, energia, processi tecnici, organizzazione e innovazione applicata.",
-    percorsiDiploma: [
-      "Laurea triennale in Ingegneria Industriale",
-      "Percorsi in ingegneria gestionale",
-      "Percorsi in ambito tecnico-produttivo",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Ingegneria Industriale",
-      "Laurea magistrale in Ingegneria Gestionale",
-      "Master in management industriale",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area industriale",
-      "Percorsi post-laurea in gestione tecnica e produzione",
-      "Corsi di perfezionamento in innovazione industriale",
-    ],
-    percorsiGenerici: [
-      "Ingegneria Industriale",
-      "Ingegneria Gestionale",
-      "Ingegneria Meccanica",
-      "Energia e produzione",
-    ],
-  },
-
-  "Ingegneria civile e ambientale": {
-    tipo: "TECNOLOGIA",
-    titolo: "Profilo civile e ambientale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso costruzioni, territorio, ambiente, infrastrutture, sicurezza, progettazione e sostenibilità.",
-    percorsiDiploma: [
-      "Laurea triennale in Ingegneria Civile e Ambientale",
-      "Percorsi in edilizia e territorio",
-      "Percorsi in ambiente e sostenibilità",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Ingegneria Civile",
-      "Laurea magistrale in Ingegneria Ambientale",
-      "Master in sicurezza, ambiente o territorio",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in area civile o ambientale",
-      "Percorsi post-laurea in sostenibilità e infrastrutture",
-      "Corsi di perfezionamento in sicurezza e territorio",
-    ],
-    percorsiGenerici: [
-      "Ingegneria Civile",
-      "Ingegneria Ambientale",
-      "Edilizia",
-      "Gestione del territorio",
-    ],
-  },
-
-  "Architettura, design e moda": {
-    tipo: "COMUNICAZIONE",
-    titolo: "Profilo creativo e progettuale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso creatività, estetica, progettazione, design, moda, spazi e comunicazione visiva.",
-    percorsiDiploma: [
-      "Percorsi in design",
-      "Percorsi in moda",
-      "Percorsi in comunicazione visiva",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale o master in design",
-      "Master in moda e comunicazione",
-      "Percorsi specialistici in progettazione creativa",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in design o moda",
-      "Percorsi post-laurea in comunicazione visiva",
-      "Corsi di perfezionamento in progettazione creativa",
-    ],
-    percorsiGenerici: [
-      "Design",
-      "Moda",
-      "Architettura",
-      "Comunicazione visiva",
-    ],
-  },
-
-  "Biologia e nutrizione": {
-    tipo: "TECNOLOGIA",
-    titolo: "Profilo scientifico e nutrizionale",
-    descrizione:
-      "Il tuo profilo sembra orientato verso biologia, alimentazione, nutrizione, salute, benessere, qualità e ambiente.",
-    percorsiDiploma: [
-      "Laurea triennale in Scienze Biologiche",
-      "Percorsi in alimentazione e benessere",
-      "Percorsi in area scientifica",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale in Biologia o Nutrizione",
-      "Master in alimentazione e benessere",
-      "Percorsi specialistici in qualità e ambiente",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in nutrizione",
-      "Percorsi post-laurea in biologia applicata",
-      "Corsi di perfezionamento in alimentazione e salute",
-    ],
-    percorsiGenerici: [
-      "Scienze Biologiche",
-      "Nutrizione",
-      "Alimentazione",
-      "Benessere",
-    ],
-  },
-
-  "Sanità e professioni sanitarie": {
-    tipo: "PSICOLOGIA",
-    titolo: "Profilo sanitario e servizi alla persona",
-    descrizione:
-      "Il tuo profilo sembra orientato verso salute, prevenzione, cura, benessere, organizzazione sanitaria e supporto alla persona.",
-    percorsiDiploma: [
-      "Percorsi in area sanitaria",
-      "Percorsi nei servizi alla persona",
-      "Percorsi in benessere e prevenzione",
-    ],
-    percorsiLaureaTriennale: [
-      "Master universitari in area sanitaria",
-      "Percorsi di management sanitario",
-      "Percorsi specialistici nei servizi alla persona",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in sanità",
-      "Percorsi post-laurea in management sanitario",
-      "Corsi di perfezionamento in area salute e servizi",
-    ],
-    percorsiGenerici: [
-      "Area sanitaria",
-      "Servizi alla persona",
-      "Management sanitario",
-      "Benessere",
-    ],
-  },
-
-  "Agraria, alimentazione e gastronomia": {
-    tipo: "ECONOMIA",
-    titolo: "Profilo agroalimentare e gastronomico",
-    descrizione:
-      "Il tuo profilo sembra orientato verso alimentazione, filiere agroalimentari, sostenibilità, gastronomia, qualità e valorizzazione del territorio.",
-    percorsiDiploma: [
-      "Percorsi in agraria",
-      "Percorsi in gastronomia",
-      "Percorsi in food management",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale o master in area agroalimentare",
-      "Master in food management",
-      "Percorsi in sostenibilità e qualità alimentare",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello in food e sostenibilità",
-      "Percorsi post-laurea in qualità agroalimentare",
-      "Corsi di perfezionamento in valorizzazione territoriale",
-    ],
-    percorsiGenerici: [
-      "Agraria",
-      "Gastronomia",
-      "Scienze dell’alimentazione",
-      "Food management",
-    ],
-  },
-
-  "Scuola e insegnamento": {
-    tipo: "SCUOLA",
-    titolo: "Profilo scuola e insegnamento",
-    descrizione:
-      "Il tuo profilo sembra orientato verso scuola, insegnamento, graduatorie, concorsi, aggiornamento professionale e formazione.",
-    percorsiDiploma: [
-      "Percorsi universitari utili per l’accesso all’insegnamento",
-      "Lauree coerenti con l’obiettivo scuola",
-      "Percorsi in area educativa o disciplinare",
-    ],
-    percorsiLaureaTriennale: [
-      "Laurea magistrale coerente con la classe di concorso",
-      "Master e percorsi per graduatorie",
-      "Corsi utili per aggiornamento professionale",
-    ],
-    percorsiLaureaMagistrale: [
-      "Percorsi per classi di concorso",
-      "Master e corsi per graduatorie",
-      "Corsi di perfezionamento per docenti",
-    ],
-    percorsiGenerici: [
-      "Scuola",
-      "Insegnamento",
-      "Graduatorie",
-      "Formazione docenti",
-    ],
-  },
-
-  "Pubblica amministrazione e concorsi": {
-    tipo: "GIURIDICA",
-    titolo: "Profilo pubblica amministrazione e concorsi",
-    descrizione:
-      "Il tuo profilo sembra orientato verso concorsi pubblici, graduatorie, amministrazione, avanzamenti professionali e ruoli istituzionali.",
-    percorsiDiploma: [
-      "Lauree in area giuridica",
-      "Lauree in area economica",
-      "Lauree in area politico-sociale",
-    ],
-    percorsiLaureaTriennale: [
-      "Lauree magistrali utili per concorsi e avanzamenti",
-      "Master in pubblica amministrazione",
-      "Percorsi in area giuridico-amministrativa",
-    ],
-    percorsiLaureaMagistrale: [
-      "Master universitari di secondo livello per PA",
-      "Percorsi post-laurea per concorsi",
-      "Corsi di perfezionamento in ambito amministrativo",
-    ],
-    percorsiGenerici: [
-      "Area giuridica",
-      "Area economica",
-      "Area politico-sociale",
-      "Pubblica amministrazione",
-    ],
-  },
-};
-
-const profiloGenerale: ProfiloBase = {
-  tipo: "GENERALE",
-  titolo: "Profilo da orientare",
-  descrizione:
-    "Le tue risposte mostrano che potrebbe essere utile confrontare più aree prima di scegliere.",
-  percorsiDiploma: [
-    "Laurea triennale coerente con obiettivi e tempi disponibili",
-    "Percorsi universitari con orientamento personalizzato",
-    "Valutazione delle aree più vicine al tuo profilo",
-  ],
-  percorsiLaureaTriennale: [
-    "Laurea magistrale coerente con il titolo già posseduto",
-    "Master universitari di primo livello",
-    "Percorsi di specializzazione professionale",
-  ],
-  percorsiLaureaMagistrale: [
-    "Master universitari di secondo livello",
-    "Corsi di perfezionamento",
-    "Percorsi executive o specialistici",
-  ],
-  percorsiGenerici: [
-    "Percorsi universitari da confrontare",
-    "Valutazione del titolo di partenza",
-    "Analisi degli obiettivi professionali",
-  ],
-};
-
-function getPercorsiCompatibili(
-  data: OrientamentoData,
-  profilo: ProfiloBase
-): string[] {
+function getPercorsiCompatibili(data: OrientamentoData): string[] {
   const titolo = data.titolo_studio || "";
+  const area = data.area || "Area da valutare";
 
   if (titolo === "Diploma") {
-    return profilo.percorsiDiploma;
+    return [
+      `Laurea triennale in area ${area}`,
+      "Percorso universitario coerente con obiettivi e tempo disponibile",
+      "Valutazione orientativa dei requisiti di accesso",
+    ];
   }
 
   if (
     titolo === "Laurea triennale" ||
     titolo === "Diploma accademico di primo livello (AFAM)"
   ) {
-    return profilo.percorsiLaureaTriennale;
+    return [
+      `Laurea magistrale coerente con ${area}`,
+      "Master universitario di primo livello",
+      "Percorso di specializzazione professionale",
+    ];
   }
 
   if (
@@ -1177,7 +424,11 @@ function getPercorsiCompatibili(
     titolo === "Diploma conservatorio (vecchio ordinamento)" ||
     titolo === "Diploma accademia di belle arti"
   ) {
-    return profilo.percorsiLaureaMagistrale;
+    return [
+      "Master universitario di secondo livello",
+      "Corso di perfezionamento",
+      "Percorso executive o specialistico",
+    ];
   }
 
   if (titolo === "Ho iniziato l’università ma non ho terminato") {
@@ -1188,7 +439,11 @@ function getPercorsiCompatibili(
     ];
   }
 
-  return profilo.percorsiGenerici;
+  return [
+    "Percorso universitario da confrontare",
+    "Valutazione del titolo di partenza",
+    "Analisi degli obiettivi professionali",
+  ];
 }
 
 function getApprofondimento(data: OrientamentoData): string {
@@ -1244,44 +499,25 @@ function getApprofondimento(data: OrientamentoData): string {
 
 function getProssimoPasso(data: OrientamentoData): string {
   if (data.stato_iscrizione === "Sì, sono già iscritto") {
-    return "Il prossimo passo consigliato è richiedere supporto sul percorso attuale, così da capire come organizzare meglio lo studio o valutare eventuali alternative.";
+    return "Puoi entrare nella dashboard e usare gli strumenti disponibili per organizzare meglio il percorso attuale.";
   }
 
   if (data.stato_iscrizione === "Sto valutando un trasferimento") {
-    return "Il prossimo passo consigliato è richiedere una valutazione del percorso già svolto e capire se un trasferimento può essere conveniente.";
+    return "Puoi entrare nella dashboard e valutare con attenzione percorso svolto, possibili CFU riconoscibili e alternative disponibili.";
   }
 
   if (data.stato_iscrizione === "Ho iniziato ma ho interrotto") {
-    return "Il prossimo passo consigliato è verificare se puoi recuperare esami già sostenuti e costruire un piano di ripartenza realistico.";
-  }
-
-  if (data.aspetto_da_valutare === "Esami universitari già sostenuti") {
-    return "Il prossimo passo consigliato è richiedere una valutazione CFU prima di scegliere il corso definitivo.";
-  }
-
-  if (data.aspetto_da_valutare === "Possibili agevolazioni o convenzioni") {
-    return "Il prossimo passo consigliato è verificare costi, convenzioni e soluzioni sostenibili prima di procedere.";
-  }
-
-  if (
-    data.urgenza === "Subito / entro 1 mese" ||
-    data.urgenza === "Entro 3 mesi"
-  ) {
-    return "Il prossimo passo consigliato è confrontarti con un orientatore per verificare subito il percorso più coerente e i tempi di iscrizione.";
+    return "Puoi entrare nella dashboard e costruire un piano di ripartenza realistico, partendo da ciò che hai già fatto.";
   }
 
   if (data.area === "Non so ancora") {
-    return "Il prossimo passo consigliato è generare un piano universitario personalizzato e confrontare più aree prima di scegliere.";
+    return "Puoi entrare nella dashboard e confrontare più possibilità prima di scegliere il percorso definitivo.";
   }
 
-  return "Il prossimo passo consigliato è generare il tuo piano universitario personalizzato e poi confrontarti con un orientatore per confermare la scelta.";
+  return "Puoi entrare nella dashboard e continuare con gli strumenti di orientamento, confronto e organizzazione del percorso.";
 }
 
 function getCtaOrientatore(data: OrientamentoData): string {
-  if (data.stato_iscrizione === "Sì, sono già iscritto") {
-    return "Richiedi supporto sul percorso";
-  }
-
   if (data.stato_iscrizione === "Sto valutando un trasferimento") {
     return "Valuta trasferimento e CFU";
   }
@@ -1294,23 +530,10 @@ function getCtaOrientatore(data: OrientamentoData): string {
     return "Richiedi valutazione CFU";
   }
 
-  if (data.aspetto_da_valutare === "Possibili agevolazioni o convenzioni") {
-    return "Verifica costi e agevolazioni";
-  }
-
-  if (
-    data.obiettivo === "Partecipare a concorsi" ||
-    data.obiettivo === "Insegnare"
-  ) {
-    return "Verifica il titolo richiesto";
-  }
-
-  return "Parla gratis con un orientatore";
+  return "Continua nella dashboard";
 }
 
 function getRisultato(data: OrientamentoData): Risultato {
-  const area = data.area || "";
-  const profilo = profiliPerArea[area] || profiloGenerale;
   const risultatoCentrale = calcolaRisultatoOrientamento(data);
 
   const percorsiCompatibili =
@@ -1318,7 +541,7 @@ function getRisultato(data: OrientamentoData): Risultato {
       ? risultatoCentrale.percorsiConsigliati.map(
           (percorso) => `${percorso.classe} ${percorso.nome}`
         )
-      : getPercorsiCompatibili(data, profilo);
+      : getPercorsiCompatibili(data);
 
   const percorsoPrioritario =
     percorsiCompatibili[0] ||
@@ -1327,7 +550,7 @@ function getRisultato(data: OrientamentoData): Risultato {
 
   return {
     tipo: risultatoCentrale.tipo,
-    titolo: profilo.titolo,
+    titolo: "Il tuo risultato orientativo",
     descrizione: risultatoCentrale.descrizione,
     percorso: risultatoCentrale.testoRispostaFinale,
     percorso_prioritario: percorsoPrioritario,
@@ -1440,86 +663,8 @@ function getStoredDownloadClickId() {
   }
 }
 
-function getStoredDownloadSource() {
-  if (typeof window === "undefined") return "";
-
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const fromUrl = params.get("ls_source");
-
-    if (fromUrl) {
-      localStorage.setItem("ls_download_source", fromUrl);
-      return fromUrl;
-    }
-
-    return localStorage.getItem("ls_download_source") || "";
-  } catch {
-    return "";
-  }
-}
-
-function getTempoStudioTag(tempo?: string): string {
-  const value = (tempo || "").trim();
-
-  if (value === "2-4 ore a settimana") return "POCO_TEMPO";
-  if (value === "5-7 ore a settimana") return "TEMPO_MEDIO";
-  if (value === "8-10 ore a settimana") return "TEMPO_ALTO";
-  if (value === "Più di 10 ore a settimana") return "TEMPO_ALTO";
-  if (value === "Non lo so ancora") return "NON_SO";
-
-  return "NON_DEFINITO";
-}
-
-async function showImmediateLaureaSmartNotification() {
-  if (typeof window === "undefined") return;
-  if (!("Notification" in window)) return;
-  if (Notification.permission !== "granted") return;
-
-  const notificationTitle = "Laurea Smart";
-  const notificationOptions: NotificationOptions = {
-    body: "Hai completato il test di orientamento. Tocca qui per tornare su Laurea Smart.",
-    icon: "/icon-192x192.png",
-    badge: "/icon-192x192.png",
-    tag: "laurea-smart-orientamento",
-    requireInteraction: true,
-    data: {
-      url: "https://app.laureasmart.it",
-    },
-  };
-
-  try {
-    if ("serviceWorker" in navigator) {
-      const registration = await navigator.serviceWorker.ready;
-
-      if (registration?.showNotification) {
-        await registration.showNotification(
-          notificationTitle,
-          notificationOptions
-        );
-        return;
-      }
-    }
-
-    const notification = new Notification(
-      notificationTitle,
-      notificationOptions
-    );
-
-    notification.onclick = () => {
-      window.focus();
-      window.location.href = "https://app.laureasmart.it";
-      notification.close();
-    };
-  } catch (error) {
-    console.warn("Notifica immediata Laurea Smart non mostrata", error);
-  }
-}
-
 async function trackDownloadFunnelEvent(payload: {
-  event_name: "test_started" | "test_form_reached" | "test_lead_submitted";
-  lead_email?: string;
-  lead_nome?: string;
-  lead_telefono?: string;
+  event_name: "test_started" | "test_result_viewed";
 }) {
   if (typeof window === "undefined") return;
 
@@ -1538,9 +683,6 @@ async function trackDownloadFunnelEvent(payload: {
         click_id: clickId,
         event_name: payload.event_name,
         source_page: window.location.href,
-        lead_email: payload.lead_email || "",
-        lead_nome: payload.lead_nome || "",
-        lead_telefono: payload.lead_telefono || "",
       }),
     });
   } catch (error) {
@@ -1551,15 +693,8 @@ async function trackDownloadFunnelEvent(payload: {
 export default function OrientamentoGratuitoTestPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<OrientamentoData>({});
-  const [fase, setFase] = useState<"test" | "form" | "risultato">("test");
-  const [lead, setLead] = useState<LeadForm>({
-    email: "",
-    privacy: false,
-  });
-  const [loading, setLoading] = useState(false);
-  const [errore, setErrore] = useState("");
+  const [fase, setFase] = useState<"test" | "risultato">("test");
   const [testStartedTracked, setTestStartedTracked] = useState(false);
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
 
   const activeSteps = useMemo(
     () =>
@@ -1577,92 +712,36 @@ export default function OrientamentoGratuitoTestPage() {
   const stepTone = getStepTone(currentStep.id);
   const theme = tones[stepTone];
 
-  const segmenti = useMemo(() => getSegmenti(data), [data]);
   const risultato = useMemo(() => getRisultato(data), [data]);
 
-  const goToLeadForm = () => {
-    setShowNotificationModal(false);
+  function goToResult(finalData: OrientamentoData) {
+    const finalSegmenti = getSegmenti(finalData);
+    const finalRisultato = getRisultato(finalData);
+
+    saveToLocalStorage(finalData, finalSegmenti, finalRisultato);
+
+    try {
+      localStorage.setItem(
+        "gps_user",
+        JSON.stringify({
+          nome: "Utente",
+          cognome: "Laurea Smart",
+          email: "",
+          telefono: "",
+        })
+      );
+      localStorage.setItem("onboarding_lead_salvato", "NO");
+      localStorage.setItem("onboarding_lead_data", new Date().toISOString());
+    } catch {
+      // evita blocchi se localStorage non è disponibile
+    }
 
     void trackDownloadFunnelEvent({
-      event_name: "test_form_reached",
+      event_name: "test_result_viewed",
     });
 
-    setFase("form");
-  };
-
-  const handleActivateNotifications = async () => {
-    try {
-      await OneSignal.Notifications.requestPermission();
-      await new Promise((resolve) => setTimeout(resolve, 1800));
-
-      if (OneSignal.Notifications.permission === true) {
-        await showImmediateLaureaSmartNotification();
-        console.log("OneSignal: consenso notifiche acquisito nel test esterno");
-      } else {
-        console.log("OneSignal: notifiche non concesse nel test esterno");
-      }
-    } catch (error) {
-      console.error("Errore attivazione notifiche test esterno:", error);
-    } finally {
-      localStorage.setItem("notifica_orientamento_esterno_mostrata", "si");
-      goToLeadForm();
-    }
-  };
-
-  const handleSkipNotifications = () => {
-    localStorage.setItem("notifica_orientamento_esterno_mostrata", "si");
-    goToLeadForm();
-  };
-
-  const syncOneSignalExternalLead = async (email: string) => {
-    const emailPulita = email.toLowerCase().trim();
-
-    if (!emailPulita) return;
-
-    try {
-      if (OneSignal.Notifications.permission === true) {
-        await OneSignal.login(emailPulita);
-        await new Promise((resolve) => setTimeout(resolve, 1600));
-      }
-
-      const tempoStudioTag = getTempoStudioTag(data.tempo);
-
-      const response = await fetch(
-        "https://laureasmart.it/api/sync-onesignal-tags.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: emailPulita,
-            nome: "Lead",
-            cognome: "Email",
-            telefono: "",
-            profilo: risultato.tipo,
-            stato_iscrizione: data.stato_iscrizione || "",
-            segmento_studente: segmenti.segmento_studente,
-            titolo_studio: data.titolo_studio || "",
-            obiettivo: data.obiettivo || "",
-            motivazione_studio: data.motivazione_studio || "",
-            area_interesse: data.area || "",
-            segmento_intento: segmenti.segmento_intento,
-            segmento_motivazione: segmenti.segmento_motivazione,
-            tempo_studio: tempoStudioTag,
-            segmento_urgenza: segmenti.segmento_urgenza,
-            segmento_aspetto: segmenti.segmento_aspetto,
-            aspetto_extra:
-              segmenti.segmento_aspetto !== "NESSUNO" ? "SI" : "NO",
-          }),
-        }
-      );
-
-      const result = await response.json();
-      console.log("SYNC ONESIGNAL TEST ESTERNO:", result);
-    } catch (error) {
-      console.error("Errore sync OneSignal test esterno:", error);
-    }
-  };
+    setFase("risultato");
+  }
 
   function handleAnswer(value: string) {
     if (!testStartedTracked) {
@@ -1684,142 +763,12 @@ export default function OrientamentoGratuitoTestPage() {
       return;
     }
 
-    const finalSegmenti = getSegmenti(nextData);
-    const finalRisultato = getRisultato(nextData);
-
-    saveToLocalStorage(nextData, finalSegmenti, finalRisultato);
-
-    const notificaGiaGestita =
-      localStorage.getItem("notifica_orientamento_esterno_mostrata") === "si";
-
-    const puoChiedereNotifiche =
-      typeof window !== "undefined" &&
-      "Notification" in window &&
-      Notification.permission === "default";
-
-    if (!notificaGiaGestita && puoChiedereNotifiche) {
-      setShowNotificationModal(true);
-      return;
-    }
-
-    goToLeadForm();
+    goToResult(nextData);
   }
 
   function goBack() {
-    if (fase === "form") {
-      setFase("test");
-      setStepIndex(activeSteps.length - 1);
-      return;
-    }
-
     if (stepIndex > 0) {
       setStepIndex((index) => index - 1);
-    }
-  }
-
-  async function submitLead() {
-    setErrore("");
-
-    const emailPulita = lead.email.trim();
-
-    if (!emailPulita) {
-      setErrore("Inserisci la tua email per ricevere il risultato del test.");
-      return;
-    }
-
-    if (!emailPulita.includes("@") || !emailPulita.includes(".")) {
-      setErrore("Inserisci un indirizzo email valido.");
-      return;
-    }
-
-    if (!lead.privacy) {
-      setErrore("Per continuare devi accettare l’informativa privacy.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const downloadClickId = getStoredDownloadClickId();
-      const downloadSource = getStoredDownloadSource();
-
-      const payload = {
-        nome: "Lead Email",
-        cognome: "",
-        email: emailPulita,
-        telefono: "",
-        canale_preferito: "email",
-        richiesta_risultato_email: "SI",
-        ...data,
-        ...segmenti,
-        risultato_tipo: risultato.tipo,
-        risultato_titolo: risultato.titolo,
-        risultato_descrizione: risultato.descrizione,
-
-        corso_suggerito: risultato.percorso,
-
-        percorso_prioritario: risultato.percorso_prioritario,
-        percorsi_compatibili: risultato.percorsi_compatibili.join(" | "),
-        approfondimento_orientamento: risultato.approfondimento,
-        prossimo_passo_orientamento: risultato.prossimo_passo,
-        percorsi_consigliati: JSON.stringify(risultato.percorsiConsigliati),
-        modalita_preferibile: risultato.modalitaPreferibile,
-        motivo_modalita_online: risultato.motivoModalitaOnline,
-        testo_risposta_finale: risultato.testoRispostaFinale,
-
-        source: "orientamento_gratuito",
-        ls_click_id: downloadClickId,
-        ls_source: downloadSource,
-        download_funnel_source: "download_page",
-      };
-
-      const response = await fetch(
-        "https://laureasmart.it/api/orientamento-gratuito-salva.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || "Salvataggio non riuscito");
-      }
-
-      void trackDownloadFunnelEvent({
-        event_name: "test_lead_submitted",
-        lead_email: emailPulita,
-        lead_nome: "Lead Email",
-        lead_telefono: "",
-      });
-
-      const gpsUser = {
-        nome: "Lead",
-        cognome: "Email",
-        email: emailPulita,
-        telefono: "",
-      };
-
-      localStorage.setItem("gps_user", JSON.stringify(gpsUser));
-      localStorage.setItem("user_email", emailPulita);
-      localStorage.setItem("onboarding_lead_salvato", "SI");
-      localStorage.setItem("onboarding_lead_data", new Date().toISOString());
-
-      void syncOneSignalExternalLead(emailPulita);
-
-      saveToLocalStorage(data, segmenti, risultato);
-      setFase("risultato");
-    } catch (error) {
-      console.error("Errore orientamento gratuito", error);
-      setErrore(
-        "Non è stato possibile salvare il risultato. Riprova tra poco."
-      );
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -2017,175 +966,6 @@ export default function OrientamentoGratuitoTestPage() {
         </>
       )}
 
-      {fase === "form" && (
-        <section
-          style={{
-            ...glassCard,
-            padding: 20,
-            background:
-              "linear-gradient(145deg, rgba(31,111,178,0.30), rgba(20,184,166,0.15), rgba(255,255,255,0.06))",
-          }}
-        >
-          <div
-            style={{
-              width: 58,
-              height: 58,
-              borderRadius: 22,
-              background: "linear-gradient(135deg, #1F6FB2 0%, #3AA0FF 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 18px 38px rgba(31,111,178,0.34)",
-              marginBottom: 16,
-            }}
-          >
-            <LockKeyhole size={28} />
-          </div>
-
-          <p
-            style={{
-              margin: "0 0 8px",
-              fontSize: 12,
-              color: "#BFDBFE",
-              fontWeight: 950,
-              letterSpacing: 0.8,
-              textTransform: "uppercase",
-            }}
-          >
-            Il tuo risultato è pronto
-          </p>
-
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 29,
-              lineHeight: 1.08,
-              letterSpacing: -0.9,
-            }}
-          >
-            Ricevi il risultato via email
-          </h1>
-
-          <p
-            style={{
-              margin: "12px 0 0",
-              fontSize: 13,
-              lineHeight: 1.65,
-              color: "rgba(255,255,255,0.72)",
-            }}
-          >
-            Inserisci la tua email: ti invieremo il riepilogo completo del test,
-            con il profilo emerso, il percorso prioritario da valutare e il
-            prossimo passo consigliato.
-          </p>
-
-          <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
-            <InputField
-              label="Email"
-              type="email"
-              value={lead.email}
-              onChange={(value) =>
-                setLead((prev) => ({ ...prev, email: value }))
-              }
-              placeholder="esempio@email.it"
-            />
-
-            <div
-              style={{
-                borderRadius: 18,
-                background: "rgba(59,130,246,0.12)",
-                border: "1px solid rgba(96,165,250,0.22)",
-                padding: 13,
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 12,
-                  lineHeight: 1.55,
-                  color: "rgba(255,255,255,0.74)",
-                }}
-              >
-                Il risultato completo sarà inviato all’indirizzo indicato.
-                Controlla anche la cartella spam, promozioni o posta
-                indesiderata se non trovi subito il messaggio.
-              </p>
-            </div>
-
-            <label
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 10,
-                padding: 13,
-                borderRadius: 18,
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={lead.privacy}
-                onChange={(event) =>
-                  setLead((prev) => ({
-                    ...prev,
-                    privacy: event.target.checked,
-                  }))
-                }
-                style={{ marginTop: 3 }}
-              />
-              <span
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.5,
-                  color: "rgba(255,255,255,0.68)",
-                }}
-              >
-                Accetto l’informativa privacy e autorizzo il trattamento della
-                mia email per ricevere il risultato del test e informazioni di
-                orientamento universitario.
-              </span>
-            </label>
-
-            {errore && (
-              <p
-                style={{
-                  margin: 0,
-                  color: "#FCA5A5",
-                  fontSize: 12,
-                  fontWeight: 850,
-                }}
-              >
-                {errore}
-              </p>
-            )}
-
-            <button
-              type="button"
-              onClick={submitLead}
-              disabled={loading}
-              style={{
-                ...primaryButtonStyle,
-                width: "100%",
-                opacity: loading ? 0.72 : 1,
-              }}
-            >
-              {loading ? <Loader2 size={18} /> : <CheckCircle2 size={18} />}
-              {loading ? "Invio in corso..." : "Ricevi il risultato via email"}
-            </button>
-
-            <button
-              type="button"
-              onClick={goBack}
-              style={{ ...secondaryButtonStyle, width: "100%" }}
-            >
-              Modifica risposte
-            </button>
-          </div>
-        </section>
-      )}
-
       {fase === "risultato" && (
         <section style={{ display: "grid", gap: 14 }}>
           <div
@@ -2222,7 +1002,7 @@ export default function OrientamentoGratuitoTestPage() {
                 textTransform: "uppercase",
               }}
             >
-              Risultato inviato
+              Risultato disponibile
             </p>
 
             <h1
@@ -2233,7 +1013,7 @@ export default function OrientamentoGratuitoTestPage() {
                 letterSpacing: -0.9,
               }}
             >
-              Controlla la tua email
+              {risultato.titolo}
             </h1>
 
             <p
@@ -2244,9 +1024,7 @@ export default function OrientamentoGratuitoTestPage() {
                 color: "rgba(255,255,255,0.76)",
               }}
             >
-              Abbiamo inviato il riepilogo completo del test all’indirizzo email
-              indicato. Nel messaggio troverai il tuo profilo orientativo, il
-              percorso prioritario da valutare e il prossimo passo consigliato.
+              {risultato.descrizione}
             </p>
           </div>
 
@@ -2280,23 +1058,98 @@ export default function OrientamentoGratuitoTestPage() {
 
               <div>
                 <h2 style={{ margin: 0, fontSize: 15 }}>
-                  Cosa troverai nella mail
+                  Percorso prioritario da valutare
                 </h2>
 
-                <ul
+                <p
                   style={{
-                    margin: "9px 0 0",
-                    paddingLeft: 18,
+                    margin: "8px 0 0",
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.78)",
+                    fontWeight: 850,
+                  }}
+                >
+                  {risultato.percorso_prioritario}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {risultato.percorsi_compatibili.length > 1 && (
+            <section
+              style={{
+                ...glassCard,
+                padding: 16,
+                borderRadius: 24,
+                border: `1px solid ${tones.teal.border}`,
+                background: tones.teal.bg,
+                boxShadow: `0 20px 42px ${tones.teal.glow}`,
+              }}
+            >
+              <h2 style={{ margin: 0, fontSize: 15 }}>
+                Altri percorsi compatibili
+              </h2>
+
+              <ul
+                style={{
+                  margin: "9px 0 0",
+                  paddingLeft: 18,
+                  fontSize: 13,
+                  lineHeight: 1.7,
+                  color: "rgba(255,255,255,0.72)",
+                }}
+              >
+                {risultato.percorsi_compatibili.slice(1, 4).map((percorso) => (
+                  <li key={percorso}>{percorso}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section
+            style={{
+              ...glassCard,
+              padding: 16,
+              borderRadius: 24,
+              border: `1px solid ${tones.purple.border}`,
+              background: tones.purple.bg,
+              boxShadow: `0 20px 42px ${tones.purple.glow}`,
+            }}
+          >
+            <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
+              <div
+                style={{
+                  width: 42,
+                  minWidth: 42,
+                  height: 42,
+                  borderRadius: 16,
+                  background: tones.purple.softBg,
+                  border: `1px solid ${tones.purple.border}`,
+                  color: tones.purple.icon,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Target size={20} />
+              </div>
+
+              <div>
+                <h2 style={{ margin: 0, fontSize: 15 }}>
+                  Prossimo passo consigliato
+                </h2>
+
+                <p
+                  style={{
+                    margin: "8px 0 0",
                     fontSize: 13,
-                    lineHeight: 1.7,
+                    lineHeight: 1.6,
                     color: "rgba(255,255,255,0.72)",
                   }}
                 >
-                  <li>il profilo emerso dalle tue risposte;</li>
-                  <li>il percorso prioritario da valutare;</li>
-                  <li>gli aspetti da approfondire prima di scegliere;</li>
-                  <li>il prossimo passo consigliato.</li>
-                </ul>
+                  {risultato.prossimo_passo}
+                </p>
               </div>
             </div>
           </section>
@@ -2330,239 +1183,31 @@ export default function OrientamentoGratuitoTestPage() {
               </div>
 
               <div>
-                <h2 style={{ margin: 0, fontSize: 15 }}>
-                  Non trovi il messaggio?
-                </h2>
+                <h2 style={{ margin: 0, fontSize: 15 }}>Nota importante</h2>
 
                 <p
                   style={{
-                    margin: "7px 0 0",
+                    margin: "8px 0 0",
                     fontSize: 13,
                     lineHeight: 1.6,
                     color: "rgba(255,255,255,0.72)",
                   }}
                 >
-                  Controlla anche le cartelle spam, promozioni o posta
-                  indesiderata. Se hai inserito per errore un indirizzo non
-                  corretto, puoi correggere l’email e richiedere un nuovo invio.
+                  Il risultato ha valore orientativo. Requisiti di accesso,
+                  costi, agevolazioni, CFU riconoscibili e condizioni di
+                  iscrizione devono sempre essere verificati con l’ateneo o con
+                  un orientatore.
                 </p>
               </div>
             </div>
           </section>
 
-          <section
-            style={{
-              ...glassCard,
-              padding: 16,
-              borderRadius: 24,
-              border: `1px solid ${tones.teal.border}`,
-              background: tones.teal.bg,
-              boxShadow: `0 20px 42px ${tones.teal.glow}`,
-            }}
-          >
-            <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
-              <div
-                style={{
-                  width: 42,
-                  minWidth: 42,
-                  height: 42,
-                  borderRadius: 16,
-                  background: tones.teal.softBg,
-                  border: `1px solid ${tones.teal.border}`,
-                  color: tones.teal.icon,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <MessageCircle size={20} />
-              </div>
-
-              <div>
-                <h2 style={{ margin: 0, fontSize: 15 }}>
-                  Siamo a tua disposizione
-                </h2>
-
-                <p
-                  style={{
-                    margin: "7px 0 0",
-                    fontSize: 13,
-                    lineHeight: 1.6,
-                    color: "rgba(255,255,255,0.72)",
-                  }}
-                >
-                  Se vuoi chiarire dubbi su requisiti, costi, riconoscimento CFU
-                  o scelta del percorso, puoi usare Laurea Smart o contattare un
-                  orientatore.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <div style={{ display: "grid", gap: 10 }}>
-            <Link href="/dashboard" style={primaryButtonStyle}>
-              Vai alla dashboard
-              <ArrowRight size={17} />
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => setFase("form")}
-              style={{ ...secondaryButtonStyle, width: "100%" }}
-            >
-              Correggi email e reinvia
-            </button>
-          </div>
+          <Link href="/dashboard" style={primaryButtonStyle}>
+            Vai alla dashboard
+            <ArrowRight size={17} />
+          </Link>
         </section>
       )}
-
-      {showNotificationModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(2,7,18,0.82)",
-            zIndex: 2000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 22,
-            backdropFilter: "blur(10px)",
-          }}
-        >
-          <div
-            style={{
-              width: "100%",
-              maxWidth: 390,
-              borderRadius: 32,
-              background:
-                "linear-gradient(135deg, rgba(17,32,51,0.98) 0%, rgba(11,23,40,0.98) 100%)",
-              padding: 26,
-              textAlign: "center",
-              boxShadow: "0 30px 90px rgba(0,0,0,0.45)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              color: "#FFFFFF",
-            }}
-          >
-            <div
-              style={{
-                width: 76,
-                height: 76,
-                borderRadius: 26,
-                background: "rgba(58,160,255,0.26)",
-                border: "1px solid rgba(120,194,255,0.28)",
-                color: "#BFDBFE",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 18px",
-                boxShadow: "0 12px 28px rgba(0,0,0,0.22)",
-              }}
-            >
-              <Sparkles size={34} />
-            </div>
-
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 28,
-                lineHeight: 1.08,
-                fontWeight: 900,
-                color: "#FFFFFF",
-                letterSpacing: "-0.8px",
-              }}
-            >
-              Vuoi salvare il test e ricevere un promemoria?
-            </h2>
-
-            <p
-              style={{
-                margin: "14px 0 22px",
-                fontSize: 15,
-                lineHeight: 1.6,
-                color: "rgba(255,255,255,0.68)",
-              }}
-            >
-              Attiva le notifiche solo se vuoi ricevere promemoria utili sul
-              risultato, sui prossimi passi e sul tuo percorso di orientamento.
-            </p>
-
-            <div style={{ display: "grid", gap: 10 }}>
-              <button
-                type="button"
-                onClick={handleActivateNotifications}
-                style={{ ...primaryButtonStyle, width: "100%" }}
-              >
-                Attiva promemoria
-                <ArrowRight size={18} />
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSkipNotifications}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  color: "rgba(255,255,255,0.42)",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  padding: 6,
-                  cursor: "pointer",
-                }}
-              >
-                Non ora
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
-  );
-}
-
-function InputField({
-  label,
-  value,
-  onChange,
-  type = "text",
-  placeholder = "",
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  placeholder?: string;
-}) {
-  return (
-    <label style={{ display: "grid", gap: 6 }}>
-      <span
-        style={{
-          fontSize: 12,
-          color: "rgba(255,255,255,0.64)",
-          fontWeight: 850,
-        }}
-      >
-        {label}
-      </span>
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        style={{
-          width: "100%",
-          minHeight: 50,
-          borderRadius: 17,
-          border: "1px solid rgba(255,255,255,0.12)",
-          background: "rgba(255,255,255,0.08)",
-          color: "#FFFFFF",
-          outline: "none",
-          padding: "0 14px",
-          fontSize: 14,
-          fontFamily: "inherit",
-          boxSizing: "border-box",
-        }}
-      />
-    </label>
   );
 }
