@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const response = await fetch(
-      "https://laureasmart.it/api/orientamento-salva.php",
+      "https://laureasmart.it/api/orientamento-gratuito-salva.php",
       {
         method: "POST",
         headers: {
@@ -15,7 +15,27 @@ export async function POST(req: Request) {
       }
     );
 
-    const data = await response.json();
+    const text = await response.text();
+
+    let data: unknown = null;
+
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = {
+          success: response.ok,
+          raw: text,
+        };
+      }
+    } else {
+      data = {
+        success: response.ok,
+        message: response.ok
+          ? "Richiesta inviata correttamente all'endpoint PHP."
+          : "Endpoint PHP raggiunto ma risposta vuota.",
+      };
+    }
 
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
