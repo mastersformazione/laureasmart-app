@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -12,6 +12,8 @@ import {
   GraduationCap,
   HeartHandshake,
   HelpCircle,
+  Loader2,
+  Mail,
   ShieldCheck,
   Sparkles,
   Target,
@@ -26,6 +28,8 @@ import type { PercorsoConsigliatoOrientamento } from "@/lib/orientamento";
 
 const DOWNLOAD_FUNNEL_ENDPOINT =
   "https://laureasmart.it/api/track-download-funnel.php";
+
+const ORIENTAMENTO_SAVE_ENDPOINT = "/api/orientamento/salva";
 
 type OrientamentoData = {
   stato_iscrizione?: string;
@@ -364,6 +368,31 @@ const secondaryButtonStyle: CSSProperties = {
   textDecoration: "none",
 };
 
+const inputStyle: CSSProperties = {
+  width: "100%",
+  minHeight: 56,
+  borderRadius: 18,
+  border: "1px solid rgba(255,255,255,0.16)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#FFFFFF",
+  fontSize: 15,
+  fontWeight: 800,
+  padding: "0 16px",
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+const helperTextStyle: CSSProperties = {
+  margin: "8px 0 0",
+  fontSize: 12,
+  lineHeight: 1.5,
+  color: "rgba(255,255,255,0.62)",
+};
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 function getStepTone(id: keyof OrientamentoData): Tone {
   if (id === "stato_iscrizione" || id === "titolo_studio") return "blue";
   if (id === "obiettivo" || id === "motivazione_studio") return "purple";
@@ -693,7 +722,10 @@ async function trackDownloadFunnelEvent(payload: {
 export default function OrientamentoGratuitoTestPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<OrientamentoData>({});
-  const [fase, setFase] = useState<"test" | "risultato">("test");
+  const [fase, setFase] = useState<"test" | "email" | "grazie">("test");
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
   const [testStartedTracked, setTestStartedTracked] = useState(false);
 
   const activeSteps = useMemo(
@@ -721,21 +753,26 @@ export default function OrientamentoGratuitoTestPage() {
     saveToLocalStorage(finalData, finalSegmenti, finalRisultato);
 
     try {
+      const now = new Date().toISOString();
+      const existingUser = localStorage.getItem("gps_user");
+      const parsedUser = existingUser ? JSON.parse(existingUser) : {};
+
       localStorage.setItem(
         "gps_user",
         JSON.stringify({
-          nome: "Utente",
-          cognome: "Laurea Smart",
-          email: "",
-          telefono: "",
+          nome: parsedUser?.nome || "Utente",
+          cognome: parsedUser?.cognome || "Laurea Smart",
+          email: parsedUser?.email || "",
+          telefono: parsedUser?.telefono || "",
         })
       );
-      if (!localStorage.getItem("registered_at")) {
-        localStorage.setItem("registered_at", new Date().toISOString());
-      }
 
       localStorage.setItem("onboarding_lead_salvato", "NO");
-      localStorage.setItem("onboarding_lead_data", new Date().toISOString());
+      localStorage.setItem("onboarding_lead_data", now);
+
+      if (!localStorage.getItem("registered_at")) {
+        localStorage.setItem("registered_at", now);
+      }
     } catch {
       // evita blocchi se localStorage non è disponibile
     }
@@ -744,7 +781,107 @@ export default function OrientamentoGratuitoTestPage() {
       event_name: "test_result_viewed",
     });
 
-    setFase("risultato");
+    setFase("email");
+  }
+
+  async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!isValidEmail(cleanEmail)) {
+      setEmailError("Inserisci un indirizzo email valido per ricevere il risultato.");
+      return;
+    }
+
+    const finalSegmenti = getSegmenti(data);
+    const finalRisultato = getRisultato(data);
+
+    setEmailError("");
+    setEmailSending(true);
+
+    try {
+      saveToLocalStorage(data, finalSegmenti, finalRisultato);
+
+      try {
+        const now = new Date().toISOString();
+        const existingUser = localStorage.getItem("gps_user");
+        const parsedUser = existingUser ? JSON.parse(existingUser) : {};
+
+        localStorage.setItem(
+          "gps_user",
+          JSON.stringify({
+            nome: parsedUser?.nome || "Utente",
+            cognome: parsedUser?.cognome || "Laurea Smart",
+            email: cleanEmail,
+            telefono: parsedUser?.telefono || "",
+          })
+        );
+
+        localStorage.setItem("onboarding_lead_salvato", "NO");
+        localStorage.setItem("onboarding_lead_data", now);
+
+        if (!localStorage.getItem("registered_at")) {
+          localStorage.setItem("registered_at", now);
+        }
+      } catch {
+        // evita blocchi se localStorage non è disponibile
+      }
+
+      const response = await fetch(ORIENTAMENTO_SAVE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_email: cleanEmail,
+          user_nome: "Utente",
+          test_source: "orientamento_gratuito_app",
+
+          stato_iscrizione: data.stato_iscrizione || "",
+          segmento_studente: finalSegmenti.segmento_studente,
+          situazione: data.situazione || "",
+          titolo_studio: data.titolo_studio || "",
+          obiettivo: data.obiettivo || "",
+          motivazione_studio: data.motivazione_studio || "",
+          segmento_motivazione: finalSegmenti.segmento_motivazione,
+          urgenza_obiettivo: data.urgenza || "",
+          tempo: data.tempo || "",
+          area: data.area || "",
+          aspetto_da_valutare: data.aspetto_da_valutare || "",
+          budget_mensile: data.budget_mensile || "",
+
+          risultato_tipo: finalRisultato.tipo,
+          corso_suggerito: finalRisultato.percorso_prioritario,
+          percorso_prioritario: finalRisultato.percorso_prioritario,
+          percorsi_compatibili: finalRisultato.percorsi_compatibili,
+          descrizione: finalRisultato.descrizione,
+          approfondimento: finalRisultato.approfondimento,
+          prossimo_passo: finalRisultato.prossimo_passo,
+          testo_risposta_finale: finalRisultato.testoRispostaFinale,
+          modalita_preferibile: finalRisultato.modalitaPreferibile,
+          motivo_modalita_online: finalRisultato.motivoModalitaOnline,
+
+          segmento_intento: finalSegmenti.segmento_intento,
+          segmento_ingresso: finalSegmenti.segmento_ingresso,
+          segmento_urgenza: finalSegmenti.segmento_urgenza,
+          segmento_aspetto: finalSegmenti.segmento_aspetto,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Invio risultato non riuscito: ${response.status}`);
+      }
+
+      setFase("grazie");
+    } catch (error) {
+      console.error("Errore invio risultato orientamento:", error);
+      setEmailError(
+        "Non siamo riusciti a inviare il risultato. Controlla la connessione e riprova."
+      );
+    } finally {
+      setEmailSending(false);
+    }
   }
 
   function handleAnswer(value: string) {
@@ -970,7 +1107,7 @@ export default function OrientamentoGratuitoTestPage() {
         </>
       )}
 
-      {fase === "risultato" && (
+      {fase === "email" && (
         <section style={{ display: "grid", gap: 14 }}>
           <div
             style={{
@@ -978,6 +1115,156 @@ export default function OrientamentoGratuitoTestPage() {
               padding: 20,
               background:
                 "linear-gradient(145deg, rgba(31,111,178,0.32), rgba(20,184,166,0.18), rgba(255,255,255,0.06))",
+            }}
+          >
+            <div
+              style={{
+                width: 62,
+                height: 62,
+                borderRadius: 23,
+                background: "linear-gradient(135deg, #1F6FB2 0%, #14B8A6 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+                boxShadow: "0 18px 38px rgba(31,111,178,0.28)",
+              }}
+            >
+              <Mail size={30} />
+            </div>
+
+            <p
+              style={{
+                margin: "0 0 8px",
+                fontSize: 12,
+                color: "#BAE6FD",
+                fontWeight: 950,
+                letterSpacing: 0.8,
+                textTransform: "uppercase",
+              }}
+            >
+              Ultimo passaggio
+            </p>
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 29,
+                lineHeight: 1.08,
+                letterSpacing: -0.9,
+              }}
+            >
+              Dove vuoi ricevere il risultato del test?
+            </h1>
+
+            <p
+              style={{
+                margin: "12px 0 0",
+                fontSize: 14,
+                lineHeight: 1.65,
+                color: "rgba(255,255,255,0.76)",
+              }}
+            >
+              Inserisci la tua email: ti inviamo una copia del risultato
+              orientativo e prepariamo la dashboard in base alle risposte che hai
+              appena dato.
+            </p>
+          </div>
+
+          <section
+            style={{
+              ...glassCard,
+              padding: 16,
+              borderRadius: 24,
+              border: `1px solid ${tones.blue.border}`,
+              background: tones.blue.bg,
+              boxShadow: `0 20px 42px ${tones.blue.glow}`,
+            }}
+          >
+            <form onSubmit={handleEmailSubmit} style={{ display: "grid", gap: 12 }}>
+              <label
+                htmlFor="orientamento-email"
+                style={{
+                  fontSize: 13,
+                  fontWeight: 950,
+                  color: "rgba(255,255,255,0.88)",
+                }}
+              >
+                Email per ricevere il risultato
+              </label>
+
+              <input
+                id="orientamento-email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="nome@email.it"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  if (emailError) setEmailError("");
+                }}
+                style={inputStyle}
+                disabled={emailSending}
+              />
+
+              <p style={helperTextStyle}>
+                Il risultato viene salvato anche nella dashboard dell’app, così
+                potrai ritrovarlo e continuare il percorso quando vuoi.
+              </p>
+
+              {emailError && (
+                <p
+                  style={{
+                    margin: 0,
+                    padding: "11px 12px",
+                    borderRadius: 16,
+                    background: "rgba(239,68,68,0.14)",
+                    border: "1px solid rgba(248,113,113,0.26)",
+                    color: "#FECACA",
+                    fontSize: 13,
+                    lineHeight: 1.45,
+                    fontWeight: 800,
+                  }}
+                >
+                  {emailError}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={emailSending}
+                style={{
+                  ...primaryButtonStyle,
+                  width: "100%",
+                  opacity: emailSending ? 0.72 : 1,
+                }}
+              >
+                {emailSending ? (
+                  <>
+                    <Loader2 size={17} />
+                    Invio in corso...
+                  </>
+                ) : (
+                  <>
+                    Ricevi il risultato via email
+                    <ArrowRight size={17} />
+                  </>
+                )}
+              </button>
+            </form>
+          </section>
+        </section>
+      )}
+
+      {fase === "grazie" && (
+        <section style={{ display: "grid", gap: 14 }}>
+          <div
+            style={{
+              ...glassCard,
+              padding: 20,
+              background:
+                "linear-gradient(145deg, rgba(22,163,74,0.30), rgba(31,111,178,0.22), rgba(255,255,255,0.06))",
             }}
           >
             <div
@@ -1006,7 +1293,7 @@ export default function OrientamentoGratuitoTestPage() {
                 textTransform: "uppercase",
               }}
             >
-              Risultato disponibile
+              Risultato inviato
             </p>
 
             <h1
@@ -1017,7 +1304,7 @@ export default function OrientamentoGratuitoTestPage() {
                 letterSpacing: -0.9,
               }}
             >
-              {risultato.titolo}
+              Grazie, la tua dashboard è pronta
             </h1>
 
             <p
@@ -1028,7 +1315,9 @@ export default function OrientamentoGratuitoTestPage() {
                 color: "rgba(255,255,255,0.76)",
               }}
             >
-              {risultato.descrizione}
+              Abbiamo inviato il risultato all’indirizzo email indicato. Ora puoi
+              tornare alla dashboard: troverai contenuti, strumenti e prossimi
+              passaggi aggiornati in base alle risposte del test.
             </p>
           </div>
 
@@ -1042,172 +1331,25 @@ export default function OrientamentoGratuitoTestPage() {
               boxShadow: `0 20px 42px ${tones.blue.glow}`,
             }}
           >
-            <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
-              <div
-                style={{
-                  width: 42,
-                  minWidth: 42,
-                  height: 42,
-                  borderRadius: 16,
-                  background: tones.blue.softBg,
-                  border: `1px solid ${tones.blue.border}`,
-                  color: tones.blue.icon,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <ClipboardCheck size={20} />
-              </div>
+            <h2 style={{ margin: 0, fontSize: 15 }}>
+              Percorso prioritario salvato
+            </h2>
 
-              <div>
-                <h2 style={{ margin: 0, fontSize: 15 }}>
-                  Percorso prioritario da valutare
-                </h2>
-
-                <p
-                  style={{
-                    margin: "8px 0 0",
-                    fontSize: 14,
-                    lineHeight: 1.6,
-                    color: "rgba(255,255,255,0.78)",
-                    fontWeight: 850,
-                  }}
-                >
-                  {risultato.percorso_prioritario}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {risultato.percorsi_compatibili.length > 1 && (
-            <section
+            <p
               style={{
-                ...glassCard,
-                padding: 16,
-                borderRadius: 24,
-                border: `1px solid ${tones.teal.border}`,
-                background: tones.teal.bg,
-                boxShadow: `0 20px 42px ${tones.teal.glow}`,
+                margin: "8px 0 0",
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.78)",
+                fontWeight: 850,
               }}
             >
-              <h2 style={{ margin: 0, fontSize: 15 }}>
-                Altri percorsi compatibili
-              </h2>
-
-              <ul
-                style={{
-                  margin: "9px 0 0",
-                  paddingLeft: 18,
-                  fontSize: 13,
-                  lineHeight: 1.7,
-                  color: "rgba(255,255,255,0.72)",
-                }}
-              >
-                {risultato.percorsi_compatibili.slice(1, 4).map((percorso) => (
-                  <li key={percorso}>{percorso}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <section
-            style={{
-              ...glassCard,
-              padding: 16,
-              borderRadius: 24,
-              border: `1px solid ${tones.purple.border}`,
-              background: tones.purple.bg,
-              boxShadow: `0 20px 42px ${tones.purple.glow}`,
-            }}
-          >
-            <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
-              <div
-                style={{
-                  width: 42,
-                  minWidth: 42,
-                  height: 42,
-                  borderRadius: 16,
-                  background: tones.purple.softBg,
-                  border: `1px solid ${tones.purple.border}`,
-                  color: tones.purple.icon,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Target size={20} />
-              </div>
-
-              <div>
-                <h2 style={{ margin: 0, fontSize: 15 }}>
-                  Prossimo passo consigliato
-                </h2>
-
-                <p
-                  style={{
-                    margin: "8px 0 0",
-                    fontSize: 13,
-                    lineHeight: 1.6,
-                    color: "rgba(255,255,255,0.72)",
-                  }}
-                >
-                  {risultato.prossimo_passo}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section
-            style={{
-              ...glassCard,
-              padding: 16,
-              borderRadius: 24,
-              border: `1px solid ${tones.amber.border}`,
-              background: tones.amber.bg,
-              boxShadow: `0 20px 42px ${tones.amber.glow}`,
-            }}
-          >
-            <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
-              <div
-                style={{
-                  width: 42,
-                  minWidth: 42,
-                  height: 42,
-                  borderRadius: 16,
-                  background: tones.amber.softBg,
-                  border: `1px solid ${tones.amber.border}`,
-                  color: tones.amber.icon,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <ShieldCheck size={20} />
-              </div>
-
-              <div>
-                <h2 style={{ margin: 0, fontSize: 15 }}>Nota importante</h2>
-
-                <p
-                  style={{
-                    margin: "8px 0 0",
-                    fontSize: 13,
-                    lineHeight: 1.6,
-                    color: "rgba(255,255,255,0.72)",
-                  }}
-                >
-                  Il risultato ha valore orientativo. Requisiti di accesso,
-                  costi, agevolazioni, CFU riconoscibili e condizioni di
-                  iscrizione devono sempre essere verificati con l’ateneo o con
-                  un orientatore.
-                </p>
-              </div>
-            </div>
+              {risultato.percorso_prioritario}
+            </p>
           </section>
 
           <Link href="/dashboard" style={primaryButtonStyle}>
-            Vai alla dashboard
+            Torna alla dashboard
             <ArrowRight size={17} />
           </Link>
         </section>
