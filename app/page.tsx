@@ -33,14 +33,12 @@ export default function Home() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("gps_user");
+    const haFattoTest = localStorage.getItem("ha_fatto_test");
 
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as Navigator & { standalone?: boolean }).standalone ===
-        true ||
-      document.referrer.startsWith("android-app://");
-
-    if (storedUser && isStandalone) {
+    // In app/WebView il controllo standalone non è sempre affidabile.
+    // Se l'utente ha già un profilo locale o ha già completato il test,
+    // deve rientrare direttamente in dashboard senza rifare onboarding/test.
+    if (storedUser || haFattoTest === "si") {
       router.replace("/dashboard");
     }
   }, [router]);

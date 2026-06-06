@@ -233,7 +233,16 @@ export default function Dashboard() {
     };
 
     const loadNotifiche = () => {
-      const registeredAt = localStorage.getItem("registered_at") || "";
+      let registeredAt = localStorage.getItem("registered_at") || "";
+
+      // Protezione per utenti creati dal test/onboarding prima del fix:
+      // se manca la data di registrazione, la inizializziamo ora.
+      // Così l'endpoint notifiche non riceve registered_at vuoto e non mostra
+      // tutte le notifiche storiche già presenti nel database.
+      if (!registeredAt) {
+        registeredAt = new Date().toISOString();
+        localStorage.setItem("registered_at", registeredAt);
+      }
 
       const url =
         "https://laureasmart.it/api/notifiche.php?t=" +

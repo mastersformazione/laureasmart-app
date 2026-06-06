@@ -730,6 +730,10 @@ export default function OrientamentoGratuitoTestPage() {
           telefono: "",
         })
       );
+      if (!localStorage.getItem("registered_at")) {
+        localStorage.setItem("registered_at", new Date().toISOString());
+      }
+
       localStorage.setItem("onboarding_lead_salvato", "NO");
       localStorage.setItem("onboarding_lead_data", new Date().toISOString());
     } catch {
