@@ -13,17 +13,32 @@ type OpenAIContentPart =
   | { type: "input_image"; image_url: string; detail: "high" | "auto" | "low" }
   | { type: "input_file"; filename: string; file_data: string };
 
-function getOutputText(payload: any): string {
-  if (typeof payload?.output_text === "string") return payload.output_text;
-
-  const chunks: string[] = [];
-  for (const item of payload?.output || []) {
-    for (const content of item?.content || []) {
-      if (typeof content?.text === "string") chunks.push(content.text);
+  type OpenAITextContent = {
+    text?: unknown;
+  };
+  
+  type OpenAIOutputItem = {
+    content?: OpenAITextContent[];
+  };
+  
+  type OpenAIResponsePayload = {
+    output_text?: unknown;
+    output?: OpenAIOutputItem[];
+  };
+  
+  function getOutputText(payload: OpenAIResponsePayload): string {
+    if (typeof payload.output_text === "string") return payload.output_text;
+  
+    const chunks: string[] = [];
+  
+    for (const item of payload.output || []) {
+      for (const content of item.content || []) {
+        if (typeof content.text === "string") chunks.push(content.text);
+      }
     }
+  
+    return chunks.join("\n").trim();
   }
-  return chunks.join("\n").trim();
-}
 
 function safeJsonParse(text: string) {
   try {
