@@ -7,7 +7,24 @@ export const dynamic = "force-dynamic";
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
+type EsameConfermato = {
+  nome?: string;
+  ssd?: string;
+  cfu?: number | string;
+  livello?: string;
+};
 
+type RequisitoRisultato = {
+  label?: string;
+  cfuPosseduti?: number | string;
+  cfuMancanti?: number | string;
+  soddisfatto?: boolean;
+};
+
+type RisultatoVerifica = {
+  stato?: string;
+  requisiti?: RequisitoRisultato[];
+} | null;
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -44,8 +61,8 @@ export async function POST(request: Request) {
     const titolo = String(formData.get("titolo") || "").trim();
     const classe = String(formData.get("classe") || "").trim();
     const note = String(formData.get("note") || "").trim();
-    const esami = parseJsonField<any[]>(formData.get("esami"), []);
-    const risultato = parseJsonField<any>(formData.get("risultato"), null);
+    const esami = parseJsonField<EsameConfermato[]>(formData.get("esami"), []);
+    const risultato = parseJsonField<RisultatoVerifica>(formData.get("risultato"), null);
 
     if (!nome || !email || !telefono) {
       return NextResponse.json(
@@ -95,8 +112,8 @@ export async function POST(request: Request) {
 
     const requisitiRows = requisiti.length
       ? requisiti
-          .map(
-            (req: any) => `
+      .map(
+        (req: RequisitoRisultato) => `
             <tr>
               <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${escapeHtml(String(req.label || "Requisito"))}</td>
               <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${escapeHtml(String(req.cfuPosseduti ?? ""))}</td>
