@@ -168,11 +168,18 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
+    
+      console.error("OPENAI_RESPONSE_ERROR", {
+        status: response.status,
+        statusText: response.statusText,
+        errorText,
+      });
+    
       return NextResponse.json(
         {
           success: false,
           message: "Errore durante la lettura AI del documento.",
-          detail: errorText.slice(0, 700),
+          detail: errorText.slice(0, 1200),
           warnings,
         },
         { status: 500 }
@@ -191,6 +198,8 @@ export async function POST(request: Request) {
       rawCount: Array.isArray(parsed.esami) ? parsed.esami.length : 0,
     });
   } catch (error) {
+    console.error("ESTRAI_ESAMI_ROUTE_ERROR", error);
+  
     return NextResponse.json(
       {
         success: false,
