@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         content.push({
           type: "input_file",
           filename: file.name || "documento.pdf",
-          file_data: base64,
+          file_data: `data:application/pdf;base64,${base64}`,
         });
       } else {
         content.push({
