@@ -18,6 +18,7 @@ import {
   Share2,
   GraduationCap,
   Sparkles,
+  BookOpenCheck,
 } from "lucide-react";
 
 type GpsUser = {
@@ -233,16 +234,7 @@ export default function Dashboard() {
     };
 
     const loadNotifiche = () => {
-      let registeredAt = localStorage.getItem("registered_at") || "";
-
-      // Protezione per utenti creati dal test/onboarding prima del fix:
-      // se manca la data di registrazione, la inizializziamo ora.
-      // Così l'endpoint notifiche non riceve registered_at vuoto e non mostra
-      // tutte le notifiche storiche già presenti nel database.
-      if (!registeredAt) {
-        registeredAt = new Date().toISOString();
-        localStorage.setItem("registered_at", registeredAt);
-      }
+      const registeredAt = localStorage.getItem("registered_at") || "";
 
       const url =
         "https://laureasmart.it/api/notifiche.php?t=" +
@@ -652,6 +644,15 @@ export default function Dashboard() {
       {!isGiaIscritto && <CompatibilitaPercorsoCard />}
       <SpazioStudentiCard />
       <PrimaDiScegliereCard />
+
+      <FeatureCard
+        icon={<BookOpenCheck size={30} />}
+        title="Verifica CFU per insegnare"
+        description="Inserisci esami, SSD e crediti: ottieni una prima verifica automatica per le classi di concorso e inviala gratis a un orientatore."
+        gradient="linear-gradient(135deg, #0F766E 0%, #1F6FB2 52%, #3AA0FF 100%)"
+        highlight
+        onClick={() => router.push("/dashboard/verifica-cfu")}
+      />
 
       <FeatureCard
         icon={<CalendarCheck size={30} />}
