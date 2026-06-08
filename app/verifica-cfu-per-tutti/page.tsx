@@ -5,6 +5,8 @@ import {
   ArrowLeft,
   BookOpenCheck,
   CheckCircle2,
+  Camera,
+  Download,
   GraduationCap,
   Mail,
   MessageCircle,
@@ -38,6 +40,7 @@ const PDF_RENDER_SCALE = 2.4;
 const ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 const ORIENTATORE_EMAIL = "info@laureasmart.it";
 const WHATSAPP_NUMBER = "393793673257";
+const APP_DOWNLOAD_URL = "https://laureasmart.it/download";
 const WHATSAPP_MESSAGE = encodeURIComponent(
   "Buongiorno, vorrei una verifica gratuita e senza impegno dei CFU per le classi di concorso."
 );
@@ -256,6 +259,7 @@ async function prepareFilesForAiExtraction(originalFiles: File[]): Promise<Prepa
 
 export default function VerificaCfuPerTuttiPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const [classi, setClassi] = useState<ClasseConcorso[]>([]);
   const [titoli, setTitoli] = useState<TitoloCompleto[]>([]);
   const [titoloCodice, setTitoloCodice] = useState("");
@@ -501,6 +505,7 @@ export default function VerificaCfuPerTuttiPage() {
     } finally {
       setExtracting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (cameraInputRef.current) cameraInputRef.current.value = "";
     }
   };
 
@@ -627,6 +632,7 @@ export default function VerificaCfuPerTuttiPage() {
       </section>
 
       <ImmediateContactCard />
+      <AppDownloadCard />
 
       {loading ? (
         <AppCard variant="dark" title="Caricamento dati" description="Sto preparando titoli e classi di concorso." />
@@ -638,21 +644,37 @@ export default function VerificaCfuPerTuttiPage() {
             description="Puoi caricare più file: carriera triennale, magistrale, screenshot o PDF. La lettura automatica compilerà la tabella, che potrai correggere."
             icon={<UploadCloud size={22} />}
           >
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                borderRadius: 24,
-                padding: 18,
-                border: "1px dashed rgba(255,255,255,0.28)",
-                background: "rgba(255,255,255,0.08)",
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              <UploadCloud size={30} />
-              <strong style={{ display: "block", marginTop: 8 }}>Carica PDF, JPG, PNG o WEBP</strong>
-              <span style={{ display: "block", marginTop: 4, color: "rgba(255,255,255,0.70)", fontSize: 13 }}>
-                Massimo {MAX_FILES} documenti, 10 MB per file. I PDF vengono letti pagina per pagina.
+            <div style={{ display: "grid", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={uploadChoiceButtonStyle}
+              >
+                <UploadCloud size={24} />
+                <span style={{ display: "grid", gap: 3, textAlign: "left" }}>
+                  <strong>Carica documento</strong>
+                  <span style={{ color: "rgba(255,255,255,0.70)", fontSize: 12.5 }}>
+                    PDF, JPG, PNG o WEBP. I PDF vengono letti pagina per pagina.
+                  </span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                style={uploadChoiceButtonStyle}
+              >
+                <Camera size={24} />
+                <span style={{ display: "grid", gap: 3, textAlign: "left" }}>
+                  <strong>Scatta una foto</strong>
+                  <span style={{ color: "rgba(255,255,255,0.70)", fontSize: 12.5 }}>
+                    Usa la fotocamera del telefono per fotografare piano di studi o certificato.
+                  </span>
+                </span>
+              </button>
+
+              <span style={{ color: "rgba(255,255,255,0.62)", fontSize: 12.5, lineHeight: 1.45 }}>
+                Puoi caricare massimo {MAX_FILES} documenti, 10 MB per file. Dopo il caricamento potrai avviare la lettura automatica.
               </span>
             </div>
 
@@ -661,6 +683,15 @@ export default function VerificaCfuPerTuttiPage() {
               type="file"
               multiple
               accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+              onChange={(e) => addFiles(e.target.files)}
+              style={{ display: "none" }}
+            />
+
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
               onChange={(e) => addFiles(e.target.files)}
               style={{ display: "none" }}
             />
@@ -894,6 +925,28 @@ function ImmediateContactCard() {
   );
 }
 
+
+function AppDownloadCard() {
+  return (
+    <AppCard
+      variant="dark"
+      title="Vuoi ritrovare e modificare i tuoi percorsi quando vuoi?"
+      description="Scarica l’app Laurea Smart: potrai salvare le verifiche, tornare sui tuoi documenti e continuare a confrontare percorsi, atenei e possibilità senza ripartire da zero."
+      icon={<Download size={22} />}
+    >
+      <div style={{ display: "grid", gap: 10 }}>
+        <a href={APP_DOWNLOAD_URL} target="_blank" rel="noopener noreferrer" style={downloadButtonStyle}>
+          <Download size={18} />
+          Scarica la app Laurea Smart
+        </a>
+        <p style={{ margin: 0, color: "rgba(255,255,255,0.66)", fontSize: 12.5, lineHeight: 1.5 }}>
+          Il test online è gratuito. Con l’app puoi continuare a lavorare sui tuoi percorsi anche in un secondo momento e avere sempre a portata di mano gli strumenti di orientamento.
+        </p>
+      </div>
+    </AppCard>
+  );
+}
+
 function RisultatoCard({
   risultato,
   classe,
@@ -1068,6 +1121,25 @@ const whatsappButtonStyle: React.CSSProperties = {
   boxShadow: "0 12px 24px rgba(22,163,74,0.24)",
 };
 
+
+const downloadButtonStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: 48,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.18)",
+  background: "linear-gradient(135deg, #2563eb, #0f766e)",
+  color: "#FFFFFF",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 9,
+  fontSize: 15,
+  fontWeight: 900,
+  textDecoration: "none",
+  boxSizing: "border-box",
+  boxShadow: "0 12px 24px rgba(37,99,235,0.24)",
+};
+
 const emailButtonStyle: React.CSSProperties = {
   width: "100%",
   minHeight: 48,
@@ -1123,6 +1195,22 @@ const miniButtonStyle: React.CSSProperties = {
   display: "grid",
   placeItems: "center",
   cursor: "pointer",
+};
+
+
+const uploadChoiceButtonStyle: React.CSSProperties = {
+  width: "100%",
+  border: "1px dashed rgba(255,255,255,0.28)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#FFFFFF",
+  borderRadius: 22,
+  padding: "15px 16px",
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  cursor: "pointer",
+  fontFamily: "inherit",
+  fontSize: 14.5,
 };
 
 const fileRowStyle: React.CSSProperties = {
