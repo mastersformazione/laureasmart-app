@@ -11,12 +11,34 @@ function sameTitleCode(a: string, b: string): boolean {
   return a.trim().toUpperCase() === b.trim().toUpperCase();
 }
 
+function toSafeCfu(value: unknown): number {
+  const parsed = Number(value || 0);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function normalizeExamSsd(ssd: string): string {
+  return normalizeSSD(String(ssd || "").trim());
+}
+
 function sumCfuForSectors(esami: EsameCfu[], settori: string[]): number {
+  const cleanSettori = settori.map((settore) => String(settore || "").trim()).filter(Boolean);
+
+  if (!cleanSettori.length) return 0;
+
   return esami.reduce((total, esame) => {
-    const normalizedSsd = normalizeSSD(esame.ssd);
-    const match = settori.some((settore) => isSsdInSector(normalizedSsd, settore));
-    return match ? total + Number(esame.cfu || 0) : total;
+    const normalizedSsd = normalizeExamSsd(esame.ssd);
+    const cfu = toSafeCfu(esame.cfu);
+
+    if (!normalizedSsd || !cfu) return total;
+
+    const match = cleanSettori.some((settore) => isSsdInSector(normalizedSsd, settore));
+
+    return match ? total + cfu : total;
   }, 0);
+}
+
+function hasCfuLanguage(note: string): boolean {
+  return /(CFU|crediti|credito|\d{1,3}\s+[A-Z]+(?:-[A-Z]+)?(?:-[A-Z]+)?\/\d{2})/i.test(note || "");
 }
 
 export function verificaCfuClasse({
@@ -47,6 +69,7 @@ export function verificaCfuClasse({
   }
 
   const parsed = parseRequisitiDaNota(note);
+
   const requisiti = parsed.requisiti.map((requisito) => {
     const cfuPosseduti = sumCfuForSectors(esami, requisito.settori);
     const cfuMancanti = Math.max(0, requisito.cfuRichiesti - cfuPosseduti);
@@ -61,7 +84,23 @@ export function verificaCfuClasse({
 
   const haRequisitiCfu = requisiti.length > 0;
   const haMancanze = requisiti.some((requisito) => !requisito.soddisfatto);
-  const haNoteNonInterpretate = parsed.nonInterpretati.length > 0 || (!!note && /CFU/i.test(note) && !haRequisitiCfu);
+  const notaSembraRichiedereCfu = hasCfuLanguage(note);
+  const haNoteNonInterpretate =
+    parsed.nonInterpretati.length > 0 || (notaSembraRichiedereCfu && !haRequisitiCfu);
+
+  let stato: RisultatoVerificaCfu["stato"];
+
+  if (haRequisitiCfu && haMancanze) {
+    stato = "parziale";
+  } else if (haRequisitiCfu && !haMancanze && haNoteNonInterpretate) {
+    stato = "da_verificare";
+  } else if (haRequisitiCfu && !haMancanze) {
+    stato = "positivo";
+  } else if (haNoteNonInterpretate) {
+    stato = "da_verificare";
+  } else {
+    stato = "positivo";
+  }
 
   return {
     titoloCompatibile: true,
@@ -69,11 +108,7 @@ export function verificaCfuClasse({
     note,
     requisiti,
     requisitiNonInterpretati: parsed.nonInterpretati,
-    stato: haMancanze
-      ? "parziale"
-      : haNoteNonInterpretate
-      ? "da_verificare"
-      : "positivo",
+    stato,
   };
 }
 
