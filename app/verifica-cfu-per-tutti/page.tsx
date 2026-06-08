@@ -257,6 +257,59 @@ async function prepareFilesForAiExtraction(originalFiles: File[]): Promise<Prepa
   return { files: files.slice(0, MAX_AI_FILES), warnings };
 }
 
+function dedupEsamiClient(esami: EsameCfu[]): EsameCfu[] {
+  const map = new Map<string, EsameCfu>();
+
+  for (const esame of esami) {
+    const nome = String(esame.nome || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+    const ssd = normalizeSSD(String(esame.ssd || ""));
+    const cfu = Number(esame.cfu || 0);
+
+    const key = `${nome}|${ssd}|${cfu}`;
+
+    if (!nome || !ssd || !cfu) {
+      map.set(`${key}|${esame.id || Math.random()}`, esame);
+      continue;
+    }
+
+    const existing = map.get(key);
+
+    if (!existing) {
+      map.set(key, {
+        ...esame,
+        ssd,
+        cfu,
+      });
+      continue;
+    }
+
+    const existingScore =
+      Number(Boolean(existing.nome)) +
+      Number(Boolean(existing.ssd)) +
+      Number(Boolean(existing.cfu));
+
+    const currentScore =
+      Number(Boolean(esame.nome)) +
+      Number(Boolean(esame.ssd)) +
+      Number(Boolean(esame.cfu));
+
+    if (currentScore > existingScore) {
+      map.set(key, {
+        ...esame,
+        ssd,
+        cfu,
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
 export default function VerificaCfuPerTuttiPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -449,53 +502,87 @@ export default function VerificaCfuPerTuttiPage() {
   const estraiEsamiDaDocumenti = async () => {
     setUploadMessage("");
     setUploadWarnings([]);
-
+  
     if (!documenti.length) {
       setUploadMessage("Carica almeno un documento prima di avviare la lettura automatica.");
       return;
     }
-
+  
     setExtracting(true);
+  
     try {
-      setUploadMessage("Sto preparando i documenti. Se hai caricato un PDF, analizzo le pagine una per una.");
-
+      setUploadMessage(
+        "Sto preparando i documenti. Se hai caricato un PDF, analizzo le pagine una per una."
+      );
+  
       const prepared = await prepareFilesForAiExtraction(documenti);
-      const formData = new FormData();
-      prepared.files.forEach((file) => formData.append("files", file));
-
+  
       if (!prepared.files.length) {
         throw new Error("Nessun file valido da inviare alla lettura automatica.");
       }
-
+  
+      const allWarnings: string[] = [...prepared.warnings];
+      const allExtracted: EsameCfu[] = [];
+  
       setUploadWarnings(prepared.warnings);
-      setUploadMessage(`Sto leggendo ${prepared.files.length} pagina/e o immagine/i con l’AI...`);
-
-      const response = await fetch("/api/verifica-cfu/estrai-esami", {
-        method: "POST",
-        body: formData,
-      });
-
-      const json = (await response.json()) as ApiEstrazioneResponse;
-      if (!response.ok || !json.success) {
-        throw new Error(json.message || "Lettura automatica non riuscita.");
+  
+      for (let index = 0; index < prepared.files.length; index += 1) {
+        const file = prepared.files[index];
+  
+        setUploadMessage(
+          `Sto leggendo ${index + 1} di ${prepared.files.length}: ${file.name}`
+        );
+  
+        const formData = new FormData();
+        formData.append("files", file);
+  
+        const response = await fetch("/api/verifica-cfu/estrai-esami", {
+          method: "POST",
+          body: formData,
+        });
+  
+        const json = (await response.json()) as ApiEstrazioneResponse;
+  
+        if (!response.ok || !json.success) {
+          allWarnings.push(
+            `${file.name}: lettura non riuscita. Puoi continuare con gli altri file o inserire manualmente eventuali esami mancanti.`
+          );
+          continue;
+        }
+  
+        if (json.esami?.length) {
+          allExtracted.push(...json.esami);
+        }
+  
+        if (json.warnings?.length) {
+          allWarnings.push(...json.warnings);
+        }
       }
-
-      const estratti = json.esami || [];
-      if (!estratti.length) {
+  
+      if (!allExtracted.length) {
         setUploadMessage(
           "Non siamo riusciti a leggere correttamente gli esami. Puoi provare con un PDF più chiaro, inserire i dati manualmente o inviare comunque i documenti all’orientatore al termine."
         );
-        setUploadWarnings((current) => [...current, ...(json.warnings || [])]);
+        setUploadWarnings(allWarnings);
         return;
       }
-
+  
+      const deduped = dedupEsamiClient(allExtracted);
+  
       setEsami((current) => {
-        const hasOnlyEmpty = current.length === 1 && !current[0].nome && !current[0].ssd && !current[0].cfu;
-        return hasOnlyEmpty ? estratti : [...current, ...estratti];
+        const hasOnlyEmpty =
+          current.length === 1 &&
+          !current[0].nome &&
+          !current[0].ssd &&
+          !current[0].cfu;
+  
+        return hasOnlyEmpty ? deduped : dedupEsamiClient([...current, ...deduped]);
       });
-
-      setUploadMessage(`Abbiamo trovato ${estratti.length} esami. Controlla SSD e CFU prima di procedere.`);
-      setUploadWarnings((current) => [...current, ...(json.warnings || [])]);
+  
+      setUploadMessage(
+        `Abbiamo trovato ${deduped.length} esami. Controlla SSD e CFU prima di procedere.`
+      );
+      setUploadWarnings(allWarnings);
     } catch (error) {
       setUploadMessage(
         error instanceof Error
