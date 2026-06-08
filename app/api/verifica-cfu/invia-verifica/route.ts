@@ -35,9 +35,11 @@ type EmailAttachment = {
 
 type DocumentoUrl = {
   nome?: string;
+  filename?: string;
   url?: string;
   size?: number;
   type?: string;
+  contentType?: string;
 };
 
 function escapeHtml(value: string) {
@@ -125,8 +127,8 @@ export async function POST(request: Request) {
     }
 
     /*
-      Manteniamo il supporto agli allegati tradizionali solo come fallback.
-      Nella landing pubblica, però, i documenti devono arrivare come URL Blob
+      Supporto allegati mantenuto come fallback.
+      Nella landing pubblica i documenti dovrebbero arrivare come link Blob
       nel campo documentiUrl, così evitiamo FUNCTION_PAYLOAD_TOO_LARGE.
     */
     const files = formData
@@ -166,9 +168,12 @@ export async function POST(request: Request) {
       ? documentiValidi
           .map((documento, index) => {
             const url = String(documento.url || "").trim();
-            const nomeDocumento = String(documento.nome || `Documento ${index + 1}`).trim();
+            const nomeDocumento = String(
+              documento.nome || documento.filename || `Documento ${index + 1}`
+            ).trim();
             const size = formatFileSize(documento.size);
-            const type = documento.type ? ` — ${escapeHtml(String(documento.type))}` : "";
+            const typeValue = documento.type || documento.contentType || "";
+            const type = typeValue ? ` — ${escapeHtml(String(typeValue))}` : "";
 
             return `
               <li style="margin-bottom:8px;">
@@ -287,6 +292,13 @@ export async function POST(request: Request) {
       </div>
     `;
 
+    /*
+      Parte SMTP ripristinata nella forma precedente:
+      - host/port/secure da env
+      - from diretto da SMTP_FROM o SMTP_USER
+      - replyTo dell'utente
+      Questo è il blocco che prima funzionava con SMTP_PORT=465 e SMTP_SECURE=true.
+    */
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT || 587),
@@ -299,13 +311,10 @@ export async function POST(request: Request) {
       },
     });
 
-    const smtpUser = String(process.env.SMTP_USER || "").trim();
-    const smtpFrom = String(process.env.SMTP_FROM || "").trim();
-    const orientatoreEmail = String(process.env.ORIENTATORE_EMAIL || "info@laureasmart.it").trim();
-
     await transporter.sendMail({
-      from: smtpFrom || `Laurea Smart <${smtpUser}>`,
-      to: orientatoreEmail,
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: process.env.ORIENTATORE_EMAIL || "info@laureasmart.it",
+      replyTo: email,
       subject: "Nuova verifica CFU da Laurea Smart",
       html,
       attachments,
