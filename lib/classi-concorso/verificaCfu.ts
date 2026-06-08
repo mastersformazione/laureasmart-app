@@ -6,56 +6,36 @@ import type {
 } from "./types";
 import { isSsdInSector, normalizeSSD } from "./ssd";
 import { parseRequisitiDaNota } from "./parserNote";
+import { selectTitoloByTemporalCondition } from "./condizioniTemporali";
 
 function sameTitleCode(a: string, b: string): boolean {
   return a.trim().toUpperCase() === b.trim().toUpperCase();
 }
 
-function toSafeCfu(value: unknown): number {
-  const parsed = Number(value || 0);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function normalizeExamSsd(ssd: string): string {
-  return normalizeSSD(String(ssd || "").trim());
-}
-
 function sumCfuForSectors(esami: EsameCfu[], settori: string[]): number {
-  const cleanSettori = settori.map((settore) => String(settore || "").trim()).filter(Boolean);
-
-  if (!cleanSettori.length) return 0;
-
   return esami.reduce((total, esame) => {
-    const normalizedSsd = normalizeExamSsd(esame.ssd);
-    const cfu = toSafeCfu(esame.cfu);
-
-    if (!normalizedSsd || !cfu) return total;
-
-    const match = cleanSettori.some((settore) => isSsdInSector(normalizedSsd, settore));
-
-    return match ? total + cfu : total;
+    const normalizedSsd = normalizeSSD(esame.ssd);
+    const match = settori.some((settore) => isSsdInSector(normalizedSsd, settore));
+    return match ? total + Number(esame.cfu || 0) : total;
   }, 0);
-}
-
-function hasCfuLanguage(note: string): boolean {
-  return /(CFU|crediti|credito|\d{1,3}\s+[A-Z]+(?:-[A-Z]+)?(?:-[A-Z]+)?\/\d{2})/i.test(note || "");
 }
 
 export function verificaCfuClasse({
   classe,
   titolo,
   esami,
+  dataConseguimentoTitolo,
 }: {
   classe: ClasseConcorso;
   titolo: TitoloCompleto | null;
   esami: EsameCfu[];
+  dataConseguimentoTitolo?: string;
 }): RisultatoVerificaCfu {
-  const titoloSelezionato = titolo
-    ? classe.titoli.find((item) => sameTitleCode(item.codice, titolo.codice))
-    : undefined;
+  const titoliCompatibili = titolo
+    ? classe.titoli.filter((item) => sameTitleCode(item.codice, titolo.codice))
+    : [];
 
-  const titoloCompatibile = Boolean(titoloSelezionato);
-  const note = titoloSelezionato?.note || "";
+  const titoloCompatibile = titoliCompatibili.length > 0;
 
   if (!titoloCompatibile) {
     return {
@@ -67,6 +47,22 @@ export function verificaCfuClasse({
       stato: "titolo_non_compatibile",
     };
   }
+
+  const selected = selectTitoloByTemporalCondition(titoliCompatibili, dataConseguimentoTitolo);
+
+  if (!selected.titolo) {
+    return {
+      titoloCompatibile: true,
+      titoloSelezionato: undefined,
+      note: selected.messaggio || "",
+      requisiti: [],
+      requisitiNonInterpretati: selected.messaggio ? [selected.messaggio] : [],
+      stato: "da_verificare",
+    };
+  }
+
+  const titoloSelezionato = selected.titolo;
+  const note = selected.noteDaUsare || titoloSelezionato.note || "";
 
   const parsed = parseRequisitiDaNota(note);
 
@@ -84,23 +80,8 @@ export function verificaCfuClasse({
 
   const haRequisitiCfu = requisiti.length > 0;
   const haMancanze = requisiti.some((requisito) => !requisito.soddisfatto);
-  const notaSembraRichiedereCfu = hasCfuLanguage(note);
   const haNoteNonInterpretate =
-    parsed.nonInterpretati.length > 0 || (notaSembraRichiedereCfu && !haRequisitiCfu);
-
-  let stato: RisultatoVerificaCfu["stato"];
-
-  if (haRequisitiCfu && haMancanze) {
-    stato = "parziale";
-  } else if (haRequisitiCfu && !haMancanze && haNoteNonInterpretate) {
-    stato = "da_verificare";
-  } else if (haRequisitiCfu && !haMancanze) {
-    stato = "positivo";
-  } else if (haNoteNonInterpretate) {
-    stato = "da_verificare";
-  } else {
-    stato = "positivo";
-  }
+    parsed.nonInterpretati.length > 0 || (!!note && /CFU|crediti|credito/i.test(note) && !haRequisitiCfu);
 
   return {
     titoloCompatibile: true,
@@ -108,7 +89,11 @@ export function verificaCfuClasse({
     note,
     requisiti,
     requisitiNonInterpretati: parsed.nonInterpretati,
-    stato,
+    stato: haMancanze
+      ? "parziale"
+      : haNoteNonInterpretate
+      ? "da_verificare"
+      : "positivo",
   };
 }
 
