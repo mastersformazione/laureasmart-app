@@ -33,6 +33,13 @@ type EmailAttachment = {
   contentType: string;
 };
 
+type DocumentoUrl = {
+  nome?: string;
+  url?: string;
+  size?: number;
+  type?: string;
+};
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -70,6 +77,22 @@ function cleanText(value: FormDataEntryValue | null): string {
   return String(value || "").trim();
 }
 
+function isSafeHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function formatFileSize(size?: number): string {
+  if (!size || !Number.isFinite(size)) return "";
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export async function POST(request: Request) {
   try {
     requireSmtpEnv();
@@ -85,6 +108,7 @@ export async function POST(request: Request) {
 
     const esami = parseJsonField<EsameConfermato[]>(formData.get("esami"), []);
     const risultato = parseJsonField<RisultatoVerifica>(formData.get("risultato"), null);
+    const documentiUrl = parseJsonField<DocumentoUrl[]>(formData.get("documentiUrl"), []);
 
     if (!nome || !email || !telefono) {
       return NextResponse.json(
@@ -100,6 +124,11 @@ export async function POST(request: Request) {
       );
     }
 
+    /*
+      Manteniamo il supporto agli allegati tradizionali solo come fallback.
+      Nella landing pubblica, però, i documenti devono arrivare come URL Blob
+      nel campo documentiUrl, così evitiamo FUNCTION_PAYLOAD_TOO_LARGE.
+    */
     const files = formData
       .getAll("files")
       .filter((item): item is File => item instanceof File && item.size > 0)
@@ -127,6 +156,31 @@ export async function POST(request: Request) {
         contentType: file.type,
       });
     }
+
+    const documentiValidi = documentiUrl.filter((documento) => {
+      const url = String(documento.url || "").trim();
+      return url && isSafeHttpUrl(url);
+    });
+
+    const documentiRows = documentiValidi.length
+      ? documentiValidi
+          .map((documento, index) => {
+            const url = String(documento.url || "").trim();
+            const nomeDocumento = String(documento.nome || `Documento ${index + 1}`).trim();
+            const size = formatFileSize(documento.size);
+            const type = documento.type ? ` — ${escapeHtml(String(documento.type))}` : "";
+
+            return `
+              <li style="margin-bottom:8px;">
+                <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+                  ${escapeHtml(nomeDocumento)}
+                </a>
+                ${size ? `<span style="color:#6b7280;"> — ${escapeHtml(size)}</span>` : ""}
+                ${type ? `<span style="color:#6b7280;">${type}</span>` : ""}
+              </li>`;
+          })
+          .join("")
+      : "";
 
     const requisiti = Array.isArray(risultato?.requisiti) ? risultato.requisiti : [];
 
@@ -205,6 +259,20 @@ export async function POST(request: Request) {
           <tbody>${esamiRows || `<tr><td colspan="5" style="padding:8px;">Nessun esame inserito.</td></tr>`}</tbody>
         </table>
 
+        ${
+          documentiValidi.length
+            ? `
+              <h3>Documenti caricati dall'utente</h3>
+              <p>I documenti originali sono stati caricati su storage e sono disponibili tramite questi link:</p>
+              <ul style="padding-left:20px;">
+                ${documentiRows}
+              </ul>
+            `
+            : attachments.length
+            ? `<h3>Documenti allegati</h3><p>Sono presenti ${attachments.length} allegati nell'email.</p>`
+            : `<h3>Documenti caricati</h3><p>Nessun documento originale allegato o collegato.</p>`
+        }
+
         ${note ? `<h3>Note utente</h3><p>${escapeHtml(note).replace(/\n/g, "<br />")}</p>` : ""}
 
         ${
@@ -231,10 +299,13 @@ export async function POST(request: Request) {
       },
     });
 
+    const smtpUser = String(process.env.SMTP_USER || "").trim();
+    const smtpFrom = String(process.env.SMTP_FROM || "").trim();
+    const orientatoreEmail = String(process.env.ORIENTATORE_EMAIL || "info@laureasmart.it").trim();
+
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: process.env.ORIENTATORE_EMAIL || "info@laureasmart.it",
-      replyTo: email,
+      from: smtpFrom || `Laurea Smart <${smtpUser}>`,
+      to: orientatoreEmail,
       subject: "Nuova verifica CFU da Laurea Smart",
       html,
       attachments,

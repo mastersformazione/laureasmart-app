@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import {
   ArrowLeft,
   BookOpenCheck,
@@ -56,6 +57,51 @@ type PreparedAiFiles = {
   files: File[];
   warnings: string[];
 };
+
+type DocumentoCaricato = {
+  filename: string;
+  url: string;
+  size: number;
+  contentType: string;
+  uploadedAt: string;
+};
+
+function sanitizeBlobFileName(fileName: string): string {
+  const cleanName = fileName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 120);
+
+  return cleanName || "documento-caricato";
+}
+
+async function uploadDocumentiOriginaliToBlob(documenti: File[]): Promise<DocumentoCaricato[]> {
+  const uploaded: DocumentoCaricato[] = [];
+
+  for (const file of documenti) {
+    const pathname = `verifica-cfu/${Date.now()}-${Math.random()
+      .toString(16)
+      .slice(2)}-${sanitizeBlobFileName(file.name)}`;
+
+    const blob = await upload(pathname, file, {
+      access: "public",
+      handleUploadUrl: "/api/verifica-cfu/upload-documenti",
+    });
+
+    uploaded.push({
+      filename: file.name || "documento-caricato",
+      url: blob.url,
+      size: file.size,
+      contentType: file.type || "application/octet-stream",
+      uploadedAt: new Date().toISOString(),
+    });
+  }
+
+  return uploaded;
+}
 
 
 type PdfJsViewport = {
@@ -598,33 +644,40 @@ export default function VerificaCfuPerTuttiPage() {
 
   const inviaVerificaEmail = async () => {
     setSendMessage("");
-  
+
     if (!risultato || !titoloSelezionato || !classeSelezionata) {
       setSendMessage("Seleziona titolo e classe prima di inviare la verifica.");
       return;
     }
-  
+
     const nomePulito = contatto.nome.trim();
     const emailPulita = contatto.email.trim().toLowerCase();
     const telefonoPulito = contatto.telefono.trim();
-  
+
     const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailPulita);
-  
+
     if (!nomePulito || !emailPulita || !telefonoPulito) {
       setSendMessage("Inserisci nome, email e telefono per richiedere la verifica gratuita.");
       return;
     }
-  
+
     if (!emailValida) {
       setSendMessage("Inserisci un indirizzo email valido, ad esempio nome@email.it.");
       return;
     }
-  
+
     setSending(true);
-  
+
     try {
+      let documentiCaricati: DocumentoCaricato[] = [];
+
+      if (documenti.length > 0) {
+        setSendMessage("Sto caricando i documenti in modo sicuro. Attendi qualche secondo...");
+        documentiCaricati = await uploadDocumentiOriginaliToBlob(documenti);
+      }
+
       const formData = new FormData();
-  
+
       formData.append("nome", nomePulito);
       formData.append("email", emailPulita);
       formData.append("telefono", telefonoPulito);
@@ -633,31 +686,33 @@ export default function VerificaCfuPerTuttiPage() {
       formData.append(
         "note",
         `${noteUtente}
-  
-  Origine richiesta: landing pubblica verifica CFU per tutti`.trim()
+
+Origine richiesta: landing pubblica verifica CFU per tutti.
+Documenti caricati su storage: ${documentiCaricati.length}.`.trim()
       );
       formData.append("esami", JSON.stringify(esamiValidi));
       formData.append("risultato", JSON.stringify(risultato));
-  
-      documenti.forEach((file) => formData.append("files", file));
-  
+      formData.append("documentiUrl", JSON.stringify(documentiCaricati));
+
+      setSendMessage("Sto inviando la richiesta all’orientatore...");
+
       const response = await fetch("/api/verifica-cfu/invia-verifica", {
         method: "POST",
         body: formData,
       });
-  
+
       const json = await response.json();
-  
+
       if (!response.ok || !json.success) {
         throw new Error(json.message || "Errore durante l’invio della richiesta.");
       }
-  
+
       setSendMessage(
         "Richiesta inviata correttamente. Un orientatore potrà verificare i documenti e il riepilogo dei CFU."
       );
     } catch (error) {
       console.error("INVIO_VERIFICA_ERROR", error);
-  
+
       setSendMessage(
         error instanceof Error
           ? error.message
@@ -1133,7 +1188,7 @@ function RisultatoCard({
         <div style={ctaBoxStyle}>
           <strong>Verifica gratuita consigliata</strong>
           <p style={{ margin: "6px 0 0" }}>
-            Inserisci i dati di contatto: invieremo il riepilogo a info@laureasmart.it. {fileCount > 0 ? `Saranno allegati anche ${fileCount} documenti caricati.` : "Puoi inviare anche senza allegati, se hai inserito tutto manualmente."}
+            Inserisci i dati di contatto: invieremo il riepilogo a info@laureasmart.it. {fileCount > 0 ? `Saranno caricati in modo sicuro anche ${fileCount} documenti e l’orientatore riceverà i link.` : "Puoi inviare anche senza allegati, se hai inserito tutto manualmente."}
           </p>
         </div>
 
@@ -1360,5 +1415,6 @@ const ctaBoxStyle: React.CSSProperties = {
   background: "rgba(31,111,178,0.10)",
   border: "1px solid rgba(31,111,178,0.14)",
 };
+
 
 
