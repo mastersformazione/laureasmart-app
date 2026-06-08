@@ -384,6 +384,7 @@ export default function VerificaCfuPerTuttiPage() {
   const [sending, setSending] = useState(false);
   const [noteUtente, setNoteUtente] = useState("");
   const [contatto, setContatto] = useState({ nome: "", email: "", telefono: "" });
+  const [risultatoSbloccato, setRisultatoSbloccato] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -430,6 +431,11 @@ export default function VerificaCfuPerTuttiPage() {
       JSON.stringify({ titoloCodice, classeCodice, esami, noteUtente, contatto })
     );
   }, [titoloCodice, classeCodice, esami, noteUtente, contatto]);
+
+  useEffect(() => {
+    setRisultatoSbloccato(false);
+    setSendMessage("");
+  }, [titoloCodice, classeCodice, esami]);
 
   const titoloSelezionato = useMemo(
     () => titoli.find((titolo) => titolo.codice === titoloCodice) || null,
@@ -516,6 +522,7 @@ export default function VerificaCfuPerTuttiPage() {
     setSendMessage("");
     setNoteUtente("");
     setContatto({ nome: "", email: "", telefono: "" });
+    setRisultatoSbloccato(false);
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -724,10 +731,11 @@ ${
         throw new Error(json.message || "Errore durante l’invio della richiesta.");
       }
 
+      setRisultatoSbloccato(true);
       setSendMessage(
         uploadBlobWarnings.length
-          ? "Richiesta inviata correttamente. Alcuni documenti non sono stati caricati su storage, ma l’orientatore riceverà comunque il riepilogo dei CFU."
-          : "Richiesta inviata correttamente. Un orientatore potrà verificare i documenti e il riepilogo dei CFU."
+          ? "Richiesta inviata correttamente. Alcuni documenti non sono stati caricati su storage, ma l’orientatore riceverà comunque il riepilogo dei CFU. Ora puoi vedere il risultato preliminare."
+          : "Richiesta inviata correttamente. Ti abbiamo inviato una copia via email. Ora puoi vedere il risultato preliminare."
       );
     } catch (error) {
       console.error("INVIO_VERIFICA_ERROR", error);
@@ -1048,9 +1056,8 @@ ${
             </select>
           </AppCard>
 
-          {risultato && classeSelezionata && titoloSelezionato && (
-            <RisultatoCard
-              risultato={risultato}
+          {risultato && classeSelezionata && titoloSelezionato && !risultatoSbloccato && (
+            <LeadGateCard
               classe={classeSelezionata}
               titolo={titoloSelezionato}
               contatto={contatto}
@@ -1060,6 +1067,15 @@ ${
               onInvia={inviaVerificaEmail}
               sending={sending}
               sendMessage={sendMessage}
+              fileCount={documenti.length}
+            />
+          )}
+
+          {risultato && classeSelezionata && titoloSelezionato && risultatoSbloccato && (
+            <RisultatoCard
+              risultato={risultato}
+              classe={classeSelezionata}
+              titolo={titoloSelezionato}
               fileCount={documenti.length}
             />
           )}
@@ -1136,8 +1152,7 @@ function AppDownloadCard() {
   );
 }
 
-function RisultatoCard({
-  risultato,
+function LeadGateCard({
   classe,
   titolo,
   contatto,
@@ -1149,7 +1164,6 @@ function RisultatoCard({
   sendMessage,
   fileCount,
 }: {
-  risultato: RisultatoVerificaCfu;
   classe: ClasseConcorso;
   titolo: TitoloCompleto;
   contatto: { nome: string; email: string; telefono: string };
@@ -1159,6 +1173,82 @@ function RisultatoCard({
   onInvia: () => void;
   sending: boolean;
   sendMessage: string;
+  fileCount: number;
+}) {
+  return (
+    <AppCard
+      variant="amber"
+      title="Il tuo risultato preliminare è pronto"
+      badge="Sblocca risultato"
+      icon={<Mail size={22} />}
+    >
+      <div style={{ display: "grid", gap: 12 }}>
+        <p style={{ margin: 0, lineHeight: 1.55 }}>
+          Abbiamo preparato il controllo sulla base degli esami inseriti e della classe selezionata.
+          Per visualizzare il riepilogo dei CFU e ricevere una copia via email, inserisci i tuoi dati.
+        </p>
+
+        <div style={ctaBoxStyle}>
+          <strong>Verifica gratuita e senza impegno</strong>
+          <p style={{ margin: "6px 0 0" }}>
+            Dopo l’invio vedrai subito il risultato preliminare. Una copia verrà inviata alla tua email e una all’orientatore Laurea Smart.
+            {fileCount > 0
+              ? ` I ${fileCount} documenti caricati saranno collegati alla richiesta, se disponibili su storage.`
+              : " Puoi inviare anche senza documenti se hai inserito gli esami manualmente."}
+          </p>
+        </div>
+
+        <InfoRow label="Titolo selezionato" value={`${titolo.codice} — ${titolo.titolo}`} />
+        <InfoRow label="Classe selezionata" value={`${classe.codice} — ${classe.descrizione}`} />
+
+        <div style={{ display: "grid", gap: 8 }}>
+          <input
+            value={contatto.nome}
+            onChange={(e) => setContatto((current) => ({ ...current, nome: e.target.value }))}
+            placeholder="Nome e cognome"
+            style={lightInputStyle}
+          />
+          <input
+            value={contatto.email}
+            onChange={(e) => setContatto((current) => ({ ...current, email: e.target.value }))}
+            placeholder="Email"
+            type="email"
+            style={lightInputStyle}
+          />
+          <input
+            value={contatto.telefono}
+            onChange={(e) => setContatto((current) => ({ ...current, telefono: e.target.value }))}
+            placeholder="Telefono"
+            style={lightInputStyle}
+          />
+          <textarea
+            value={noteUtente}
+            onChange={(e) => setNoteUtente(e.target.value)}
+            placeholder="Note facoltative per l’orientatore"
+            style={{ ...lightInputStyle, minHeight: 92, paddingTop: 12, resize: "vertical" }}
+          />
+        </div>
+
+        <AppButton type="button" variant="whatsapp" onClick={onInvia} disabled={sending}>
+          {sending ? <Loader2 size={18} /> : <Mail size={18} />}
+          {sending ? "Invio in corso..." : "Mostra risultato e richiedi verifica gratuita"}
+        </AppButton>
+
+        {sendMessage && <StatusBox darkText>{sendMessage}</StatusBox>}
+      </div>
+    </AppCard>
+  );
+}
+
+function RisultatoCard({
+  risultato,
+  classe,
+  titolo,
+  fileCount,
+}: {
+  risultato: RisultatoVerificaCfu;
+  classe: ClasseConcorso;
+  titolo: TitoloCompleto;
   fileCount: number;
 }) {
   const positive = risultato.stato === "positivo";
@@ -1172,6 +1262,10 @@ function RisultatoCard({
       icon={positive ? <CheckCircle2 size={22} /> : <AlertTriangle size={22} />}
     >
       <div style={{ display: "grid", gap: 12 }}>
+        <StatusBox darkText>
+          Richiesta inviata correttamente. Ti abbiamo inviato una copia del riepilogo via email e il risultato resta visibile qui sotto.
+        </StatusBox>
+
         <InfoRow label="Titolo" value={`${titolo.codice} — ${titolo.titolo}`} />
         <InfoRow label="Classe" value={`${classe.codice} — ${classe.descrizione}`} />
 
@@ -1205,46 +1299,14 @@ function RisultatoCard({
         )}
 
         <div style={ctaBoxStyle}>
-          <strong>Verifica gratuita consigliata</strong>
+          <strong>Controllo preliminare</strong>
           <p style={{ margin: "6px 0 0" }}>
-            Inserisci i dati di contatto: invieremo il riepilogo a info@laureasmart.it. {fileCount > 0 ? `Saranno caricati in modo sicuro anche ${fileCount} documenti e l’orientatore riceverà i link.` : "Puoi inviare anche senza allegati, se hai inserito tutto manualmente."}
+            Il risultato automatico non ha valore ufficiale e deve essere verificato da un orientatore.
+            {fileCount > 0
+              ? " I documenti caricati sono stati associati alla richiesta quando il caricamento su storage è riuscito."
+              : " La richiesta è stata inviata sulla base degli esami inseriti manualmente o letti in precedenza."}
           </p>
         </div>
-
-        <div style={{ display: "grid", gap: 8 }}>
-          <input
-            value={contatto.nome}
-            onChange={(e) => setContatto((current) => ({ ...current, nome: e.target.value }))}
-            placeholder="Nome e cognome"
-            style={lightInputStyle}
-          />
-          <input
-            value={contatto.email}
-            onChange={(e) => setContatto((current) => ({ ...current, email: e.target.value }))}
-            placeholder="Email"
-            type="email"
-            style={lightInputStyle}
-          />
-          <input
-            value={contatto.telefono}
-            onChange={(e) => setContatto((current) => ({ ...current, telefono: e.target.value }))}
-            placeholder="Telefono"
-            style={lightInputStyle}
-          />
-          <textarea
-            value={noteUtente}
-            onChange={(e) => setNoteUtente(e.target.value)}
-            placeholder="Note facoltative per l’orientatore"
-            style={{ ...lightInputStyle, minHeight: 92, paddingTop: 12, resize: "vertical" }}
-          />
-        </div>
-
-        <AppButton type="button" variant="whatsapp" onClick={onInvia} disabled={sending}>
-          {sending ? <Loader2 size={18} /> : <Mail size={18} />}
-          {sending ? "Invio in corso..." : "Richiedi verifica gratuita"}
-        </AppButton>
-
-        {sendMessage && <StatusBox darkText>{sendMessage}</StatusBox>}
       </div>
     </AppCard>
   );
