@@ -57,6 +57,100 @@ type PreparedAiFiles = {
   warnings: string[];
 };
 
+type PdfJsViewport = {
+  width: number;
+  height: number;
+};
+
+type PdfJsPage = {
+  getViewport: (params: { scale: number }) => PdfJsViewport;
+  render: (params: {
+    canvasContext: CanvasRenderingContext2D;
+    viewport: PdfJsViewport;
+  }) => { promise: Promise<void> };
+};
+
+type PdfJsDocument = {
+  numPages: number;
+  getPage: (pageNumber: number) => Promise<PdfJsPage>;
+};
+
+type PdfJsLib = {
+  GlobalWorkerOptions: {
+    workerSrc: string;
+  };
+  getDocument: (params: { data: Uint8Array }) => {
+    promise: Promise<PdfJsDocument>;
+  };
+};
+
+declare global {
+  interface Window {
+    pdfjsLib?: PdfJsLib;
+  }
+}
+
+function loadPdfJsFromCdn(): Promise<PdfJsLib> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") {
+      reject(new Error("PDF.js può essere caricato solo nel browser."));
+      return;
+    }
+
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      resolve(window.pdfjsLib);
+      return;
+    }
+
+    const existingScript = document.querySelector<HTMLScriptElement>('script[data-pdfjs="true"]');
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => {
+        if (!window.pdfjsLib) {
+          reject(new Error("PDF.js non disponibile dopo il caricamento."));
+          return;
+        }
+
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+        resolve(window.pdfjsLib);
+      });
+
+      existingScript.addEventListener("error", () => {
+        reject(new Error("Errore durante il caricamento di PDF.js."));
+      });
+
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    script.async = true;
+    script.dataset.pdfjs = "true";
+
+    script.onload = () => {
+      if (!window.pdfjsLib) {
+        reject(new Error("PDF.js non disponibile dopo il caricamento."));
+        return;
+      }
+
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      resolve(window.pdfjsLib);
+    };
+
+    script.onerror = () => {
+      reject(new Error("Errore durante il caricamento di PDF.js."));
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
 function canvasToJpegBlob(canvas: HTMLCanvasElement, quality = 0.92): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
@@ -77,11 +171,9 @@ async function convertPdfToPageImages(file: File): Promise<PreparedAiFiles> {
   const warnings: string[] = [];
   const files: File[] = [];
 
-  const pdfjsLib = await import("pdfjs-dist");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-
+  const pdfjsLib = await loadPdfJsFromCdn();
   const data = await file.arrayBuffer();
-  const loadingTask = pdfjsLib.getDocument({ data });
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(data) });
   const pdf = await loadingTask.promise;
   const pagesToAnalyze = Math.min(pdf.numPages, MAX_PDF_PAGES_PER_FILE);
 
@@ -1007,3 +1099,4 @@ const ctaBoxStyle: React.CSSProperties = {
   background: "rgba(31,111,178,0.10)",
   border: "1px solid rgba(31,111,178,0.14)",
 };
+
