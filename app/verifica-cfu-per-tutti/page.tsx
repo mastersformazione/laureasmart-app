@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   GraduationCap,
   Mail,
+  MessageCircle,
   Plus,
   Trash2,
   AlertTriangle,
@@ -35,6 +36,11 @@ const MAX_AI_FILES = 30;
 const MAX_PDF_PAGES_PER_FILE = 15;
 const PDF_RENDER_SCALE = 2.4;
 const ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+const ORIENTATORE_EMAIL = "info@laureasmart.it";
+const WHATSAPP_NUMBER = "393793673257";
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  "Buongiorno, vorrei una verifica gratuita e senza impegno dei CFU per le classi di concorso."
+);
 
 const livelli = [
   { value: "triennale", label: "Triennale" },
@@ -620,6 +626,8 @@ export default function VerificaCfuPerTuttiPage() {
         </p>
       </section>
 
+      <ImmediateContactCard />
+
       {loading ? (
         <AppCard variant="dark" title="Caricamento dati" description="Sto preparando titoli e classi di concorso." />
       ) : (
@@ -852,6 +860,40 @@ export default function VerificaCfuPerTuttiPage() {
   );
 }
 
+function ImmediateContactCard() {
+  const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
+  const emailHref = `mailto:${ORIENTATORE_EMAIL}?subject=${encodeURIComponent(
+    "Verifica gratuita CFU classi di concorso"
+  )}&body=${encodeURIComponent(
+    "Buongiorno, vorrei una verifica gratuita e senza impegno dei CFU per le classi di concorso."
+  )}`;
+
+  return (
+    <AppCard
+      variant="dark"
+      title="Preferisci parlare subito con un orientatore?"
+      description="Puoi contattarci gratis e senza impegno anche prima di caricare i documenti. Se vuoi, poi potrai comunque usare il test automatico qui sotto."
+      icon={<Mail size={22} />}
+    >
+      <div style={{ display: "grid", gap: 10 }}>
+        <a href={whatsappHref} target="_blank" rel="noopener noreferrer" style={whatsappButtonStyle}>
+          <MessageCircle size={18} />
+          Scrivi su WhatsApp
+        </a>
+
+        <a href={emailHref} style={emailButtonStyle}>
+          <Mail size={18} />
+          Invia una email
+        </a>
+
+        <p style={{ margin: 0, color: "rgba(255,255,255,0.66)", fontSize: 12.5, lineHeight: 1.5 }}>
+          La consulenza è gratuita. Un orientatore può aiutarti a capire quali documenti caricare e come leggere correttamente SSD, CFU e requisiti della classe di concorso.
+        </p>
+      </div>
+    </AppCard>
+  );
+}
+
 function RisultatoCard({
   risultato,
   classe,
@@ -1008,6 +1050,41 @@ function WarningList({ items }: { items: string[] }) {
   );
 }
 
+const whatsappButtonStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: 48,
+  borderRadius: 16,
+  border: "1px solid rgba(34,197,94,0.28)",
+  background: "linear-gradient(135deg, #16A34A 0%, #22C55E 100%)",
+  color: "#FFFFFF",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 9,
+  fontSize: 15,
+  fontWeight: 900,
+  textDecoration: "none",
+  boxSizing: "border-box",
+  boxShadow: "0 12px 24px rgba(22,163,74,0.24)",
+};
+
+const emailButtonStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: 48,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.16)",
+  background: "rgba(255,255,255,0.10)",
+  color: "#FFFFFF",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 9,
+  fontSize: 15,
+  fontWeight: 900,
+  textDecoration: "none",
+  boxSizing: "border-box",
+};
+
 const inputStyle: React.CSSProperties = {
   width: "100%",
   minHeight: 48,
@@ -1080,4 +1157,5 @@ const ctaBoxStyle: React.CSSProperties = {
   background: "rgba(31,111,178,0.10)",
   border: "1px solid rgba(31,111,178,0.14)",
 };
+
 
