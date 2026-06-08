@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { upload } from "@vercel/blob/client";
 import {
   ArrowLeft,
   BookOpenCheck,
@@ -34,7 +33,7 @@ type ApiEstrazioneResponse = {
 
 const STORAGE_KEY = "ls_verifica_cfu_per_tutti_v1";
 const MAX_FILES = 5;
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
 const MAX_AI_FILES = 30;
 const MAX_PDF_PAGES_PER_FILE = 15;
 const PDF_RENDER_SCALE = 2.4;
@@ -59,48 +58,58 @@ type PreparedAiFiles = {
 };
 
 type DocumentoCaricato = {
-  filename: string;
+  nome: string;
   url: string;
   size: number;
-  contentType: string;
-  uploadedAt: string;
+  type: string;
 };
 
-function sanitizeBlobFileName(fileName: string): string {
-  const cleanName = fileName
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9._-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 120);
+type UploadDocumentiResult = {
+  documenti: DocumentoCaricato[];
+  warnings: string[];
+};
 
-  return cleanName || "documento-caricato";
-}
+type UploadDocumentoResponse = {
+  success: boolean;
+  message?: string;
+  documento?: DocumentoCaricato;
+};
 
-async function uploadDocumentiOriginaliToBlob(documenti: File[]): Promise<DocumentoCaricato[]> {
+async function uploadDocumentiOriginaliToBlob(documenti: File[]): Promise<UploadDocumentiResult> {
   const uploaded: DocumentoCaricato[] = [];
+  const warnings: string[] = [];
 
-  for (const file of documenti) {
-    const pathname = `verifica-cfu/${Date.now()}-${Math.random()
-      .toString(16)
-      .slice(2)}-${sanitizeBlobFileName(file.name)}`;
+  for (let index = 0; index < documenti.length; index += 1) {
+    const file = documenti[index];
 
-    const blob = await upload(pathname, file, {
-      access: "public",
-      handleUploadUrl: "/api/verifica-cfu/upload-documenti",
-    });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    uploaded.push({
-      filename: file.name || "documento-caricato",
-      url: blob.url,
-      size: file.size,
-      contentType: file.type || "application/octet-stream",
-      uploadedAt: new Date().toISOString(),
-    });
+      const response = await fetch("/api/verifica-cfu/carica-documento", {
+        method: "POST",
+        body: formData,
+      });
+
+      const json = (await response.json()) as UploadDocumentoResponse;
+
+      if (!response.ok || !json.success || !json.documento?.url) {
+        throw new Error(json.message || `${file.name}: caricamento documento non riuscito.`);
+      }
+
+      uploaded.push(json.documento);
+    } catch (error) {
+      console.error("BLOB_UPLOAD_DOCUMENTO_ERROR", error);
+
+      warnings.push(
+        error instanceof Error
+          ? `${file.name || `Documento ${index + 1}`}: ${error.message}`
+          : `${file.name || `Documento ${index + 1}`}: caricamento su storage non riuscito.`
+      );
+    }
   }
 
-  return uploaded;
+  return { documenti: uploaded, warnings };
 }
 
 
@@ -524,7 +533,7 @@ export default function VerificaCfuPerTuttiPage() {
         continue;
       }
       if (file.size > MAX_FILE_SIZE) {
-        warnings.push(`${file.name}: superiore a 10 MB.`);
+        warnings.push(`${file.name}: superiore a 4 MB.`);
         continue;
       }
       accepted.push(file);
@@ -670,10 +679,13 @@ export default function VerificaCfuPerTuttiPage() {
 
     try {
       let documentiCaricati: DocumentoCaricato[] = [];
+      let uploadBlobWarnings: string[] = [];
 
       if (documenti.length > 0) {
         setSendMessage("Sto caricando i documenti in modo sicuro. Attendi qualche secondo...");
-        documentiCaricati = await uploadDocumentiOriginaliToBlob(documenti);
+        const uploadResult = await uploadDocumentiOriginaliToBlob(documenti);
+        documentiCaricati = uploadResult.documenti;
+        uploadBlobWarnings = uploadResult.warnings;
       }
 
       const formData = new FormData();
@@ -688,7 +700,12 @@ export default function VerificaCfuPerTuttiPage() {
         `${noteUtente}
 
 Origine richiesta: landing pubblica verifica CFU per tutti.
-Documenti caricati su storage: ${documentiCaricati.length}.`.trim()
+Documenti caricati su storage: ${documentiCaricati.length}.
+${
+  uploadBlobWarnings.length
+    ? `Avvisi caricamento documenti: ${uploadBlobWarnings.join(" | ")}`
+    : ""
+}`.trim()
       );
       formData.append("esami", JSON.stringify(esamiValidi));
       formData.append("risultato", JSON.stringify(risultato));
@@ -708,7 +725,9 @@ Documenti caricati su storage: ${documentiCaricati.length}.`.trim()
       }
 
       setSendMessage(
-        "Richiesta inviata correttamente. Un orientatore potrà verificare i documenti e il riepilogo dei CFU."
+        uploadBlobWarnings.length
+          ? "Richiesta inviata correttamente. Alcuni documenti non sono stati caricati su storage, ma l’orientatore riceverà comunque il riepilogo dei CFU."
+          : "Richiesta inviata correttamente. Un orientatore potrà verificare i documenti e il riepilogo dei CFU."
       );
     } catch (error) {
       console.error("INVIO_VERIFICA_ERROR", error);
@@ -844,7 +863,7 @@ Documenti caricati su storage: ${documentiCaricati.length}.`.trim()
               </button>
 
               <span style={{ color: "rgba(255,255,255,0.62)", fontSize: 12.5, lineHeight: 1.45 }}>
-                Puoi caricare massimo {MAX_FILES} documenti, 10 MB per file. Dopo il caricamento potrai avviare la lettura automatica.
+                Puoi caricare massimo {MAX_FILES} documenti, 4 MB per file. Dopo il caricamento potrai avviare la lettura automatica.
               </span>
             </div>
 
@@ -1415,6 +1434,7 @@ const ctaBoxStyle: React.CSSProperties = {
   background: "rgba(31,111,178,0.10)",
   border: "1px solid rgba(31,111,178,0.14)",
 };
+
 
 
 
