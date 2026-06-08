@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
+
 type EsameConfermato = {
   nome?: string;
   ssd?: string;
@@ -25,6 +26,13 @@ type RisultatoVerifica = {
   stato?: string;
   requisiti?: RequisitoRisultato[];
 } | null;
+
+type EmailAttachment = {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+};
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -36,6 +44,7 @@ function escapeHtml(value: string) {
 
 function parseJsonField<T>(value: FormDataEntryValue | null, fallback: T): T {
   if (typeof value !== "string") return fallback;
+
   try {
     return JSON.parse(value) as T;
   } catch {
@@ -44,10 +53,21 @@ function parseJsonField<T>(value: FormDataEntryValue | null, fallback: T): T {
 }
 
 function requireSmtpEnv() {
-  const missing = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS"].filter((key) => !process.env[key]);
+  const missing = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS"].filter(
+    (key) => !process.env[key]
+  );
+
   if (missing.length) {
     throw new Error(`Configurazione SMTP mancante: ${missing.join(", ")}.`);
   }
+}
+
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function cleanText(value: FormDataEntryValue | null): string {
+  return String(value || "").trim();
 }
 
 export async function POST(request: Request) {
@@ -55,12 +75,14 @@ export async function POST(request: Request) {
     requireSmtpEnv();
 
     const formData = await request.formData();
-    const nome = String(formData.get("nome") || "").trim();
-    const email = String(formData.get("email") || "").trim();
-    const telefono = String(formData.get("telefono") || "").trim();
-    const titolo = String(formData.get("titolo") || "").trim();
-    const classe = String(formData.get("classe") || "").trim();
-    const note = String(formData.get("note") || "").trim();
+
+    const nome = cleanText(formData.get("nome"));
+    const email = cleanText(formData.get("email")).toLowerCase();
+    const telefono = cleanText(formData.get("telefono"));
+    const titolo = cleanText(formData.get("titolo"));
+    const classe = cleanText(formData.get("classe"));
+    const note = cleanText(formData.get("note"));
+
     const esami = parseJsonField<EsameConfermato[]>(formData.get("esami"), []);
     const risultato = parseJsonField<RisultatoVerifica>(formData.get("risultato"), null);
 
@@ -71,12 +93,19 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { success: false, message: "Inserisci un indirizzo email valido." },
+        { status: 400 }
+      );
+    }
+
     const files = formData
       .getAll("files")
       .filter((item): item is File => item instanceof File && item.size > 0)
       .slice(0, MAX_FILES);
 
-    const attachments = [];
+    const attachments: EmailAttachment[] = [];
     const fileWarnings: string[] = [];
 
     for (const file of files) {
@@ -84,11 +113,14 @@ export async function POST(request: Request) {
         fileWarnings.push(`${file.name}: formato non allegato perché non supportato.`);
         continue;
       }
+
       if (file.size > MAX_FILE_SIZE) {
         fileWarnings.push(`${file.name}: non allegato perché superiore a 10 MB.`);
         continue;
       }
+
       const buffer = Buffer.from(await file.arrayBuffer());
+
       attachments.push({
         filename: file.name || "documento-caricato",
         content: buffer,
@@ -97,6 +129,7 @@ export async function POST(request: Request) {
     }
 
     const requisiti = Array.isArray(risultato?.requisiti) ? risultato.requisiti : [];
+
     const esamiRows = esami
       .map(
         (esame, index) => `
@@ -112,8 +145,8 @@ export async function POST(request: Request) {
 
     const requisitiRows = requisiti.length
       ? requisiti
-      .map(
-        (req: RequisitoRisultato) => `
+          .map(
+            (req: RequisitoRisultato) => `
             <tr>
               <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${escapeHtml(String(req.label || "Requisito"))}</td>
               <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${escapeHtml(String(req.cfuPosseduti ?? ""))}</td>
@@ -130,16 +163,21 @@ export async function POST(request: Request) {
         <p>Un utente ha richiesto la verifica gratuita dei CFU per una classe di concorso.</p>
 
         <h3>Dati utente</h3>
-        <p><strong>Nome:</strong> ${escapeHtml(nome)}<br />
-        <strong>Email:</strong> ${escapeHtml(email)}<br />
-        <strong>Telefono:</strong> ${escapeHtml(telefono)}</p>
+        <p>
+          <strong>Nome:</strong> ${escapeHtml(nome)}<br />
+          <strong>Email:</strong> ${escapeHtml(email)}<br />
+          <strong>Telefono:</strong> ${escapeHtml(telefono)}
+        </p>
 
         <h3>Titolo e classe</h3>
-        <p><strong>Titolo dichiarato:</strong> ${escapeHtml(titolo || "Non indicato")}<br />
-        <strong>Classe richiesta:</strong> ${escapeHtml(classe || "Non indicata")}</p>
+        <p>
+          <strong>Titolo dichiarato:</strong> ${escapeHtml(titolo || "Non indicato")}<br />
+          <strong>Classe richiesta:</strong> ${escapeHtml(classe || "Non indicata")}
+        </p>
 
         <h3>Risultato automatico</h3>
         <p><strong>Stato:</strong> ${escapeHtml(String(risultato?.stato || "Da verificare"))}</p>
+
         <table style="border-collapse:collapse;width:100%;font-size:14px;">
           <thead>
             <tr style="background:#f3f4f6;">
@@ -153,6 +191,7 @@ export async function POST(request: Request) {
         </table>
 
         <h3>Esami confermati dall'utente</h3>
+
         <table style="border-collapse:collapse;width:100%;font-size:14px;">
           <thead>
             <tr style="background:#f3f4f6;">
@@ -167,16 +206,25 @@ export async function POST(request: Request) {
         </table>
 
         ${note ? `<h3>Note utente</h3><p>${escapeHtml(note).replace(/\n/g, "<br />")}</p>` : ""}
-        ${fileWarnings.length ? `<h3>Avvisi allegati</h3><p>${fileWarnings.map(escapeHtml).join("<br />")}</p>` : ""}
 
-        <p style="margin-top:20px;font-size:13px;color:#6b7280;">Il controllo automatico è preliminare e richiede verifica manuale dell'orientatore.</p>
+        ${
+          fileWarnings.length
+            ? `<h3>Avvisi allegati</h3><p>${fileWarnings.map(escapeHtml).join("<br />")}</p>`
+            : ""
+        }
+
+        <p style="margin-top:20px;font-size:13px;color:#6b7280;">
+          Il controllo automatico è preliminare e richiede verifica manuale dell'orientatore.
+        </p>
       </div>
     `;
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT || 587),
-      secure: String(process.env.SMTP_SECURE || "").toLowerCase() === "true" || Number(process.env.SMTP_PORT) === 465,
+      secure:
+        String(process.env.SMTP_SECURE || "").toLowerCase() === "true" ||
+        Number(process.env.SMTP_PORT) === 465,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -192,8 +240,13 @@ export async function POST(request: Request) {
       attachments,
     });
 
-    return NextResponse.json({ success: true, message: "Richiesta inviata correttamente." });
+    return NextResponse.json({
+      success: true,
+      message: "Richiesta inviata correttamente.",
+    });
   } catch (error) {
+    console.error("INVIA_VERIFICA_ERROR", error);
+
     return NextResponse.json(
       {
         success: false,

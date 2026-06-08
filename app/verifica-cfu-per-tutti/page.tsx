@@ -598,43 +598,71 @@ export default function VerificaCfuPerTuttiPage() {
 
   const inviaVerificaEmail = async () => {
     setSendMessage("");
-
+  
     if (!risultato || !titoloSelezionato || !classeSelezionata) {
       setSendMessage("Seleziona titolo e classe prima di inviare la verifica.");
       return;
     }
-
-    if (!contatto.nome.trim() || !contatto.email.trim() || !contatto.telefono.trim()) {
+  
+    const nomePulito = contatto.nome.trim();
+    const emailPulita = contatto.email.trim().toLowerCase();
+    const telefonoPulito = contatto.telefono.trim();
+  
+    const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailPulita);
+  
+    if (!nomePulito || !emailPulita || !telefonoPulito) {
       setSendMessage("Inserisci nome, email e telefono per richiedere la verifica gratuita.");
       return;
     }
-
+  
+    if (!emailValida) {
+      setSendMessage("Inserisci un indirizzo email valido, ad esempio nome@email.it.");
+      return;
+    }
+  
     setSending(true);
+  
     try {
       const formData = new FormData();
-      formData.append("nome", contatto.nome.trim());
-      formData.append("email", contatto.email.trim());
-      formData.append("telefono", contatto.telefono.trim());
+  
+      formData.append("nome", nomePulito);
+      formData.append("email", emailPulita);
+      formData.append("telefono", telefonoPulito);
       formData.append("titolo", `${titoloSelezionato.codice} — ${titoloSelezionato.titolo}`);
       formData.append("classe", `${classeSelezionata.codice} — ${classeSelezionata.descrizione}`);
-      formData.append("note", `${noteUtente}\n\nOrigine richiesta: landing pubblica verifica CFU per tutti`.trim());
+      formData.append(
+        "note",
+        `${noteUtente}
+  
+  Origine richiesta: landing pubblica verifica CFU per tutti`.trim()
+      );
       formData.append("esami", JSON.stringify(esamiValidi));
       formData.append("risultato", JSON.stringify(risultato));
+  
       documenti.forEach((file) => formData.append("files", file));
-
+  
       const response = await fetch("/api/verifica-cfu/invia-verifica", {
         method: "POST",
         body: formData,
       });
-
+  
       const json = await response.json();
+  
       if (!response.ok || !json.success) {
         throw new Error(json.message || "Errore durante l’invio della richiesta.");
       }
-
-      setSendMessage("Richiesta inviata correttamente. Un orientatore potrà verificare i documenti e il riepilogo dei CFU.");
+  
+      setSendMessage(
+        "Richiesta inviata correttamente. Un orientatore potrà verificare i documenti e il riepilogo dei CFU."
+      );
     } catch (error) {
-      setSendMessage(error instanceof Error ? error.message : "Errore durante l’invio della richiesta.");
+      console.error("INVIO_VERIFICA_ERROR", error);
+  
+      setSendMessage(
+        error instanceof Error
+          ? error.message
+          : "Errore durante l’invio della richiesta."
+      );
     } finally {
       setSending(false);
     }
