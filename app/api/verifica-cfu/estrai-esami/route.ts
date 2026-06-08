@@ -4,7 +4,7 @@ import { normalizzaEsamiEstratti } from "@/lib/classi-concorso/parseEsamiEstratt
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_FILES = 5;
+const MAX_FILES = 30;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_BLOCKS_PER_REQUEST = 12;
 const PDF_BLOCK_MAX_CHARS = 7_000;

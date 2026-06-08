@@ -40,6 +40,9 @@ type ApiEstrazioneResponse = {
 const STORAGE_KEY = "ls_verifica_cfu_v2";
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_AI_FILES = 30;
+const MAX_PDF_PAGES_PER_FILE = 15;
+const PDF_RENDER_SCALE = 2.4;
 const ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 
 const livelli = [
@@ -48,6 +51,118 @@ const livelli = [
   { value: "ciclo_unico", label: "Ciclo unico" },
   { value: "altro", label: "Altro / non specificato" },
 ] as const;
+
+type PreparedAiFiles = {
+  files: File[];
+  warnings: string[];
+};
+
+function canvasToJpegBlob(canvas: HTMLCanvasElement, quality = 0.92): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Impossibile convertire una pagina PDF in immagine."));
+          return;
+        }
+        resolve(blob);
+      },
+      "image/jpeg",
+      quality
+    );
+  });
+}
+
+async function convertPdfToPageImages(file: File): Promise<PreparedAiFiles> {
+  const warnings: string[] = [];
+  const files: File[] = [];
+
+  const pdfjsLib = await import("pdfjs-dist");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+  const data = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({ data });
+  const pdf = await loadingTask.promise;
+  const pagesToAnalyze = Math.min(pdf.numPages, MAX_PDF_PAGES_PER_FILE);
+
+  if (pdf.numPages > MAX_PDF_PAGES_PER_FILE) {
+    warnings.push(
+      `${file.name}: il PDF contiene ${pdf.numPages} pagine. Per contenere tempi e costi sono state preparate le prime ${MAX_PDF_PAGES_PER_FILE}.`
+    );
+  }
+
+  for (let pageNumber = 1; pageNumber <= pagesToAnalyze; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const viewport = page.getViewport({ scale: PDF_RENDER_SCALE });
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      warnings.push(`${file.name}: impossibile preparare la pagina ${pageNumber}.`);
+      continue;
+    }
+
+    canvas.width = Math.ceil(viewport.width);
+    canvas.height = Math.ceil(viewport.height);
+
+    await page.render({ canvasContext: context, viewport }).promise;
+
+    const blob = await canvasToJpegBlob(canvas);
+    const cleanName = file.name.replace(/\.pdf$/i, "");
+    files.push(
+      new File([blob], `${cleanName}-pagina-${pageNumber}.jpg`, {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      })
+    );
+  }
+
+  if (files.length) {
+    warnings.push(`${file.name}: preparate ${files.length} pagine come immagini per la lettura AI.`);
+  }
+
+  return { files, warnings };
+}
+
+async function prepareFilesForAiExtraction(originalFiles: File[]): Promise<PreparedAiFiles> {
+  const files: File[] = [];
+  const warnings: string[] = [];
+
+  for (const file of originalFiles) {
+    if (files.length >= MAX_AI_FILES) {
+      warnings.push(`Limite tecnico raggiunto: saranno inviate alla lettura AI al massimo ${MAX_AI_FILES} pagine/immagini.`);
+      break;
+    }
+
+    if (file.type === "application/pdf") {
+      try {
+        const converted = await convertPdfToPageImages(file);
+        warnings.push(...converted.warnings);
+
+        for (const convertedFile of converted.files) {
+          if (files.length >= MAX_AI_FILES) break;
+          files.push(convertedFile);
+        }
+
+        if (!converted.files.length) {
+          warnings.push(`${file.name}: conversione PDF non riuscita. Provo a inviare il PDF originale alla lettura AI.`);
+          files.push(file);
+        }
+      } catch (error) {
+        warnings.push(
+          `${file.name}: non sono riuscito a preparare le pagine del PDF. Provo a inviare il PDF originale alla lettura AI.`
+        );
+        files.push(file);
+        console.error("PDF_CLIENT_RENDER_ERROR", error);
+      }
+      continue;
+    }
+
+    files.push(file);
+  }
+
+  return { files: files.slice(0, MAX_AI_FILES), warnings };
+}
 
 export default function VerificaCfuPage() {
   const router = useRouter();
@@ -256,8 +371,18 @@ export default function VerificaCfuPage() {
 
     setExtracting(true);
     try {
+      setUploadMessage("Sto preparando i documenti. Se hai caricato un PDF, analizzo le pagine una per una.");
+
+      const prepared = await prepareFilesForAiExtraction(documenti);
       const formData = new FormData();
-      documenti.forEach((file) => formData.append("files", file));
+      prepared.files.forEach((file) => formData.append("files", file));
+
+      if (!prepared.files.length) {
+        throw new Error("Nessun file valido da inviare alla lettura automatica.");
+      }
+
+      setUploadWarnings(prepared.warnings);
+      setUploadMessage(`Sto leggendo ${prepared.files.length} pagina/e o immagine/i con l’AI...`);
 
       const response = await fetch("/api/verifica-cfu/estrai-esami", {
         method: "POST",
@@ -274,7 +399,7 @@ export default function VerificaCfuPage() {
         setUploadMessage(
           "Non siamo riusciti a leggere correttamente gli esami. Puoi provare con un PDF più chiaro, inserire i dati manualmente o inviare comunque i documenti all’orientatore al termine."
         );
-        setUploadWarnings(json.warnings || []);
+        setUploadWarnings((current) => [...current, ...(json.warnings || [])]);
         return;
       }
 
@@ -284,7 +409,7 @@ export default function VerificaCfuPage() {
       });
 
       setUploadMessage(`Abbiamo trovato ${estratti.length} esami. Controlla SSD e CFU prima di procedere.`);
-      setUploadWarnings(json.warnings || []);
+      setUploadWarnings((current) => [...current, ...(json.warnings || [])]);
     } catch (error) {
       setUploadMessage(
         error instanceof Error
@@ -444,7 +569,7 @@ export default function VerificaCfuPage() {
               <UploadCloud size={30} />
               <strong style={{ display: "block", marginTop: 8 }}>Carica PDF, JPG, PNG o WEBP</strong>
               <span style={{ display: "block", marginTop: 4, color: "rgba(255,255,255,0.70)", fontSize: 13 }}>
-                Massimo {MAX_FILES} file, 10 MB per file.
+                Massimo {MAX_FILES} documenti, 10 MB per file. I PDF vengono letti pagina per pagina.
               </span>
             </div>
 
