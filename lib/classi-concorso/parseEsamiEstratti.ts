@@ -6,6 +6,8 @@ export type EsameEstrattoDaDocumento = {
   ssd?: string;
   cfu?: number | string;
   voto?: string | number | null;
+  esito?: string | null;
+  data?: string | null;
   livello?: string | null;
   sourceFile?: string | null;
   confidence?: number | null;
@@ -34,11 +36,44 @@ function creaId(prefix = "doc-exam") {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export function normalizzaEsamiEstratti(items: EsameEstrattoDaDocumento[]): EsameCfu[] {
-  const seen = new Set<string>();
-  const normalized: EsameCfu[] = [];
+function normalizzaNomePerConfronto(nome: string): string {
+  return nome
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\b(?:esame|insegnamento|attivita|formativa|modulo)\b/g, " ")
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
+}
 
-  for (const item of items || []) {
+function contaCampiUtili(item: EsameEstrattoDaDocumento): number {
+  let score = 0;
+  if (item.nome) score += 1;
+  if (item.ssd) score += 1;
+  if (item.cfu) score += 1;
+  if (item.voto) score += 2;
+  if (item.esito) score += 2;
+  if (item.data) score += 1;
+  if (item.livello) score += 1;
+  if (item.sourceFile) score += 1;
+  if (typeof item.confidence === "number") score += item.confidence;
+  return score;
+}
+
+function scegliMigliore(
+  corrente: EsameEstrattoDaDocumento,
+  candidato: EsameEstrattoDaDocumento
+): EsameEstrattoDaDocumento {
+  return contaCampiUtili(candidato) > contaCampiUtili(corrente) ? candidato : corrente;
+}
+
+export function normalizzaEsamiEstratti(items: unknown[]): EsameCfu[] {
+  const dedup = new Map<string, EsameEstrattoDaDocumento>();
+
+  for (const raw of items || []) {
+    if (!raw || typeof raw !== "object") continue;
+    const item = raw as EsameEstrattoDaDocumento;
+
     const nome = String(item.nome || "").replace(/\s+/g, " ").trim();
     const ssd = normalizeSSD(String(item.ssd || "").trim());
     const cfu = normalizzaCfu(item.cfu);
@@ -46,18 +81,26 @@ export function normalizzaEsamiEstratti(items: EsameEstrattoDaDocumento[]): Esam
     if (!nome && !ssd && !cfu) continue;
     if (!ssd || !cfu) continue;
 
-    const key = `${nome.toLowerCase()}|${ssd}|${cfu}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const nomeKey = normalizzaNomePerConfronto(nome);
+    if (!nomeKey) continue;
 
-    normalized.push({
-      id: creaId(),
-      nome: nome || "Esame rilevato",
+    const key = `${nomeKey}|${ssd}|${cfu}`;
+    const candidato: EsameEstrattoDaDocumento = {
+      ...item,
+      nome,
       ssd,
       cfu,
-      livello: normalizzaLivello(item.livello),
-    });
+    };
+
+    const existing = dedup.get(key);
+    dedup.set(key, existing ? scegliMigliore(existing, candidato) : candidato);
   }
 
-  return normalized;
+  return Array.from(dedup.values()).map((item) => ({
+    id: creaId(),
+    nome: String(item.nome || "Esame rilevato").replace(/\s+/g, " ").trim(),
+    ssd: normalizeSSD(String(item.ssd || "").trim()),
+    cfu: normalizzaCfu(item.cfu),
+    livello: normalizzaLivello(item.livello),
+  }));
 }

@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_PDF_TEXT_CHARS = 120_000;
 const ALLOWED_TYPES = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
 
 type OpenAIContentPart =
@@ -13,41 +14,91 @@ type OpenAIContentPart =
   | { type: "input_image"; image_url: string; detail: "high" | "auto" | "low" }
   | { type: "input_file"; filename: string; file_data: string };
 
-  type OpenAITextContent = {
-    text?: unknown;
-  };
-  
-  type OpenAIOutputItem = {
-    content?: OpenAITextContent[];
-  };
-  
-  type OpenAIResponsePayload = {
-    output_text?: unknown;
-    output?: OpenAIOutputItem[];
-  };
-  
-  function getOutputText(payload: OpenAIResponsePayload): string {
-    if (typeof payload.output_text === "string") return payload.output_text;
-  
-    const chunks: string[] = [];
-  
-    for (const item of payload.output || []) {
-      for (const content of item.content || []) {
-        if (typeof content.text === "string") chunks.push(content.text);
-      }
+type OpenAITextContent = {
+  text?: unknown;
+};
+
+type OpenAIOutputItem = {
+  content?: OpenAITextContent[];
+};
+
+type OpenAIResponsePayload = {
+  output_text?: unknown;
+  output?: OpenAIOutputItem[];
+};
+
+type ParsedAiResponse = {
+  esami?: unknown;
+  warnings?: unknown;
+};
+
+type PdfParseResult = {
+  text?: string;
+  numpages?: number;
+};
+
+type PdfParseFn = (buffer: Buffer) => Promise<PdfParseResult>;
+
+function getOutputText(payload: OpenAIResponsePayload): string {
+  if (typeof payload.output_text === "string") return payload.output_text;
+
+  const chunks: string[] = [];
+
+  for (const item of payload.output || []) {
+    for (const content of item.content || []) {
+      if (typeof content.text === "string") chunks.push(content.text);
     }
-  
-    return chunks.join("\n").trim();
   }
 
-function safeJsonParse(text: string) {
+  return chunks.join("\n").trim();
+}
+
+function safeJsonParse(text: string): ParsedAiResponse {
   try {
-    return JSON.parse(text);
+    return JSON.parse(text) as ParsedAiResponse;
   } catch {
     const match = text.match(/\{[\s\S]*\}/);
-    if (match) return JSON.parse(match[0]);
+    if (match) return JSON.parse(match[0]) as ParsedAiResponse;
     throw new Error("Risposta AI non interpretabile come JSON.");
   }
+}
+
+function truncateText(value: string, maxChars = MAX_PDF_TEXT_CHARS): string {
+  if (value.length <= maxChars) return value;
+  return `${value.slice(0, maxChars)}\n\n[TESTO PDF TRONCATO PER LIMITE TECNICO: verificare comunque il file originale allegato.]`;
+}
+
+async function extractPdfText(buffer: Buffer): Promise<{ text: string; pages?: number }> {
+  try {
+    const pdfParseModule = await import("pdf-parse");
+    const pdfParse = pdfParseModule.default as PdfParseFn;
+    const parsed = await pdfParse(buffer);
+    return {
+      text: String(parsed.text || "").replace(/\r/g, "\n").replace(/\n{3,}/g, "\n\n").trim(),
+      pages: parsed.numpages,
+    };
+  } catch (error) {
+    console.error("PDF_TEXT_EXTRACTION_ERROR", error);
+    return { text: "" };
+  }
+}
+
+function buildPrompt(): string {
+  return `Analizza i documenti universitari allegati e/o il testo estratto dai PDF.
+
+Obiettivo: estrarre gli esami universitari utili al conteggio CFU per classi di concorso.
+
+Regole fondamentali:
+1. Analizza tutto il contenuto disponibile, non solo la prima pagina.
+2. Nei PDF testuali troverai blocchi indicati come "TESTO ESTRATTO DA PDF". Considerali fonte primaria perché contengono il testo di tutte le pagine estratte lato server.
+3. In molti certificati lo stesso esame compare due volte: una riga principale in maiuscolo/grassetto e una riga descrittiva più piccola sotto. Se due righe hanno stesso nome, stesso SSD/settore e stessi CFU, restituisci una sola riga.
+4. Preferisci la riga principale/completa, soprattutto se contiene esito, data o voto.
+5. Non duplicare un esame solo perché il nome è ripetuto in maiuscolo e poi in minuscolo.
+6. Estrai solo esami, attività formative o prove con CFU e SSD/settore riconoscibile. Non inventare SSD o CFU.
+7. Se un dato è leggibile ma incerto, includilo con confidence bassa. Se manca SSD o CFU, non includere la riga e segnala un warning.
+8. Normalizza i settori come MAT/01, M-PSI/07, MED/25, SPS/07, ING-INF/05.
+9. Per ogni esame restituisci nome, SSD, CFU, voto se presente, livello se deducibile e file sorgente se deducibile.
+10. Rispondi solo con JSON valido conforme allo schema.`;
 }
 
 export async function POST(request: Request) {
@@ -94,21 +145,38 @@ export async function POST(request: Request) {
     const content: OpenAIContentPart[] = [
       {
         type: "input_text",
-        text:
-          "Analizza i documenti universitari allegati. Estrai esclusivamente gli esami sostenuti o riconoscibili come esami di carriera. Per ogni esame restituisci nome, SSD, CFU, voto se presente, livello se deducibile e file sorgente se deducibile. Non inventare SSD o CFU: se non sono presenti o sono dubbi, ometti la riga oppure segnala un warning. Rispondi solo con JSON valido conforme allo schema.",
+        text: buildPrompt(),
       },
     ];
 
+    let pdfTextFiles = 0;
+    let pdfFallbackFiles = 0;
+
     for (const file of validFiles) {
       const arrayBuffer = await file.arrayBuffer();
-      const base64 = Buffer.from(arrayBuffer).toString("base64");
+      const buffer = Buffer.from(arrayBuffer);
+      const base64 = buffer.toString("base64");
 
       if (file.type === "application/pdf") {
-        content.push({
-          type: "input_file",
-          filename: file.name || "documento.pdf",
-          file_data: `data:application/pdf;base64,${base64}`,
-        });
+        const extracted = await extractPdfText(buffer);
+
+        if (extracted.text.length >= 80) {
+          pdfTextFiles += 1;
+          content.push({
+            type: "input_text",
+            text: `\n\n--- TESTO ESTRATTO DA PDF: ${file.name || "documento.pdf"} ---\nPagine rilevate: ${extracted.pages || "non specificato"}\n${truncateText(extracted.text)}\n--- FINE TESTO PDF: ${file.name || "documento.pdf"} ---`,
+          });
+        } else {
+          pdfFallbackFiles += 1;
+          warnings.push(
+            `${file.name}: non è stato possibile estrarre testo dal PDF; provo comunque la lettura AI del file.`
+          );
+          content.push({
+            type: "input_file",
+            filename: file.name || "documento.pdf",
+            file_data: `data:application/pdf;base64,${base64}`,
+          });
+        }
       } else {
         content.push({
           type: "input_image",
@@ -119,6 +187,17 @@ export async function POST(request: Request) {
       }
     }
 
+    if (pdfTextFiles > 0) {
+      warnings.push(
+        `PDF testuali analizzati tramite estrazione completa del testo: ${pdfTextFiles}. Controllare comunque la tabella prima del calcolo.`
+      );
+    }
+    if (pdfFallbackFiles > 0) {
+      warnings.push(
+        `PDF analizzati tramite fallback visuale/file: ${pdfFallbackFiles}. Se mancano righe, caricare screenshot ingranditi delle pagine interessate.`
+      );
+    }
+
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -126,7 +205,7 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
         input: [{ role: "user", content }],
         text: {
           format: {
@@ -168,13 +247,13 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-    
+
       console.error("OPENAI_RESPONSE_ERROR", {
         status: response.status,
         statusText: response.statusText,
         errorText,
       });
-    
+
       return NextResponse.json(
         {
           success: false,
@@ -186,20 +265,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const aiPayload = await response.json();
+    const aiPayload = (await response.json()) as OpenAIResponsePayload;
     const outputText = getOutputText(aiPayload);
     const parsed = safeJsonParse(outputText);
-    const esami = normalizzaEsamiEstratti(parsed.esami || []);
+    const rawEsami = Array.isArray(parsed.esami) ? parsed.esami : [];
+    const rawWarnings = Array.isArray(parsed.warnings)
+      ? parsed.warnings.filter((warning): warning is string => typeof warning === "string")
+      : [];
+    const esami = normalizzaEsamiEstratti(rawEsami);
 
     return NextResponse.json({
       success: true,
       esami,
-      warnings: [...warnings, ...(parsed.warnings || [])],
-      rawCount: Array.isArray(parsed.esami) ? parsed.esami.length : 0,
+      warnings: [...warnings, ...rawWarnings],
+      rawCount: rawEsami.length,
     });
   } catch (error) {
     console.error("ESTRAI_ESAMI_ROUTE_ERROR", error);
-  
+
     return NextResponse.json(
       {
         success: false,
