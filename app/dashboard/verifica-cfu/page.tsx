@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   BookOpenCheck,
   CheckCircle2,
+  Camera,
   GraduationCap,
   Mail,
+  MessageCircle,
   Plus,
   Trash2,
   AlertTriangle,
@@ -17,17 +18,9 @@ import {
 } from "lucide-react";
 import AppButton from "@/components/ui/AppButton";
 import AppCard from "@/components/ui/AppCard";
-import BottomNav from "@/components/ui/BottomNav";
 import type { ClasseConcorso, EsameCfu, RisultatoVerificaCfu, TitoloCompleto } from "@/lib/classi-concorso/types";
 import { createEmptyExam, verificaCfuClasse } from "@/lib/classi-concorso/verificaCfu";
 import { normalizeSSD } from "@/lib/classi-concorso/ssd";
-
-type GpsUser = {
-  nome: string;
-  email: string;
-  telefono: string;
-  interesse?: string;
-};
 
 type ApiEstrazioneResponse = {
   success: boolean;
@@ -37,13 +30,18 @@ type ApiEstrazioneResponse = {
   rawCount?: number;
 };
 
-const STORAGE_KEY = "ls_verifica_cfu_v2";
+const STORAGE_KEY = "ls_verifica_cfu_per_tutti_v1";
 const MAX_FILES = 5;
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
 const MAX_AI_FILES = 30;
 const MAX_PDF_PAGES_PER_FILE = 15;
 const PDF_RENDER_SCALE = 2.4;
 const ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+const ORIENTATORE_EMAIL = "info@laureasmart.it";
+const WHATSAPP_NUMBER = "393793673257";
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  "Buongiorno, vorrei una verifica gratuita e senza impegno dei CFU per le classi di concorso."
+);
 
 const livelli = [
   { value: "triennale", label: "Triennale" },
@@ -56,6 +54,62 @@ type PreparedAiFiles = {
   files: File[];
   warnings: string[];
 };
+
+type DocumentoCaricato = {
+  nome: string;
+  url: string;
+  size: number;
+  type: string;
+};
+
+type UploadDocumentiResult = {
+  documenti: DocumentoCaricato[];
+  warnings: string[];
+};
+
+type UploadDocumentoResponse = {
+  success: boolean;
+  message?: string;
+  documento?: DocumentoCaricato;
+};
+
+async function uploadDocumentiOriginaliToBlob(documenti: File[]): Promise<UploadDocumentiResult> {
+  const uploaded: DocumentoCaricato[] = [];
+  const warnings: string[] = [];
+
+  for (let index = 0; index < documenti.length; index += 1) {
+    const file = documenti[index];
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/verifica-cfu/carica-documento", {
+        method: "POST",
+        body: formData,
+      });
+
+      const json = (await response.json()) as UploadDocumentoResponse;
+
+      if (!response.ok || !json.success || !json.documento?.url) {
+        throw new Error(json.message || `${file.name}: caricamento documento non riuscito.`);
+      }
+
+      uploaded.push(json.documento);
+    } catch (error) {
+      console.error("BLOB_UPLOAD_DOCUMENTO_ERROR", error);
+
+      warnings.push(
+        error instanceof Error
+          ? `${file.name || `Documento ${index + 1}`}: ${error.message}`
+          : `${file.name || `Documento ${index + 1}`}: caricamento su storage non riuscito.`
+      );
+    }
+  }
+
+  return { documenti: uploaded, warnings };
+}
+
 
 type PdfJsViewport = {
   width: number;
@@ -256,10 +310,62 @@ async function prepareFilesForAiExtraction(originalFiles: File[]): Promise<Prepa
   return { files: files.slice(0, MAX_AI_FILES), warnings };
 }
 
+function dedupEsamiClient(esami: EsameCfu[]): EsameCfu[] {
+  const map = new Map<string, EsameCfu>();
+
+  for (const esame of esami) {
+    const nome = String(esame.nome || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+    const ssd = normalizeSSD(String(esame.ssd || ""));
+    const cfu = Number(esame.cfu || 0);
+
+    const key = `${nome}|${ssd}|${cfu}`;
+
+    if (!nome || !ssd || !cfu) {
+      map.set(`${key}|${esame.id || Math.random()}`, esame);
+      continue;
+    }
+
+    const existing = map.get(key);
+
+    if (!existing) {
+      map.set(key, {
+        ...esame,
+        ssd,
+        cfu,
+      });
+      continue;
+    }
+
+    const existingScore =
+      Number(Boolean(existing.nome)) +
+      Number(Boolean(existing.ssd)) +
+      Number(Boolean(existing.cfu));
+
+    const currentScore =
+      Number(Boolean(esame.nome)) +
+      Number(Boolean(esame.ssd)) +
+      Number(Boolean(esame.cfu));
+
+    if (currentScore > existingScore) {
+      map.set(key, {
+        ...esame,
+        ssd,
+        cfu,
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
 export default function VerificaCfuPage() {
-  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [user, setUser] = useState<GpsUser | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const [classi, setClassi] = useState<ClasseConcorso[]>([]);
   const [titoli, setTitoli] = useState<TitoloCompleto[]>([]);
   const [titoloCodice, setTitoloCodice] = useState("");
@@ -276,23 +382,9 @@ export default function VerificaCfuPage() {
   const [sending, setSending] = useState(false);
   const [noteUtente, setNoteUtente] = useState("");
   const [contatto, setContatto] = useState({ nome: "", email: "", telefono: "" });
+  const [risultatoSbloccato, setRisultatoSbloccato] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("gps_user");
-
-    if (!storedUser) {
-      router.push("/register");
-      return;
-    }
-
-    const parsedUser = JSON.parse(storedUser) as GpsUser;
-    setUser(parsedUser);
-    setContatto({
-      nome: parsedUser.nome || "",
-      email: parsedUser.email || "",
-      telefono: parsedUser.telefono || "",
-    });
-
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
@@ -301,12 +393,20 @@ export default function VerificaCfuPage() {
           classeCodice?: string;
           esami?: EsameCfu[];
           noteUtente?: string;
+          contatto?: { nome?: string; email?: string; telefono?: string };
         };
 
         setTitoloCodice(parsed.titoloCodice || "");
         setClasseCodice(parsed.classeCodice || "");
         setNoteUtente(parsed.noteUtente || "");
         if (parsed.esami?.length) setEsami(parsed.esami);
+        if (parsed.contatto) {
+          setContatto({
+            nome: parsed.contatto.nome || "",
+            email: parsed.contatto.email || "",
+            telefono: parsed.contatto.telefono || "",
+          });
+        }
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
@@ -321,14 +421,19 @@ export default function VerificaCfuPage() {
         setTitoli(titoliData || []);
       })
       .finally(() => setLoading(false));
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ titoloCodice, classeCodice, esami, noteUtente })
+      JSON.stringify({ titoloCodice, classeCodice, esami, noteUtente, contatto })
     );
-  }, [titoloCodice, classeCodice, esami, noteUtente]);
+  }, [titoloCodice, classeCodice, esami, noteUtente, contatto]);
+
+  useEffect(() => {
+    setRisultatoSbloccato(false);
+    setSendMessage("");
+  }, [titoloCodice, classeCodice, esami]);
 
   const titoloSelezionato = useMemo(
     () => titoli.find((titolo) => titolo.codice === titoloCodice) || null,
@@ -414,6 +519,8 @@ export default function VerificaCfuPage() {
     setUploadWarnings([]);
     setSendMessage("");
     setNoteUtente("");
+    setContatto({ nome: "", email: "", telefono: "" });
+    setRisultatoSbloccato(false);
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -431,7 +538,7 @@ export default function VerificaCfuPage() {
         continue;
       }
       if (file.size > MAX_FILE_SIZE) {
-        warnings.push(`${file.name}: superiore a 10 MB.`);
+        warnings.push(`${file.name}: superiore a 4 MB.`);
         continue;
       }
       accepted.push(file);
@@ -455,53 +562,87 @@ export default function VerificaCfuPage() {
   const estraiEsamiDaDocumenti = async () => {
     setUploadMessage("");
     setUploadWarnings([]);
-
+  
     if (!documenti.length) {
       setUploadMessage("Carica almeno un documento prima di avviare la lettura automatica.");
       return;
     }
-
+  
     setExtracting(true);
+  
     try {
-      setUploadMessage("Sto preparando i documenti. Se hai caricato un PDF, analizzo le pagine una per una.");
-
+      setUploadMessage(
+        "Sto preparando i documenti. Se hai caricato un PDF, analizzo le pagine una per una."
+      );
+  
       const prepared = await prepareFilesForAiExtraction(documenti);
-      const formData = new FormData();
-      prepared.files.forEach((file) => formData.append("files", file));
-
+  
       if (!prepared.files.length) {
         throw new Error("Nessun file valido da inviare alla lettura automatica.");
       }
-
+  
+      const allWarnings: string[] = [...prepared.warnings];
+      const allExtracted: EsameCfu[] = [];
+  
       setUploadWarnings(prepared.warnings);
-      setUploadMessage(`Sto leggendo ${prepared.files.length} pagina/e o immagine/i con l’AI...`);
-
-      const response = await fetch("/api/verifica-cfu/estrai-esami", {
-        method: "POST",
-        body: formData,
-      });
-
-      const json = (await response.json()) as ApiEstrazioneResponse;
-      if (!response.ok || !json.success) {
-        throw new Error(json.message || "Lettura automatica non riuscita.");
+  
+      for (let index = 0; index < prepared.files.length; index += 1) {
+        const file = prepared.files[index];
+  
+        setUploadMessage(
+          `Sto leggendo ${index + 1} di ${prepared.files.length}: ${file.name}`
+        );
+  
+        const formData = new FormData();
+        formData.append("files", file);
+  
+        const response = await fetch("/api/verifica-cfu/estrai-esami", {
+          method: "POST",
+          body: formData,
+        });
+  
+        const json = (await response.json()) as ApiEstrazioneResponse;
+  
+        if (!response.ok || !json.success) {
+          allWarnings.push(
+            `${file.name}: lettura non riuscita. Puoi continuare con gli altri file o inserire manualmente eventuali esami mancanti.`
+          );
+          continue;
+        }
+  
+        if (json.esami?.length) {
+          allExtracted.push(...json.esami);
+        }
+  
+        if (json.warnings?.length) {
+          allWarnings.push(...json.warnings);
+        }
       }
-
-      const estratti = json.esami || [];
-      if (!estratti.length) {
+  
+      if (!allExtracted.length) {
         setUploadMessage(
           "Non siamo riusciti a leggere correttamente gli esami. Puoi provare con un PDF più chiaro, inserire i dati manualmente o inviare comunque i documenti all’orientatore al termine."
         );
-        setUploadWarnings((current) => [...current, ...(json.warnings || [])]);
+        setUploadWarnings(allWarnings);
         return;
       }
-
+  
+      const deduped = dedupEsamiClient(allExtracted);
+  
       setEsami((current) => {
-        const hasOnlyEmpty = current.length === 1 && !current[0].nome && !current[0].ssd && !current[0].cfu;
-        return hasOnlyEmpty ? estratti : [...current, ...estratti];
+        const hasOnlyEmpty =
+          current.length === 1 &&
+          !current[0].nome &&
+          !current[0].ssd &&
+          !current[0].cfu;
+  
+        return hasOnlyEmpty ? deduped : dedupEsamiClient([...current, ...deduped]);
       });
-
-      setUploadMessage(`Abbiamo trovato ${estratti.length} esami. Controlla SSD e CFU prima di procedere.`);
-      setUploadWarnings((current) => [...current, ...(json.warnings || [])]);
+  
+      setUploadMessage(
+        `Abbiamo trovato ${deduped.length} esami. Controlla SSD e CFU prima di procedere.`
+      );
+      setUploadWarnings(allWarnings);
     } catch (error) {
       setUploadMessage(
         error instanceof Error
@@ -511,6 +652,7 @@ export default function VerificaCfuPage() {
     } finally {
       setExtracting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (cameraInputRef.current) cameraInputRef.current.value = "";
     }
   };
 
@@ -522,23 +664,59 @@ export default function VerificaCfuPage() {
       return;
     }
 
-    if (!contatto.nome.trim() || !contatto.email.trim() || !contatto.telefono.trim()) {
+    const nomePulito = contatto.nome.trim();
+    const emailPulita = contatto.email.trim().toLowerCase();
+    const telefonoPulito = contatto.telefono.trim();
+
+    const emailValida = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailPulita);
+
+    if (!nomePulito || !emailPulita || !telefonoPulito) {
       setSendMessage("Inserisci nome, email e telefono per richiedere la verifica gratuita.");
       return;
     }
 
+    if (!emailValida) {
+      setSendMessage("Inserisci un indirizzo email valido, ad esempio nome@email.it.");
+      return;
+    }
+
     setSending(true);
+
     try {
+      let documentiCaricati: DocumentoCaricato[] = [];
+      let uploadBlobWarnings: string[] = [];
+
+      if (documenti.length > 0) {
+        setSendMessage("Sto caricando i documenti in modo sicuro. Attendi qualche secondo...");
+        const uploadResult = await uploadDocumentiOriginaliToBlob(documenti);
+        documentiCaricati = uploadResult.documenti;
+        uploadBlobWarnings = uploadResult.warnings;
+      }
+
       const formData = new FormData();
-      formData.append("nome", contatto.nome.trim());
-      formData.append("email", contatto.email.trim());
-      formData.append("telefono", contatto.telefono.trim());
+
+      formData.append("nome", nomePulito);
+      formData.append("email", emailPulita);
+      formData.append("telefono", telefonoPulito);
       formData.append("titolo", `${titoloSelezionato.codice} — ${titoloSelezionato.titolo}`);
       formData.append("classe", `${classeSelezionata.codice} — ${classeSelezionata.descrizione}`);
-      formData.append("note", noteUtente);
+      formData.append(
+        "note",
+        `${noteUtente}
+
+Origine richiesta: verifica CFU interna app.
+Documenti caricati su storage: ${documentiCaricati.length}.
+${
+  uploadBlobWarnings.length
+    ? `Avvisi caricamento documenti: ${uploadBlobWarnings.join(" | ")}`
+    : ""
+}`.trim()
+      );
       formData.append("esami", JSON.stringify(esamiValidi));
       formData.append("risultato", JSON.stringify(risultato));
-      documenti.forEach((file) => formData.append("files", file));
+      formData.append("documentiUrl", JSON.stringify(documentiCaricati));
+
+      setSendMessage("Sto inviando la richiesta all’orientatore...");
 
       const response = await fetch("/api/verifica-cfu/invia-verifica", {
         method: "POST",
@@ -546,25 +724,36 @@ export default function VerificaCfuPage() {
       });
 
       const json = await response.json();
+
       if (!response.ok || !json.success) {
         throw new Error(json.message || "Errore durante l’invio della richiesta.");
       }
 
-      setSendMessage("Richiesta inviata correttamente. Un orientatore potrà verificare i documenti e il riepilogo dei CFU.");
+      setRisultatoSbloccato(true);
+      setSendMessage(
+        uploadBlobWarnings.length
+          ? "Richiesta inviata correttamente. Alcuni documenti non sono stati caricati su storage, ma l’orientatore riceverà comunque il riepilogo dei CFU. Ora puoi vedere il risultato preliminare."
+          : "Richiesta inviata correttamente. Ti abbiamo inviato una copia via email. Ora puoi vedere il risultato preliminare."
+      );
     } catch (error) {
-      setSendMessage(error instanceof Error ? error.message : "Errore durante l’invio della richiesta.");
+      console.error("INVIO_VERIFICA_ERROR", error);
+
+      setSendMessage(
+        error instanceof Error
+          ? error.message
+          : "Errore durante l’invio della richiesta."
+      );
     } finally {
       setSending(false);
     }
   };
 
-  if (!user) return null;
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        padding: "22px 18px 120px",
+        padding: "22px 18px 70px",
         fontFamily: "var(--font-sora), var(--font-geist-sans), Arial",
         maxWidth: 460,
         margin: "0 auto",
@@ -575,7 +764,7 @@ export default function VerificaCfuPage() {
     >
       <button
         type="button"
-        onClick={() => router.push("/dashboard")}
+        onClick={() => { window.location.href = "/dashboard"; }}
         style={{
           border: "none",
           background: "rgba(255,255,255,0.10)",
@@ -629,13 +818,15 @@ export default function VerificaCfuPage() {
             letterSpacing: "-0.9px",
           }}
         >
-          Controlla i CFU per le classi di concorso
+          Verifica gratis i tuoi CFU per le classi di concorso
         </h1>
 
         <p style={{ margin: "13px 0 0", fontSize: 15.5, lineHeight: 1.6, opacity: 0.95 }}>
-          Carica il piano di studi oppure inserisci gli esami a mano. Laurea Smart prepara una prima lettura dei crediti eventualmente mancanti.
+          Carica il piano di studi, il certificato esami o uno screenshot della tua carriera universitaria. Il sistema legge automaticamente SSD e CFU e prepara un primo controllo dei crediti utili per la classe di concorso desiderata.
         </p>
       </section>
+
+      <ImmediateContactCard />
 
       {loading ? (
         <AppCard variant="dark" title="Caricamento dati" description="Sto preparando titoli e classi di concorso." />
@@ -647,21 +838,37 @@ export default function VerificaCfuPage() {
             description="Puoi caricare più file: carriera triennale, magistrale, screenshot o PDF. La lettura automatica compilerà la tabella, che potrai correggere."
             icon={<UploadCloud size={22} />}
           >
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                borderRadius: 24,
-                padding: 18,
-                border: "1px dashed rgba(255,255,255,0.28)",
-                background: "rgba(255,255,255,0.08)",
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              <UploadCloud size={30} />
-              <strong style={{ display: "block", marginTop: 8 }}>Carica PDF, JPG, PNG o WEBP</strong>
-              <span style={{ display: "block", marginTop: 4, color: "rgba(255,255,255,0.70)", fontSize: 13 }}>
-                Massimo {MAX_FILES} documenti, 10 MB per file. I PDF vengono letti pagina per pagina.
+            <div style={{ display: "grid", gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={uploadChoiceButtonStyle}
+              >
+                <UploadCloud size={24} />
+                <span style={{ display: "grid", gap: 3, textAlign: "left" }}>
+                  <strong>Carica documento</strong>
+                  <span style={{ color: "rgba(255,255,255,0.70)", fontSize: 12.5 }}>
+                    PDF, JPG, PNG o WEBP. I PDF vengono letti pagina per pagina.
+                  </span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                style={uploadChoiceButtonStyle}
+              >
+                <Camera size={24} />
+                <span style={{ display: "grid", gap: 3, textAlign: "left" }}>
+                  <strong>Scatta una foto</strong>
+                  <span style={{ color: "rgba(255,255,255,0.70)", fontSize: 12.5 }}>
+                    Usa la fotocamera del telefono per fotografare piano di studi o certificato.
+                  </span>
+                </span>
+              </button>
+
+              <span style={{ color: "rgba(255,255,255,0.62)", fontSize: 12.5, lineHeight: 1.45 }}>
+                Puoi caricare massimo {MAX_FILES} documenti, 4 MB per file. Dopo il caricamento potrai avviare la lettura automatica.
               </span>
             </div>
 
@@ -670,6 +877,15 @@ export default function VerificaCfuPage() {
               type="file"
               multiple
               accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+              onChange={(e) => addFiles(e.target.files)}
+              style={{ display: "none" }}
+            />
+
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
               onChange={(e) => addFiles(e.target.files)}
               style={{ display: "none" }}
             />
@@ -837,9 +1053,8 @@ export default function VerificaCfuPage() {
             </select>
           </AppCard>
 
-          {risultato && classeSelezionata && titoloSelezionato && (
-            <RisultatoCard
-              risultato={risultato}
+          {risultato && classeSelezionata && titoloSelezionato && !risultatoSbloccato && (
+            <LeadGateCard
               classe={classeSelezionata}
               titolo={titoloSelezionato}
               contatto={contatto}
@@ -849,6 +1064,15 @@ export default function VerificaCfuPage() {
               onInvia={inviaVerificaEmail}
               sending={sending}
               sendMessage={sendMessage}
+              fileCount={documenti.length}
+            />
+          )}
+
+          {risultato && classeSelezionata && titoloSelezionato && risultatoSbloccato && (
+            <RisultatoCard
+              risultato={risultato}
+              classe={classeSelezionata}
+              titolo={titoloSelezionato}
               fileCount={documenti.length}
             />
           )}
@@ -865,14 +1089,46 @@ export default function VerificaCfuPage() {
           </AppCard>
         </div>
       )}
-
-      <BottomNav />
     </main>
   );
 }
 
-function RisultatoCard({
-  risultato,
+function ImmediateContactCard() {
+  const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
+  const emailHref = `mailto:${ORIENTATORE_EMAIL}?subject=${encodeURIComponent(
+    "Verifica gratuita CFU classi di concorso"
+  )}&body=${encodeURIComponent(
+    "Buongiorno, vorrei una verifica gratuita e senza impegno dei CFU per le classi di concorso."
+  )}`;
+
+  return (
+    <AppCard
+      variant="dark"
+      title="Preferisci parlare subito con un orientatore?"
+      description="Puoi contattarci gratis e senza impegno anche prima di caricare i documenti. Se vuoi, poi potrai comunque usare il test automatico qui sotto."
+      icon={<Mail size={22} />}
+    >
+      <div style={{ display: "grid", gap: 10 }}>
+        <a href={whatsappHref} target="_blank" rel="noopener noreferrer" style={whatsappButtonStyle}>
+          <MessageCircle size={18} />
+          Scrivi su WhatsApp
+        </a>
+
+        <a href={emailHref} style={emailButtonStyle}>
+          <Mail size={18} />
+          Invia una email
+        </a>
+
+        <p style={{ margin: 0, color: "rgba(255,255,255,0.66)", fontSize: 12.5, lineHeight: 1.5 }}>
+          La consulenza è gratuita. Un orientatore può aiutarti a capire quali documenti caricare e come leggere correttamente SSD, CFU e requisiti della classe di concorso.
+        </p>
+      </div>
+    </AppCard>
+  );
+}
+
+
+function LeadGateCard({
   classe,
   titolo,
   contatto,
@@ -884,7 +1140,6 @@ function RisultatoCard({
   sendMessage,
   fileCount,
 }: {
-  risultato: RisultatoVerificaCfu;
   classe: ClasseConcorso;
   titolo: TitoloCompleto;
   contatto: { nome: string; email: string; telefono: string };
@@ -894,6 +1149,82 @@ function RisultatoCard({
   onInvia: () => void;
   sending: boolean;
   sendMessage: string;
+  fileCount: number;
+}) {
+  return (
+    <AppCard
+      variant="amber"
+      title="Il tuo risultato preliminare è pronto"
+      badge="Sblocca risultato"
+      icon={<Mail size={22} />}
+    >
+      <div style={{ display: "grid", gap: 12 }}>
+        <p style={{ margin: 0, lineHeight: 1.55 }}>
+          Abbiamo preparato il controllo sulla base degli esami inseriti e della classe selezionata.
+          Per visualizzare il riepilogo dei CFU e ricevere una copia via email, inserisci i tuoi dati.
+        </p>
+
+        <div style={ctaBoxStyle}>
+          <strong>Verifica gratuita e senza impegno</strong>
+          <p style={{ margin: "6px 0 0" }}>
+            Dopo l’invio vedrai subito il risultato preliminare. Una copia verrà inviata alla tua email e una all’orientatore Laurea Smart.
+            {fileCount > 0
+              ? ` I ${fileCount} documenti caricati saranno collegati alla richiesta, se disponibili su storage.`
+              : " Puoi inviare anche senza documenti se hai inserito gli esami manualmente."}
+          </p>
+        </div>
+
+        <InfoRow label="Titolo selezionato" value={`${titolo.codice} — ${titolo.titolo}`} />
+        <InfoRow label="Classe selezionata" value={`${classe.codice} — ${classe.descrizione}`} />
+
+        <div style={{ display: "grid", gap: 8 }}>
+          <input
+            value={contatto.nome}
+            onChange={(e) => setContatto((current) => ({ ...current, nome: e.target.value }))}
+            placeholder="Nome e cognome"
+            style={lightInputStyle}
+          />
+          <input
+            value={contatto.email}
+            onChange={(e) => setContatto((current) => ({ ...current, email: e.target.value }))}
+            placeholder="Email"
+            type="email"
+            style={lightInputStyle}
+          />
+          <input
+            value={contatto.telefono}
+            onChange={(e) => setContatto((current) => ({ ...current, telefono: e.target.value }))}
+            placeholder="Telefono"
+            style={lightInputStyle}
+          />
+          <textarea
+            value={noteUtente}
+            onChange={(e) => setNoteUtente(e.target.value)}
+            placeholder="Note facoltative per l’orientatore"
+            style={{ ...lightInputStyle, minHeight: 92, paddingTop: 12, resize: "vertical" }}
+          />
+        </div>
+
+        <AppButton type="button" variant="whatsapp" onClick={onInvia} disabled={sending}>
+          {sending ? <Loader2 size={18} /> : <Mail size={18} />}
+          {sending ? "Invio in corso..." : "Mostra risultato e richiedi verifica gratuita"}
+        </AppButton>
+
+        {sendMessage && <StatusBox darkText>{sendMessage}</StatusBox>}
+      </div>
+    </AppCard>
+  );
+}
+
+function RisultatoCard({
+  risultato,
+  classe,
+  titolo,
+  fileCount,
+}: {
+  risultato: RisultatoVerificaCfu;
+  classe: ClasseConcorso;
+  titolo: TitoloCompleto;
   fileCount: number;
 }) {
   const positive = risultato.stato === "positivo";
@@ -907,6 +1238,10 @@ function RisultatoCard({
       icon={positive ? <CheckCircle2 size={22} /> : <AlertTriangle size={22} />}
     >
       <div style={{ display: "grid", gap: 12 }}>
+        <StatusBox darkText>
+          Richiesta inviata correttamente. Ti abbiamo inviato una copia del riepilogo via email e il risultato resta visibile qui sotto.
+        </StatusBox>
+
         <InfoRow label="Titolo" value={`${titolo.codice} — ${titolo.titolo}`} />
         <InfoRow label="Classe" value={`${classe.codice} — ${classe.descrizione}`} />
 
@@ -940,46 +1275,14 @@ function RisultatoCard({
         )}
 
         <div style={ctaBoxStyle}>
-          <strong>Verifica gratuita consigliata</strong>
+          <strong>Controllo preliminare</strong>
           <p style={{ margin: "6px 0 0" }}>
-            Inserisci i dati di contatto: invieremo il riepilogo a info@laureasmart.it. {fileCount > 0 ? `Saranno allegati anche ${fileCount} documenti caricati.` : "Puoi inviare anche senza allegati, se hai inserito tutto manualmente."}
+            Il risultato automatico non ha valore ufficiale e deve essere verificato da un orientatore.
+            {fileCount > 0
+              ? " I documenti caricati sono stati associati alla richiesta quando il caricamento su storage è riuscito."
+              : " La richiesta è stata inviata sulla base degli esami inseriti manualmente o letti in precedenza."}
           </p>
         </div>
-
-        <div style={{ display: "grid", gap: 8 }}>
-          <input
-            value={contatto.nome}
-            onChange={(e) => setContatto((current) => ({ ...current, nome: e.target.value }))}
-            placeholder="Nome e cognome"
-            style={lightInputStyle}
-          />
-          <input
-            value={contatto.email}
-            onChange={(e) => setContatto((current) => ({ ...current, email: e.target.value }))}
-            placeholder="Email"
-            type="email"
-            style={lightInputStyle}
-          />
-          <input
-            value={contatto.telefono}
-            onChange={(e) => setContatto((current) => ({ ...current, telefono: e.target.value }))}
-            placeholder="Telefono"
-            style={lightInputStyle}
-          />
-          <textarea
-            value={noteUtente}
-            onChange={(e) => setNoteUtente(e.target.value)}
-            placeholder="Note facoltative per l’orientatore"
-            style={{ ...lightInputStyle, minHeight: 92, paddingTop: 12, resize: "vertical" }}
-          />
-        </div>
-
-        <AppButton type="button" variant="whatsapp" onClick={onInvia} disabled={sending}>
-          {sending ? <Loader2 size={18} /> : <Mail size={18} />}
-          {sending ? "Invio in corso..." : "Richiedi verifica gratuita"}
-        </AppButton>
-
-        {sendMessage && <StatusBox darkText>{sendMessage}</StatusBox>}
       </div>
     </AppCard>
   );
@@ -1027,6 +1330,42 @@ function WarningList({ items }: { items: string[] }) {
   );
 }
 
+const whatsappButtonStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: 48,
+  borderRadius: 16,
+  border: "1px solid rgba(34,197,94,0.28)",
+  background: "linear-gradient(135deg, #16A34A 0%, #22C55E 100%)",
+  color: "#FFFFFF",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 9,
+  fontSize: 15,
+  fontWeight: 900,
+  textDecoration: "none",
+  boxSizing: "border-box",
+  boxShadow: "0 12px 24px rgba(22,163,74,0.24)",
+};
+
+
+const emailButtonStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: 48,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,0.16)",
+  background: "rgba(255,255,255,0.10)",
+  color: "#FFFFFF",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 9,
+  fontSize: 15,
+  fontWeight: 900,
+  textDecoration: "none",
+  boxSizing: "border-box",
+};
+
 const inputStyle: React.CSSProperties = {
   width: "100%",
   minHeight: 48,
@@ -1067,6 +1406,22 @@ const miniButtonStyle: React.CSSProperties = {
   cursor: "pointer",
 };
 
+
+const uploadChoiceButtonStyle: React.CSSProperties = {
+  width: "100%",
+  border: "1px dashed rgba(255,255,255,0.28)",
+  background: "rgba(255,255,255,0.08)",
+  color: "#FFFFFF",
+  borderRadius: 22,
+  padding: "15px 16px",
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  cursor: "pointer",
+  fontFamily: "inherit",
+  fontSize: 14.5,
+};
+
 const fileRowStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -1099,4 +1454,8 @@ const ctaBoxStyle: React.CSSProperties = {
   background: "rgba(31,111,178,0.10)",
   border: "1px solid rgba(31,111,178,0.14)",
 };
+
+
+
+
 
