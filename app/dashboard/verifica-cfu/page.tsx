@@ -43,6 +43,38 @@ const WHATSAPP_MESSAGE = encodeURIComponent(
   "Buongiorno, vorrei una verifica gratuita e senza impegno dei CFU per le classi di concorso."
 );
 
+function normalizeTemporalText(value: string): string {
+  return (value || "")
+    .replace(/[’]/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function hasDateBasedTemporalCondition(note?: string): boolean {
+  if (!note) return false;
+
+  const clean = normalizeTemporalText(note);
+
+  const hasExactDate =
+    /\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(clean) ||
+    /\d{1,2}\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+\d{4}/i.test(
+      clean
+    );
+
+  if (!hasExactDate) return false;
+
+  return /\b(entro|fino\s+al|non\s+oltre|prima\s+del|dal|dall'|a\s+decorrere\s+dal|a\s+partire\s+dal|successivamente\s+al|dopo\s+il)\b/i.test(
+    clean
+  );
+}
+
+function formatDateForDisplay(value: string): string {
+  if (!value) return "";
+  const [year, month, day] = value.split("-");
+  if (!year || !month || !day) return value;
+  return `${day}/${month}/${year}`;
+}
+
 const livelli = [
   { value: "triennale", label: "Triennale" },
   { value: "magistrale", label: "Magistrale" },
@@ -382,6 +414,7 @@ export default function VerificaCfuPage() {
   const [sending, setSending] = useState(false);
   const [noteUtente, setNoteUtente] = useState("");
   const [contatto, setContatto] = useState({ nome: "", email: "", telefono: "" });
+  const [dataConseguimentoTitolo, setDataConseguimentoTitolo] = useState("");
   const [risultatoSbloccato, setRisultatoSbloccato] = useState(false);
 
   useEffect(() => {
@@ -394,11 +427,13 @@ export default function VerificaCfuPage() {
           esami?: EsameCfu[];
           noteUtente?: string;
           contatto?: { nome?: string; email?: string; telefono?: string };
+          dataConseguimentoTitolo?: string;
         };
 
         setTitoloCodice(parsed.titoloCodice || "");
         setClasseCodice(parsed.classeCodice || "");
         setNoteUtente(parsed.noteUtente || "");
+        setDataConseguimentoTitolo(parsed.dataConseguimentoTitolo || "");
         if (parsed.esami?.length) setEsami(parsed.esami);
         if (parsed.contatto) {
           setContatto({
@@ -426,14 +461,14 @@ export default function VerificaCfuPage() {
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ titoloCodice, classeCodice, esami, noteUtente, contatto })
+      JSON.stringify({ titoloCodice, classeCodice, esami, noteUtente, contatto, dataConseguimentoTitolo })
     );
-  }, [titoloCodice, classeCodice, esami, noteUtente, contatto]);
+  }, [titoloCodice, classeCodice, esami, noteUtente, contatto, dataConseguimentoTitolo]);
 
   useEffect(() => {
     setRisultatoSbloccato(false);
     setSendMessage("");
-  }, [titoloCodice, classeCodice, esami]);
+  }, [titoloCodice, classeCodice, esami, dataConseguimentoTitolo]);
 
   const titoloSelezionato = useMemo(
     () => titoli.find((titolo) => titolo.codice === titoloCodice) || null,
@@ -443,6 +478,19 @@ export default function VerificaCfuPage() {
   const classeSelezionata = useMemo(
     () => classi.find((classe) => classe.codice === classeCodice) || null,
     [classi, classeCodice]
+  );
+
+  const titoliCompatibiliSelezionati = useMemo(() => {
+    if (!classeSelezionata || !titoloSelezionato) return [];
+
+    return classeSelezionata.titoli.filter(
+      (item) => item.codice.trim().toUpperCase() === titoloSelezionato.codice.trim().toUpperCase()
+    );
+  }, [classeSelezionata, titoloSelezionato]);
+
+  const richiedeDataConseguimento = useMemo(
+    () => titoliCompatibiliSelezionati.some((item) => hasDateBasedTemporalCondition(item.note)),
+    [titoliCompatibiliSelezionati]
   );
 
   const titoliFiltrati = useMemo(() => {
@@ -484,8 +532,15 @@ export default function VerificaCfuPage() {
       classe: classeSelezionata,
       titolo: titoloSelezionato,
       esami: esamiValidi,
+      dataConseguimentoTitolo: richiedeDataConseguimento ? dataConseguimentoTitolo : undefined,
     });
-  }, [classeSelezionata, titoloSelezionato, esamiValidi]);
+  }, [
+    classeSelezionata,
+    titoloSelezionato,
+    esamiValidi,
+    richiedeDataConseguimento,
+    dataConseguimentoTitolo,
+  ]);
 
   const updateExam = (id: string, field: keyof EsameCfu, value: string | number) => {
     setEsami((current) =>
@@ -520,6 +575,7 @@ export default function VerificaCfuPage() {
     setSendMessage("");
     setNoteUtente("");
     setContatto({ nome: "", email: "", telefono: "" });
+    setDataConseguimentoTitolo("");
     setRisultatoSbloccato(false);
     localStorage.removeItem(STORAGE_KEY);
   };
@@ -680,6 +736,11 @@ export default function VerificaCfuPage() {
       return;
     }
 
+    if (richiedeDataConseguimento && !dataConseguimentoTitolo) {
+      setSendMessage("Inserisci la data di conseguimento del titolo: per questa combinazione i requisiti cambiano in base alla data.");
+      return;
+    }
+
     setSending(true);
 
     try {
@@ -705,6 +766,7 @@ export default function VerificaCfuPage() {
         `${noteUtente}
 
 Origine richiesta: verifica CFU interna app.
+${richiedeDataConseguimento && dataConseguimentoTitolo ? `Data conseguimento titolo: ${formatDateForDisplay(dataConseguimentoTitolo)}.` : ""}
 Documenti caricati su storage: ${documentiCaricati.length}.
 ${
   uploadBlobWarnings.length
@@ -713,6 +775,9 @@ ${
 }`.trim()
       );
       formData.append("esami", JSON.stringify(esamiValidi));
+      if (dataConseguimentoTitolo) {
+        formData.append("dataConseguimentoTitolo", dataConseguimentoTitolo);
+      }
       formData.append("risultato", JSON.stringify(risultato));
       formData.append("documentiUrl", JSON.stringify(documentiCaricati));
 
@@ -1052,6 +1117,25 @@ ${
               ))}
             </select>
           </AppCard>
+
+          {richiedeDataConseguimento && (
+            <AppCard
+              variant="dark"
+              title="Data conseguimento titolo"
+              description="Per questa combinazione titolo/classe i requisiti cambiano in base alla data di conseguimento del titolo."
+              icon={<GraduationCap size={22} />}
+            >
+              <input
+                value={dataConseguimentoTitolo}
+                onChange={(e) => setDataConseguimentoTitolo(e.target.value)}
+                type="date"
+                style={inputStyle}
+              />
+              <p style={{ margin: "10px 0 0", color: "rgba(255,255,255,0.68)", fontSize: 12.5, lineHeight: 1.5 }}>
+                Inserisci la data indicata nel certificato di laurea o nella carriera universitaria. Il sistema userà questo dato solo quando la nota ministeriale prevede requisiti diversi prima o dopo una determinata data.
+              </p>
+            </AppCard>
+          )}
 
           {risultato && classeSelezionata && titoloSelezionato && !risultatoSbloccato && (
             <LeadGateCard
@@ -1454,6 +1538,7 @@ const ctaBoxStyle: React.CSSProperties = {
   background: "rgba(31,111,178,0.10)",
   border: "1px solid rgba(31,111,178,0.14)",
 };
+
 
 
 
