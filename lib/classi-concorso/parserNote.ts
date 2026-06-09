@@ -121,7 +121,18 @@ function normalizeCommonCompactAreas(text: string): string {
     .replace(/\bLANT\b/g, "L-ANT")
     .replace(/\bLLIN\b/g, "L-LIN")
     .replace(/\bLFILLET\b/g, "L-FIL-LET")
-    .replace(/\bSPS\s+(\d{1,2})\b/g, "SPS/$1");
+    .replace(/\bSECS\s+P\b/g, "SECS-P")
+    .replace(/\bSECS\s+S\b/g, "SECS-S")
+    .replace(/\bING\s+INF\b/g, "ING-INF")
+    .replace(/\bING\s+IND\b/g, "ING-IND")
+    .replace(/\bL\s+ART\b/g, "L-ART")
+    .replace(/\bL\s+ANT\b/g, "L-ANT")
+    .replace(/\bL\s+LIN\b/g, "L-LIN")
+    .replace(/\bSPS\s*(\d{1,2})\b/g, "SPS/$1")
+    .replace(/\b(IUS|SPS|MED|MAT|FIS|CHIM|BIO|GEO|INF|ICAR|AGR|VET)-(\d{1,2})\b/g, "$1/$2")
+    .replace(/\b(IUS|SPS|MED|MAT|FIS|CHIM|BIO|GEO|INF|ICAR|AGR|VET)\s+(\d{1,2})\b/g, "$1/$2")
+    .replace(/\b(SECS-P|SECS-S|ING-INF|ING-IND|L-ART|L-ANT|L-LIN|L-FIL-LET|M-PSI|M-PED|M-FIL|M-STO|M-GGR|M-DEA|M-EDF|M-AGR)-(\d{1,2})\b/g, "$1/$2")
+    .replace(/\b(SECS-P|SECS-S|ING-INF|ING-IND|L-ART|L-ANT|L-LIN|L-FIL-LET|M-PSI|M-PED|M-FIL|M-STO|M-GGR|M-DEA|M-EDF|M-AGR)\s+(\d{1,2})\b/g, "$1/$2");
 }
 
 function getTipoRequisito(settori: string[]): RequisitoCfu["tipo"] {
@@ -245,11 +256,6 @@ function expandCompactSectorCodes(text: string): string[] {
   const exactCodes = normalized.match(/[A-Z]+(?:-[A-Z]+)?(?:-[A-Z]+)?\/\d{1,2}/g) || [];
   sectors.push(...exactCodes.map((code) => code.replace(/\/(\d)$/g, "/0$1")));
 
-  /*
-    M-FIL/03 o 04
-    M-FIL/06 o 07 o 08
-    M-STO/01, 02 o 04
-  */
   const baseCodeRegex =
     /([A-Z]+(?:-[A-Z]+)?(?:-[A-Z]+)?)\/(\d{1,2})((?:\s*(?:,|E|O|OPPURE|\/)\s*\d{1,2})+)/g;
 
@@ -268,9 +274,6 @@ function expandCompactSectorCodes(text: string): string[] {
     }
   }
 
-  /*
-    M-PSI/01/02/05
-  */
   const slashChainRegex = /([A-Z]+(?:-[A-Z]+)?(?:-[A-Z]+)?)\/(\d{1,2}(?:\/\d{1,2}){1,8})/g;
   let slashChainMatch: RegExpExecArray | null;
 
@@ -283,11 +286,8 @@ function expandCompactSectorCodes(text: string): string[] {
     }
   }
 
-  /*
-    MPSI1/2/5 oppure MPSI 1/2/5
-  */
   const compactNoSlashRegex =
-    /\b(M-PSI|MPSI|M-PED|MPED|M-FIL|MFIL|M-STO|MSTO|M-GGR|MGGR|L-ANT|LANT|L-LIN|LLIN|L-FIL-LET|LFILLET|MAT|FIS|CHIM|BIO|GEO|INF|IUS|MED|SPS|ICAR)\s*-?\s*(\d{1,2}(?:\s*\/\s*\d{1,2}){1,8})\b/g;
+    /\b(M-PSI|MPSI|M-PED|MPED|M-FIL|MFIL|M-STO|MSTO|M-GGR|MGGR|L-ANT|LANT|L-LIN|LLIN|L-FIL-LET|LFILLET|SECS-P|SECSP|SECS-S|SECSS|ING-INF|INGINF|ING-IND|INGIND|L-ART|LART|MAT|FIS|CHIM|BIO|GEO|INF|IUS|MED|SPS|ICAR|AGR|VET)\s*-?\s*(\d{1,2}(?:\s*\/\s*\d{1,2}){1,8})\b/g;
 
   let compactNoSlashMatch: RegExpExecArray | null;
 
@@ -387,6 +387,96 @@ function splitStructuredBlocksText(text: string): string[] {
   return blocks;
 }
 
+function findNumberedRequirementStarts(text: string): number[] {
+  const normalized = normalizeCommonCompactAreas(text);
+
+  const regex =
+    /\b(?:almeno\s+)?\d{1,3}\s*(?:CFU|crediti|credito)?\s*(?:in|tra|fra)?\s*:?\s*(?=(?:[A-Z]+(?:-[A-Z]+)?(?:-[A-Z]+)?\/\d{1,2}|[A-Z]+(?:-[A-Z]+)?(?:-[A-Z]+)?-\d{1,2}|[A-Z]+(?:-[A-Z]+)?(?:-[A-Z]+)?\s+\d{1,2}))/gi;
+
+  const starts: number[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(normalized)) !== null) {
+    const start = match.index ?? 0;
+    const before = normalized.slice(Math.max(0, start - 16), start);
+
+    if (/(\/|\bO\s*|\bOPPURE\s*)$/i.test(before.trim())) {
+      continue;
+    }
+
+    starts.push(start);
+  }
+
+  return Array.from(new Set(starts)).sort((a, b) => a - b);
+}
+
+function splitNumberedRequirementsText(text: string): string[] {
+  const clean = normalizeNote(text);
+  const starts = findNumberedRequirementStarts(clean);
+
+  if (starts.length < 2) return [];
+
+  const blocks: string[] = [];
+
+  for (let index = 0; index < starts.length; index += 1) {
+    const start = starts[index];
+    const end = index + 1 < starts.length ? starts[index + 1] : clean.length;
+    const block = cleanFragment(clean.slice(start, end));
+
+    if (block) blocks.push(block);
+  }
+
+  return blocks;
+}
+
+function parseStructuredNumberedDiCuiRequirements(
+  cleanNote: string,
+  requisiti: RequisitoCfu[]
+): boolean {
+  if (!/\bdi\s+cui\b/i.test(cleanNote)) return false;
+
+  const afterDiCui = cleanNote.split(/\bdi\s+cui\b/i).slice(1).join(" ");
+  const blocks = splitNumberedRequirementsText(afterDiCui);
+
+  if (blocks.length < 2) return false;
+
+  let parsedAny = false;
+
+  for (const block of blocks) {
+    const match = block.match(
+      /^(?:almeno\s+)?(\d{1,3})\s*(?:CFU|crediti|credito)?\s*(?:(in|tra|fra)\s*)?:?\s*([\s\S]*)$/i
+    );
+
+    if (!match) continue;
+
+    const cfuRichiesti = Number(match[1]);
+    const fragment = cleanFragment(match[3] || "");
+    const settori = extractSectors(fragment).filter((settore) => settore.includes("/"));
+
+    if (!cfuRichiesti || settori.length === 0) continue;
+
+    const label =
+      settori.length === 1
+        ? `${cfuRichiesti} CFU in ${settori[0]}`
+        : inferBlockLabel(cfuRichiesti, settori);
+
+    const requirement = createRequirement(
+      requisiti,
+      cfuRichiesti,
+      settori,
+      cleanNote,
+      label
+    );
+
+    if (requirement) {
+      requisiti.push(requirement);
+      parsedAny = true;
+    }
+  }
+
+  return parsedAny;
+}
+
 function parseStructuredDiCuiBlocks(cleanNote: string, requisiti: RequisitoCfu[]): boolean {
   if (!hasStructuredDiCuiBlocks(cleanNote)) return false;
 
@@ -477,6 +567,19 @@ function parseCompactRequirementsWithoutCfuWord(cleanNote: string, requisiti: Re
   }
 }
 
+function extractConjoinedTitleCondition(note: string): string | null {
+  const clean = normalizeNote(note);
+
+  const match = clean.match(/\bcongiunt[oa]\s+a\b([\s\S]*)/i);
+  if (!match) return null;
+
+  const condition = cleanFragment(match[0]);
+
+  if (!condition) return null;
+
+  return `Attenzione: la nota richiede un titolo aggiuntivo congiunto. Verificare manualmente: ${condition}`;
+}
+
 function removeDuplicateRequirements(requisiti: RequisitoCfu[]): RequisitoCfu[] {
   const map = new Map<string, RequisitoCfu>();
 
@@ -527,14 +630,27 @@ export function parseRequisitiDaNota(note: string): {
 } {
   const cleanNote = normalizeNote(note);
 
-  if (!cleanNote || !/(CFU|crediti|credito|\d{1,3}\s+[A-Z]+(?:-[A-Z]+)?\/?\d{1,2})/i.test(cleanNote)) {
+  if (!cleanNote) {
     return { requisiti: [], nonInterpretati: [] };
   }
 
   const requisiti: RequisitoCfu[] = [];
   const nonInterpretati: string[] = [];
 
-  const parsedStructuredBlocks = parseStructuredDiCuiBlocks(cleanNote, requisiti);
+  const conjoinedTitleCondition = extractConjoinedTitleCondition(cleanNote);
+  if (conjoinedTitleCondition) {
+    nonInterpretati.push(conjoinedTitleCondition);
+  }
+
+  if (!/(CFU|crediti|credito|\d{1,3}\s+[A-Z]+(?:-[A-Z]+)?\/?\d{1,2})/i.test(cleanNote)) {
+    return {
+      requisiti: [],
+      nonInterpretati,
+    };
+  }
+
+  const parsedStructuredNumbered = parseStructuredNumberedDiCuiRequirements(cleanNote, requisiti);
+  const parsedStructuredBlocks = parsedStructuredNumbered || parseStructuredDiCuiBlocks(cleanNote, requisiti);
 
   if (!parsedStructuredBlocks) {
     parseExplicitCfuRequirements(cleanNote, requisiti, nonInterpretati);
@@ -543,7 +659,7 @@ export function parseRequisitiDaNota(note: string): {
 
   const deduplicati = removeDuplicateRequirements(removeOverBroadRequirements(requisiti));
 
-  if (deduplicati.length === 0) {
+  if (deduplicati.length === 0 && nonInterpretati.length === 0) {
     nonInterpretati.push(cleanNote);
   }
 
