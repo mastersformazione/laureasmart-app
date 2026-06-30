@@ -1,11 +1,14 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "it.laureasmart.app",
       "sha256_cert_fingerprints": [
-        "56:21:1A:BF:A0:58:F7:55:B4:A0:6E:AD:58:0E:55:A2:C4:9A:0A:EC:BF:07:4A:7D:92:D6:CF:92:7C:25:C5:27"
+        "56:21:1A:BF:A0:58:F7:55:B4:A0:6E:AD:58:0E:55:A2:C4:9A:0A:EC:BF:07:4A:7D:92:D6:CF:92:7C:25:C5:27",
+        "3C:23:E5:A7:25:8E:A6:C2:9E:1A:C8:F5:2C:AF:E2:17:D8:87:BC:44:B1:76:93:C3:8F:C4:6C:ED:DA:40:63:55"
       ]
     }
   }
