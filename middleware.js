@@ -49,6 +49,10 @@ export async function middleware(request) {
       return 'window.LaureaWPCRM=' + JSON.stringify(config).replace(/</g, '\\u003c') + ';</script>';
     });
     html = html.split(SITE + ASSETS).join('/ls-assets/');
+    if (path === '/privacy') {
+      html = html.replace('percorso e modello di ateneo eventualmente scelti', 'percorso eventualmente scelto e preferenze per individuare l’ateneo');
+      html = html.replace('</body>', '<p>L’interfaccia su app.laureasmart.it è distribuita tramite Vercel, che gestisce anche il transito tecnico della richiesta verso il sito WordPress. La richiesta viene poi gestita nel CRM Laurea Smart come descritto sopra. Per informazioni sui fornitori, sulle ubicazioni del trattamento e sulle garanzie applicabili puoi contattare info@laureasmart.it.</p></body>');
+    }
     return new Response(request.method === 'HEAD' ? null : html, { status: upstream.status, headers });
   } catch {
     return new Response('<!doctype html><html lang="it"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Laurea Smart</title><body style="font-family:system-ui;padding:32px"><h1>LAUREA SMART</h1><p>Connessione momentaneamente non disponibile. Riprova tra poco.</p><a href="/">Riprova</a></body></html>', { status: 503, headers: { ...Object.fromEntries(headers), 'Content-Type': 'text/html; charset=utf-8' } });
