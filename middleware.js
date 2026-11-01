@@ -24,8 +24,11 @@ export async function middleware(request) {
     upstreamHeaders.set('Content-Type', 'application/json');
     upstreamHeaders.set('Origin', SITE);
     upstreamHeaders.set('X-Laurea-Session', request.headers.get('x-laurea-session') || '');
-    const session = (request.headers.get('cookie') || '').split(';').map(v => v.trim()).find(v => v.startsWith('ls_form_session='));
-    if (session) upstreamHeaders.set('Cookie', session);
+    const session = (request.headers.get('cookie') || '').split(';').map(v => v.trim()).find(v => v.startsWith('__Host-ls_app_session='));
+    if (!session) return fail('Sessione dell’app non disponibile. Ricarica il modulo e riprova.', 403);
+    const sessionValue = session.slice('__Host-ls_app_session='.length);
+    if (sessionValue !== request.headers.get('x-laurea-session')) return fail('Sessione dell’app non aggiornata. Ricarica il modulo e riprova.', 403);
+    upstreamHeaders.set('Cookie', 'ls_form_session=' + sessionValue);
   }
   let target = SITE + '/wp-admin/admin-post.php?action=' + (path === '/privacy' ? 'laureasmart_privacy' : 'laureasmart_app');
   if (isPost) target = SITE + '/wp-json/laureasmart/v1/request';
@@ -38,12 +41,14 @@ export async function middleware(request) {
     const upstream = await fetch(target, { method: isPost ? 'POST' : 'GET', headers: upstreamHeaders, body, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(55000) });
     const type = upstream.headers.get('content-type') || 'application/octet-stream';
     headers.set('Content-Type', type);
-    const cookie = upstream.headers.get('set-cookie');
-    if (!isPost && !isAsset && path !== '/privacy' && cookie?.startsWith('ls_form_session=')) headers.set('Set-Cookie', cookie);
     if (isPost || isAsset || !type.includes('text/html')) return new Response(request.method === 'HEAD' ? null : upstream.body, { status: upstream.status, headers });
     let html = await upstream.text();
     html = html.replace(/window\.LaureaWPCRM=(\{.*?\});<\/script>/, (_, json) => {
       const config = JSON.parse(json);
+      // Bind the WordPress-signed token to an HttpOnly cookie on the actual app host.
+      // Never reconstruct this cookie from a submitted header or expose credentials.
+      if (!/^[a-f0-9]{32}\.\d+\.live\.[a-f0-9]{64}$/.test(config.token)) throw new Error('Invalid session');
+      headers.set('Set-Cookie', '__Host-ls_app_session=' + config.token + '; Path=/; Max-Age=7200; Secure; HttpOnly; SameSite=Strict');
       config.api = '/ls-request';
       config.privacy = '/privacy';
       return 'window.LaureaWPCRM=' + JSON.stringify(config).replace(/</g, '\\u003c') + ';</script>';
