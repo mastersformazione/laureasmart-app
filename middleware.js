@@ -9,7 +9,7 @@ export async function middleware(request) {
   const path = url.pathname;
   const isPost = path === '/ls-request';
   const isAsset = path.startsWith('/ls-assets/');
-  const headers = new Headers({ 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'X-Laurea-Release': 'web-20261101' });
+  const headers = new Headers({ 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'X-Laurea-Release': 'web-20261101-wizard' });
   const fail = (message, status) => new Response(JSON.stringify({ ok: false, message }), { status, headers: { ...Object.fromEntries(headers), 'Content-Type': 'application/json' } });
   if (isPost ? request.method !== 'POST' : !['GET', 'HEAD'].includes(request.method)) return fail('Metodo non consentito.', 405);
   const upstreamHeaders = new Headers();
@@ -34,7 +34,7 @@ export async function middleware(request) {
   if (isPost) target = SITE + '/wp-json/laureasmart/v1/request';
   if (isAsset) {
     const name = path.slice('/ls-assets/'.length);
-    if (!/^(?:styles\.css|qualification\.js|crm-client\.js|app\.js|brand-kit\/fonts\/manrope-variable\.ttf)$/.test(name)) return fail('Risorsa non trovata.', 404);
+    if (!/^(?:styles\.css|qualification\.js|crm-client\.js|quiz-access\.js|app\.js|brand-kit\/fonts\/manrope-variable\.ttf)$/.test(name)) return fail('Risorsa non trovata.', 404);
     target = SITE + ASSETS + name + url.search;
   }
   try {
@@ -54,7 +54,7 @@ export async function middleware(request) {
       return 'window.LaureaWPCRM=' + JSON.stringify(config).replace(/</g, '\\u003c') + ';</script>';
     });
     html = html.split(SITE + ASSETS).join('/ls-assets/');
-    if (path === '/privacy') {
+    if (path === '/privacy' && !html.includes('sono gestiti tramite Vercel')) {
       html = html.replace('percorso e modello di ateneo eventualmente scelti', 'percorso eventualmente scelto e preferenze per individuare l’ateneo');
       html = html.replace('</body>', '<p>L’interfaccia su app.laureasmart.it è distribuita tramite Vercel, che gestisce anche il transito tecnico della richiesta verso il sito WordPress. La richiesta viene poi gestita nel CRM Laurea Smart come descritto sopra. Per informazioni sui fornitori, sulle ubicazioni del trattamento e sulle garanzie applicabili puoi contattare info@laureasmart.it.</p></body>');
     }
