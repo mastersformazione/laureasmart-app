@@ -9,6 +9,7 @@ export async function middleware(request) {
   const path = url.pathname;
   const isPost = path === '/ls-request';
   const isAsset = path.startsWith('/ls-assets/');
+  const isPWA = path === '/manifest.webmanifest' || path === '/sw.js';
   const headers = new Headers({ 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'X-Laurea-Release': 'web-20261101-wizard' });
   const fail = (message, status) => new Response(JSON.stringify({ ok: false, message }), { status, headers: { ...Object.fromEntries(headers), 'Content-Type': 'application/json' } });
   if (isPost ? request.method !== 'POST' : !['GET', 'HEAD'].includes(request.method)) return fail('Metodo non consentito.', 405);
@@ -32,16 +33,18 @@ export async function middleware(request) {
   }
   let target = SITE + '/wp-admin/admin-post.php?action=' + (path === '/privacy' ? 'laureasmart_privacy' : 'laureasmart_app');
   if (isPost) target = SITE + '/wp-json/laureasmart/v1/request';
+  if (isPWA) target = SITE + ASSETS + (path === '/sw.js' ? 'pwa-worker.js' : 'manifest.webmanifest');
   if (isAsset) {
     const name = path.slice('/ls-assets/'.length);
-    if (!/^(?:styles\.css|qualification\.js|crm-client\.js|quiz-access\.js|app\.js|brand-kit\/fonts\/manrope-variable\.ttf)$/.test(name)) return fail('Risorsa non trovata.', 404);
+    if (!/^(?:styles\.css|qualification\.js|crm-client\.js|quiz-access\.js|app\.js|pwa\.js|icons\/icon-(?:192|512)\.png|brand-kit\/fonts\/manrope-variable\.ttf)$/.test(name)) return fail('Risorsa non trovata.', 404);
     target = SITE + ASSETS + name + url.search;
   }
   try {
     const upstream = await fetch(target, { method: isPost ? 'POST' : 'GET', headers: upstreamHeaders, body, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(55000) });
     const type = upstream.headers.get('content-type') || 'application/octet-stream';
     headers.set('Content-Type', type);
-    if (isPost || isAsset || !type.includes('text/html')) return new Response(request.method === 'HEAD' ? null : upstream.body, { status: upstream.status, headers });
+    if (isPWA) { headers.set('Cache-Control', 'public, max-age=0, must-revalidate'); headers.set('Content-Type', path === '/sw.js' ? 'application/javascript; charset=utf-8' : 'application/manifest+json; charset=utf-8'); if (path === '/sw.js') headers.set('Service-Worker-Allowed', '/'); }
+    if (isPost || isAsset || isPWA || !type.includes('text/html')) return new Response(request.method === 'HEAD' ? null : upstream.body, { status: upstream.status, headers });
     let html = await upstream.text();
     html = html.replace(/window\.LaureaWPCRM=(\{.*?\});<\/script>/, (_, json) => {
       const config = JSON.parse(json);
@@ -54,6 +57,7 @@ export async function middleware(request) {
       return 'window.LaureaWPCRM=' + JSON.stringify(config).replace(/</g, '\\u003c') + ';</script>';
     });
     html = html.split(SITE + ASSETS).join('/ls-assets/');
+    if (path !== '/privacy') html = html.replace('</head>', '<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#ffffff"><link rel="icon" type="image/png" href="/ls-assets/icons/icon-192.png"><link rel="apple-touch-icon" href="/ls-assets/icons/icon-192.png"></head>');
     if (path === '/privacy' && !html.includes('sono gestiti tramite Vercel')) {
       html = html.replace('percorso e modello di ateneo eventualmente scelti', 'percorso eventualmente scelto e preferenze per individuare l’ateneo');
       html = html.replace('</body>', '<p>L’interfaccia su app.laureasmart.it è distribuita tramite Vercel, che gestisce anche il transito tecnico della richiesta verso il sito WordPress. La richiesta viene poi gestita nel CRM Laurea Smart come descritto sopra. Per informazioni sui fornitori, sulle ubicazioni del trattamento e sulle garanzie applicabili puoi contattare info@laureasmart.it.</p></body>');
@@ -64,4 +68,4 @@ export async function middleware(request) {
   }
 }
 
-export const config = { matcher: ['/', '/privacy', '/ls-request', '/ls-assets/:path*'] };
+export const config = { matcher: ['/', '/privacy', '/ls-request', '/ls-assets/:path*', '/manifest.webmanifest', '/sw.js'] };
